@@ -1,0 +1,535 @@
+{% extends 'home.html' %}
+
+{% block title %}
+    Listado | Productos
+{% endblock title %}
+{% block body %}
+    <!-- Content -->
+    <div class="container-fluid">
+        <div class="card mt-2">
+            <div class="card-header">
+                <form class="form-inline" method="POST">
+
+                    {% csrf_token %}
+{#                                            <button type="button" onclick="showModalCreation('{% url 'sales:json_product_create' %}')"#}
+{#                                                    class="btn-sm btn-outline-success"><i class="fas fa-user-plus ml-1 mr-1"></i> Nuevo#}
+{#                                                producto#}
+{#                                            </button>#}
+
+                    <button type="button"
+                            class="btn-sm btn-outline-success ml-1 mr-1 btn-new-product"
+                            data-toggle="modal"
+                            data-target="#modal-new-product">
+                        <i class="fas fa-plus-square"></i>
+                        Nuevo producto
+                    </button>
+
+{#                    <button type="button" onclick="showModalView('modal_family_save')"#}
+{#                            class="btn-sm btn-outline-success ml-1 mr-1">Familia#}
+{#                    </button>#}
+                    <button type="button" onclick="showModalView('modal_brand_save')"
+                            class="btn-sm btn-outline-success ml-1 mr-1">Marca
+                    </button>
+{#                    <button type="button" onclick="showModalView('modal_category_save')"#}
+{#                            class="btn-sm btn-outline-success ml-1 mr-1">Categoria#}
+{#                    </button>#}
+{#                    <button type="button" onclick="showModalView('modal_subcategory_save')"#}
+{#                            class="btn-sm btn-outline-success ml-1 mr-1">Subcategoria#}
+{#                    </button>#}
+                    <label class="my-1 mr-2 ml-2" for="custom-input-product-by-name">Buscar texto:</label>
+                    {#                    <select class="custom-select my-1 mr-sm-2" id="id-product-pk">#}
+                    {#                        <option value="" selected disabled>Seleccione</option>#}
+                    {#                        {% for n in products %}#}
+                    {#                            <option value="{{ n.id }}">{{ n.name }}</option>{% endfor %}#}
+                    {#                    </select>#}
+
+                    <input type="text" id="custom-input-product-by-name" class="form-control ml-2 mr-2"
+                           style="width: 15%"
+                           placeholder="Ingrese un texto y presione enter">
+
+                    <label class="my-1 mr-2 font-weight-bold" for="brand_id">Buscar Marca :</label>
+                    <select class="custom-select my-1 mr-sm-2 brand" id="brand_id" name="product-brand" required>
+                        <option value="0" selected>SELECCIONE...</option>
+                        {% for pb in product_brand_set %}
+                            <option value="{{ pb.id }}">{{ pb.name }}</option>
+                        {% endfor %}
+
+                    </select>
+
+                    <button type="button"
+                            class="col-sm-1 btn btn-sm btn-outline-secondary font-weight-bold border-0 text-dark btn-block p-1"
+                            id="btn-type-change">Tipo de Cambio:
+                    </button>
+                    <div class="col-sm-1">
+                        <input type="text" class="form-control text-center font-weight-bold pr-0 pl-0"
+                               id="type_change" readonly>
+                        <input type="hidden" class="form-control text-center font-weight-bold pr-0 pl-0"
+                               id="type_change_value" readonly>
+                    </div>
+
+{#                    <button type="button" class="btn btn-primary ml-2 mr-2" id="btn-search-brand">#}
+{#                        <i class="fas fa-search-dollar"></i>#}
+{#                    </button>#}
+
+
+                    {#                        <a href="{% url 'sales:product_print' %}" class="btn-sm btn-warning"#}
+                    {#                           target="print"><span#}
+                    {#                                class="fa fa-print"></span> Imprimir</a>#}
+
+                </form>
+            </div>
+            <div class="card-body">
+
+            </div>
+        </div>
+
+    </div>
+
+
+    <div id="product-grid-list"></div>
+
+
+    <div class="modal fade bd-example-modal-lg" id="creation" tabindex="-1" role="dialog"
+         aria-labelledby="exampleModalLabel" aria-hidden="true"></div>
+    <div class="modal fade" id="edition" tabindex="-1" role="dialog" aria-labelledby="ModalHelpTitle"
+         aria-hidden="true"></div>
+    <div class="modal fade" id="set-quantity-on-hand" tabindex="-1" role="dialog" aria-labelledby="ModalHelpTitle"
+         aria-hidden="true"></div>
+    <div class="modal fade" id="show-kardex" tabindex="-1" role="dialog" aria-labelledby="ModalHelpTitle"
+         aria-hidden="true"></div>
+    <div class="modal fade" id="set-product-detail" tabindex="-1" role="dialog" aria-labelledby="ModalHelpTitle"
+         aria-hidden="true"></div>
+    <div class="modal fade" id="edition-recipe" tabindex="-1" role="dialog" aria-labelledby="ModalHelpTitle"
+         aria-hidden="true"></div>
+    <div class="modal fade" id="modal-register" tabindex="-1" role="dialog" aria-labelledby="ModalHelpTitle"
+         aria-hidden="true"></div>
+
+    <div class="modal fade" id="modal-product-info" tabindex="-1" role="dialog" aria-labelledby="ModalHelpTitle"
+         aria-hidden="true"></div>
+
+    {#MODAL DE CAMBIO DE STOCK#}
+    <div class="modal fade" id="modal-changeStock" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header text-center">
+                    <h5 class="modal-title" id="exampleModalLabel1">ACTUALIZAR STOCK DEL SIGUIENTE PRODUCTO:</h5>
+                    <button type="button" class="close ml-0" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="update-stock">
+                    ...
+                </div>
+                <div class="modal-footer">
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    {#MODAL DE CAMBIO DE PRECIO DE COMPRA#}
+    <div class="modal fade" id="modal-change-price-purchase" tabindex="-1" role="dialog"
+         aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header text-center">
+                    <h5 class="modal-title" id="exampleModalLabel1">ACTUALIZAR PRECIO DE COMPRA DEL PRODUCTO:</h5>
+                    <button type="button" class="close ml-0" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="change-price-purchase">
+                    ...
+                </div>
+                <div class="modal-footer">
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    {#MODAL DE CAMBIO DE PRECIO DE COMPRA EN DOLARES#}
+    <div class="modal fade" id="modal-change-price-purchase-dollar" tabindex="-1" role="dialog"
+         aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header text-center">
+                    <h5 class="modal-title" id="exampleModalLabel1">ACTUALIZAR PRECIO DE COMPRA DEL PRODUCTO EN DOLARES:</h5>
+                    <button type="button" class="close ml-0" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="change-price-purchase-dollar">
+                    ...
+                </div>
+                <div class="modal-footer">
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    {#MODAL DE NUEVO PRODUCTO#}
+    <div class="modal fade" id="modal-new-product" tabindex="-1" role="dialog"
+         aria-labelledby="staticBackdropLabel"
+         aria-hidden="true">
+
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">NUEVO PRODUCTO:</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                         <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="new-product">
+                    ...
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+
+{% endblock body %}
+
+
+{% block extrajs %}
+    <script type="text/javascript">
+        let $ = jQuery.noConflict();
+
+        $('#brand_id').select2({
+            theme: 'bootstrap4',
+        });
+
+        {#function refreshTable() {#}
+        {#    $('#product-data-grid').DataTable().draw();#}
+        {# }#}
+
+        $('#id-product-pk').select2({
+            theme: 'bootstrap4',
+        });
+        $(document).on('click', '.btn-product-recipe', function () {
+            let id = $(this).attr('pk');
+            $.ajax({
+                url: '/sales/product_recipe_edit/',
+                dataType: 'json',
+                type: 'GET',
+                data: {'pk': id},
+                success: function (response) {
+                    $('#edition-recipe').html(response.form);
+                    $('#edition-recipe').modal('show');
+                },
+                fail: function (response) {
+                    toastr.error('Formulario con problemas', '¡Mensaje!');
+                }
+            });
+        });
+        $(document).on('click', '.quantity-on-hand', function () {
+            var search = $(this).attr('pk');
+            $.ajax({
+                url: '/sales/get_product/',
+                dataType: 'json',
+                type: 'GET',
+                data: {'pk': search},
+                success: function (response) {
+                    if (response.success) {
+                        $('#set-quantity-on-hand').html(response.form);
+                        $('#set-quantity-on-hand').modal('show');
+                        {#$('#set-quantity-on-hand').html(response.grid);#}
+                    }
+                },
+                fail: function (response) {
+                    console.log(response);
+                }
+            });
+        });
+        $(document).on('click', '.get-kardex', function () {
+            var search = $(this).attr('pk');
+            $.ajax({
+                url: '/sales/get_kardex_by_product/',
+                dataType: 'json',
+                type: 'GET',
+                data: {'pk': search},
+                success: function (response) {
+                    if (response.success) {
+                        $('#show-kardex').html(response.form);
+                        $('#show-kardex').modal('show');
+                    }
+                },
+                fail: function (response) {
+                    console.log(response);
+                }
+            });
+        });
+        $(document).on('click', '.get-product-detail', function () {
+            var search = $(this).attr('pk');
+            $.ajax({
+                url: '/sales/set_product_detail/',
+                dataType: 'json',
+                type: 'GET',
+                data: {'pk': search},
+                success: function (response) {
+                    if (response.success) {
+                        {#console.log(response.serialized_data);#}
+                        $('#set-product-detail').html(response.form);
+                        $('#product-detail-grid').html(response.grid);
+                        $('#set-product-detail').modal('show');
+                    }
+                },
+                fail: function (response) {
+                    console.log(response);
+                }
+            });
+        });
+        $(document).on('click', '.btn-product-info', function () {
+            var search = $(this).attr('pk');
+            $.ajax({
+                url: '/sales/info_product_detail/',
+                dataType: 'json',
+                type: 'GET',
+                data: {'pk': search},
+                success: function (response) {
+                    if (response.success) {
+                        $('#modal-product-info').html(response.form);
+                        $('#modal-product-info').modal('show');
+                    }
+                },
+                fail: function (response) {
+                    console.log(response);
+                }
+            });
+        });
+
+        function showModalEdition(url) {
+            $('#edition').load(url, function () {
+                $(this).modal('show');
+            });
+        };
+
+        function showModalCreation(url) {
+            $('#creation').load(url, function () {
+                $(this).modal('show');
+            });
+        };
+
+
+        function readURL(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    $('#blah').attr('src', e.target.result);
+                    var file = $('#id_photo')[0].files[0]
+                    if (file) {
+                        $('.custom-file-label').text(file.name);
+                    }
+
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        $(document).on('keypress', '#custom-input-product-by-name', function (e) {
+
+            if (e.keyCode === 13) {
+                {#$("#brand_id").select2("val", "0");#}
+
+                e.preventDefault()
+
+                $(this).trigger("enterKey");
+
+                let _product_name = $(this).val();
+                //let _id = $(this).attr('product-detail');
+
+                if (_product_name.length === 0) {
+                    toastr.warning('¡Favor de completar los caracteres requeridos', 'Error de Datos');
+                    return false;
+                }
+                //$('#loading-666').html(loader).show();
+                getProducts("name_contains", _product_name, "");
+                //return false;
+            }
+        });
+
+        function getProducts($criteria, $value, $brand) {
+
+            $.ajax({
+                url: '/sales/get_product_by_criteria/',
+                async: true,
+                dataType: 'json', // for response
+                type: 'GET',
+                data: {
+                    'value': $value,
+                    'criteria': $criteria,
+                    'brand': $brand
+                },
+                contentType: 'application/json;charset=UTF-8',
+                headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                success: function (response, textStatus, xhr) {
+                    if (xhr.status === 200) {
+                        toastr.success(response.message, '¡Bien hecho!');
+                        $('#product-grid-list').html(response.grid);
+                    }
+                },
+                error: function (jqXhr, textStatus, xhr) { // provide a bit more info about the error to the console
+                    if (jqXhr.status === 500) {
+                        toastr.error(jqXhr.responseJSON.error, '¡Error de Consulta!');
+                    } else {
+                        if (textStatus === 'timeout') {
+                            toastr.error('Failed from timeout', '¡Error de Consulta!');
+                        } else {
+                            console.log(" STATUS: " + xhr + " " + textStatus);
+                        }
+                    }
+                }
+            });
+        }
+
+        $('#id-product-pk').change(function () {
+            let selected = $(this).find(':selected').text();
+            getProducts("name", selected);
+        });
+
+        function showModalView(route) {
+            $('#modal-register').empty();
+            $.ajax({
+                url: '/sales/' + route + '/',
+                dataType: 'json',
+                type: 'GET',
+                data: {},
+                success: function (response) {
+                    $('#modal-register').html(response.form);
+                    $('#modal-register').modal('show');
+                },
+                fail: function (response) {
+                    toastr.error('Ocurrio un problema al mostrar el formulario', '¡Mensaje!');
+                }
+            });
+        };
+
+        function showModalView(route) {
+            $('#modal-register').empty();
+            $.ajax({
+                url: '/sales/' + route + '/',
+                dataType: 'json',
+                type: 'GET',
+                data: {},
+                success: function (response) {
+                    $('#modal-register').html(response.form);
+                    $('#modal-register').modal('show');
+                },
+                fail: function (response) {
+                    toastr.error('Ocurrio un problema al mostrar el formulario', '¡Mensaje!');
+                }
+            });
+        };
+
+        $(document).on('click', '#btn-presenting', function () {
+            var search = $(this).attr('pk');
+            alert(search)
+            $.ajax({
+                url: '/sales/product_detail/',
+                dataType: 'json',
+                type: 'GET',
+                data: {'pk': search},
+                success: function (response) {
+                    if (response.success) {
+                        $('#id-table-presenting').html(response.form);
+                        $('#product-detail-grid').html(response.grid);
+                    }
+                },
+                fail: function (response) {
+                    console.log(response);
+                }
+            });
+        });
+
+        $(document).on('click', '.btn-new-product', function () {
+            {#let _product_id = $(this).attr('pk');#}
+            $('#lending').empty();
+            $.ajax({
+                url: '/sales/get_modal_new_product/',
+                async: true,
+                dataType: 'json',
+                type: 'GET',
+                data: {},
+                success: function (response) {
+                    $('#new-product').html(response.grid);
+                },
+                fail: function (response) {
+                    console.log("error");
+                }
+            });
+        })
+
+        $(document).on('change', '#brand_id', function () {
+            let brand_id = $(this).val();
+            if (brand_id === null){
+                toastr.warning('¡Favor escoger primero una marca de la lista', 'Error de Datos');
+                return false;
+            }
+            $('#custom-input-product-by-name').val('')
+            getProducts("", "", brand_id );
+        });
+
+        /*$(document).on('click', '#btn-search-brand', function () {
+
+            let brand_id = $('#brand_id').val()
+            if (brand_id === null){
+                toastr.warning('¡Favor escoger primero una marca de la lista', 'Error de Datos');
+                return false;
+            }
+            $('#custom-input-product-by-name').val('')
+            getProducts("", "", brand_id );
+
+        });*/
+        $(document).on('click', '#btn-type-change', function (e) {
+            let _input_type_change = $('#type_change')
+            let _input_type_change_value = $('#type_change_value')
+
+            $.ajax({
+                url: '/buys/get_type_change/',
+                async: true,
+                dataType: 'json', // for response
+                type: 'GET',
+                data: {},
+                contentType: 'application/json;charset=UTF-8',
+                headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                success: function (response, textStatus, xhr) {
+                    if (xhr.status === 200) {
+                        _input_type_change.val('$ ' + response.buy);
+                        _input_type_change_value.val(response.buy);
+                    }
+                },
+                error: function (jqXhr, textStatus, xhr) {
+                    if (jqXhr.status === 500) {
+                        toastr.error(jqXhr.responseJSON.error, 'Mensaje');
+                    } else {
+                        if (textStatus === 'timeout') {
+                            toastr.error('Failed from timeout', 'Mensaje');
+                        } else {
+                            console.log(" STATUS: " + xhr + " " + textStatus);
+                        }
+                    }
+                },
+            });
+            return false;
+        });
+        $("#btn-type-change").trigger('click');
+
+
+
+
+    </script>
+{% endblock extrajs %}

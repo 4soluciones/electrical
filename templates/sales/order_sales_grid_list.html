@@ -1,0 +1,353 @@
+{% load app_filters %}
+
+<div class="text-right container-fluid pt-0 pb-2">
+    <a href="{% url 'sales:print_orders_sales' f1 f2 %}" class="btn btn-blue">
+        <i class="fas fa-file-pdf"></i> Reporte PDF
+    </a>
+    <button type="button" id="btn_export_excel" class="btn btn-success">
+        <i class="fas fa-file-csv"></i> Excel
+    </button>
+</div>
+
+<div class="col-sm-12 pl-0 pr-0 mb-3">
+    <input id="myInput2" type="text" placeholder="Buscar registro..." class="form-control form-control-lg my-1">
+</div>
+
+
+<table class="table table-sm table-bordered" id="table-dictionary">
+    <thead class="font-weight-bold">
+    <tr class="text-dark text-uppercase">
+        <th class="bg-light text-center">#</th>
+        <th class="bg-light text-center">Sede</th>
+        <th class="bg-light text-center">Tipo</th>
+        <th class="bg-light text-center">Serie</th>
+        <th class="bg-light text-center">Numero</th>
+        <th class="bg-light text-center">Cliente</th>
+        <th class="bg-light text-center">Usuario</th>
+        <th class="bg-light text-center">Total</th>
+        <th class="bg-light text-center">Creado</th>
+        <th class="bg-light text-center noExl">Imprimir</th>
+        <th class="bg-light text-center noExl">Anular</th>
+        {#            <th class="bg-light text-center bg-light" colspan="5">Detalles de la venta</th>#}
+        {#        </tr>#}
+        {#        <tr class="text-dark text-uppercase">#}
+        {#            <th class="bg-light text-center" colspan="11">#</th>#}
+        {#            <th class="bg-light text-center">id</th>#}
+        <th class="bg-light text-center bg-light">producto</th>
+        <th class="bg-light text-center">unidad</th>
+        <th class="bg-light text-center">cantidad</th>
+        <th class="bg-light text-center">precio</th>
+        <th class="bg-light text-center">subtotal</th>
+    </tr>
+    </thead>
+    <tbody class="body">
+    {#            <tr>#}
+    {% for p in dictionary %}
+        <tr pk="{{ p.id }}">
+            {% for d in p.order_detail_set %}
+                {% if p.status == 'A' %}
+                    {% if forloop.first %}
+                        <td class="align-middle text-center" {% if p.status == 'A' %}
+                            style="background-color: #ee8888 !important;"  {% endif %}>{{ p.id }}</td>
+                        <td class="align-middle text-center font-weight-bold" {% if p.status == 'A' %}
+                            style="background-color: #ee8888 !important;"  {% endif %}
+                        >{{ p.subsidiary }}</td>
+                        <td class="align-middle text-center" {% if p.status == 'A' %}
+                            style="background-color: #ee8888 !important;"  {% endif %}>{{ p.type_bill }}</td>
+                        <td class="align-middle text-center" {% if p.status == 'A' %}
+                            style="background-color: #ee8888 !important;"  {% endif %}>
+                            {% if p.order_bill %}
+                                {{ p.serial_bill }}
+                            {% else %}
+                                {{ p.serial }}
+                            {% endif %}
+                        </td>
+                        <td class="align-middle text-center" style="background-color: #ee8888 !important;">
+                            {% if p.order_bill %}
+                                {{ p.correlative_bill|zfill:8 }}
+                            {% else %}
+                                {{ p.correlative_sale|zfill:8 }}
+                            {% endif %}
+                        </td>
+                        <td class="align-middle text-center font-weight-bold"
+                            style="background-color: #ee8888 !important;" colspan="11">ANULADA
+                        </td>
+                    {% endif %}
+                {% else %}
+                    {% if forloop.first %}
+                        <td class="align-middle text-center" rowspan="{{ p.details }}"
+                                {% if p.way_to_pay == 'D' %}
+                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ p.id }}</td>
+                        <td class="align-middle text-center font-weight-bold" rowspan="{{ p.details }}"
+                                {% if p.way_to_pay == 'D' %}
+                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}
+                        >{{ p.subsidiary }}</td>
+                        <td class="align-middle text-center" rowspan="{{ p.details }}"
+                                {% if p.way_to_pay == 'D' %}
+                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ p.type_bill }}</td>
+                        <td class="align-middle text-center" rowspan="{{ p.details }}"
+                                {% if p.way_to_pay == 'D' %}
+                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>
+                            {% if p.order_bill %}
+                                {{ p.serial_bill }}
+                            {% else %}
+                                {{ p.serial }}
+                            {% endif %}
+                        </td>
+                        <td class="align-middle text-center" rowspan="{{ p.details }}"
+                                {% if p.way_to_pay == 'D' %}
+                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>
+                            {% if p.order_bill %}
+                                {{ p.correlative_bill|zfill:8 }}
+                            {% else %}
+                                {{ p.correlative_sale|zfill:8 }}
+                            {% endif %}
+                        </td>
+                        <td class="align-middle text-center" rowspan="{{ p.details }}"
+                                {% if p.way_to_pay == 'D' %}
+                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ p.client|upper }}</td>
+                        <td class="align-middle text-center" rowspan="{{ p.details }}"
+                                {% if p.way_to_pay == 'D' %}
+                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}
+                        >{{ p.user.worker_set.last.employee.names|upper }}</td>
+                        <td class="align-middle text-right text-danger" rowspan="{{ p.details }}"
+                                {% if p.way_to_pay == 'D' %}
+                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}
+                        >{{ p.total|floatformat:2 }}</td>
+                        <td class="align-middle text-center" rowspan="{{ p.details }}"
+                                {% if p.way_to_pay == 'D' %}
+                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}
+                        >{{ p.create_at|date:"d-m-y" }}</td>
+                        <td class="align-middle text-center text-success noExl" rowspan="{{ p.details }}"
+                                {% if p.way_to_pay == 'D' %}
+                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>
+                            {% if p.order_bill %}
+                                <a class="btn btn-primary ml-1 my-1 montserrat"
+                                   href="{% url 'sales:print_order_bill'  p.id %}"
+                                   target="print">
+                                    <span class="fas fa-file-invoice"></span></a>
+                                <a class="btn btn-green ml-1 my-1 montserrat"
+                                   href="{% url 'sales:print_ticket_order_sales'  p.id 1 %}"
+                                   target="print">
+                                    <span class="fa fa-print"></span></a>
+                            {% else %}
+                                <a class="btn btn-blue ml-1 my-1 montserrat"
+                                   href="{% url 'sales:print_ticket_order_sales' p.id 0 %}"
+                                   target="print">
+                                    <span class="fa fa-print"></span></a>
+                            {% endif %}
+                        </td>
+                        <td class="align-middle text-center text-success noExl" rowspan="{{ p.details }}"
+                                {% if p.way_to_pay == 'D' %}
+                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>
+                            <a class="btn btn-danger ml-1 my-1 btn-cancel" data-bs-toggle="tooltip"
+                               pk="{{ p.id }}"
+                               href="#" data-bs-placement="top" title="ANULAR VENTA">
+                                <i class="fas fa-ban"></i></a>
+                        </td>
+                        {#                        <td class="align-middle text-center" >{{ d.id }}</td>#}
+
+                        <td class="align-middle text-center" {% if p.way_to_pay == 'D' %}
+                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ d.comentary|upper }}</td>
+                        <td class="align-middle text-center" {% if p.way_to_pay == 'D' %}
+                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ d.unit }}</td>
+                        <td class="align-middle text-right text-primary text-center"
+                                {% if p.way_to_pay == 'D' %}
+                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ d.quantity_sold|floatformat }}</td>
+                        <td class="align-middle text-right text-success" {% if p.way_to_pay == 'D' %}
+                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ d.price_unit|floatformat:2 }}</td>
+                        <td class="align-middle text-right text-success" {% if p.way_to_pay == 'D' %}
+                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ d.multiply|floatformat:2 }}</td>
+                        </tr>
+                        {##}
+                    {% else %}
+                        <tr class="text-center purchase ">
+                            {#                            <td class="align-middle text-center">{{ d.id }}</td>#}
+                            <td class="align-middle text-center" {% if p.way_to_pay == 'D' %}
+                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ d.comentary|upper }}</td>
+                            <td class="align-middle text-center" {% if p.way_to_pay == 'D' %}
+                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ d.unit }}</td>
+                            <td class="align-middle text-right text-primary text-center"
+                                    {% if p.way_to_pay == 'D' %}
+                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ d.quantity_sold|floatformat }}</td>
+                            <td class="align-middle text-right text-success" {% if p.way_to_pay == 'D' %}
+                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ d.price_unit|floatformat:2 }}</td>
+                            <td class="align-middle text-right text-success" {% if p.way_to_pay == 'D' %}
+                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ d.multiply|floatformat:2 }}</td>
+                        </tr>
+                    {% endif %}
+
+                {% endif %}
+
+
+
+            {% endfor %}
+
+    {% endfor %}
+    <tr>
+        <td colspan="7" class="text-right">SUMA TOTAL</td>
+        <td colspan="1" class="text-danger text-right font-weight-bold">{{ sum|floatformat:2 }}</td>
+        <td colspan="8"></td>
+    </tr>
+    </tbody>
+</table>
+
+<div class="text-center container pt-4" style="border-color: #000000">
+    <table class="table table-sm table-bordered">
+        <thead class="font-weight-bold">
+        <tr class="text-dark text-uppercase" style="background: #a8e0a0">
+            <th class="text-center">Usuario</th>
+            <th class="text-center">total ventas</th>
+            <th class="text-center">total Facturas</th>
+            <th class="text-center">total boletas</th>
+            <th class="text-center">total tickets</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for key, value in user_dict.items %}
+            <tr class="text-dark text-uppercase" style="background: #d7e7d5">
+                <td class="align-middle text-center">{{ value.user_names }}</td>
+                <td class="align-middle text-center">{{ value.total_sold|safe|floatformat:2 }}</td>
+                <td class="align-middle text-center">{{ value.total_bills|safe|floatformat:2 }}</td>
+                <td class="align-middle text-center">{{ value.total_receipts|safe|floatformat:2 }}</td>
+                <td class="align-middle text-center">{{ value.total_tickets|safe|floatformat:2 }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        <tfoot>
+        <tr class="font-weight-bold bg-success">
+            <td class="align-middle text-center">TOTALES</td>
+            <td class="align-middle text-center">{{ sum|safe|floatformat:2 }}</td>
+            <td class="align-middle text-center">{{ sum_bills|safe|floatformat:2 }}</td>
+            <td class="align-middle text-center">{{ sum_receipts|safe|floatformat:2 }}</td>
+            <td class="align-middle text-center">{{ sum_tickets|safe|floatformat:2 }}</td>
+        </tr>
+        </tfoot>
+    </table>
+
+    <table class="table table-sm table-bordered mt-5">
+        <thead class="font-weight-bold">
+        <tr class="text-dark text-uppercase" style="background: #c2d2f3">
+            <th class="text-center">Venta Total</th>
+            <th class="text-center">total Contado</th>
+            <th class="text-center">total Credito</th>
+            <th class="text-center">total Deposito</th>
+        </tr>
+        </thead>
+        <tbody>
+            <tr class="font-weight-bold" style="background: #5380dd">
+                <td class="align-middle text-center">{{ sum|safe|floatformat:2 }}</td>
+                <td class="align-middle text-center">{{ total_cash|safe|floatformat:2 }}</td>
+                <td class="align-middle text-center">{{ total_credit|safe|floatformat:2 }}</td>
+                <td class="align-middle text-center">{{ total_deposit|safe|floatformat:2 }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+
+<style>
+    body {
+        -webkit-print-color-adjust: exact;
+    }
+
+</style>
+
+
+<script type="text/javascript">
+
+
+    $("#btn_export_excel").click(function () {
+        $("#table-dictionary").table2excel({
+            // exclude CSS class
+            exclude: ".noExl",
+            name: "Worksheet Name",
+            filename: "Reporte de Ventas", //do not include extension
+            fileext: ".xls", // file extension
+            preserveColors: true,
+            exclude_img: true,
+            exclude_links: true,
+            exclude_inputs: true
+        });
+    });
+
+    $(document).ready(function () {
+
+        $("#myInput2").on("keyup", function () {
+            $("#table-dictionary tbody tr td").closest("tr").hide()
+            var value = $(this).val().toUpperCase();
+            if (value) {
+                $("#table-dictionary tbody tr td:contains('" + value + "')").each(function (index) {
+                    console.log(index)
+                    const parent = $(this).closest("tr")
+                    const rowspan = $(this).attr("rowspan")
+                    console.log(rowspan)
+                    if (rowspan !== undefined) {
+                        var current = parent
+                        for (var i = 0; i < rowspan; i++) {
+                            console.log(current.text())
+                            current.show()
+                            current = current.next()
+                        }
+                    } else {
+                        parent.show()
+                    }
+                })
+            } else {
+                $("#table-dictionary tbody tr td").closest("tr").show()
+            }
+        });
+
+    });
+
+    /*$('#table-dictionary').bootstrapTable({
+
+        //pagination: true,
+        showFooter: false,
+        //search: true,
+        showExport: true,
+        //filter: true,
+        //showRefresh:true,
+        showPrint: true,
+        //showColumns: true,
+        showFullScreen: true,
+        //pageList:[10, 25, 50, 100, 'All'],
+        //showPaginationSwitch: true,
+        exportDataType: 'all',
+        exportTypes: ['pdf', 'excel', 'xlsx', 'txt', 'json', 'xml'],
+        //exportFooter: true,
+
+        exportOptions: {
+            fileName: 'Reporte de ventas',
+            buttons: [{
+                extend: 'excel',
+                text: 'Export Search Results',
+                className: 'btn btn-primary',
+            }],
+            type: 'pdf',
+            className: 'btn btn-primary',
+            jspdf: {
+                orientation: 'l',
+                format: 'bestfit', //a3, bestfit
+                margins: {left: 10, right: 10, top: 100, bottom: 20},
+                autotable: {
+                    styles: {
+                        fillColor: '#fff',
+                        textColor: '#343a40',
+                        fontSize: 10,
+                        valign: 'middle',
+                        lineWidth: 0.02,
+                        lineColor: '#343a40'
+                    },
+                    tableLineColor: '#409EFF',
+                    tableWidth: 'wrap', // auto
+                    theme: 'grid',
+                    //tableExport: {onBeforeAutotable: DoBeforeAutotable, onCellData: DoCellData}
+                }
+            }
+        },
+        ignoreRow: [],
+
+    });*/
+
+</script>

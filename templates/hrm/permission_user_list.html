@@ -1,0 +1,95 @@
+<div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h6 class="modal-title">Permisos de usuario</h6>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="card h-100 w-100">
+                <div class="card-header">
+                    <div class="row p-0 m-0">
+                        <div class="col-sm-2 align-self-center text-primary">
+                            Empleado
+                        </div>
+                        <div class="col-sm-5 align-self-center">
+                            <input type="text" class="form-control form-control-sm text-center"
+                                   value="{{ employee_obj.full_name }}" readonly>
+                        </div>
+                        <div class="col-sm-2 align-self-center text-primary">
+                            Usuario
+                        </div>
+                        <div class="col-sm-3 align-self-center">
+                            <input type="text" class="form-control form-control-sm text-center" id="id-user"
+                                   value="{{ user_obj.username }}" user_pk="{{ user_obj.id }}" readonly>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-1">
+                    <table id="table-permission" class="table table-sm table-hover">
+                        <thead>
+                        <tr class="text-white" style="background: #a53a3a">
+                            <td>Nº</td>
+                            <td>Permiso</td>
+                            <td>Grupo</td>
+                        </tr>
+                        </thead>
+                        <tbody class="detail_permission">
+                        {% for p in group_user_set %}
+                            <tr row="{{ p.pk }}">
+                                <td>1</td>
+                                <td class="check align-middle">
+                                    <div class="form-check-inline">
+                                        <label class="form-check-label">
+                                            <input type="checkbox"
+                                                   class="form-check-input align-middle permission_check"
+                                                   {% if p.status %}checked{% endif %} value="{{ p.pk }}">
+                                        </label>
+                                    </div>
+                                </td>
+                                <td>{{ p.group_name }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer">
+
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">&nbsp;
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $("tbody.detail_permission tr td.check div label input.permission_check").on("click", function () {
+
+        var group = $(this).attr('value');
+        var user_pk = $('#id-user').attr('user_pk');
+        var status = 'False';
+        if ($(this).is(':checked')) {
+            status = 'True';
+        }
+        $.ajax({
+            url: '/hrm/update_permission/',
+            async: true,
+            dataType: 'json',
+            type: 'GET',
+            data: {'status': status, 'group': group, 'user_pk': user_pk},
+            success: function (response, textStatus, xhr) {
+                if (xhr.status === 200) {
+                    toastr.success(response['message'], 'Bien hecho');
+                }
+
+            },
+            fail: function (response) {
+                console.log("error");
+            }
+        });
+
+    });
+</script>

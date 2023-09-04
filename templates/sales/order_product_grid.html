@@ -1,0 +1,111 @@
+<div class="card roboto-condensed-regular">
+    <div class="card-body m-0 p-1">
+        <div class="table-responsive dataTables_wrapper m-0 p-0"
+             style="overflow-y: scroll; height: 700px; width: auto; overflow-x: hidden;">
+            <table id="product-data-grid" class="table table-bordered table-hover" cellspacing="0" style="width: 100%;">
+                <thead>
+                <tr class="text-center text-white" style="background: #0671a9">
+                    <th class="th-sm font-weight-normal" style="width: 25%;">Producto</th>
+                    <th class="th-sm font-weight-normal" style="width: 22%;">Stock en sedes</th>
+                    <th class="th-sm font-weight-normal" style="width: 53%;">Unidades</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for product in product_dic %}
+                    <tr class="text-center m-0 p-0" product="{{ product.id }}">
+                        <td class="align-middle">
+                            <address class="text-left">
+                                {{ product.name }}<br>
+{#                                Codigo: {{ product.code }}<br>#}
+{#                                Familia: {{ product.product_family.name }}<br>#}
+{#                                Marca: {{ product.product_brand.name }}#}
+                            </address>
+                        </td>
+                        <td class="p-0 td-table-stock">
+                            {% if product.productstore_set.all.count > 0 %}
+                                <table class="table table-sm text-uppercase small table-stock-headquarters">
+                                    <thead>
+                                    <th class="small font-weight-normal">Sede</th>
+                                    <th class="small font-weight-normal">Almacen</th>
+                                    <th class="small font-weight-normal">Stock</th>
+                                    </thead>
+                                    <tbody>
+                                    {% for product_store in product.productstore_set.all %}
+                                        <tr
+                                                store_="{{ product_store.subsidiary_store.category }}" store_id="{{ product_store.id  }}"
+                                                class="{% if product_store.subsidiary_store.subsidiary.id == subsidiary.id %}text-danger my-subsidiary{% endif %}">
+                                            <td class="align-middle">{{ product_store.subsidiary_store.subsidiary.name }}</td>
+                                            <td class="align-middle">{{ product_store.subsidiary_store.name }}</td>
+                                            <td class="item-stock align-middle {% if product_store.subsidiary_store.category == 'V' and product_store.subsidiary_store.subsidiary.id == subsidiary.id %}bg-success text-white montserrat {% endif %}">{{ product_store.get_stock_with_dot|safe }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            {% endif %}
+                        </td>
+                        <td class="p-0">
+                            {% if product.productdetail_set.all.count > 0 %}
+                                <table class="table table-sm text-uppercase small table-prices" style="width: 100%;">
+                                    <thead>
+                                    <th style="width: 20%;" class="small font-weight-normal">Cantidad</th>
+                                    <th style="width: 80%;" class="small font-weight-normal">Precios (%)</th>
+                                    </thead>
+                                    <tbody>
+                                    {% for obj in product.productdetail_set.all %}
+                                        <tr product="{{ product.id }}" productname="{{ product.name }}"
+                                            unit="{{ obj.unit.id }}" unitname="{{ obj.unit.name }}"
+                                            quantity_minum="{{ obj.quantity_minimum|safe }}">
+                                            <td class="align-middle text-center quantity-sales-price">
+                                                {#                                                oninput="validity.valid||(value='');" enteros#}
+                                                <input type="number" class="form-control quantity-select" min="0"
+                                                       onkeyup="if(this.value<0){this.value= this.value * -1}"
+                                                       placeholder="{{ obj.unit.name }}" value="">
+                                            </td>
+                                            <td class="align-middle p-1 prices-list">
+                                                <div class="row col-sm-12 m-0 p-0">
+                                                    <div class="col-sm-4 text-center  p-0">
+                                                        <button type="button" pk="{{ obj.id }}"
+                                                                ip="{{ obj.get_calculate_price1|safe }}"
+                                                                class="btn btn-outline-primary btn-one"><span
+                                                                class="badge badge-primary badge-pill font-weight-normal">{{ obj.percentage_one|floatformat:0 }}%</span><br>
+                                                             {{ obj.get_calculate_price1|safe }}
+                                                        </button>
+                                                    </div>
+                                                    <div class="col-sm-4 text-center   p-0">
+                                                        <button type="button" pk="{{ obj.id }}"
+                                                                ip="{{ obj.get_calculate_price2|safe }}"
+                                                                class="btn btn-outline-primary btn-two"><span
+                                                                class="badge badge-primary badge-pill font-weight-normal">{{ obj.percentage_two|floatformat:0 }}%</span><br>
+                                                            {{ obj.get_calculate_price2|safe }}
+                                                        </button>
+                                                    </div>
+                                                    <div class="col-sm-4 text-center  p-0">
+                                                        <button type="button" pk="{{ obj.id }}"
+                                                                ip="{{ obj.get_calculate_price3|safe }}"
+                                                                class="btn btn-outline-primary btn-three"><span
+                                                                class="badge badge-primary badge-pill font-weight-normal">{{ obj.percentage_three|floatformat:0 }}%</span><br>
+                                                             {{ obj.get_calculate_price3|safe }}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+                <tfoot>
+                <tr class="text-center text-white" style="background: #0671a9">
+                    <th class="th-sm font-weight-normal" style="width: 25%;">Producto</th>
+                    <th class="th-sm font-weight-normal" style="width: 25%;">Stock en sedes</th>
+                    <th class="th-sm font-weight-normal" style="width: 50%;">Unidades</th>
+                </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,268 @@
+<div class="card-header text-center text-uppercase bg-light font-weight-bold">
+    <h2> {{ client_obj }} </h2>
+</div>
+
+<input type="hidden" id="start_date" name="start_date" value="{{ start_date }}">
+<input type="hidden" id="end_date" name="end_date" value="{{ end_date }}">
+
+<div class="" id="grid-dictionary" style="overflow:scroll;width: 100%;height: 45em">
+    <table class="table table-sm table-bordered" id="table-dictionary" style="border-collapse: collapse;">
+        <thead>
+        <tr class="text-white small text-uppercase text-center">
+            <td class="bg-primary">ID</td>
+            <td class="bg-primary">TIPO</td>
+            <td class="bg-primary">FECHA</td>
+
+            <td class="bg-info" colspan="5">DETALLES DE ORDEN</td>
+
+            <td class="bg-primary">TOTAL VENTA</td>
+            <td class="bg-primary">TOTAL PAGADO</td>
+            <td class="bg-primary">PAGO FALTANTE</td>
+
+            <td class="bg-secondary">PAGOS</td>
+        </tr>
+        </thead>
+        <tbody>
+
+
+        {% for o in dictionary %}
+
+            <tr info="{{ o.id }}" class="">
+
+                <td class="align-middle text-center id-obj">{{ o.id }}</td>
+                <td class="align-middle text-center" {% if o.c_status == 'A' %} style="background-color: #ea6969" {% endif %}>
+                    {% if o.type == 'VENTA' %}
+                        {% if o.c_status == 'A' %}
+                            <span class="text-dark font-weight-bolder">{{ o.status }}</span>
+                        {% else %}
+                            <span class="text-success font-weight-bolder">{{ o.type }}</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="text-dark font-weight-bolder">{{ o.type }}</span>
+                    {% endif %}
+                </td>
+
+                <td class="align-middle text-center">{{ o.date|date:"d-m-y" }}</td>
+
+                <td class="align-middle text-center" colspan="5">
+                <table class="table">
+                <thead>
+                <tr>
+                    <th class="bg-info" style="width: 60%">PRODUCTO</th>
+                    <th class="bg-info" style="width: 10%">UND</th>
+                    <th class="bg-info" style="width: 10%">CANT.</th>
+                    <th class="bg-info" style="width: 10%">PREC.</th>
+                    <th class="bg-info" style="width: 10%">IMP.</th>
+                </tr>
+                </thead>
+                    {% for d in o.order_detail_set %}
+                        <tr>
+                            <td class="align-middle text-center">{{ d.product }}</td>
+                            <td class="align-middle text-center unit-obj"><span
+                                    class="text-success font-weight-bolder">{{ d.unit }}</span></td>
+                            <td class="align-middle text-center quantity-obj">{{ d.quantity_sold|floatformat:0 }}</td>
+                            <td class="align-middle text-center">{{ d.price_unit|safe }}</td>
+                            <td class="align-middle text-center total-obj">{{ d.multiply|safe }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+
+                </td>
+                {% if o.c_status != 'A' %}
+                    <td class="align-middle text-primary text-center">{{ o.total|safe }}</td>
+                    <td class="align-middle text-primary text-center">{{ o.total_repay_loan|safe }}</td>
+                    <td class="align-middle text-primary text-center total-remaining-repay-loan-obj pay-loan-rest">{{ o.total_remaining_repay_loan }}</td>
+                {% else %}
+                    <td class="align-middle text-danger text-center" colspan="3">ANULADO</td>
+                {% endif %}
+                <td class="align-middle text-center" colspan="4">
+                    <table class="table">
+                    <thead>
+                    <tr>
+                        <th class="bg-secondary">FECHA DE PAGO</th>
+                        <th class="bg-secondary">TIPO PAGO</th>
+                        <th class="bg-secondary">TOTAL PAGADO</th>
+                        <th class="bg-secondary">ACCIÓN</th>
+                    </tr>
+                    </thead>
+                        {% for l in o.loan_payment_set %}
+                            <tr>
+                                {% if o.c_status != 'A' %}
+                                    <td class="align-middle text-center">{{ l.operation_date|date:"d-m-y" }}</td>
+                                    <td class="align-middle text-center">
+                                        {{ l.type }}
+                                        {% if l.cash_flow %}
+                                            <br>{{ l.cash_flow.cash.name }}
+                                            <br>{{ l.cash_flow.operation_code }}
+                                        {% endif %}
+                                    </td>
+                                    <td class="align-middle text-success text-center">{{ l.price|floatformat:2 }}</td>
+
+                                    {% if o.total != o.total_repay_loan %}
+                                        {% if forloop.first %}
+                                            <td class="td-green" style="!important;height: 100%;" rowspan="{{ o.loans_count }}" >
+                                                <button type="button"
+                                                        class="btn btn-success btn-sm btn-block btn-payment"
+                                                        data-toggle="modal"
+                                                        data-target="#modal-payment" pk="{{ o.first_detail }}"
+                                                        style="!important;height: 100%;!important;width: 100%;display: inline-grid">
+                                                    <i class="fas fa-dollar-sign"></i> Pagar
+                                                </button>
+                                            </td>
+                                        {% endif %}
+
+                                    {% else %}
+                                        <td class="align-middle text-success text-center">PAGADO</td>
+                                    {% endif %}
+                                {% else %}
+                                    <td class="align-middle text-danger text-center" colspan="3">ANULADO </td>
+                                    <td class="align-middle text-success text-center">-</td>
+                                {% endif %}
+                            {% empty %}
+                                    {% if o.c_status != 'A' %}
+                                        <td class="align-middle text-primary text-center" colspan="3">SIN PAGOS </td>
+                                        {% if o.total != o.total_repay_loan %}
+                                            <td class="td-green" style="!important;height: 100%;">
+                                                <button type="button"
+                                                        class="btn btn-success btn-sm btn-block btn-payment"
+                                                        data-toggle="modal"
+                                                        data-target="#modal-payment" pk="{{ o.first_detail }}"
+                                                        style="!important;height: 100%;!important;width: 100%;display: inline-grid">
+                                                    <i class="fas fa-dollar-sign"></i> Pagar
+                                                </button>
+                                            </td>
+                                        {% else %}
+                                            <td class="align-middle text-success text-center">PAGADO</td>
+                                        {% endif %}
+
+                                    {% else %}
+
+                                        <td class="align-middle text-danger text-center" colspan="3">ANULADO</td>
+                                        <td class="align-middle text-success text-center">-</td>
+                                    {% endif %}
+
+
+                            </tr>
+
+                        {% endfor %}
+                    </table>
+                </td>
+
+
+{#                {% for d in o.order_detail_set %}#}
+{##}
+{##}
+{#                {% if forloop.first %}#}
+{#                    {% if o.c_status != 'A' %}#}
+{#                        <td class="align-middle text-primary text-right">{{ o.total|safe }}</td>#}
+{#                        <td class="align-middle text-primary text-right">{{ o.total_repay_loan|safe }}</td>#}
+{#                        <td class="align-middle text-primary text-right total-remaining-repay-loan-obj pay-loan-rest">{{ o.total_remaining_repay_loan|safe }}</td>#}
+{#                    {% else %}#}
+{#                            <td class="align-middle text-danger text-center">ANULADO </td>#}
+{#                    {% endif %}#}
+{#                {% endif %}#}
+{##}
+{#                {% for l in d.loan_payment_set %}#}
+{#                    {% if forloop.parentloop.first and forloop.first %}#}
+{#                        #}
+{##}
+{#                    {% endif %}#}
+{#                    {% if forloop.parentloop.first and forloop.first %}#}
+{#                    {% endif %}#}
+{#                    </tr>#}
+{#                {% empty %}#}
+{#                    {% if forloop.first %}#}
+{#                        {% if o.c_status != 'A' %}#}
+{#                            <td class="align-middle text-primary text-center">SIN PAGOS </td>#}
+{#                            {% if o.total != o.total_repay_loan %}#}
+{#                                <td class="td-green" style="!important;height: 100%;">#}
+{#                                    <button type="button"#}
+{#                                            class="btn btn-success btn-sm btn-block btn-payment"#}
+{#                                            data-toggle="modal"#}
+{#                                            data-target="#modal-payment" pk="{{ d.id }}"#}
+{#                                            style="!important;height: 100%;!important;width: 100%;display: inline-grid">#}
+{#                                        <i class="fas fa-dollar-sign"></i> Pagar#}
+{#                                    </button>#}
+{#                                </td>#}
+{#                            {% else %}#}
+{#                                <td class="align-middle text-success text-center">PAGADO</td>#}
+{#                            {% endif %}#}
+{##}
+{#                        {% else %}#}
+{##}
+{#                            <td class="align-middle text-danger text-center">ANULADO </td>#}
+{#                            <td class="align-middle text-success text-center">-</td>#}
+{#                        {% endif %}#}
+{##}
+{#                    {% endif %}#}
+{#                    </tr>#}
+{##}
+{#                {% endfor %}#}
+{##}
+{#                {% endfor %}#}
+            </tr>
+        {% endfor %}
+        </tbody>
+        <tfoot>
+        <tr class="text-center">
+            <td colspan="8"></td>
+            <td class="align-middle text-primary">{{ sum_total|safe }}</td>
+            <td class="align-middle text-primary">{{ sum_total_repay_loan|safe }}</td>
+            <td class="align-middle text-primary">{{ sum_total_remaining_repay_loan|safe }}</td>
+        </tr>
+        </tfoot>
+    </table>
+</div>
+
+
+<script type="text/javascript">
+
+    $(document).on('click', '.btn-payment', function () {
+
+        let _detail_id = $(this).attr('pk');
+        $('#lending').empty();
+        $.ajax({
+            url: '/sales/get_order_detail_for_pay/',
+            async: true,
+            dataType: 'json',
+            type: 'GET',
+            data: {
+                'detail_id': _detail_id,
+                'start_date': $('#start_date').val(),
+                'end_date': $('#end_date').val(),
+            },
+
+            success: function (response) {
+                $('#lending').html(response.grid);
+            },
+            fail: function (response) {
+                console.log("error");
+            }
+        });
+    });
+
+
+    $("#table-to-excel").click(function () {
+        $("#table-dictionary").table2excel({
+            // exclude CSS class
+            exclude: ".noExl",
+            name: "Worksheet GLP",
+            filename: "kardex_glp",//do not include extension
+            fileext: ".xlsx", // file extension
+            preserveColors: true
+
+        });
+    });
+
+
+    $('#table-dictionary').each(function () {
+
+        let count2 = $(this).find("td.body-spending button").length;
+        if (count2 === 0) {
+            $(this).find("td.head-spending").remove()
+            $(this).find("td.body-spending").remove()
+            $(this).find("td.colcount").attr('colspan', '22')
+        }
+    });
+
+</script>

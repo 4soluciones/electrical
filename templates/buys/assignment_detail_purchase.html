@@ -1,0 +1,305 @@
+<div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+
+    <div class="modal-content">
+
+        <div class="modal-header text-center">
+
+
+            <h5 class="modal-title font-weight-bold">DESTINAR - ALMACEN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</h5>
+            <h5 class="modal-title ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; COMPRA
+                Nº: {{ purchase.bill_number|upper }}</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            <input type="hidden" id="id_compra" value="{{ purchase.id }}">
+
+        </div>
+
+        <form action="" method="POST">
+            {% csrf_token %}
+
+            <div class="modal-body">
+                <table class="table" id="table-header" style="width: 100%;">
+                    <tr>
+
+                        <td style="width: 16%; font-size: 15px" class="align-middle font-weight-bold text-uppercase">
+                            Fecha:&nbsp; {{ purchase.purchase_date|date:"d-m-Y" }}</td>
+                        <td style="width: 10%" class="align-middle font-weight-bold text-uppercase">Almacen destino:
+                        </td>
+                        <td style="width: 14%" class="align-middle">
+                            <select class="form-control font-weight-bold" id="id_almacen" name="almacen" required>
+                                {#                                <option disabled selected value=""> Seleccione</option>#}
+                                {% for a in subsidiary_stores.all %}
+                                    {% if subsidiary_stores.id == a.id %}
+                                        <option value="{{ a.id }}">{{ a.name }}</option>
+                                    {% else %}
+                                        <option value="{{ a.id }}">{{ a.name }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td style="width: 15%" class="align-middle">
+                            {% if purchase.check_dollar %}
+                                <div class="form-check">
+                                    <input class="form-check-input check-dollar"
+                                           type="checkbox" value="" id="check_dollar" checked
+                                           style=" transform: scale(1.6);">
+                                    <label class="form-check-label font-weight-bold" for="check_dollar"
+                                           style="background: #c7d6ee">
+                                        COMPRA EN DOLARES
+                                    </label>
+                                </div>
+
+                            {% else %}
+                                <div class="form-check">
+                                    <input class="form-check-input check-soles"
+                                           type="checkbox" value="" id="check_soles" checked
+                                           style=" transform: scale(1.5);">
+                                    <label class="form-check-label font-weight-bold" for="check_soles">
+                                        COMPRA EN SOLES
+                                    </label>
+                                </div>
+
+                            {% endif %}
+
+                        </td>
+                        <td style="width: 15%" class="align-middle text-uppercase text-right font-weight-bold">
+                            {% if purchase.check_dollar %}
+                                <label class="form-check-label font-weight-bold" style="background: #c7d6ee">
+                                    Tipo de cambio: {{ type_change }}
+                                </label>
+                            {% endif %}
+                        </td>
+
+                        <td style="width: 10%" class="align-middle text-uppercase text-right font-weight-bold pr-0">
+                            Total
+                            Flete:
+                        </td>
+                        <td style="width: 6%" class=" item-freight align-middle text-right font-weight-bold pl-0"
+                            freight="{{ purchase.total_freight|safe }}">
+                            S/ {{ purchase.total_freight|safe }}
+                            {#                            <input type="text" class="form-control text-center" id="id_freight" value="S/ {{ purchase.total_freight|safe }}">#}
+                        </td>
+                    </tr>
+                </table>
+                <table class="table table-bordered table-striped align-content-center response table-hover table-sm"
+                       style="width: 100%;">
+
+                    <thead>
+                    <tr class="text-white text-center bg-info">
+                        {#                        <th class="align-middle">Código</th>#}
+                        <th class="align-middle">Producto</th>
+                        <th class="align-middle">Marca</th>
+                        <th class="align-middle">Cantidad</th>
+                        <th class="align-middle">Unidad</th>
+                        <th class="align-middle">Valor Unit.</th>
+                        <th class="align-middle">%Dto.1</th>
+                        <th class="align-middle">%Dto.2</th>
+                        <th class="align-middle">%Dto.3</th>
+                        <th class="align-middle">%Dto.4</th>
+                        <th class="align-middle">Importe</th>
+                        <th>Val. Unit. Dto. (IGV)</th>
+                        {% if not purchase.check_dollar %}
+                            <th>Val. Unit. Dto. (IGV) + FLETE</th>
+                        {% endif %}
+                        {% if purchase.check_dollar %}
+                            <th>Val. Unit. Dto. (IGV) en SOLES</th>
+                            <th>Val. Unit. Dto. (IGV) + FLETE en SOLES</th>
+                        {% endif %}
+                        <th>Cambiar Precio</th>
+                        <!--<th>Almacen</th>-->
+                    </tr>
+                    </thead>
+                    <tbody id="details">
+                    {% for d in dictionary %}
+                        {% for p in d.purchase_detail_set %}
+                            <tr product="{{ p.product_id }}" purchase_detail="{{ p.id }}">
+                                {#                                <td class="text-center">{{ p.product_code }}</td>#}
+                                <td>{{ p.product }}</td>
+                                <td class="text-center">{{ p.product_brand }}</td>
+                                <td class="item-quantity text-center">{{ p.quantity|safe|floatformat:0 }}</td>
+                                <td class="item-unit text-center" pu="{{ p.unit_id }}">{{ p.unit_name }}</td>
+                                <td class="item-price text-right" price_unit="{{ p.price_unit|safe }}">
+                                    <div class="input-icon" style="font-family: ui-serif,serif">
+                                        <i class="change-money">S/</i>
+                                        {{ p.price_unit|safe }}
+                                    </div>
+                                </td>
+                                <td class="item-discount1 text-right">{{ p.discount_one|safe }}</td>
+                                <td class="item-discount2 text-right">{{ p.discount_two|safe }}</td>
+                                <td class="item-discount3 text-right">{{ p.discount_three|safe }}</td>
+                                <td class="item-discount4 text-right">{{ p.discount_four|safe }}</td>
+                                <td class="text-center">
+                                    <div class="input-icon" style="font-family: ui-serif,serif">
+                                        <i class="change-money">S/</i>
+                                        {{ p.multiplicate|safe }}
+                                    </div>
+                                </td>
+                                <td class="item-price-unit-discount text-center font-weight-bold" {% if d.check_igv %}
+                                    price_unit_d="{{ p.price_unit_discount|safe }}" {% else %}
+                                    price_unit_d="{{ p.price_unit_discount_with_igv|safe }}"{% endif %}
+                                        {% if purchase.check_dollar %} style="background: #c7d6ee" {% else %}
+                                    style="background: #00e25b" {% endif %} >
+                                    {% if d.check_igv %}
+                                        <div class="input-icon" style="font-family: ui-serif,serif">
+                                            <i class="change-money">S/</i>
+                                            {{ p.price_unit_discount|safe }}
+                                        </div>
+                                    {% else %}
+                                        <div class="input-icon" style="font-family: ui-serif,serif">
+                                            <i class="change-money">S/</i>
+                                            {{ p.price_unit_discount_with_igv|safe }}
+                                        </div>
+                                    {% endif %}
+
+                                </td>
+                                {% if not purchase.check_dollar %}
+                                    <td class="item-price-unit-discount-plus-freight text-center font-weight-bold"
+                                        price_unit_plus_freight="{{ p.price_unit_discount_plus_freight|safe }}">
+                                        <div class="input-icon" style="font-family: ui-serif,serif">
+                                            <i class="change-money">S/</i>
+                                            {{ p.price_unit_discount_plus_freight|safe }}
+                                        </div>
+                                    </td>
+                                {% endif %}
+                                {% if purchase.check_dollar %}
+                                    <td class="item-price-unit-igv-change text-center font-weight-bold"
+                                        price_unit_igv_change="{{ p.price_unit_discount_with_igv_money_change|safe }}"
+                                        style="background: #00e25b">
+                                        <i class="" style="font-family: ui-serif,serif">S/</i>
+                                        {{ p.price_unit_discount_with_igv_money_change|safe }}
+                                    </td>
+
+                                    <td class="item-price-unit-igv-change-plus-freight text-center font-weight-bold"
+                                        price_unit_igv_change_plus_freight="{{ p.price_unit_discount_with_igv_money_change_freight|safe }}"
+                                        style="background: #00e25b">
+                                        <i class="" style="font-family: ui-serif,serif">S/</i>
+                                        {{ p.price_unit_discount_with_igv_money_change_freight|safe }}
+                                    </td>
+                                {% endif %}
+
+                                <td class="item-check text-center align-middle" style=" transform: scale(1.6);">
+                                    <div class="form-check">
+                                        <input class="form-check-input position-static check-kardex" type="checkbox"
+                                               value="" checked>
+                                    </div>
+                                </td>
+                                <!--<td class="item-store">
+                                <select  class="form-control form-control-sm">
+                                    <option selected value="0">seleccione</option>
+{#                                    {% for a in subsidiary_stores %}#}
+{#                                        <option value="{{ a.id }}">{{ a.name }}</option>#}
+{#                                    {% endfor %}#}
+                                </select>
+                            </td>-->
+                            </tr>
+                        {% endfor %}
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div><!-- modal-body -->
+
+
+            <div class="modal-footer">
+                &nbsp;
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                &nbsp;
+                <button id="assignment-changes" type="button" class="btn btn-primary">Asignar Productos</button>
+
+
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+<script type="text/javascript">
+    /*function comprobateSelect(){
+        let _flag = true;
+        $("#details tr").each(function () {
+            let _value= $(this).find('select').val();
+            if (_value === '0'){
+                _flag = false;
+
+            }
+        })
+        return _flag;
+    }*/
+
+    $(document).ready(function () {
+        let _check = $("#check_dollar")
+        if (_check.is(':checked')) {
+            $(".change-money").text('$')
+        } else {
+            $(".change-money").text('S/')
+        }
+    });
+
+
+    $('#assignment-changes').click(function () {
+        let mensaje = confirm("¿Esta seguro de asignar al almacen seleccionado?");
+        if (mensaje) {
+            if ($('#id_compra').val() !== '') {
+                if ($('#id_almacen').val() > 0) {
+                    let details_purchase = {
+                        "Details": [],
+                        "Purchase": $('#id_compra').val(),
+                        "id_almacen": $('#id_almacen').val(),
+                        "CheckDollar": ($("#check_dollar").is(':checked')) ? 1 : 0,
+                        "CheckSoles": ($("#check_soles").is(':checked')) ? 1 : 0,
+                        "Freight": Number($("#table-header tr td.item-freight").attr('freight'))
+                    };
+                    $("#details  tr").each(function () {
+                        var detailObj = {
+                            "PurchaseDetail": $(this).attr('purchase_detail'),
+                            "Product": $(this).attr('product'),
+                            "Quantity": $(this).find("td.item-quantity").text(),
+                            "Unit": $(this).find("td.item-unit").attr('pu'),
+                            "Price": $(this).find("td.item-price").attr('price_unit'),
+                            "PriceUnitDiscount": $(this).find("td.item-price-unit-discount").attr('price_unit_d'),
+                            "PriceUnitDiscountPlusFreight": Number($(this).find("td.item-price-unit-discount-plus-freight").attr('price_unit_plus_freight')),
+                            "PriceUnitIgvMoneyChange": Number($(this).find("td.item-price-unit-igv-change").attr('price_unit_igv_change')),
+                            "PriceUnitIgvMoneyChangePlusFreight": Number($(this).find("td.item-price-unit-igv-change-plus-freight").attr('price_unit_igv_change_plus_freight')),
+                            "Check": ($(this).find("td.item-check div.form-check input.check-kardex").is(':checked')) ? 1 : 0,
+                            //"Store": $(this).find("td.item-store select").val(),
+                        };
+                        details_purchase.Details.push(detailObj);
+                    });
+                   // console.log(JSON.stringify(details_purchase));
+                    $.ajax({
+
+                        url: '/buys/save_detail_purchase_store/',
+                        async: true,
+                        dataType: 'json', // for response
+                        type: 'GET',
+                        data: {'details_purchase': JSON.stringify(details_purchase)},
+                        contentType: 'application/json;charset=UTF-8',
+                        headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                        success: function (response, textStatus, xhr) {
+                            if (xhr.status === 200) {
+                                toastr.success(response.message, '¡EXITOSO!');
+                                $('#assignment').modal('hide');
+                                setTimeout(() => {
+                                    location.reload();
+                                }, 800);
+                            }
+                        },
+                        error: function (jqXhr, textStatus, xhr) {
+                            $('#assignment').modal('hide');
+                            toastr.error(jqXhr.responseJSON.error, '¡MENSAJE!');
+                        }
+                    });
+
+                } else {
+                    toastr.warning("SELECCIONE EL ALMACEN DE DESTINO. ", '¡ADVERTENCIA!');
+                    return false;
+                }
+            } else {
+                toastr.warning("NO SE LOGRO SELECCIONAR LA COMPRA ", '¡ADVERTENCIA!');
+                return false;
+            }
+        }
+    })
+
+</script>

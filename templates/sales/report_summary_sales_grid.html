@@ -1,0 +1,55 @@
+{% load app_filters %}
+
+<div class="text-center container pt-4" style="border-color: #000000">
+
+    <table class="table table-sm table-bordered">
+        <thead class="font-weight-bold">
+        <tr class="text-dark text-uppercase" style="background: #a8e0a0">
+            <th class="text-center">Usuario</th>
+            <th class="text-center">total ventas</th>
+            <th class="text-center">total Facturas</th>
+            <th class="text-center">total boletas</th>
+            <th class="text-center">total tickets</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for key, value in user_dict.items %}
+            <tr class="text-dark text-uppercase" style="background: #d7e7d5">
+                <td class="align-middle text-center">{{ value.user_names }}</td>
+                <td class="align-middle text-center">{{ value.total_sold|safe|floatformat:2 }}</td>
+                <td class="align-middle text-center">{{ value.total_bills|safe|floatformat:2 }}</td>
+                <td class="align-middle text-center">{{ value.total_receipts|safe|floatformat:2 }}</td>
+                <td class="align-middle text-center">{{ value.total_tickets|safe|floatformat:2 }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        <tfoot>
+        <tr class="font-weight-bold bg-success">
+            <td class="align-middle text-center">TOTALES</td>
+            <td class="align-middle text-center">{{ sum|safe|floatformat:2 }}</td>
+            <td class="align-middle text-center">{{ sum_bills|safe|floatformat:2 }}</td>
+            <td class="align-middle text-center">{{ sum_receipts|safe|floatformat:2 }}</td>
+            <td class="align-middle text-center">{{ sum_tickets|safe|floatformat:2 }}</td>
+        </tr>
+        </tfoot>
+    </table>
+
+    <table class="table table-sm table-bordered mt-5">
+        <thead class="font-weight-bold">
+        <tr class="text-dark text-uppercase" style="background: #c2d2f3">
+            <th class="text-center">Venta Total</th>
+            <th class="text-center">total Contado</th>
+            <th class="text-center">total Credito</th>
+            <th class="text-center">total Deposito</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr class="font-weight-bold" style="background: #5380dd">
+            <td class="align-middle text-center">{{ sum|safe|floatformat:2 }}</td>
+            <td class="align-middle text-center">{{ total_cash|safe|floatformat:2 }}</td>
+            <td class="align-middle text-center">{{ total_credit|safe|floatformat:2 }}</td>
+            <td class="align-middle text-center">{{ total_deposit|safe|floatformat:2 }}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>

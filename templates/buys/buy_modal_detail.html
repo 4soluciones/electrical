@@ -1,0 +1,95 @@
+<div class="modal-body table-responsive" id="modal-detail">
+    <div class="row">
+        <div class="col-sm-8 col-md-8 col-lg-8">
+            <label>Producto</label>
+            <select class="form-control" id="id_producto" name="producto" required>
+                <option selected value="0"> Seleccione</option>
+{#                {% for p in product_obj %}#}
+{#                    <option value="{{ p.id }}">{{ p.name }} | {{ p.product_brand.name }}</option>#}
+{#                    {% if employee.occupation.id == p.id %}#}
+{#                        <option value="{{ p.id }}">{{ p.name }}</option>#}
+{#                    {% else %}#}
+{#                        <option value="{{ p.id }}">{{ p.name }}</option>#}
+{#                    {% endif %}#}
+{#                {% endfor %}#}
+            </select>
+        </div>
+
+        <div class="col-sm-2 col-md-2 col-lg-2">
+            <label>Cantidad</label>
+            <input type="text" class="form-control" id="id_cantidad"
+                   name="cantidad"
+                   placeholder="Cantidad" required
+                   value="">
+        </div>
+
+        <div class="col-sm-2 col-md-2-lg-2">
+            <label>Unidad</label>
+            <select class="form-control" id="id_unidad" name="unidad" required>
+                <option value="0"> Seleccione</option>
+                {% for u in unitmeasurement_obj %}
+                    {% if employee.occupation.id == u.id %}
+                        <option selected value="{{ u.id }}">{{ u.description }}</option>
+                    {% else %}
+                        <option value="{{ u.id }}">{{ u.description }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+
+    </div>
+    <div class="row pt-3">
+
+        <div class="col-sm-2 col-md-2 col-lg-2">
+            <label>Descuento 1</label>
+            <input type="text" class="form-control new-import" id="id_discount_1"
+                   name="discount1"
+                   placeholder="S/.0.00"
+                   value="">
+        </div>
+        <div class="col-sm-2 col-md-2 col-lg-2">
+            <label>Descuento 2</label>
+            <input type="text" class="form-control new-import" id="id_discount_2"
+                   name="discount2"
+                   placeholder="S/.0.00"
+                   value="">
+        </div>
+        <div class="col-sm-2 col-md-2 col-lg-2">
+            <label>Descuento 3</label>
+            <input type="text" class="form-control new-import" id="id_discount_3"
+                   name="discount3"
+                   placeholder="S/.0.00"
+                   value="">
+        </div>
+        <div class="col-sm-2 col-md-2 col-lg-2">
+            <label>Descuento 4</label>
+            <input type="text" class="form-control new-import" id="id_discount_4"
+                   name="discount4"
+                   placeholder="S/.0.00"
+                   value="">
+        </div>
+
+
+        <div class="col-sm-2 col-md-2 col-lg-2">
+            <label>Precio unitario</label>
+            <input type="text" class="form-control" id="id_preciounitario"
+                   name="preciounitario"
+                   placeholder="S/.0.00" required
+                   value="" readonly>
+        </div>
+
+
+        <div class="col-sm-2 col-md-2 col-lg-2">
+            <label>Total</label>
+            <input type="text" class="form-control new-import" id="id_import"
+                   name="total"
+                   placeholder="S/.0.00" required
+                   value="">
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-sm btn-secondary" onclick="limper()" data-dismiss="modal">Salir
+    </button>
+    <button type="button" id="id_add" class="btn btn-sm btn-success">Agregar</button>
+</div>

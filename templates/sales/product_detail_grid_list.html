@@ -1,0 +1,190 @@
+{% if product_details %}
+    <div class="col-md-12">
+        <table class="table table-hover m-0" style="width: 100%;">
+            <thead class="bg-light ">
+            <tr class="text-center">
+                <th style="width: 7%;">
+                    <div class="form-check-inline">
+                        <label class="form-check-label">
+                            <input type="checkbox" class="form-check-input" value="">
+                        </label>
+                    </div>
+                </th>
+                <th style="width: 15%;">Unidad de medida</th>
+                <th style="width: 45%;">Precio de Venta</th>
+                <th style="width: 15%;">Cantidad Minima</th>
+                <th style="width: 10%;">Habilitado</th>
+                <th style="width: 8%;">Edit</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            {% for obj in product_details %}
+
+                <tr>
+                    <td class="align-middle text-center">
+                        <div class="form-check-inline">
+                            <label class="form-check-label">
+                                <input type="checkbox" class="form-check-input" value="">
+                            </label>
+                        </div>
+                    </td>
+                    <td class="align-middle text-center"><a href="#"><small>{{ obj.unit }}</small></a></td>
+                    <td class="align-middle p-1"><small>
+                        <div class="row col-sm-12 m-0 p-0">
+                            <div class="col-sm-4 text-center">
+                                <label class="m-0"><b>{{ obj.percentage_one|safe }} %</b> </label>
+                                <input type="text" id="id-price1" name="price1"
+                                       value="{{ obj.get_calculate_price1|safe }}"
+                                       class="form-control form-control-sm text-right decimal" readonly>
+                            </div>
+                            <div class="col-sm-4 text-center">
+                                <label class="m-0"><b>{{ obj.percentage_two|safe }} %</b></label>
+                                <input type="text" id="id-price2" name="price2"
+                                       value="{{ obj.get_calculate_price2|safe }}"
+                                       class="form-control form-control-sm text-right decimal" readonly>
+                            </div>
+                            <div class="col-sm-4 text-center">
+                                <label class="m-0"><b>{{ obj.percentage_three|safe }} %</b></label>
+                                <input type="text" id="id-price3" name="price3"
+                                       value="{{ obj.get_calculate_price3|safe }}"
+                                       class="form-control form-control-sm text-right decimal" readonly>
+                            </div>
+                        </div>
+                    </small>
+                    </td>
+                    <td class="align-middle text-center"><small>{{ obj.quantity_minimum|floatformat:2 }}</small></td>
+                    <td class="text-center align-middle">
+                        <div class="form-check-inline">
+                            <label class="form-check-label">
+                                <input type="checkbox" class="form-check-input align-middle check-enabled"
+                                       {% if obj.is_enabled %}checked{% endif %} value="{{ obj.id }}">
+                            </label>
+                        </div>
+                    </td>
+                    <td class="align-middle">
+                        <a class="edit-product-detail" pk="{{ obj.id }}"><i class="fa fa-pencil-alt"></i></a>
+                        <a class="delete-product-detail" pk="{{ obj.id }}"><i class="fa fa-trash"></i></a>
+                    </td>
+                </tr>
+                </tbody>
+                <tfoot>
+                <tr>
+                    <td class="text-right align-middle pb-0" colspan="4">
+                        <label class="m-0"><b>Última Actualización:</b></label>
+
+                    </td>
+                    <td class="text-right pb-0" colspan="2">
+                        <input type="text" id="id-update" name="update"
+                               class="form-control form-control-sm text-center"
+                               value="{{ obj.update_at|date:"d/m/y G:i:s" }}" readonly>
+                    </td>
+                </tr>
+                <tr class="border-top-0">
+                    <td class="text-right align-middle pt-0" colspan="4">
+                         <label class="m-0"><b>Actualizado por:</b></label>
+                    </td>
+                    <td class="text-right pt-0" colspan="2">
+                        <input type="text" id="id-update" name="update"
+                               class="form-control form-control-sm text-center"
+                               value="{% if obj.user %}{{ obj.user|upper }}{% else %}-{% endif %}" readonly>
+                    </td>
+                </tr>
+                </tfoot>
+            {% endfor %}
+        </table>
+    </div>
+{% else %}
+    Lo sentimos, no hay presentaciones registradas</h1>
+{% endif %}
+
+<script type="text/javascript">
+
+    $('.edit-product-detail').on('click', function () {
+        $('#btn-product-detail-save').fadeOut();
+        $('#btn-product-detail-update').fadeIn();
+        var search = $(this).attr('pk');
+        $.ajax({
+            url: '/sales/get_product_detail/',
+            dataType: 'json',
+            type: 'GET',
+            data: {'pk': search},
+            success: function (response, textStatus, xhr) {
+                if (xhr.status === 200) {
+                    var myObj = JSON.parse(response.obj);
+                    //console.log(myObj);
+                    $('#id_product_detail').val(myObj[0]['pk']);
+                    $('#id_product').val(myObj[0]['fields']['product']);
+                    $('#id_unit option[value="' + myObj[0]['fields']['unit'] + '"]').prop('selected', true);
+                    $('#id_price_sale').val(myObj[0]['fields']['price_sale']);
+                    $('#id_quantity_minimum').val(myObj[0]['fields']['quantity_minimum']);
+                    $('#id_p1').val(parseFloat(myObj[0]['fields']['percentage_one']));
+                    $('#id_p2').val(parseFloat(myObj[0]['fields']['percentage_two']));
+                    $('#id_p3').val(parseFloat(myObj[0]['fields']['percentage_three']));
+                    $('#id_price_purchase').val(parseFloat(myObj[0]['fields']['price_purchase']));
+                }
+            },
+            fail: function (response) {
+                console.log(response);
+            }
+        });
+    });
+
+    $('.delete-product-detail').on('click', function () {
+        //$('#btn-product-detail-save').fadeOut();
+        //$('#btn-product-detail-update').fadeIn();
+        let search = $(this).attr('pk');
+        let _tr = $(this).parent('td').parent('tr');
+        let r = confirm("¿Desea eliminar la presentacion");
+
+        if (r === true) {
+
+            $.ajax({
+                url: '/sales/delete_product_detail/',
+                dataType: 'json',
+                type: 'GET',
+                data: {'pk': search},
+                success: function (response, textStatus, xhr) {
+                    if (xhr.status === 200) {
+                        _tr.remove();
+                    }
+                },
+                fail: function (response) {
+                    console.log(response);
+                }
+            });
+        }
+
+    });
+
+
+    $(".check-enabled").on("click", function () {
+
+        var pk = $(this).attr('value');
+        var status = 'False';
+        if ($(this).is(':checked')) {
+            status = 'True';
+        }
+
+        console.log('status: ' + status);
+        console.log('pk: ' + pk);
+
+        $.ajax({
+            url: '/sales/toogle_status_product_detail/',
+            async: true,
+            dataType: 'json',
+            type: 'GET',
+            data: {'pk': pk, 'status': status},
+            success: function (response, textStatus, xhr) {
+                if (xhr.status == 200) {
+                    toastr.success(response['message'], '¡Bien hecho!');
+                }
+
+            },
+            fail: function (response) {
+                console.log("error");
+            }
+        });
+
+    });
+</script>

@@ -1,0 +1,138 @@
+{% extends 'home.html' %}
+
+{% block title %}
+    coronasoft.dev | Listado de compras
+{% endblock title %}
+
+{% block body %}
+
+    <!-- Content -->
+    <div class="container-fluid">
+
+        <div id="purchase-grid-list">{% include "buys/purchase_grid_list.html" %}</div>
+
+    </div>
+
+    <div class="modal fade" id="assignment" tabindex="-1" role="dialog" aria-labelledby="ModalHelpTitle"
+         aria-hidden="true"></div>
+
+
+{% endblock body %}
+
+{% block extrajs %}
+
+    <script type="text/javascript">
+
+        {#$('#puchase-data-grid').dataTable();#}
+        $('#puchase-data-grid').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.15/i18n/Spanish.json"
+            }
+        });
+        $(document).on('click', '.assignment-store', function () {
+            let search = $(this).attr('pk');
+            $.ajax({
+                url: '/buys/get_detail_purchase_store/',
+                dataType: 'json',
+                type: 'GET',
+                data: {
+                    'pk': search,
+                    'type_change': $('#type_change_value').val(),
+                },
+
+                contentType: 'application/json;charset=UTF-8',
+                headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                success: function (response, textStatus, xhr) {
+                    if (xhr.status === 200) {
+                        $('#assignment').html(response.form);
+                        $('#assignment').modal('show');
+
+                    }
+                },
+                error: function (jqXhr, textStatus, xhr) {
+                    $('#assignment').html(jqXhr.form);
+                    toastr.error(jqXhr.responseJSON, '¡MENSAJE!');
+                }
+
+                /*
+                success: function (response) {
+                    console.log(response);
+                    if(response.success){
+                        $('#assignment').html(response.form);
+                        $('#assignment').modal('show');
+                    }
+                },
+                fail: function (response) {
+                    console.log(response)
+{#toastr.warning('NO CUENTA CON UN ALMACEN DE MERCADERIA');#}
+            }*/
+            });
+        });
+        /*Boton anular*/
+        //Boton  validar requerimiento
+        $(document).on('click', '.btn-annular', function () {
+            let search = $(this).attr('pk');
+            let mensaje = confirm("¿Esta seguro de anular la compra?");
+            if (mensaje) {
+                $.ajax({
+                    url: '/buys/update_state_annular_purchase/',
+                    dataType: 'json',
+                    type: 'GET',
+                    data: {'pk': search},
+                    success: function (response) {
+                        toastr.success(response.message, '¡COMPRA ANULADA CORRECTAMENTE!');
+                        setTimeout(() => {
+                            location.reload();
+                        }, 500);
+                    },
+                    fail: function (response) {
+                        toastr.success(response.message, '¡PROBLEMAS AL ANULAR LA COMPRA!');
+                    }
+                });
+            }
+        });
+
+        $(document).on('click', '.btn-update', function () {
+            let _purchase = $(this).attr('pk');
+            let mensaje = confirm("¿Editar la compra seleccionada?");
+            if (mensaje) {
+                window.open("/buys/update_purchase/" + _purchase + "/", '_blank');
+            }
+        });
+
+        $(document).on('click', '#btn-type-change', function (e) {
+            let _input_type_change = $('#type_change')
+            let _input_type_change_value = $('#type_change_value')
+
+            $.ajax({
+                url: '/buys/get_type_change/',
+                async: true,
+                dataType: 'json', // for response
+                type: 'GET',
+                data: {},
+                contentType: 'application/json;charset=UTF-8',
+                headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                success: function (response, textStatus, xhr) {
+                    if (xhr.status === 200) {
+                        _input_type_change.val('$ ' + response.buy);
+                        _input_type_change_value.val(response.buy);
+                    }
+                },
+                error: function (jqXhr, textStatus, xhr) {
+                    if (jqXhr.status === 500) {
+                        toastr.error(jqXhr.responseJSON.error, 'Mensaje');
+                    } else {
+                        if (textStatus === 'timeout') {
+                            toastr.error('Failed from timeout', 'Mensaje');
+                        } else {
+                            console.log(" STATUS: " + xhr + " " + textStatus);
+                        }
+                    }
+                },
+            });
+            return false;
+        });
+        $("#btn-type-change").trigger('click');
+
+    </script>
+{% endblock extrajs %}

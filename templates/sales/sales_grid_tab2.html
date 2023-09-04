@@ -1,0 +1,58 @@
+<div class="card montserrat" style="border-color: #0b62a4">
+    <div class="card-header m-0 p-2" style="background: #156dae">
+        <div class="row">
+            <div class="col-sm-4"><h6 class="text-white mt-1">PRODUCTOS</h6></div>
+            <div class="col-sm-8">
+                <input type="text" class="form-control form-control-sm quicksearch"
+                       placeholder="Search"/></div>
+        </div>
+    </div>
+    <div class="card-body pl-0" style="/*background-color: rgba(0,123,255,.5)!important;*/">
+        <div class="container p-0 m-0" id="grid-products" style="height: 590px;">
+            <div class="row grid p-0 m-0">
+                {% for product in product_dic %}
+                    <div class="col-sm-4 pt-0 pb-3 pr-0 element-item" data-category="{{ product.name }}">
+                        <div class="card h-100" style="background-color: #f6f5ef; border-color: #0d68ae"
+                             onclick="showModalView('get_rate_product',{{ product.id }})">
+                            <div class="card-body">
+                                {#                                <img src="{{ product.path_cache }}" class="img-thumbnail mx-auto d-block">#}
+                                <h3 class="card-title align-middle display-4 text-center m-0 mb-0 text-danger  font-weight-bold"
+                                    style="font-size: 0.9rem;text-transform: uppercase;height: 30px;">
+                                    <label>{{ product.name|upper }}</label>
+                                </h3>
+                                <div class="card-text">
+                                    <p class="text-primary mb-0 small text-uppercase">Codigo: {{ product.code }}
+                                        - {{ product.id }}</p>
+                                    {% if product.stock %}
+                                        <p class="text-primary mb-0 small text-uppercase">
+                                            Stock: {{ product.stock }}</p>
+                                    {% else %}
+                                        <p class="text-danger mb-0 small text-uppercase">Stock: 0</p>
+                                    {% endif %}
+
+                                    <p class="text-primary mb-0 small text-uppercase">P.V.
+                                        : {{ product.price }} [{{ product.unit }}]</p>
+                                    <p class="text-primary mb-0 small text-uppercase">P.C: {{ product.price_purchase|default_if_none:'0.00' }}
+
+                                </div>
+                            </div><!-- card-body -->
+{#                            <div class="card-footer text-muted text-center" style="background: #1c75b1">#}
+{#                                <a class="btn btn-success btn-sm text-white text-uppercase card-item-product"#}
+{#                                   pk="{{ product.id }}" data-toggle="modal" data-target=".modal-rate">#}
+{#                                    Ver Precios <i class="fas fa-tag fa-sm text-right"></i>#}
+{#                                </a>#}
+{#                            </div><!-- card-footer -->#}
+                        </div>
+                    </div><!-- element-item -->
+                {% endfor %}
+            </div><!-- row -->
+        </div><!-- container -->
+    </div>
+</div>
+
+<script type="text/javascript">
+    {#posrenderizado#}
+    {% if is_render %}
+        $("#grid-products").mCustomScrollbar();
+    {% endif %}
+</script>

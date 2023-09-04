@@ -1,0 +1,122 @@
+<form id="update-stock-form" action="" method="POST">
+    {% csrf_token %}
+
+    <input type="hidden" id="id_product" name="product" value="{{ product.id }}">
+
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <h4 class="mt-1 text-center"> {{ product.name }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <table class="table table-sm pay-options">
+        <thead>
+        <tr class="text-uppercase font-weight-lighter">
+            <th class="border-right text-center border-left align-middle">SERIE</th>
+            <th class="border-right text-center border-left align-middle">SEDE</th>
+            <th class="border-right text-center border-left align-middle">ALMACENES</th>
+        </tr>
+        </thead>
+        {% for p in product_dict %}
+            {% for ps in p.product_store_set.all %}
+                <tbody class="mb-4">
+                <tr pk="{{ ps.product__id }}">
+                    <td class="border-top-0 border-bottom border-right border-left text-center align-middle">{{ ps.subsidiary_store__subsidiary__serial }}</td>
+                    <td class="border-top-0 border-bottom border-right align-middle text-center">{{ ps.subsidiary_store__subsidiary__name }}</td>
+                    <td class="border-top-0 border-bottom border-right align-middle">
+                        <table class="table table-borderless mb-0 table-sm product-store">
+                            <thead>
+                            <tr class="border-0">
+                                <th class="table-light text-center text-black-50 small border-0"
+                                    style="text-transform: uppercase; width: 10%;">#
+                                </th>
+                                <th class="table-light text-center text-black-50 small border-0"
+                                    style="text-transform: uppercase; width: 45%;">Almacen
+                                </th>
+                                <th class="table-light text-center text-black-50 small border-0"
+                                    style="text-transform: uppercase; width: 15%;">Stock Antiguo
+                                </th>
+                                <th class="table-light text-center text-black-50 small border-0"
+                                    style="text-transform: uppercase; width: 15%;">Nuevo Stock
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr class="border-0 detail">
+                                <td class="align-middle text-center border-top border-right subsidiary-store"
+                                    pk="{{ ps.subsidiary_store__id }}">{{ ps.subsidiary_store__id }}</td>
+                                <td class="align-middle text-center border-top border-right">{{ ps.subsidiary_store__name }}
+                                </td>
+                                <td class="align-middle border-top stock exist" op="update"
+                                    pk="{{ ps.id }}">
+                                    <input class="form-control form-control-sm decimal" type="text" id="id_old_stock"
+                                           name="old-stock"
+                                           value="{{ ps.stock|safe }}" readonly>
+                                </td>
+                                <td class="align-middle border-top">
+                                    <input class="form-control form-control-sm decimal" type="text" id="id_new_stock"
+                                           name="new-stock"
+                                           value="" placeholder="0">
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+                </tbody>
+            {% endfor %}
+        {% endfor %}
+        <tfoot>
+        <tr class="border-0">
+            <td colspan="3" class="border-0 pr-2 text-right pt-3 pb-0">
+                <button type="submit" id="btn-save" class="btn btn-primary"> Guardar</button>
+            </td>
+        </tr>
+        </tfoot>
+    </table>
+
+</form>
+
+<script type="text/javascript">
+
+    $('#update-stock-form').submit(function (event) {
+        event.preventDefault();
+        let data = new FormData($('#update-stock-form').get(0));
+
+        let product_id = $("#id_product").val();
+
+        $('#btn-save').attr("disabled", "true");
+
+        $.ajax({
+            url: '/sales/new_update_stock/',
+            type: "POST",
+            data: data,
+            cache: false,
+            processData: false,
+            contentType: false,
+            success: function (response, textStatus, xhr) {
+                if (xhr.status === 200) {
+                    $('#modal-changeStock').modal('hide');
+                    console.log(response.new_stock)
+
+                    $('td.stock[pk="' + product_id + '"]').html(response.new_stock + '.00')
+
+                    toastr.success(response['message'], '¡Bien hecho!');
+                }
+            },
+            error: function (jqXhr, textStatus, xhr) {
+                if (jqXhr.status === 500) {
+                    toastr.error(jqXhr.responseJSON.error, '¡Error de Peticións!');
+                }
+            }
+        });
+        $('#btn-save').removeAttr("disabled", "false");
+
+    });
+
+</script>
+

@@ -1,0 +1,277 @@
+{% load app_filters %}
+<div class="text-right container-fluid pt-0 pb-2">
+    <button type="button" id="btn_export_excel" class="btn btn-success">
+        <i class="fas fa-file-csv"></i> Excel
+    </button>
+</div>
+
+<table class="table table-sm table-bordered mt-2" id="table-product-store">
+    <thead class="font-weight-bold">
+    <tr class="text-dark text-uppercase">
+        <th class="bg-light text-center">ID</th>
+        <th class="bg-light text-center">CÓDIGO</th>
+        <th class="bg-light text-center">NOMBRE DEL PRODUCTO</th>
+        <th class="bg-light text-center">MARCA</th>
+        <th class="bg-light text-center">UNIDAD</th>
+        <th class="bg-light text-center">PRECIO DE COMPRA</th>
+        <th class="bg-light text-center" colspan="1">{{ subsidiary.name }} - {{ subsidiary_store_obj.name }}</th>
+        <th class="bg-light text-center">Stock</th>
+        <th class="bg-light text-center">Estado</th>
+    </tr>
+    </thead>
+    <tbody id="details-grid">
+    {% for p in product_set %}
+        <tr pk="{{ p.id }}" class="text-center">
+            <td class="align-middle text-center" rowspan="
+
+
+
+                    {% if p.productdetail_set.all.count > 0 %}{{ p.productdetail_set.all.count }}{% else %}1{% endif %}">{{ p.id }}</td>
+            <td class="align-middle text-center" rowspan="
+
+
+
+                    {% if p.productdetail_set.all.count > 0 %}{{ p.productdetail_set.all.count }}{% else %}1{% endif %}">
+                {% if product.code %}
+                    {{ product.code|zfill:6 }}
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+            <td class="align-middle text-center" rowspan="
+
+
+
+                    {% if p.productdetail_set.all.count > 0 %}{{ p.productdetail_set.all.count }}{% else %}1{% endif %}">{{ p.name|upper }}</td>
+            <td class="align-middle text-center" rowspan="
+
+
+
+                    {% if p.productdetail_set.all.count > 0 %}{{ p.productdetail_set.all.count }}{% else %}1{% endif %}">{{ p.product_brand.name|upper }}</td>
+            {% for pd in p.productdetail_set.all %}
+                {% if not forloop.first %}
+                    <tr class="text-center" pk="{{ p.id }}">
+                {% endif %}
+                <td class="align-middle text-center">{{ pd.unit.name }}</td>
+                <td class="align-middle text-center">{{ pd.price_purchase|safe }}</td>
+
+                {% if forloop.first %}
+                    {% for ps in p.productstore_set.all %}
+                        {% if ps.subsidiary_store.subsidiary.id == subsidiary.id %}
+                            <td class="font-weight-bold align-middle text-right" style="width: 10%"
+                                rowspan="
+
+
+                                        {% if p.productdetail_set.all.count > 0 %}{{ p.productdetail_set.all.count }}{% else %}1{% endif %}">
+                                Stock
+                                Actual:
+                            </td>
+                            <td class="item-current-stock align-middle" style="width: 10%"
+                                rowspan="
+
+
+                                        {% if p.productdetail_set.all.count > 0 %}{{ p.productdetail_set.all.count }}{% else %}1{% endif %}">
+                                <input type="number" class="form-control current-stock"
+                                       id="id_current_stock" data-pk="{{ p.id }}"
+                                       name="current_stock"
+                                        {% if ps.status_inventory == '2' %}
+                                       readonly
+                                            {#                                       {% elif ps.status_inventory == '1' %}#}
+                                            {#                                            readonly#}
+                                        {% endif %}
+                                       value="{{ ps.get_stock_with_dot }}">
+                            </td>
+                            <td class="item-status-inventory font-weight-bold align-middle text-center {% if ps.status_inventory == '2' %}text-success{% endif %}"
+                                status="{{ ps.status_inventory }}"
+                                rowspan="
+
+
+                                        {% if p.productdetail_set.all.count > 0 %}{{ p.productdetail_set.all.count }}{% else %}1{% endif %}">
+                                {{ ps.get_status_inventory_display }}
+                            </td>
+                        {% else %}
+
+                        {% endif %}
+                    {% empty %}
+                        <td class="font-weight-bold align-middle text-right text-danger"> Sin Stock</td>
+                        <td class="item-current-stock align-middle">
+                            <input type="number" class="form-control current-stock"
+                                   id="id_current_stock"
+                                   data-pk="{{ p.id }}"
+                                   name="current_stock"
+                                   value="0.00">
+                        </td>
+                        <td class="item-status-inventory font-weight-bold align-middle text-center" status="1">
+                            SIN CUADRE DE INVENTARIO
+                        </td>
+                    {% endfor %}
+                {% endif %}
+            {% empty %}
+                <td class="font-weight-bold align-middle text-center text-danger" colspan="5">PRODUCTO SIN
+                    PRESENTACIONES
+                </td>
+            {% endfor %}
+
+            </tr>
+
+    {% endfor %}
+
+    </tbody>
+</table>
+
+{% block extrajs %}
+    <script type="text/javascript">
+
+        $(document).on('keypress', '.current-stock', function (e) {
+
+            if (e.keyCode === 13) {
+                e.preventDefault()
+                {#$(this).trigger("enterKey");#}
+                //console.log($(this).val());
+
+                let _td_new_stock = $(this);
+                let _new_stock = $(this).val();
+                let _product_id = $(this).attr("data-pk");
+                let _inventory_id = $('#end-inventory').attr('inventory');
+                let _td_status = $(this).parent('td').parent('tr').find('td.item-status-inventory');
+
+                //console.log(_product_id)
+
+                $.ajax({
+                    url: '/sales/save_new_inventory_product/',
+                    async: true,
+
+                    dataType: 'json', // for response
+                    type: 'GET',
+                    data: {
+                        'new_stock': _new_stock,
+                        'product_id': _product_id,
+                        'inventory_id': _inventory_id,
+                    },
+                    contentType: 'application/json;charset=UTF-8',
+                    headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                    success: function (response, textStatus, xhr) {
+                        if (xhr.status === 200) {
+                            toastr.success(response.message, '¡Bien hecho!');
+                            _td_new_stock.val(_new_stock);
+                            _td_new_stock.attr('readonly', true);
+                            _td_status.addClass('text-success')
+                            _td_status.text('INVENTARIADO')
+                            _td_status.attr('status', 2)
+                        }
+                    },
+                    error: function (jqXhr, textStatus, xhr) {
+                        if (jqXhr.status === 500) {
+                            if (jqXhr.responseJSON.status === 2) {
+                                _td_new_stock.attr('readonly', true);
+                                _td_status.addClass('text-success')
+                                _td_status.text('INVENTARIADO')
+                                _td_status.attr('status', 2)
+                            }
+                            {#toastr.error(jqXhr.responseJSON.error, '¡Error de Guardado!');#}
+                        }
+                    },
+                });
+
+
+            }
+        });
+
+        $(document).ready(function () {
+            $('#table-product-store').DataTable({
+                "bPaginate": false,
+                "language": {
+                    "sProcessing": "Procesando...",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sSearch": "Buscar:",
+                    "sUrl": "",
+                    "sInfoThousands": ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    },
+                    "oAria": {
+                        "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                        "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                    }
+                }
+            });
+
+        });
+
+        /*$('#table-product-store').bootstrapTable({
+
+            //pagination: true,
+            showFooter: false,
+            //search: true,
+            showExport: true,
+            //filter: true,
+            //showRefresh:true,
+            showPrint: true,
+            //showColumns: true,
+            showFullScreen: true,
+            //pageList:[10, 25, 50, 100, 'All'],
+            //showPaginationSwitch: true,
+            exportDataType: 'all',
+            exportTypes: ['pdf', 'excel', 'xlsx', 'txt', 'json', 'xml'],
+            //exportFooter: true,
+
+            exportOptions: {
+                fileName: 'Reporte de ventas',
+                buttons: [{
+                    extend: 'excel',
+                    text: 'Export Search Results',
+                    className: 'btn btn-primary',
+                }],
+                type: 'pdf',
+                className: 'btn btn-primary',
+                jspdf: {
+                    orientation: 'l',
+                    format: 'bestfit', //a3, bestfit
+                    margins: {left: 10, right: 10, top: 100, bottom: 20},
+                    autotable: {
+                        styles: {
+                            fillColor: '#fff',
+                            textColor: '#343a40',
+                            fontSize: 10,
+                            valign: 'middle',
+                            lineWidth: 0.02,
+                            lineColor: '#343a40'
+                        },
+                        tableLineColor: '#409EFF',
+                        tableWidth: 'wrap', // auto
+                        theme: 'grid',
+                        //tableExport: {onBeforeAutotable: DoBeforeAutotable, onCellData: DoCellData}
+                    }
+                }
+            },
+            ignoreRow: [],
+
+        });*/
+
+        $("#btn_export_excel").click(function () {
+            $("#table-product-store").table2excel({
+                // exclude CSS class
+                exclude: ".noExl",
+                name: "Worksheet Name",
+                filename: "Reporte de Ventas", //do not include extension
+                fileext: ".xls", // file extension
+                preserveColors: true,
+                exclude_img: true,
+                exclude_links: true,
+                exclude_inputs: true
+            });
+        });
+
+
+    </script>
+{% endblock extrajs %}

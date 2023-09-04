@@ -1,0 +1,53 @@
+<form class="needs-validation" id="new-debs-form" method="POST">
+    {% csrf_token %}
+    <div class="row">
+
+        <div class="col-md-6 mb-3">
+            <label for="id-transfer-description">Cantidad de cuotas:</label>
+            <input type="text"
+                   class="form-control form-control-sm text-uppercase"
+                   id="id-quantity-debs"
+                   maxlength="100"
+                   name="quantity-debs" required>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="id-transfer-description">Agregar:</label>
+            <button type="button"
+                    class="col-sm-5 btn btn-sm btn-primary text-white btn-block p-1"
+                    id="btn-add-debs">+
+            </button>
+        </div>
+
+    </div>
+
+    <div class="row">
+        <div class="card-body pt-2">
+
+            <div class="table-responsive">
+                <div class="table-responsive dataTables_wrapper roboto-condensed-regular">
+
+                    <table id="id_debs_grid"
+                           class="table table-hover table-sm align-content-center table-bordered mb-0"
+                           cellspacing="0" style="width: 100%;">
+                        <thead>
+                        <tr class="text-center text-white text-uppercase" style="background: #1a77c8">
+                            <th scope="col" class="align-middle font-weight-normal" >Nº cuotas</th>
+                            <th scope="col" class="align-middle font-weight-normal" >Monto</th>
+
+                        </tr>
+                        </thead>
+                    </table>
+                    <tfoot>
+                    <tr>
+                        <td class="border">
+                            total
+                        </td>
+                    </tr>
+                    </tfoot>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</form>

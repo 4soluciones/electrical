@@ -1,0 +1,160 @@
+{% extends 'home.html' %}
+{% block title %}
+    Costos producto
+{% endblock title %}
+{% block body %}
+    <!-- Content -->
+    <div class="container-fluid">
+        <div class="card-header text-left mt-2 mb-1 p-1" style="background-color: #0262b5">
+            <div class="form-inline mt-0 mb-0 p-0">
+                <table>
+                    <tr>
+                        <td class="pl-2 pr-2 text-white">Fecha inicial</td>
+                        <td class="pl-2 pr-2"><input type="date" class="form-control form-control-sm"
+                                                     id="id_date_initial"
+                                                     value="{{ date }}" required>
+                        </td>
+                        <td class="pl-2 pr-2 text-white">Fecha final</td>
+                        <td class="pl-2 pr-2"><input type="date" class="form-control form-control-sm" id="id_date_final"
+                                                     value="{{ date }}" required>
+                        </td>
+                        <td class="pl-2 pr-2">
+                            <button type="button" id="id_btn_show" class="button btn-sm text-white"><i
+                                    class="fas fa-database"></i> <span>  Mostrar Costos</span></button>
+                        </td>
+                        <td>
+                            <button onclick="excelVouchers();" class="btn btn-success m-1"><span
+                                    class="fa fa-file-excel"></span> Exportar
+                                Compras
+                            </button>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="table-responsive" id="table-costs-purchase"></div>
+    </div>
+    <div class="container text-center pt-5" id="loading" style="display: none">
+        <div class="row m-5">
+            <div class="col-md-12 m-5">
+                {#                    <div class="loader">#}
+                {#                        <div class="loader-inner">#}
+                {#                            <div class="loading one"></div>#}
+                {#                        </div>#}
+                {#                        <div class="loader-inner">#}
+                {#                            <div class="loading two"></div>#}
+                {#                        </div>#}
+                {#                        <div class="loader-inner">#}
+                {#                            <div class="loading three"></div>#}
+                {#                        </div>#}
+                {#                        <div class="loader-inner">#}
+                {#                            <div class="loading four"></div>#}
+                {#                        </div>#}
+                {#                    </div>#}
+                <div class="spinner-grow text-primary" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+                <div class="spinner-grow text-secondary" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+                <div class="spinner-grow text-success" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+                <div class="spinner-grow text-danger" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+                <div class="spinner-grow text-warning" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+                <div class="spinner-grow text-info" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+                <div class="spinner-grow text-dark" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <style>
+        .button {
+            border-radius: 4px;
+            background-color: #c6470c;
+            border: none;
+            text-align: center;
+            font-size: 14px;
+            padding: 8px;
+            width: 240px;
+            transition: all 0.5s;
+            cursor: pointer;
+            margin: 0px;
+        }
+
+        .button span {
+            cursor: pointer;
+            display: inline-block;
+            position: relative;
+            transition: 0.5s;
+        }
+
+        .button span:after {
+            content: '\00bb';
+            position: absolute;
+            opacity: 0;
+            top: 0;
+            right: -30px;
+            transition: 0.5s;
+        }
+
+        .button:hover span {
+            padding-right: 20px;
+        }
+
+        .button:hover span:after {
+            opacity: 1;
+            right: 0;
+        }
+    </style>
+{% endblock body %}
+{% block extrajs %}
+    <script type="text/javascript">
+        $('#id_btn_show').click(function () {
+            let Valor = {
+                "date_initial": $('#id_date_initial').val(),
+                "date_final": $('#id_date_final').val(),
+            };
+            $('#table-costs-purchase').empty();
+            $('#loading').show();
+            $.ajax({
+                url: '/sales/get_costs_purchase/',
+                async: true,
+                dataType: 'json',
+                type: 'GET',
+                data: {'data': JSON.stringify(Valor)},
+                contentType: 'application/json;charset=UTF-8',
+                headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                success: function (response, textStatus, xhr) {
+                    if (xhr.status == 200) {
+                        $('#loading').hide();
+                        $('#table-costs-purchase').html(response.grid);
+                    }
+                },
+                error: function (jqXhr, textStatus, xhr) {
+                    $('#table-costs-purchase').html(jqXhr.grid);
+                    toastr.error(jqXhr.responseJSON.detalle, '¡Mensaje!');
+                }
+            });
+        });
+
+        function excelVouchers() {
+
+            $("#id-table-purchase").table2excel({
+                // exclude CSS class
+                exclude: ".noExl",
+                name: "Worksheet vouchers",
+                filename: "Compras",//do not include extension
+                fileext: ".xlsx", // file extension
+                preserveColors: true
+            });
+        }
+    </script>
+{% endblock extrajs %}

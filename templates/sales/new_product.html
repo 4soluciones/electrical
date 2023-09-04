@@ -1,0 +1,222 @@
+<div class="card-group">
+
+    <div class="card bg-light">
+
+        <div class="card-body">
+            <form id="product-form" action="" method="POST">
+            {% csrf_token %}
+                <div class="row pb-3">
+                    <div class="col-sm-12 col-md-12 col-lg-12">
+                        <div class="row">
+                            <div class="col-sm-4 col-md-4 col-lg-4 text-left">
+                                <label for="product_id" class="col-form-label">Nombre del Producto :</label>
+                            </div>
+                            <div class="col-sm-8 col-md-8 col-lg-8 pl-0 text-left">
+                                <input type="text" id="product_id" name="product" class="form-control" required>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="row pb-3">
+
+                    <div class="col-sm-12 col-md-12 col-lg-12">
+                        <div class="row">
+                            <div class="col-sm-4 col-md-4 col-lg-4 pr-0 text-left">
+                                <label for="code_id" class="col-form-label">Codigo del Producto :</label>
+                            </div>
+                            <div class="col-sm-4 col-md-4 col-lg-4 pl-0 text-left">
+                                <input type="text" id="code_id" name="code" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div class="row pb-3">
+
+                    <div class="col-sm-6 col-md-6 col-lg-6">
+                        <div class="row">
+                            <div class="col-sm-8 col-md-8 col-lg-8 text-left">
+                                <label for="stock_min_id" class="col-form-label">Stock Min :</label>
+                            </div>
+                            <div class="col-sm-4 col-md-4 col-lg-4 pl-0 text-left">
+                                <input type="text" id="stock_min_id" name="stock-min" class="form-control">
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-6 col-lg-6">
+                        <div class="row">
+                            <div class="col-sm-4 col-md-4 col-lg-4 text-right">
+                                <label for="family_product_id" class="col-form-label">Familia :</label>
+                            </div>
+                            <div class="col-sm-8 col-md-8 col-lg-8 pl-0 text-left">
+                                <select class="form-control" id="family_product_id" name="family-product" required>
+                                    <option disabled selected value=""> Seleccione</option>
+                                    {% for family in families %}
+                                        <option value="{{ family.id }}">{{ family.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="row pb-4 border-bottom">
+
+                    <div class="col-sm-6 col-md-6 col-lg-6">
+                        <div class="row">
+                            <div class="col-sm-8 col-md-8 col-lg-8 text-left">
+                                <label for="stock_max_id" class="col-form-label">Stock Max :</label>
+                            </div>
+                            <div class="col-sm-4 col-md-4 col-lg-4 pl-0 text-left">
+                                <input type="text" id="stock_max_id" name="stock-max" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-6 col-lg-6">
+                        <div class="row">
+                            <div class="col-sm-4 col-md-4 col-lg-4 text-right">
+                                <label for="brand_id" class="col-form-label">Marca :</label>
+                            </div>
+
+                            <div class="col-sm-8 col-md-8 col-lg-8 pl-0 text-left">
+                                <select class="form-control" id="brand_id" name="brand-product" required>
+                                    <option disabled selected value=""> Seleccione</option>
+                                    {% for brand in brands %}
+                                        <option value="{{ brand.id }}">{{ brand.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="row pb-4 border-bottom">
+
+                    <div class="col-sm-12 col-md-12 col-lg-12">
+
+
+                        <div class="form-row pt-4">
+
+
+                            <div class="form-group col-4">
+                                <label for="id_unit">Tipo de Unidad</label>
+                                <select id="id_unit" name="unit" class="form-control form-control-sm">
+                                    <option disabled selected value=""> Seleccione</option>
+                                    {% for unit in units %}
+                                        <option value="{{ unit.id }}">{{ unit.description }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col">
+                                <label for="id_quantity_minimum">Cantidad Minima del tipo de Unidad</label>
+                                <input type="text" id="id_quantity_minimum" name="quantity_minimum"
+                                class="form-control form-control-sm decimal" required>
+                            </div>
+                            <div class="col">
+                                <label for="id_price_sale">Precio</label>
+                                <input type="text" id="id_price_sale" name="price_sale"
+                                       class="form-control form-control-sm decimal" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-4">
+                                <label for="id_p1">(%)Porcentaje</label>
+                                <input type="number" id="id_p1" name="id_p1"
+                                       class="form-control form-control-sm text-right decimal" required>
+                            </div>
+                            <div class="col">
+                                <label for="id_p2">(%)Porcentaje 2</label>
+                                <input type="number" id="id_p2" name="id_p2"
+                                       class="form-control form-control-sm text-right decimal" required>
+                            </div>
+                            <div class="col">
+                                <label for="id_p3">(%)Porcentaje 3</label>
+                                <input type="number" id="id_p3" name="id_p3"
+                                       class="form-control form-control-sm text-right decimal" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col">
+                                <label for="id_pc">Precio de compra</label>
+                                <input type="text" id="id_price_purchase" name="id_price_purchase"
+                                       class="form-control form-control-sm text-right decimal" required>
+                            </div>
+                            <div class="col"></div>
+                            <div class="col"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    <button type="submit" id="btn-product-save" class="btn btn-primary">Guardar</button>
+                </div>
+
+            </form>
+        </div>
+
+
+    </div><!-- card-body -->
+
+
+</div><!-- card -->
+
+
+<script type="text/javascript">
+
+    $('#family_product_id').select2({
+        theme: 'bootstrap4',
+    });
+
+    $('#brand_id').select2({
+        theme: 'bootstrap4',
+    });
+
+    $('#id_unit').select2({
+        theme: 'bootstrap4',
+    });
+
+
+    $('#product-form').submit(function (event) {
+
+        event.preventDefault();
+
+        let data = new FormData($('#product-form').get(0));
+
+        $("#btn-product-save").attr("disabled", "true");
+
+        $.ajax({
+            url: '/sales/save_product_detail/',
+            type: "POST",
+            data: data,
+            cache: false,
+            processData: false,
+            contentType: false,
+            success: function (response, textStatus, xhr) {
+                if (xhr.status === 200) {
+                    {#$('#product-detail-grid').html(response.grid);#}
+                    toastr.success(response['message'], '¡Bien hecho!');
+                }
+            },
+            error: function (jqXhr, textStatus, xhr) {
+                if (jqXhr.status === 500) {
+                    toastr.error(jqXhr.responseJSON.error, '¡Inconcebible!');
+                }
+            }
+        });
+        $('#modal-new-product').modal('hide');
+        $("#btn-product-save").removeAttr("disabled", "false");
+
+    });
+
+
+</script>

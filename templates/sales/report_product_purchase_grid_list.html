@@ -1,0 +1,47 @@
+{% if dictionary %}
+
+    <table class="table  table-striped align-content-center table-bordered response" id="id-table-purchase">
+        <thead class="text-white" style="background-color: rgb(6,106,191);">
+        <tr>
+            <th class="text-center">Nº</th>
+            <th class="text-center">Producto</th>
+            <th class="text-center">Cantidad comprada</th>
+            <th class="text-center">Cantidad vendida</th>
+            <th class="text-center">Stock</th>
+            <th class="text-center">Precio unitario</th>
+            <th class="text-center">Precio total</th>
+            {#             <th class="text-center">Gastos Subtotal</th>#}
+        </tr>
+        </thead>
+        <tbody>
+        {% for p in dictionary %}
+            <tr>
+                <td class="item text-center align-middle"></td>
+                <td class="text-left  align-middle text-uppercase">{{ p.product }}</td>
+                <td class="decimal text-right  align-middle">{{ p.quantity_purchase|floatformat:2 }}</td>
+                <td class="decimal text-right  align-middle">{{ p.quantity_sales|floatformat:2 }}</td>
+                <td class="decimal text-right  align-middle {% if p.stock <= 0 %}text-danger{% endif %}">{{ p.stock|floatformat:2 }}</td>
+                <td class="decimal text-right  align-middle">{{ p.price_unit_purchase|floatformat:2 }}
+                </td>
+                <td class="decimal text-right  align-middle">{{ p.price_total_purchase|floatformat:2 }}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% else %}
+    <h1>Sin informacion de compras.</h1>
+{% endif %}
+<script>
+    $index = 1;
+    $('table tr td.item').each(function () {
+        $(this).text($index);
+        $index++;
+    });
+    $('table tr td.decimal').each(function () {
+        let _str = $(this).text();
+        _str = _str.replace(',', '.');
+        $(this).text(_str);
+    });
+</script>

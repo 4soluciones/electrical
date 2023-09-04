@@ -1,0 +1,2082 @@
+{% extends 'home.html' %}
+{% load static %}
+{% load operations %}
+{% block title %}
+    Ventas
+{% endblock title %}
+
+{% block body %}
+
+    <style type="text/css">
+        /* scrollbar_vertical */
+        .mCSB_scrollTools {
+            background-color: #f3efef;
+        }
+
+        .mCSB_draggerRail {
+            background-color: #17b7ce !important;
+        }
+
+        .mCSB_dragger_bar {
+            background-color: #0d76e0 !important;
+        }
+
+        /* ---- isotope ---- */
+
+        /* .grid {
+          border: 1px solid #333;
+        } */
+
+        /* clear fix */
+        .grid:after {
+            content: '';
+            display: block;
+            clear: both;
+        }
+
+        .dollar {
+        {#display: inline-block;#} position: relative;
+        }
+
+        .dollar input {
+            padding-left: 6px;
+        }
+
+        .dollar:before {
+            position: absolute;
+            content: "S/.";
+            left: 4px;
+            top: 3px;
+        }
+
+        .dollar-table {
+        {#display: inline-block;#} position: relative;
+        }
+
+        .dollar-table input {
+            padding-left: 6px;
+        }
+
+        .dollar-table:before {
+            position: absolute;
+            content: "S/.";
+            left: 12px;
+            top: 10px;
+        }
+    </style>
+
+    {% if error != "" %}
+        <div class="alert alert-danger" role="alert">
+            <h4 class="alert-heading">Inconcebible!</h4>
+            <p>{{ error }}</p>
+            <hr>
+        </div>
+    {% endif %}
+
+    {% if distribution %}
+
+        <input type="hidden" class="form-control form-control-sm distribution" id="id_distribution"
+               value="{{ distribution }}" readonly="true">
+        <input type="hidden" class="form-control form-control-sm type" id="type" value="R" readonly="true">
+
+    {% else %}
+
+        {% if electronic_invoice %}
+
+            <input type="hidden" class="form-control form-control-sm distribution" id="id_distribution" value="0"
+                   readonly="true">
+            <input type="hidden" class="form-control form-control-sm type" id="type" value="E" readonly="true">
+        {% else %}
+
+            <input type="hidden" class="form-control form-control-sm distribution" id="id_distribution" value="0"
+                   readonly="true">
+            <input type="hidden" class="form-control form-control-sm type" id="type" value="V" readonly="true">
+
+        {% endif %}
+    {% endif %}
+
+    <input type="hidden" class="form-control form-control-sm type" id="id_order_sale_quotation" value=""
+           readonly="true">
+    <input type="hidden" class="form-control form-control-sm type" id="id_order_sale_quotation_correlative" value=""
+           readonly="true">
+
+    <div class="card-group">
+        <div class="card col-sm-5 p-0">
+            <div class="col-sm-12 m-0 p-0 vh-100 row justify-content-center align-items-center">
+                <div id="product_list_sales">
+                    <strong>Atencion!</strong> Ingrese un texto para comenzar la búsqueda...
+                </div>
+                <div class="loader-container col-auto" id="loader-product" style="display: none">
+                    <div class="loader"></div>
+                    {#                    <div class="loader2"></div>#}
+                </div>
+                {#  {% include "sales/order_sales_product_grid.html" %}#}
+                {#                {% include "sales/sales_grid_tab1.html" %}#}
+            </div>
+        </div>
+
+        <div class="card col-sm-7 p-0" id="tab-two">
+            {#            {% include "sales/sales_grid_tab2.html" %}#}
+            {#            {% include "sales/order_sales_product_grid.html" %}#}
+            {% include "sales/sales_grid_tab1.html" %}
+        </div>
+
+    </div><!-- card-group -->
+    <!-- Modal -->
+    {#    <div class="modal fade bd-example-modal-xl" id="add-modal" tabindex="-1" role="dialog"#}
+    {#         aria-labelledby="exampleModalLabel" aria-hidden="true"></div>#}
+
+    <div class="modal fade" id="modal-voucher" tabindex="-1" role="dialog" aria-labelledby="ModalHelpTitle"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header" style="background: #0b55a4">
+                    <h6 class="modal-title  text-white">TIPOS DE COMPROBANTES</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="row col-sm-12 p-0 m-0 menu-sales">
+
+                        <div class="col-sm-6">
+
+                            <div class="card m-0" style="border-color: #0f478a">
+
+                                <div class="card-header text-center" style="background: #0f478a">
+                                    <label class="card-title m-0 text-white">COMPROBANTES FORMATO TICKETS</label>
+                                </div>
+
+                                <div class="card-body">
+                                    <div class="row col-sm-12 p-0 m-0">
+                                        <div class="col-sm-4">
+                                            <button type="button" id="save-order" onclick="create_voucher('T', 'T')"
+                                                    class="btn btn-sm btn-outline-success">
+                                                <i class="fas fa-ticket-alt"></i> TICKET INTERNO
+                                            </button>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <button type="button" id="btn-invoice-ticket"
+                                                    onclick="create_voucher('F', 'T')"
+                                                    class="btn btn-sm btn-outline-success">
+                                                <i class="fas fa-ticket-alt"></i> TICKET FACTURA
+                                            </button>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <button type="button" id="btn-bill-ticket"
+                                                    onclick="create_voucher('B', 'T')"
+                                                    class="btn btn-sm btn-outline-success">
+                                                <i class="fas fa-ticket-alt"></i> TICKET BOLETA
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="card m-0" style="border-color: #0f478a">
+                                <div class="card-header text-center" style="background: #0f478a">
+                                    <label class="card-title m-0 text-white">COMPROBANTES FORMATO A4</label>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row col-sm-12 p-0 m-0">
+
+                                        <div class="col-sm-6">
+                                            <button type="button" id="btn-invoice-a4"
+                                                    onclick="create_voucher('F', 'A4')"
+                                                    class="btn btn-sm btn-outline-secondary">
+                                                <i class="fas fa-file-invoice"></i> GENERAR &nbsp;FACTURA A4
+                                            </button>
+                                        </div>
+
+                                        <div class="col-sm-6">
+                                            <button type="button" id="btn-bill-a4" onclick="create_voucher('B', 'A4')"
+                                                    class="btn btn-sm btn-outline-secondary">
+                                                <i class="fas fa-file-invoice"></i> GENERAR &nbsp;BOLETA A4
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!----------------------- Modal Client----------------------------->
+    <div class="modal fade" id="modalClient" data-backdrop="static" data-keyboard="false" tabindex="-1"
+         aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Nuevo Cliente:</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-sm table-borderless small font-weight-bolder text-uppercase">
+                        <tbody>
+                        <tr>
+                            <th scope="row" style="width: 40%;">
+                                <label for="surnames">Tipo de documento</label>
+                            </th>
+                            <td>
+                                <select id="document_type_client" name="document_type_client" class="form-control"
+                                        style="font-size: .9375rem;">
+                                    {% for type in document_types %}
+                                        {% if type.id == '01' %}
+                                            <option value="{{ type.id }}">DOCUMENTO NACIONAL DE IDENTIDAD</option>
+                                        {% elif type.id == '06' %}
+                                            <option value="{{ type.id }}">REGISTRO UNICO CONTRIBUYENTE (RUC)</option>
+                                        {% elif type.id == '00' %}
+                                            <option value="{{ type.id }}">OTRO</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">
+                                <label for="document_number_client">Nº de Documento</label>
+                            </th>
+                            <td>
+                                <input type="text" class="form-control" id="document_number_client"
+                                       name="document_number_client"
+                                       autocomplete="off">
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">
+                                <label for="names">Nombres</label>
+                            </th>
+                            <td>
+                                <input type="text" class="form-control" name="names" id="client-names">
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">
+                                <label for="phone">Telefono</label>
+                            </th>
+                            <td>
+                                <input type="text" class="form-control" name="phone" id="client-phone">
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">
+                                <label for="email">E-mail</label>
+                            </th>
+                            <td>
+                                <input type="text" class="form-control" name="email" id="client-email">
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">
+                                <label for="address">Direccion</label>
+                            </th>
+                            <td>
+                                <input type="text" class="form-control" name="address" id="client-address">
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">
+                                <label for="id_district">Distritos</label>
+                            </th>
+                            <td>
+                                <select id="id_district" name="id_district" class="form-control">
+                                    <option value="0">SELECCIONAR</option>
+                                    {% for district in districts %}
+                                        <option value="{{ district.id }}">{{ district.description }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">
+                                <label for="reference">Referencia</label>
+                            </th>
+                            <td>
+                                <input type="text" class="form-control" name="reference" id="client-reference">
+
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Salir</button>
+                    <button type="button" class="btn btn-primary" id="save-new-client">Guardar Cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!----------------------- Modal Client----------------------------->
+
+
+
+    <div class="mr-3 ml-0" style="
+            display: none;
+            position: absolute;
+            top: 57px;
+            left: 956px;
+            background: #e9ecef;
+            opacity: 0.5;
+            width: 100%;
+            {#height: 46em;#}
+            !important;bottom: 560px;
+            padding-right: 65em;
+            padding-top: 2em;" id="loading-666">
+
+    </div>
+
+    {#    <div class="mr-3 ml-0" style="#}
+    {#            display: none;#}
+    {#            position: absolute;#}
+    {#            top: 57px;#}
+    {#            left: 956px;#}
+    {#            background: #e9ecef;#}
+    {#            opacity: 0.5;#}
+    {#            width: 100%;#}
+    {#height: 46em;#}
+    {#            !important;bottom: 560px;#}
+    {#            padding-right: 65em;#}
+    {#            padding-top: 2em;" id="loading-bill">#}
+    {##}
+    {#    </div>#}
+    <div class="mr-3 ml-0" style="
+            display: none;
+            position: absolute;
+            top: 212px;
+            left: 711px;
+            background: #c6114d;
+            opacity: 1001;
+            width: 26.1%;
+            {#height: 46em;#}
+            {#!important;bottom: 560px;#}
+            padding-right: 4em;
+            padding-top: -4em;" id="loading-bill">
+
+    </div>
+
+    <style>
+        div.dataTables_wrapper div#product-data-grid_filter {
+            width: 100%;
+            float: none;
+            text-align: center;
+        }
+
+        div.dataTables_wrapper div#product-data-grid_filter label input[type='Search'] {
+            width: 300px;
+        }
+    </style>
+{% endblock body %}
+
+
+{% block extrajs %}
+
+    <script type="text/javascript">
+        $('#sum-total').val('0.00');
+        {#$('#product-data-grid').DataTable({#}
+        {#    responsive: true,#}
+        {#    "pageLength": 100,#}
+        {#    "lengthMenu": [100, 250, 500, "All"],#}
+        {#    initComplete: function () {#}
+        {#        this.api().columns().every(function () {#}
+        {#            var column = this;#}
+        {#            $('#dataTables-example .head .head_hide').html('');#}
+        {##}
+        {#            var select = $('<select id="formfilter" class="filterdropdown"><option value="">' + $(column.header()).text() + '</option></select>')#}
+        {#                .appendTo($(column.header()).empty())#}
+        {#                .on('change', function () {#}
+        {#                    var val = $.fn.dataTable.util.escapeRegex(#}
+        {#                        $(this).val()#}
+        {#                    );#}
+        {#                    column#}
+        {#                        .search(val ? '^' + val + '$' : '', true, false)#}
+        {#                        .draw();#}
+        {#                });#}
+        {##}
+        {#            column.data().unique().sort().each(function (d, j) {#}
+        {#                select.append('<option value="' + d + '">' + d + '</option>')#}
+        {#            });#}
+        {#        });#}
+        {#    }#}
+        {# });#}
+        setTimeout(() => {
+            $(".quicksearch").focus();
+        }, 500);
+        loader = '<div class="container">' +
+            '<div class="row">' +
+            '<div class="col-md-12">' +
+            '<div class="loader">' +
+            '<p><strong>Cargando Reniec/Sunat...</strong></p>' +
+            '<div class="loader-inner"></div>' +
+            '<div class="loader-inner"></div>' +
+            '<div class="loader-inner"></div>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>';
+
+        loader2 = '<div class="container">' +
+            '<div class="row">' +
+            '<div class="col-md-12">' +
+            '<div class="loader">' +
+            '<p>Cargando Comprobante...</p>' +
+            '<div class="loader-inner"></div>' +
+            '<div class="loader-inner"></div>' +
+            '<div class="loader-inner"></div>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>';
+
+        $("#id-nro-document-sender").attr('maxlength', 8);
+        sessionStorage.setItem('document', '01')
+
+        $('#id_client_name').select2({
+            theme: 'bootstrap4',
+        });
+
+        let pu;
+        let p;
+        let perms;
+
+        perms = "{{ perms.admin }}";
+        // console.log(perms)
+
+        sessionStorage.setItem('BillType', 'V');
+        if ($("#radio2").is(':checked')) {
+            $("#document_type_sender").attr('disabled', 'disabled');
+            $("#id_client_name").removeAttr('disabled');
+            $("#document_type_sender").find('option[value]').removeAttr('selected');
+            $("#document_type_sender").find('option[value="0"]').attr('selected', 'selected');
+            $("#id-nro-document-sender").attr('readonly', true);
+            $("#document_type_sender").trigger('change');
+        }
+        ;
+        $('#transaction_payment_type').change(function () {
+            let type = $('#transaction_payment_type').val();
+            if (type === 'E') {
+                $('#cash').css('display', '');
+                $('#deposit').css('display', 'none');
+                $('#id_cash').trigger('change');
+                $('#credit').css('display', 'none');
+            } else if (type === 'D') {
+                $('#deposit').css('display', '');
+                $('#cash').css('display', 'none');
+                $('#credit').css('display', 'none');
+            } else if (type === 'C') {
+                $('#credit').css('display', '');
+                $('#cash').css('display', 'none');
+                $('#deposit').css('display', 'none');
+            } else if (type === '0') {
+                $('#credit').css('display', 'none');
+                $('#cash').css('display', 'none');
+                $('#deposit').css('display', 'none');
+            }
+
+
+        });
+        $(document).on('change', '#id-type-order', function () {
+            let type = $('#id-type-order').val();
+            if (type === 'T') {
+                $('#search_quotation').css('display', '');
+                $('#form_quotation').css('display', '');
+                $('#form_quotation_row2').css('display', '');
+            } else {
+                $('#search_quotation').css('display', 'none');
+                $('#form_quotation').css('display', 'none');
+                $('#form_quotation_row2').css('display', 'none');
+            }
+        });
+        $(document).on('click', '#btn-new-form', function () {
+            location.reload();
+        });
+
+        function SearchQuotation() {
+            let correlative = $('#id-search-quotation').val();
+            $('#id-search-quotation').val('');
+            $.ajax({
+                url: '/sales/get_order_by_correlative/',
+                async: true,
+                dataType: 'json',
+                type: 'GET',
+                data: {'correlative': correlative},
+                success: function (response) {
+                    if (response.success) {
+                        $('.update-order').removeClass('d-none');
+                        $("#id_order_sale_quotation").val(response.order_id);
+                        $("#id_order_sale_quotation_correlative").val(response.correlative);
+                        $("#document_type_sender").val(response.document_type);
+                        $("#document_type_sender").trigger('change');
+                        $("#id_validity_date").val(response.validity_date);
+                        $("#id_date_completion").val(response.date_completion);
+                        $("#id_place_delivery").val(response.place_delivery);
+                        $("#id_type_quotation").val(response.type_quotation);
+                        $("#id_type_quotation").trigger('change');
+                        $("#id_name_type_quotation").val(response.type_name_quotation);
+                        $("#id_observation").val(response.observation);
+                        $("#btn-voucher-order").prop("disabled", true);
+                        $('.print-ticket-bill-quotation').css('display', 'flex');
+                        $('#id-type-order').val('V');
+                        $('#transaction_payment_type').val(response.transaction_payment_type)
+                        let c = jQuery.Event("change");
+                        c.which = 13;
+                        c.keyCode = 13;
+                        $("#transaction_payment_type").trigger(c);
+                        $("#id-nro-document-sender").val(response.document_number);
+                        let e = jQuery.Event("keypress");
+                        e.which = 13;
+                        e.keyCode = 13;
+                        $("#id-nro-document-sender").trigger(e);
+                        {#console.log(response.detail)#}
+                        let Detail = response['detail'];
+                        $('table#id-table-detail-order tbody#sales-details').empty();
+                        Detail.forEach(
+                            element =>
+                                addOrderDetail(element.unit_id, element.product_id, element.quantity, element.price, element.unit_name, element.product_name, element.store, element.unit_min, element.id)
+                        )
+                    } else {
+                        toastr.warning(response.message);
+                    }
+                },
+                fail: function (response) {
+                    toastr.error("error");
+                }
+            });
+        }
+
+        function showModalView(ruta, pk) {
+            if (($('#id_client option:selected').val() == '0') && ($('#id_client_name option:selected').val() == '0')) {
+                toastr.warning('¡Elija un cliente porfavor!', 'Mensaje!');
+                $('#id_client').focus();
+                return false;
+            }
+            {#let pk = $(this).attr('pk');#}
+            {#sessionStorage.setItem("product_id", pk);#}
+
+            // Comprobar si hay filas en los detalles
+            if (hasRowDetails()) {
+                // Comprobar si hay filas de un producto especifico
+            }
+            $('#add-modal').empty();
+            // Cargamos el modal tarifas del producto
+            $.ajax({
+                url: '/sales/' + ruta + '/',
+                async: true,
+                dataType: 'json',
+                type: 'GET',
+                data: {'product': pk, 'distribution': $('#id_distribution').val()},
+                success: function (response) {
+                    {#$('#rates').html(response.grid);#}
+                    $('#add-modal').html(response.form);
+                    $('#add-modal').modal('show');
+                },
+                fail: function (response) {
+                    toastr.error("error");
+                }
+            });
+
+        };
+        {#Sirve para convertir select en autocompletar#}
+
+        {#$('#id_serie').select2({#}
+        {#    theme: 'bootstrap4',#}
+        {# });#}
+        {#Selecciona un cliente del autocomplit #}
+        $(document).on('change', '#document_type_sender', function () {
+            let _val = $(this).val();
+            if (_val === '01') {
+                $("#id-nro-document-sender").attr('maxlength', 8);
+                sessionStorage.setItem('document', '01')
+                $('#id-nro-document-sender').val('');
+                $('#id_sender').val('');
+                $('#id-address-line').css('display', 'none');
+                $('#id_address').val('')
+                {#$('#id_address_sender').val('');#}
+            } else if (_val === '06') {
+                $("#id-nro-document-sender").attr('maxlength', 11);
+                sessionStorage.setItem('document', '06')
+                $('#id-nro-document-sender').val('');
+                $('#id_sender').val('');
+                $('#id-address-line').css('display', '');
+                $('#id_address').val('')
+            } else if (_val === '04' || _val === '07' || _val === '00') {
+                $("#id-nro-document-sender").attr('maxlength', 15);
+                sessionStorage.setItem('document', '')
+                $('#id_sender').val('');
+                $('#id-nro-document-sender').val('');
+                $('#id-address-line').css('display', 'none');
+                $('#id_address').val('')
+            }
+        });
+
+        /*$(document).on('click', '#id_client_name', function (e){
+            {#console.log('si entro')#}
+            {#$('#id_client_name').trigger('change.select2');#}
+        });*/
+
+
+        $(document).on('change', '#id_client_name', function (e) {
+
+            {#$('#id_client_name').trigger('change.select2');#}
+
+            let client_id = $('#id_client_name option:selected').val();
+            let client_name = $('#id_client_name option:selected').text();
+            let address = $('#id_client_name option:selected').attr('address');
+            let client_document = $('#id_client_name option:selected').attr('document-number');
+            let client_document_type = $('#id_client_name option:selected').attr('document-type');
+            $('#id-nro-document-sender').val(client_document);
+            $('#document_type_sender').val(client_document_type)
+            {#$("#document_type_sender").trigger('change');#}
+            $("#id_sender").val(client_name);
+            $("#id-client-sender").val(client_id);
+
+
+            if (client_id !== 0) {
+                $("#id_sender").val(client_name);
+                $("#id-client-sender").val(client_id);
+                $("#id_address").val(address);
+                $('#document_type_sender').val(client_document_type);
+                $('#id_client_name option:selected').attr('document-type');
+                $('#id-nro-document-sender').val(client_document)
+                $('#document_type_sender').val(client_document_type);
+                {#$("#document_type_sender").trigger('change');#}
+                $('#id-nro-document-sender').val(client_document);
+            }
+        });
+
+
+        $('#id-nro-document-sender').keypress(function (e) {
+
+            if (e.keyCode === 13) {
+                e.preventDefault()
+                $(this).trigger("enterKey");
+                let _document_number = $('#id-nro-document-sender').val();
+                if ((sessionStorage.getItem('document') === '01') && (_document_number.length !== 8)) {
+                    toastr.warning('¡Favor de completar los caracteres requeridos: 8 caracteres para DNI', 'Error de Datos');
+                    return false;
+                } else {
+                    if ((sessionStorage.getItem('document') === '06') && (_document_number.length !== 11)) {
+                        toastr.warning('¡Favor de completar los caracteres requeridos: 11 caracteres para RUC!', 'Error de Datos');
+                        return false;
+                    }
+                }
+                if ($('#document_type_sender').val() === '0') {
+                    toastr.warning('¡Favor seleecionar un tipo de documento!', 'Error de Datos');
+                    return false;
+                }
+
+                $('#loading-666').html(loader).show()
+
+                $.ajax({
+                    url: '/sales/get_name_business/',
+                    async: true,
+                    dataType: 'json', // for response
+                    type: 'GET',
+                    data: {
+                        'nro_document': $('#id-nro-document-sender').val(),
+                        'type': $('#document_type_sender').val()
+                    },
+                    contentType: 'application/json;charset=UTF-8',
+                    headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                    success: function (response, textStatus, xhr) {
+                        if (xhr.status === 200) {
+                            toastr.success(response.message, '¡Bien hecho!');
+                            $("#id_sender").val(response.result);
+                            $("#id-client-sender").val(response.pk);
+                            $("#id_address").val(response.address);
+                            $('#loading-666').hide();
+                        }
+                    },
+                    error: function (jqXhr, textStatus, xhr) {
+                        if (jqXhr.status === 500) {
+                            toastr.error(jqXhr.responseJSON.error, '¡Error de Consulta!');
+                        } else {
+                            if (textStatus === 'timeout') {
+                                toastr.error('Failed from timeout', '¡Error de Consulta!');
+                            } else {
+                                console.log(" STATUS: " + xhr + " " + textStatus);
+                            }
+                        }
+                        $('#loading-666').hide();
+                    },
+                });
+                return false;
+            }
+        });
+        $('#id_client, #id_client_name').on('select2:select', function (e) {
+            $('#id_table_client').empty()
+            let data = e.params.data;
+            let search = data['id'];
+
+            $.ajax({
+                url: '/sales/get_client/',
+                async: true,
+                dataType: 'json',
+                type: 'GET',
+                data: {'pk': search},
+                success: function (response) {
+                    $('#client-name').val(response['client_names']);
+                    $('#id_table_client').html(response.grid).parent('div').slideDown();
+                },
+                fail: function (response) {
+                    toastr.error("error");
+                }
+            });
+
+        });
+
+        // sales_grid_tab1 - verifica si tiene filas
+        function hasRowDetails() {
+            var _response = false;
+            if ($("#sales-details tr").length > 0) {
+                _response = true;
+            }
+            return _response;
+        }
+
+        // sales_grid_tab2 - btn Ver Precios
+        {#$(document).on('click', '.card-item-product', function () {#}
+        {#    if (($('#id_client option:selected').val() == '0') && ($('#id_client_name option:selected').val() == '0')) {#}
+        {#        toastr.warning('¡Elija un cliente porfavor!', 'Mensaje!');#}
+        {#        $('#id_client').focus();#}
+        {#        return false;#}
+        {#    }#}
+        {#    let _product_id = $(this).attr('pk');#}
+        {#    sessionStorage.setItem("product_id", _product_id);#}
+        {##}
+        {#    // Comprobar si hay filas en los detalles#}
+        {#    if (hasRowDetails()) {#}
+        {#        // Comprobar si hay filas de un producto especifico#}
+        {##}
+        {#    }#}
+        {#    $('#rates').empty();#}
+        {#    // Cargamos el modal tarifas del producto#}
+        {#    $.ajax({#}
+        {#        url: '/sales/get_rate_product/',#}
+        {#        async: true,#}
+        {#        dataType: 'json',#}
+        {#        type: 'GET',#}
+        {#        data: {'product': _product_id, 'distribution': $('#id_distribution').val()},#}
+        {#        success: function (response) {#}
+        {#            $('#rates').html(response.grid);#}
+        {#        },#}
+        {#        fail: function (response) {#}
+        {#            console.log("error");#}
+        {#        }#}
+        {#    });#}
+        {# });#}
+
+        // sales_grid_tab1 - sumar total de los detalles
+        function calculateTotal() {
+
+            var sum = 0;
+            $('#sales-details tr td.item-total').each(function () {
+                let total_detail = Number($(this).find('input.input-total-detail').val());
+                {#console.log(total_detail)#}
+                sum = sum + total_detail;
+            });
+
+
+            $('#sum-total').val(sum.toFixed(2));
+
+        }
+
+        // sales_grid_tab1 - eliminar un detalle segun id producto
+        function deleteItem($product, $unit) {
+            let quantity_delete = 0
+            let quantity_min = 0
+            let rows = $('#sales-details').find("tr[product=" + $product + "][pu=" + $unit + "]");
+            quantity_delete = parseFloat(rows.find('td.item-quantity input.input-quantity').val());
+            quantity_min = parseFloat(rows.find('td.item-unit').attr('unit_min'));
+            $('#sales-details').find("tr[product=" + $product + "][pu=" + $unit + "]").remove();
+            let _row = $('table#product-data-grid tbody tr[product=' + $product + ']');
+            let old_stock = parseFloat(_row.find('td.td-table-stock table.table-stock-headquarters tbody tr.my-subsidiary[store_="V"] td.item-stock').text());
+            _row.find('td.td-table-stock table.table-stock-headquarters tbody tr.my-subsidiary[store_="V"] td.item-stock').text((old_stock + (quantity_delete * quantity_min)).toFixed(2));
+            calculateTotal();
+            counterStrike();
+        }
+
+        function add_client_advancement($product, $_unit, $value) {
+
+            if ($value === 0) {
+                let _quantity = 0;
+                $('table#id-table-detail-order tbody#sales-details tr').each(function () {
+                    if ($(this).attr('product') == $product && $(this).attr('pu') == $_unit) {
+                        _quantity = parseFloat($(this).find('td.item-quantity').text());
+                        $('table.table-client-advancement tbody#details-client-advancement tr').each(function () {
+                            if ($product == parseInt($(this).attr('product_final'))) {
+                                let value_last = parseFloat($(this).find('td.quantity-client').text());
+                                $(this).find('td.quantity-client').text((value_last + _quantity).toFixed(0));
+                            }
+                        })
+                    }
+                })
+            } else {
+                if ($value > 0) {
+                    $('table.table-client-advancement tbody#details-client-advancement tr').each(function () {
+                        if ($product == parseInt($(this).attr('product_final'))) {
+                            let value_last = parseFloat($(this).find('td.quantity-client').text());
+                            $(this).find('td.quantity-client').text((value_last + parseFloat($value)).toFixed(0));
+                        }
+                    })
+                }
+            }
+        }
+
+        function distribution_value(_product, _unit) {
+            let param = 0;
+            $('table#id-table-detail-order tbody#sales-details tr').each(function () {
+                if ($(this).attr('product') == _product && $(this).attr('pu') == _unit) {
+                    param = parseFloat($(this).find('td.item-quantity').text());
+                    $('#tbl-sales-distribution-grid tbody.sales-distribution-detail tr').each(function () {
+                        if (_product == parseInt($(this).attr('product'))) {
+                            let value_last = parseFloat($(this).find('td.quantity-surplus').text());
+                            $(this).find('td.quantity-surplus').text((value_last + param).toFixed(3));
+                        }
+                    })
+                }
+            })
+        }
+
+        // reasigna numero de fila a los detalles
+        function counterStrike() {
+            var index = 1;
+            $('#sales-details tr').each(function () {
+                $(this).attr('i', index);
+                $(this).children('td:first').text(index);
+                index++;
+            });
+
+        }
+
+        /*
+                $('#save-order').click(function () {
+
+                    createSales();
+
+                });*/
+
+        function create_voucher($type_doc, $print) {
+
+            if (($('#id-nro-document-sender').val() === '') && ($('#id_sender').val() === '') && ($('#id-client-sender').val()) === '') {
+                toastr.warning('¡Elija un cliente porfavor!', 'Mensaje');
+                $('#id-nro-document-sender').focus();
+                return false;
+            }
+            if ($type_doc === 'T') {
+                createSales($type_doc, $print)
+            } else {
+                if ($type_doc === 'F') {
+                    if ($("#document_type_sender").val() === '06') {
+                        let _document_number = $('#id-nro-document-sender').val();
+                        if (_document_number.length === 8) {
+                            toastr.warning('¡La factura solo se registra con RUC!', 'Mensaje');
+                            return false;
+                        } else {
+                            if (_document_number.length !== 11) {
+                                toastr.warning('¡La factura solo se registra con RUC!!', 'Mensaje');
+                                return false;
+                            }
+                        }
+                    } else {
+                        toastr.warning('El tipo de documento debe ser en RUC', 'Mensaje');
+                        return false;
+                    }
+                    let r = confirm("¿Desea generar la factura?");
+                    sessionStorage.setItem('BillType', 'F');
+                    if (r === true) {
+                        createSales($type_doc, $print);
+                    }
+                } else {
+                    if ($type_doc === 'B') {
+                        if ($("#document_type_sender").val() === '01') {
+                            let _document_number = $('#id-nro-document-sender').val();
+                            if (_document_number.length === 11) {
+                                toastr.warning('¡La boleta solo se registra con DNI!', 'Mensaje');
+                                return false;
+                            } else {
+                                if (_document_number.length !== 8) {
+                                    toastr.warning('¡La boleta solo se registra con DNI!!', 'Mensaje');
+                                    return false;
+                                }
+                            }
+                        }
+                        /*else {
+                            toastr.warning('El tipo de documento debe ser en DNI', 'Mensaje');
+                            return false;
+                        }*/
+                        let r = confirm("¿Desea generar la boleta?");
+                        sessionStorage.setItem('BillType', 'B');
+                        if (r === true) {
+                            createSales($type_doc, $print);
+                        }
+                    }
+                }
+            }
+        }
+
+        function createSales($type_doc, $print) {
+
+            if ($('#id-type-order').val() === '0' || $('#id-type-order').val() === '') {
+                toastr.warning('Seleccione el tipo de orden que desea realizar');
+                return false;
+            }
+            if ($('#transaction_payment_type').val() === '0') {
+                toastr.warning('¡Selecione el tipo de pago!', 'Mensaje');
+                return false;
+            }
+            if ($('#transaction_payment_type').val() === 'E' && $('#id-type-order').val() === 'V') {
+                if ($('#id_date').val() === '') {
+                    toastr.error('No puede realizar ventas sin aperturar la caja', 'Mensaje');
+                    return false;
+                }
+            }
+            //Comprobar si selecciono serie
+            if (($('#type').val() === 'E') && ($('#id_serie').val() === '0')) {
+                toastr.warning('¡Favor de completar la serie!', 'Mensaje');
+                $('#id_serie').focus();
+                return false;
+            }
+            // Comprobar si hay filas en los detalles
+            if (hasRowDetails() === false) {
+                toastr.warning('¡Elija los productos..!', 'Mensaje');
+                return false;
+            }
+
+            if ($('#id-type-order').val() === 'T') {
+                if ($('#id_date_completion').val() === '' || $('#id_place_delivery').val() === '' || $('#id_type_quotation').val() === '0' || $('#id_name_type_quotation').val() === '' || $('#id_observation').val() === '') {
+                    toastr.warning('Complete los campos de la cotización');
+                    return false;
+                }
+            }
+
+            if ($('#user_id').val() === '0') {
+                toastr.warning('Seleccione el Usuario');
+                return false;
+            }
+            if ($('#id-client-sender').val() === '' ) {
+                toastr.warning('BUSQUE EL CLIENTE  O PRESIONE ENTER PARA BUSCARLO - ERROR DE LLENADO');
+                return false;
+            }
+
+            let sales = {
+                "Details": [],
+                "Client": $('#id-client-sender').val(),
+                "Address": $('#id_address').val(),
+                "SaleTotal": $('#sum-total').val(),
+                "TransactionPaymentType": $('#transaction_payment_type').val(),
+                "Distribution": $('#id_distribution').val(),
+                "Type": $type_doc,
+                "order_type": 'V',
+                "Serie": $('#id_serie').val(),
+                "BillType": sessionStorage.BillType,
+                "Date": $('#date').val(),
+                "Demo": ($('#demo').is(':checked')) ? 1 : 0,
+                "type_payment": $('#transaction_payment_type').val(),
+                "cash": $('#id_cash').val(),
+                "date_cash": $('#id_date').val(),
+                "cash_deposit": $('#id_cash_deposit').val(),
+                "cod_operation": $('#code-operation').val(),
+                "validity_date": $('#id_validity_date').val(),
+                "date_completion": $('#id_date_completion').val(),
+                "place_delivery": $('#id_place_delivery').val(),
+                "type_quotation": $('#id_type_quotation').val(),
+                "observation": $('#id_observation').val(),
+                "name_type_quotation": $('#id_name_type_quotation').val(),
+                "order_sale_quotation": Number($('#id_order_sale_quotation').val()),
+                "userID": $('#user_id').val()
+            };
+
+            // Recorre cada detalle de producto (son 2 arrays) each -> recorre
+
+            $("#sales-details tr").each(function () {
+                let _quantity = $(this).find("td.item-quantity input.input-quantity").val();
+                if (_quantity === '' || _quantity <= 0) {
+                    toastr.warning('Ingrese un valor valido para la cantidad');
+                    return false
+                }
+                let _price = $(this).find("td.item-price input.input-price").val();
+                if (_price === '' || _quantity <= 0) {
+                    toastr.warning('Ingrese un valor valido para el precio');
+                    return false
+                }
+                let detailObj = {
+                    "Product": $(this).attr('product'),
+                    "Unit": $(this).find("td.item-unit").attr('pu'),
+                    "Quantity": parseFloat($(this).find("td.item-quantity input.input-quantity").val()).toFixed(2),
+                    "Price": parseFloat($(this).find("td.item-price input.input-price").val()).toFixed(2),
+                    "DetailTotal": parseFloat($(this).find("td.item-total input.input-total-detail").val()).toFixed(2),
+                    "_commentary": $(this).find("td.item-product input.input-product-name").val(),
+                    "Store": $(this).attr("store_p")
+                };
+                sales.Details.push(detailObj);
+
+            });
+            {#$('#loading-bill').html(loader2).show();#}
+            $("#save-order").slideUp("fast");
+            $("#btn-invoice-ticket").slideUp("fast");
+            $("#btn-bill-ticket").slideUp("fast");
+            $("#btn-invoice-a4").slideUp("fast");
+            $("#btn-bill-a4").slideUp("fast");
+
+            $(".menu-sales").addClass('d-none');
+
+            {#console.log('$print', $print);#}
+            {#console.log('$type_doc', $type_doc);#}
+
+            {#console.log('type_doc', $type_doc)#}
+            {#console.log('print', $print)#}
+
+            $.ajax({
+                url: '/sales/create_order_detail/',
+                async: true,
+                dataType: 'json', // for response
+                type: 'GET',
+                data: {'sales': JSON.stringify(sales)},
+                contentType: 'application/json;charset=UTF-8',
+                headers: {
+                    "X-CSRFToken": '{{ csrf_token }}'
+                },
+                success: function (response, textStatus, xhr) {
+                    if (xhr.status === 200) {
+                        if (response.msg_sunat !== undefined) {
+                            toastr.success(response.message + response.msg_sunat, '¡Mensaje!');
+                        } else {
+                            toastr.success(response.message, '¡Mensaje!');
+                        }
+
+                        if ($type_doc === 'T' && $print === 'T') {
+                            window.open("/sales/print_ticket_order_sales/" + response.id_sales + "/" + '0' + "/", '_blank');
+                        } else if ($type_doc === 'F' || $type_doc === 'B') {
+
+                            if ($print === 'T') {
+                                {#console.log('if de print ticket electronico')#}
+                                {#console.log('type_doc', $type_doc)#}
+                                {#console.log('print', $print)#}
+                                window.open("/sales/print_ticket_order_sales/" + response.id_sales + "/" + '1' + "/", '_blank');
+                            } else if ($print === 'A4') {
+                                {#console.log('if de print A4 electronico')#}
+                                {#console.log('type_doc', $type_doc)#}
+                                {#console.log('print', $print)#}
+                                window.location.href = "/sales/print_order_bill/" + response.id_sales + "/";
+                            }
+                        }
+                        clearForm();
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    }
+                },
+                error: function (jqXhr, textStatus, xhr) {
+                    toastr.error(jqXhr.responseJSON.error, '¡ERROR DE SUNAT!');
+                    $(".menu-sales").removeClass('d-none');
+                    $("#save-order").slideDown("fast");
+                    $("#btn-invoice-ticket").slideDown("fast");
+                    $("#btn-bill-ticket").slideDown("fast");
+                    $("#btn-invoice-a4").slideDown("fast");
+                    $("#btn-bill-a4").slideDown("fast");
+                }
+            });
+
+        }
+
+        function clearForm() {
+
+            $('#client-name').val('');
+            $('#id-client-sender').val('');
+            $('#id-nro-document-sender').val('');
+            $('#id_sender').val('');
+            $('#id_client').val('0').trigger('change')
+            $("#sales-details").empty();
+            $('#sum-total').val('');
+            $("#code-operation").empty();
+            $(".quicksearch").empty();
+            $("#id_distribution").val('');
+            $("#id-nro-document-sender").attr('maxlength', 8);
+            sessionStorage.setItem('document', '01')
+        }
+
+        {#le facture#}
+
+        $(".invoice").click(function () {
+
+            // Comprobar si hay un cliente seleccionado
+            if (($('#id_client option:selected').val() == '0') && ($('#id_client_name option:selected').val() == '0')) {
+                toastr.warning('¡Elija un cliente porfavor!', 'Error de Llenado!');
+                $('#id_client').focus();
+                return false;
+            }
+            //Comprobar si selecciono serie
+            if (($('#type').val() == 'E') && ($('#id_serie').val() == '0')) {
+                toastr.warning('¡Favor de completar la serie!', 'Error de Llenado!');
+                $('#id_serie').focus();
+            }
+            // Comprobar si hay filas en los detalles
+            if (hasRowDetails() == false) {
+                toastr.warning('¡Elija los productos..!', 'Error de Llenado!');
+                return false;
+            }
+            if ($("#radio1").is(':checked')) {
+
+                let _document_number = $('#id_client option:selected').attr('document-number');
+
+                if (_document_number.length === 8) {
+                    toastr.warning('¡La factura solo se registra con RUC!', 'Error de Llenado!');
+                    return false;
+                } else {
+                    if (_document_number.length !== 11) {
+                        toastr.warning('¡La factura solo se registra con RUC!!', 'Error de Llenado!');
+                        return false;
+                    }
+                }
+            } else {
+                if ($("#radio2").is(':checked')) {
+                    let _document_number_name = $('#id_client_name option:selected').attr('document-number');
+
+                    if (_document_number_name.length === 8) {
+                        toastr.warning('¡La factura solo se registra con RUC!', 'Error de Llenado!');
+                        return false;
+                    } else {
+                        if (_document_number_name.length !== 11) {
+                            toastr.warning('¡La factura solo se registra con RUC!', 'Error de Llenado!');
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            let r = confirm("¿Desea generar la factura?");
+            sessionStorage.setItem('BillType', 'F');
+            if (r === true) {
+
+                createSales();
+            }
+        });
+        $(".receipt").click(function () {
+
+            // Comprobar si hay un cliente seleccionado
+            if (($('#id_client option:selected').val() == '0') && ($('#id_client_name option:selected').val() == '0')) {
+                toastr.warning('¡Elija un cliente porfavor!', 'Error de LLenado!');
+                $('#id_client').focus();
+                return false;
+            }
+            //Comprobar si selecciono serie
+            if (($('#type').val() == 'E') && ($('#id_serie').val() == '0')) {
+                toastr.warning('¡Favor de completar la serie!', 'Error de LLenado!');
+                $('#id_serie').focus();
+            }
+            // Comprobar si hay filas en los detalles
+            if (hasRowDetails() == false) {
+                toastr.warning('¡Elija los productos..!', 'Error de LLenado!');
+                return false;
+            }
+
+            if ($("#radio1").is(':checked')) {
+
+                let _document_number = $('#id_client option:selected').attr('document-number');
+
+                if (_document_number.length === 11) {
+                    toastr.warning('¡La boleta solo se registra con DNI!', 'Error de Llenado!');
+                    return false;
+                } else {
+                    if (_document_number.length !== 8) {
+                        toastr.warning('¡La boleta solo se registra con DNI!!', 'Error de Llenado!');
+                        return false;
+                    }
+                }
+            } else {
+                if ($("#radio2").is(':checked')) {
+                    let _document_number_name = $('#id_client_name option:selected').attr('document-number');
+
+                    if (_document_number_name.length === 11) {
+                        toastr.warning('¡La boleta solo se registra con DNI!', 'Error de Llenado!');
+                        return false;
+                    } else {
+                        if (_document_number_name.length !== 8) {
+                            toastr.warning('¡La boleta solo se registra con DNI!!', 'Error de Llenado!');
+                            return false;
+                        }
+                    }
+                }
+            }
+            let r = confirm("¿Desea generar la boleta de venta?");
+            sessionStorage.setItem('BillType', 'B');
+            if (r === true) {
+
+                createSales();
+            }
+        });
+
+
+        $("#radio1,#radio2").click(function () {
+            if ($("#radio1").is(':checked')) {
+                $("#id_client_name").attr('disabled', 'disabled');
+                $("#document_type_sender").removeAttr('disabled');
+                $("#id-nro-document-sender").attr('readonly', false);
+                $("#id_client_name").find('option[value]').removeAttr('selected');
+                $("#id_client_name").find('option[value="0"]').attr('selected', 'selected');
+                $("#id_client_name").trigger('change');
+                $('#document_type_sender').val(0);
+                $("#id_sender").val('');
+                $("#id-nro-document-sender").val('');
+                $("#id_address").val('');
+                $(".client-table").val('');
+                $(".client-table").attr('placeholder', '')
+                $(".client-table").attr('disabled', 'disabled');
+
+            } else if ($("#radio2").is(':checked')) {
+                $("#document_type_sender").attr('disabled', 'disabled');
+                $("#id_client_name").removeAttr('disabled');
+                $("#document_type_sender").find('option[value]').removeAttr('selected');
+                $("#document_type_sender").find('option[value="0"]').attr('selected', 'selected');
+                $("#id_sender").val('');
+                $("#id_address").val('');
+                $("#document_type_sender").trigger('change');
+                $("#id-nro-document-sender").val('');
+                $("#id-nro-document-sender").attr('readonly', true);
+                $(".client-table").attr('placeholder', 'INGRESE CLIENTE Y PRESIONE ENTER...')
+                $(".client-table").removeAttr('disabled');
+            }
+        });
+
+        function Client_Advancement($product, $quantity) {
+            let a = false;
+            $('table.table-client-advancement tbody#details-client-advancement tr').each(function () {
+
+                if ($product == $(this).attr('product_final')) {
+                    let quantity_b = parseFloat($(this).find('td.quantity-client').text());
+                    if ((quantity_b - parseFloat($quantity)) >= 0) {
+                        $(this).find('td.quantity-client').text((Difference(quantity_b, parseFloat($quantity))).toFixed(0));
+                        a = true;
+                    } else {
+                        a = false;
+                    }
+                }
+            })
+            return a;
+        }
+
+        function Difference(Valor1, Valor2) {
+            let S = parseFloat(Valor1 - Valor2);
+            return S;
+        };
+        $('#tbl-sales-distribution-grid tbody.sales-distribution-detail tr td').each(function () {
+            let _str = $(this).text();
+            _str = _str.replace(',', '.');
+            $(this).text(_str);
+        });
+        {#$('#add-all-details').click(function () {#}
+        {#$(document).on('click', '#add-all-details', function () {#}
+        {#    let _sum_detail_quantity = 0;#}
+        {#    let _sum_product_rate_quantity = 0;#}
+        {#    let _detail_quantity = 0;#}
+        {#    $("#sales-details tr[product=" + sessionStorage.product_id + "]").each(function () {#}
+        {#        _detail_quantity = parseFloat($(this).find('td.item-quantity').text());#}
+        {#        _sum_detail_quantity = _sum_detail_quantity + _detail_quantity;#}
+        {#    })#}
+        {##}
+        {#    $('table tbody#product-rates tr').each(function () {#}
+        {##}
+        {#        let cont_sequence = true;#}
+        {#        let row = 0;#}
+        {#        let _input_quantity = $(this).find("td input.quantity").val();#}
+        {#        let _unit = $(this).attr('unit_id');#}
+        {##}
+        {#        let _input_price = $(this).find("td input.price").val();#}
+        {##}
+        {#        if (_input_quantity !== '' && _input_price !== '') {#}
+        {#            let _quantity = parseFloat(_input_quantity);#}
+        {#            let _product = $(this).attr('product_id');#}
+        {#            let _unit = $(this).attr('unit_id');#}
+        {#            let _stock = parseFloat($('#store-rates').find("tr.selected-item td.current-stock").text());#}
+        {#            _sum_product_rate_quantity = _sum_product_rate_quantity + _quantity;#}
+        {#            {% if distribution is None and electronic_invoice is None %}#}
+        {#                if (_quantity > _stock || _sum_product_rate_quantity > _stock ||#}
+        {#                    (_sum_detail_quantity > 0 && _sum_detail_quantity + _sum_product_rate_quantity > _stock)) {#}
+        {#                    toastr.warning('Stock Insuficiente', '¡MENSAJE!');#}
+        {#                    $('.modal-rate').modal('hide');#}
+        {#                    return false;#}
+        {#                }#}
+        {#            {% endif %}#}
+        {#            if ($("#sales-details tr[product=" + _product + "][pu=" + _unit + "]").length) {#}
+        {#                let $msg = 'El producto con este tipo de unidad ya se encuentra en el registro.';#}
+        {#                toastr.warning($msg, '¡MENSAJE!');#}
+        {#                return false;#}
+        {#            }#}
+        {#if ($("#id-table-detail-order tr[product=" + _product + "][pu=" + _unit + "]").length) {#}
+        {#    let row = $("#id-table-detail-order tr[product=" + _product + "][pu=" + _unit + "]")#}
+        {#    if ((_product_store_stock - _quantity_search * _quantity_minimum) >= 0) {#}
+        {#        new_quantity = parseFloat(row.find('td.item-quantity').text()) + new_quantity;#}
+        {#        row.find('td.item-quantity').text(new_quantity.toFixed(2));#}
+        {#        _total = parseFloat(_price_sale) * parseFloat(new_quantity);#}
+        {#        row.find('td.item-total').text(_total.toFixed(2));#}
+        {#        _div_barcode.parents('div.card-product').find('input.product-stock').val(_product_store_stock - _quantity_search * _quantity_minimum);#}
+        {#        calculateTotal();#}
+        {#        val_ = true#}
+        {#    } else {#}
+        {#        toastr.warning('Cantidad insuficiente en stock', 'Mensaje');#}
+        {#    }#}
+        {# }#}
+        {#            addDetail($(this));#}
+        {#        }#}
+        {##}
+        {#    });#}
+        {#    $('#add-modal').empty();#}
+        {#    $('#add-modal').modal('hide');#}
+        {#    $(".quicksearch").val('');#}
+        {#    setTimeout(() => {#}
+        {#        $(".quicksearch").focus();#}
+        {#    }, 500);#}
+        {##}
+        {# });#}
+
+        {#function addDetail($tr) {#}
+        {##}
+        {#    let _unit_id = $tr.attr('unit_id');#}
+        {#    let _product_id = $tr.attr('product_id');#}
+        {#    let _product_name = $tr.attr('product_name');#}
+        {#    let _quantity = parseFloat($tr.find("td input.quantity").val());#}
+        {#    let _price = parseFloat($tr.find("td input.price").val());#}
+        {#    let _total = _quantity * _price;#}
+        {#    let _unit = $tr.find("td.unit-name").text();#}
+        {#    let _product_store = $('#store-rates').find("tr.selected-item").attr('ps');#}
+        {#    $('#sales-details').append(#}
+        {#        '<tr product="' + _product_id + '" store_p="' + _product_store + '" pu="' + _unit_id + '" class="text-uppercase small text-center">' +#}
+        {#        '<td class="align-middle">' + '</td>' +#}
+        {#        '<td class="align-middle">' + _product_name + '</td>' +#}
+        {#        '<td class="align-middle item-quantity">' + _quantity + '</td>' +#}
+        {#        '<td class="align-middle item-unit" pu="' + _unit_id + '">' + _unit + '</td>' +#}
+        {#        '<td class="align-middle item-price">' + _price.toFixed(2) + '</td>' +#}
+        {#        '<td class="align-middle item-total">' + _total.toFixed(2) + '</td>' +#}
+        {#        '<td>' + '<button type="button" onclick="deleteItem(' + _product_id + ',' + _unit_id + ')" class="btn btn-danger btn-sm">' +#}
+        {#        '<i class="fa fa-trash"></i></button>' + '</td>' +#}
+        {#        '</tr>'#}
+        {#    );#}
+        {#    calculateTotal();#}
+        {#    counterStrike();#}
+        {# }#}
+
+        if ($("#type").length) {
+            if ($("#type").val() == 'E') {
+                $("#save-order").hide()
+            } else {
+                {#$(".quote").hide();#}
+                {#$(".invoice").hide();#}
+                {#$(".receipt").hide();#}
+                {#$(".series").hide()#}
+                {#$("#demo").hide()#}
+            }
+        }
+
+        function printPdf($url) {
+            {#myWindow = window.open($url);#}
+            {#myWindow.close;  //optional, to close the new window as soon as it opens#}
+            //this ensures user doesn't have to close the pop-up manually
+            let link = document.createElement('a');
+            link.href = $url;
+            link.download = 'file.pdf';
+            link.dispatchEvent(new MouseEvent('click'));
+        }
+
+        $("#id_cash").change(function () {
+
+            $("#id_date").val('');
+
+            if ($("#id_cash").val() !== '0') {
+
+                $.ajax({
+                    url: '/accounting/get_cash_date/',
+                    async: true,
+                    dataType: 'json', // for response
+                    type: 'GET',
+                    data: {'cash_id': $("#id_cash").val()},
+                    contentType: 'application/json;charset=UTF-8',
+                    headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                    success: function (response, textStatus, xhr) {
+                        if (xhr.status === 200) {
+                            toastr.success(response.message, 'Mensaje');
+                            $("#id_date").val(response.cash_date);
+                        }
+                    },
+                    error: function (jqXhr, textStatus, xhr) {
+                        if (jqXhr.status === 500) {
+                            toastr.warning(jqXhr.responseJSON.error, 'Mensaje');
+                        } else {
+                            if (textStatus === 'timeout') {
+                                toastr.error('Failed from timeout', 'Mensaje');
+                            } else {
+                                console.log(" STATUS: " + xhr + " " + textStatus);
+                            }
+                        }
+                    }
+                });
+            }
+        });
+        $('#id_address').keypress(function (e) {
+
+            if (e.keyCode === 13) {
+                e.preventDefault()
+                $(this).trigger("enterKey");
+                if ($('#id-client-sender').val() === '') {
+                    toastr.warning('¡Problemas en la seleccion del cliente', 'Direccion');
+                    return false;
+                }
+                let _address_ = $('#id_address').val();
+                if (_address_.length === 0) {
+                    toastr.warning('¡Favor de completar la direccion', 'Direccion');
+                    return false;
+                }
+                $.ajax({
+                    url: '/sales/update_address/',
+                    async: true,
+                    dataType: 'json', // for response
+                    type: 'GET',
+                    data: {
+                        'pk_': $('#id-client-sender').val(),
+                        'address_': $('#id_address').val()
+                    },
+                    success: function (response) {
+                        toastr.success(response.message, 'Mensaje')
+                    },
+                    fail: function (response) {
+                        toastr.error('Problemas en la actualizacion', 'Mensaje')
+                    }
+                });
+                return false;
+            }
+        });
+
+
+        $(document).on('click', 'table#product-data-grid tbody tr td table.table-prices tbody tr td.prices-list div button', async function () {
+            let value = $(this).attr('pk');
+            let price = parseFloat($(this).attr('ip'));
+            let tr = $(this).parent('div').parent('div').parent('td').parent('tr');
+            let unit_id = tr.attr('unit');
+            let name_unit = tr.attr('unitname');
+            let product_id = tr.attr('product');
+            let product_brand = tr.attr('product_brand');
+            let name_product = tr.attr('productname');
+            let quantity_minim = parseFloat(tr.attr('quantity_minum'));
+            let quantity = parseFloat(tr.find('td.quantity-sales-price input.quantity-select').val());
+            let stock = parseFloat(tr.parent('tbody').parents('table.table-prices').parent('td').parent('tr').find('td.td-table-stock table.table-stock-headquarters tbody tr.my-subsidiary[store_="V"] td.item-stock').text());
+            let store_id = tr.parent('tbody').parents('table.table-prices').parent('td').parent('tr').find('td.td-table-stock table.table-stock-headquarters tbody tr.my-subsidiary').attr('store_id');
+            if (isNaN(quantity)) {
+                toastr.warning('Ingrese la cantidad del producto');
+                tr.find('td.quantity-sales-price input.quantity-select').val('')
+                return false
+            }
+            if (quantity === '' || quantity === 0) {
+                toastr.warning('Ingrese la cantidad del producto');
+                tr.find('td.quantity-sales-price input.quantity-select').val('')
+                return false
+            }
+            if (quantity < 0) {
+                toastr.warning('La cantidad debe ser un valor positivo');
+                tr.find('td.quantity-sales-price input.quantity-select').val('')
+                return false
+            }
+            if ($("#sales-details tr[product=" + product_id + "][pu=" + unit_id + "]").length) {
+                let $msg = 'El producto con este tipo de unidad ya se encuentra en el registro.';
+                toastr.warning($msg, 'Mensaje');
+                tr.find('td.quantity-sales-price input.quantity-select').val('')
+                return false;
+            }
+
+            /*if (quantity * quantity_minim <= stock) {
+                addOrderDetail(unit_id, product_id, quantity, price, name_unit, unescape(name_product), store_id, quantity_minim, product_brand);
+                tr.parent('tbody').parents('table.table-prices').parent('td').parent('tr').find('td.td-table-stock table.table-stock-headquarters tbody tr.my-subsidiary[store_="V"] td.item-stock').text((stock - quantity * quantity_minim).toFixed(2));
+            } else {
+                toastr.warning('Stock insuficiente en almacen');
+            }*/
+            let _flag_stock = await check_stock(quantity, product_id)
+
+            if (_flag_stock === true) {
+                addOrderDetail(unit_id, product_id, quantity, price, name_unit, unescape(name_product), store_id, quantity_minim, product_brand);
+                tr.parent('tbody').parents('table.table-prices').parent('td').parent('tr').find('td.td-table-stock table.table-stock-headquarters tbody tr.my-subsidiary[store_="V"] td.item-stock').text((stock - quantity * quantity_minim).toFixed(2));
+            } else {
+                toastr.warning('STOCK INSUFICIENTE EN ALMACEN');
+            }
+
+            tr.find('td.quantity-sales-price input.quantity-select').val('');
+        });
+
+        function escapeHtml(text) {
+            var map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+
+            return text.replace(/[&<>"']/g, function (m) {
+                return map[m];
+            });
+        }
+
+
+        function addOrderDetail(a, b, c, d, e, f, g, h, i) {
+
+            let _unit_id = a
+            let _product_id = b
+            let _quantity = parseFloat(c)
+            let _price = parseFloat(d)
+            let _total = _quantity * _price
+            let _unit = e
+            let _product_name = escapeHtml(f)
+            let _product_brand = i
+            let _product_store = g
+            let _quantity_minim = parseFloat(h)
+
+            //console.log(perms.admin)
+            /*if (perms) {
+                console.log('true')
+            }
+            else{
+                console.log('false')
+            }*/
+
+            $('#sales-details').append(
+                '<tr detail_id="' + 'NaN' + '" product="' + _product_id + '" store_p="' + _product_store + '" pu="' + _unit_id + '" class="text-uppercase small text-center" style="font-size: 14px;">' +
+                '<td class="align-middle">' + '</td>' +
+                '<td class="align-middle text-left item-product">' + '<input type="text" class="form-control form-control-sm input-product-name" value="' + _product_name + ' - ' + _product_brand + '">' + '</td>' +
+                '<td class="align-middle item-quantity">' + '<input type="number" class="form-control form-control-sm text-right input-quantity" disabled value="' + _quantity.toFixed(2) + '">' + '</td>' +
+                '<td class="align-middle item-unit" pu="' + _unit_id + '" unit_min="' + _quantity_minim + '">' + _unit + '</td>' +
+                '<td class="align-middle item-price">' + '<input type="number" class="form-control form-control-sm text-right input-price" value="' + _price.toFixed(2) + '">' + '</td>' +
+                '<td class="align-middle item-total">' + '<input type="number" class="form-control form-control-sm text-right input-total-detail" value="' + _total.toFixed(2) + '">' + '</td>' +
+                '<td>' + '<button type="button" onclick="deleteItem(' + _product_id + ',' + _unit_id + ')" class="btn btn-danger btn-sm">' +
+                '<i class="fa fa-trash"></i></button>' + '</td>' +
+                '</tr>'
+            );
+            calculateTotal();
+            counterStrike();
+        }
+
+        $('#id-family').change(function () {
+            let _search = $(this).val();
+            $('#product_list_sales').empty();
+            if (_search === '0') {
+                $('div#loader-product').css('display', 'none');
+                $('#product_list_sales').text('Listado de productos')
+                return false
+            } else {
+                $('div#loader-product').css('display', '');
+                $.ajax({
+                    url: '/sales/get_product_sales_grid/',
+                    async: true,
+                    dataType: 'json',
+                    type: 'GET',
+                    data: {'pk': _search},
+                    success: function (response) {
+                        $('#product_list_sales').html(response.grid).slideDown();
+                        $('div#loader-product').css('display', 'none');
+                    },
+                });
+            }
+        });
+        $(document).on('keypress', '#custom-search-product', function (e) {
+
+            $('#product_list_sales').empty();
+            $('#custom-search-barcode').val(' ')
+
+            if (e.keyCode === 13) {
+
+                e.preventDefault()
+
+                $(this).trigger("enterKey");
+
+                let _product_name = $(this).val().trim();
+
+                if (_product_name.length === 0) {
+                    toastr.warning('¡Favor de ingresar una busqueda', 'Error de Datos');
+                    return false;
+                }
+                getProductsByNameOrBarcode(_product_name, '')
+
+            }
+        });
+
+        $(document).on('keypress', '#custom-search-barcode', function (e) {
+
+            $('#product_list_sales').empty();
+            $('#custom-search-product').val(' ');
+
+            if (e.keyCode === 13) {
+
+                e.preventDefault()
+
+                $(this).trigger("enterKey");
+
+                let _barcode = $(this).val().trim();
+
+                if (_barcode.length === 0) {
+                    toastr.warning('¡Favor de ingresar un codigo de barras', 'Error de Datos');
+                    return false;
+                }
+                getProductsByNameOrBarcode('', _barcode)
+
+            }
+        });
+
+
+        function getProductsByNameOrBarcode($product_name, $barcode) {
+
+            $('div#loader-product').css('display', '');
+            $.ajax({
+                url: '/sales/get_product_sales_grid_new/',
+                async: true,
+                dataType: 'json', // for response
+                type: 'GET',
+                data: {
+                    'value': $product_name,
+                    'barcode': $barcode
+                },
+                contentType: 'application/json;charset=UTF-8',
+                headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                success: function (response, textStatus, xhr) {
+                    if (xhr.status === 200) {
+                        toastr.success(response.message, '¡Bien hecho!');
+                        {#$('#product-grid-list').html(response.grid);#}
+                        $('#product_list_sales').html(response.grid).slideDown();
+                        $('div#loader-product').css('display', 'none');
+                    }
+                },
+                error: function (jqXhr, textStatus, xhr) {
+                    if (jqXhr.status === 500) {
+                        toastr.error(jqXhr.responseJSON.error, '¡Error de Consulta!');
+                    } else {
+                        if (textStatus === 'timeout') {
+                            toastr.error('Failed from timeout', '¡Error de Consulta!');
+                        } else {
+                            console.log(" STATUS: " + xhr + " " + textStatus);
+                        }
+                    }
+                }
+            });
+        }
+
+
+        $(document).on('keyup', '#sales-details tr td.item-price input.input-price', function (e) {
+            let val = Number($(this).val());
+            let row = $(this).parent('td.item-price').parent('tr');
+            let quantity = Number(row.find('td.item-quantity input.input-quantity').val());
+            {#console.log('quantity',quantity)#}
+            {#console.log('val',val)#}
+            if (isNaN(val)) {
+                $(this).val('')
+            } else {
+                let total_detail = quantity * val
+                if (val !== '') {
+                    row.find('td.item-total input.input-total-detail').val((total_detail).toFixed(2))
+                    calculateTotal();
+                }
+            }
+        });
+        $(document).on('keyup', '#sales-details tr td.item-quantity input.input-quantity', function (e) {
+            let val = Number($(this).val());
+            let row = $(this).parent('td.item-quantity').parent('tr');
+            let price = Number(row.find('td.item-price input.input-price').val());
+            if (isNaN(val)) {
+                $(this).val('')
+            } else {
+                if (val !== '') {
+                    row.find('td.item-total input.input-total-detail').val((price * val).toFixed(2))
+                    calculateTotal();
+                }
+            }
+        });
+
+        $(document).on('keyup', '#sales-details tr td.item-total input.input-total-detail', function (e) {
+            let val = Number($(this).val());
+            {#console.log('total', val)#}
+            let row = $(this).parent('td.item-total').parent('tr');
+            let quantity = Number(row.find('td.item-quantity input.input-quantity').val());
+            let price = Number(row.find('td.item-price input.input-price').val());
+            {#console.log('quantity', quantity)#}
+
+            let price_unit = val / quantity
+            {#console.log('price_unit', price_unit)#}
+            row.find('td.item-price input.input-price').val((price_unit).toFixed(2))
+            calculateTotal();
+
+        });
+
+
+        $(document).on('change', '#document_type_client', async function () {
+            let _val = $(this).val();
+            if (_val === '01') {
+                $("#document_number_client").attr('maxlength', 8);
+                sessionStorage.setItem('client-document', '01')
+                $('#document_number_client').val('');
+                {#$('#id_sender').val('');#}
+                {#$('#id-address-line').css('display', 'none');#}
+                {#$('#id_address').val('')#}
+                {#$('#id_address_sender').val('');#}
+            } else if (_val === '06') {
+                $("#document_number_client").attr('maxlength', 11);
+                sessionStorage.setItem('client-document', '06')
+                $('#document_number_client').val('');
+                {#$('#id_sender').val('');#}
+                {#$('#id-address-line').css('display', '');#}
+                {#$('#id_address').val('')#}
+            } else if (_val === '00') {
+                $("#document_number_client").attr('maxlength', 15);
+                sessionStorage.setItem('client-document', '')
+                let new_n_order = await get_last_number_others();
+                {#$('#id_sender').val('');#}
+                $('#document_number_client').val(new_n_order);
+                {#$('#id-address-line').css('display', 'none');#}
+                {#$('#id_address').val('')#}
+            }
+        });
+
+        $('#id_district').select2({
+            theme: 'bootstrap4',
+        });
+
+        $("#document_number_client").attr('maxlength', 8);
+        sessionStorage.setItem('client-document', '01')
+
+        $(document).on('click', '#save-new-client', function (e) {
+
+            e.preventDefault()
+
+            let _document_type = $('#document_type_client').val();
+            let _document_number = $('#document_number_client').val();
+            let _names = $('#client-names').val();
+            let _phone = $('#client-phone').val();
+            let _email = $('#client-email').val();
+            let _address = $('#client-address').val();
+            let _district = $('#id_district').val();
+            let _reference = $('#client-reference').val();
+
+            if (sessionStorage.getItem('client-document') === '01') {
+
+                if (_document_number.length !== 8) {
+                    toastr.warning('¡Favor de completar los caracteres requeridos: 8 caracteres para DNI', 'Error de Datos');
+                    return false;
+                }
+                if (_names.length === 0) {
+                    toastr.warning('¡Favor de completar los Nombres', 'Error de Datos!');
+                    return false;
+                }
+            } else {
+                if (sessionStorage.getItem('client-document') === '06') {
+                    if (_document_number.length !== 11) {
+                        toastr.warning('¡Favor de completar los caracteres requeridos: 11 caracteres para RUC!', 'Error de Datos');
+                        return false;
+                    }
+                    if (_names.length === 0) {
+                        toastr.warning('¡Favor de completar la Razon Social', 'Error de Datos!');
+                        return false;
+                    }
+                    if (_address.length === 0) {
+                        toastr.warning('¡Favor de completar la direccion', 'Error de Datos!');
+                        return false;
+                    }
+                }
+            }
+
+            if ($('#id_district').val() === 0) {
+                toastr.warning('¡Favor de seleccionar un distrito', 'Error de Datos!');
+                return false;
+            }
+
+            let client_dict = {
+                "ClientTypeDocument": _document_type,
+                "ClientDocumentNumber": _document_number,
+                "ClientNames": _names,
+                "ClientPhone": _phone,
+                "ClientEmail": _email,
+                "ClientAddress": _address,
+                "ClientDistrict": _district,
+                "ClientReference": _reference,
+            }
+
+            $.ajax({
+                url: '/sales/save_new_client_sale/',
+                async: true,
+                dataType: 'json', // for response
+                type: 'GET',
+                data: {'client_dict': JSON.stringify(client_dict)},
+                contentType: 'application/json;charset=UTF-8',
+                headers: {
+                    "X-CSRFToken": '{{ csrf_token }}'
+                },
+                success: function (response, textStatus, xhr) {
+                    if (xhr.status === 200) {
+                        toastr.success(response.message, '¡Mensaje!');
+                        $('#modalClient').modal('hide');
+                        $('#document_number_client').val('');
+                        $('#client-names').val('');
+                        $('#client-phone').val('');
+                        $('#client-email').val('');
+                        $('#client-address').val('');
+                        $('#id_district').val(0);
+                        $('#client-reference').val('');
+
+                        $("#id_sender").val(response.names);
+                        $("#id-client-sender").val(response.client_id);
+                        $("#id_address").val(response.client_address);
+                    }
+                },
+                error: function (jqXhr, textStatus, xhr) {
+                    toastr.error(jqXhr.responseJSON.error, '¡ERROR DE DATOS!');
+                }
+            });
+        });
+
+        $(document).on('click', '#btn-update-order', function (e) {
+
+            if ($('#id-type-order').val() === 'T') {
+                if ($('#id_date_completion').val() === '' || $('#id_place_delivery').val() === '' || $('#id_type_quotation').val() === '0' || $('#id_name_type_quotation').val() === '' || $('#id_observation').val() === '') {
+                    toastr.warning('Complete los campos de la cotización');
+                    return false;
+                }
+            }
+            if ($('#id_order_sale_quotation').val() === '') {
+                toastr.warning('No existe cotizacion, actualice si es necesario');
+                return false;
+
+            }
+
+            if (hasRowDetails() === false) {
+                toastr.warning('¡Elija los productos..!', 'Mensaje');
+                return false;
+            }
+
+            let sales = {
+                "Details": [],
+                "Client": $('#id-client-sender').val(),
+                "SaleTotal": $('#sum-total').val(),
+                "TransactionPaymentType": $('#transaction_payment_type').val(),
+                "Distribution": $('#id_distribution').val(),
+                "Type": 'T',
+                "order_type": $('#id-type-order').val(),
+                "Serie": $('#id_serie').val(),
+                "BillType": sessionStorage.BillType,
+                "Date": $('#date').val(),
+                "Demo": ($('#demo').is(':checked')) ? 1 : 0,
+                "type_payment": $('#transaction_payment_type').val(),
+                "cash": $('#id_cash').val(),
+                "date_cash": $('#id_date').val(),
+                "cash_deposit": $('#id_cash_deposit').val(),
+                "cod_operation": $('#code-operation').val(),
+                "validity_date": $('#id_validity_date').val(),
+                "date_completion": $('#id_date_completion').val(),
+                "place_delivery": $('#id_place_delivery').val(),
+                "type_quotation": $('#id_type_quotation').val(),
+                "observation": $('#id_observation').val(),
+                "name_type_quotation": $('#id_name_type_quotation').val(),
+                "order_sale_quotation": Number($('#id_order_sale_quotation').val()),
+                "correlative_sale": $('#id_order_sale_quotation_correlative').val(),
+            };
+
+            $("#sales-details tr").each(function () {
+                let _quantity = $(this).find("td.item-quantity input.input-quantity").val();
+                if (_quantity === '' || _quantity <= 0) {
+                    toastr.warning('Ingrese un valor valido para la cantidad');
+                    return false
+                }
+                let _price = $(this).find("td.item-price input.input-price").val();
+                if (_price === '' || _quantity <= 0) {
+                    toastr.warning('Ingrese un valor valido para el precio');
+                    return false
+                }
+                let detailObj = {
+                    "Detail": $(this).attr('detail_id'),
+                    "Product": $(this).attr('product'),
+                    "Unit": $(this).find("td.item-unit").attr('pu'),
+                    "Quantity": parseFloat($(this).find("td.item-quantity input.input-quantity").val()).toFixed(2),
+                    "Price": parseFloat($(this).find("td.item-price input.input-price").val()).toFixed(2),
+                    "DetailTotal": parseFloat($(this).find("td.item-total input.input-total-detail").val()).toFixed(2),
+                    "_commentary": $(this).find("td.item-product input.input-product-name").val(),
+                    "Store": $(this).attr("store_p")
+                };
+                sales.Details.push(detailObj);
+            });
+
+            {#console.log(sales)#}
+
+            $.ajax({
+                url: '/sales/update_quotation/',
+                async: true,
+                dataType: 'json', // for response
+                type: 'GET',
+                data: {'sales': JSON.stringify(sales)},
+                contentType: 'application/json;charset=UTF-8',
+                headers: {
+                    "X-CSRFToken": '{{ csrf_token }}'
+                },
+                success: function (response, textStatus, xhr) {
+                    if (xhr.status === 200) {
+                        toastr.success(response.message + response.msg_sunat, '¡Mensaje!');
+                        window.open("/sales/print_quotation/" + response.id_sales + "/" + 'T' + "/", '_blank');
+                        setTimeout(() => {
+                            location.reload();
+                        }, 2000);
+                    }
+                },
+                error: function (jqXhr, textStatus, xhr) {
+                    toastr.error(jqXhr.responseJSON.error, '¡ERROR DE SUNAT!');
+                }
+            });
+
+        });
+
+        $(document).on('focusin', '.client-table', function (e) {
+            $(this).parent('td').find('div.dropdown-menu').css({
+                'background-color': 'transparent',
+                'border': 'transparent',
+            })
+            $(this).val(' ');
+            $('#id_unit_product').val('0')
+            $('#id_sender').val('');
+            $('#id-nro-document-sender').val('');
+            $('#id_address').val('');
+            $('#document_type_sender').val('0');
+            $('#document_type_sender').trigger('change');
+        });
+
+        $(document).on('keypress', '.client-table', function (e) {
+
+            $(this).parent('td').find('div.dropdown-menu').empty()
+
+            if (e.keyCode === 13) {
+
+                e.preventDefault()
+
+                $(this).trigger("enterKey");
+                let _client_name = $(this).val();
+                let _td = $(this).parent('td')
+                let _menu = _td.find('.dropdown-menu')
+
+                if (_client_name.length > 3) {
+
+                    $.ajax({
+                        url: '/sales/get_clients_by_criteria/',
+                        async: true,
+                        dataType: 'json', // for response
+                        type: 'GET',
+                        data: {
+                            'value': _client_name,
+                        },
+                        contentType: 'application/json;charset=UTF-8',
+                        headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                        success: function (response, textStatus, xhr) {
+                            if (xhr.status === 200) {
+                                let list = response.client_list;
+                                _menu.css({'background-color': '#fff', 'border': '1px solid rgba(0,0,0,.15)'})
+                                for (let i = 0; i < list.length; i++) {
+                                    _menu.append(`<a class="dropdown-item client-item" client_name="${list[i].client_names}" client_document_number="${list[i].client_document_number}" client_address="${list[i].client_address}" client_type_document="${list[i].client_type_document}" href="#" data-id="${list[i].client_id}">cliente: ${list[i].client_names} - ${list[i].client_type}: ${list[i].client_document_number}</a>`)
+                                }
+                            }
+                        },
+                        error: function (jqXhr, textStatus, xhr) {
+                            if (jqXhr.status === 500) {
+                                toastr.error(jqXhr.responseJSON.error, 'Mensaje');
+                            } else {
+                                if (textStatus === 'timeout') {
+                                    toastr.error('Failed from timeout', 'Mensaje');
+                                } else {
+                                    console.log(" STATUS: " + xhr + " " + textStatus);
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    toastr.warning('Para la busqueda ingrese minimo 3 caracteres', 'Error de llenado');
+                    return false;
+                }
+            }
+        });
+
+        $(document).on('click', '.client-item', function (e) {
+
+            let _client_id = $(this).attr('data-id');
+            let _client_address = $(this).attr('client_address');
+            let _client_name = $(this).attr('client_name');
+            let _tr = $(this).parent('div.dropdown-menu').parent('td').parent('tr')
+            let _td = $(this).parent('div.dropdown-menu').parent('td')
+            let _client_type_document = $(this).attr('client_type_document')
+            let _client_document_number = $(this).attr('client_document_number')
+
+            $('#document_type_sender').val(_client_type_document);
+            $('#document_type_sender').trigger('change');
+
+            $('#id_sender').val(_client_name);
+            $('#id_address').val(_client_address);
+            $("#id-nro-document-sender").val(_client_document_number);
+            $("#id-client-sender").val(_client_id);
+            $(".client-table").val(_client_name);
+
+            $(this).parent('div.dropdown-menu').empty()
+            $(this).parent('div.dropdown-menu').addClass('hide')
+        });
+
+        async function check_stock(_quantity, _product_id) {
+
+            let _flag_stock = true
+
+            await $.ajax({
+                url: '/sales/check_stock/',
+                async: true,
+                dataType: 'json', // for response
+                type: 'GET',
+                data: {
+                    'quantity': _quantity,
+                    'product': _product_id
+                },
+                contentType: 'application/json;charset=UTF-8',
+                headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                success: function (response, textStatus, xhr) {
+                    if (xhr.status === 200) {
+                        {#console.log(response.flag)#}
+                        _flag_stock = response.flag;
+                    }
+                },
+                error: function (jqXhr, textStatus, xhr) {
+                    toastr.error('¡ERROR!');
+                }
+            });
+            return _flag_stock
+        }
+
+        async function get_last_number_others() {
+
+            let new_n_order = 0;
+
+            await $.ajax({
+                url: '/sales/get_last_id_type_others/',
+                async: true,
+                dataType: 'json', // for response
+                type: 'GET',
+                data: {},
+                contentType: 'application/json;charset=UTF-8',
+                headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                success: function (response, textStatus, xhr) {
+                    if (xhr.status === 200) {
+                        new_n_order = response.new_n_order;
+                        //console.log(new_n_order)
+                    }
+                },
+                error: function (jqXhr, textStatus, xhr) {
+                    toastr.error('¡ERROR!');
+                }
+            });
+            return new_n_order
+
+        }
+
+
+    </script>
+
+{% endblock extrajs %}

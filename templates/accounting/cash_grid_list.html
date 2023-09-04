@@ -1,0 +1,248 @@
+{% if dictionary %}
+
+    <div class="table-responsive mt-3 table-sm">
+        <table class="table table-bordered" id="table-cash">
+            <thead>
+            <tr>
+                <th class="text-uppercase text-center align-middle bg-light text-dark small font-weight-bold">Estado
+                </th>
+                <th class="text-uppercase text-center align-middle bg-light text-dark small font-weight-bold">Fecha</th>
+
+                <th class="text-uppercase text-center align-middle bg-light text-dark small font-weight-bold">TOTAL <br>
+                    ENTRADAS
+                </th>
+                <th class="text-uppercase text-center align-middle bg-light text-dark small font-weight-bold">TOTAL <br>
+                    SALIDAS
+                </th>
+                <th class="text-uppercase text-center align-middle bg-light text-dark small font-weight-bold">SALDO <br>
+                    ACTUAL
+                </th>
+
+                <th class="text-uppercase text-center align-middle bg-light text-dark small font-weight-bold">
+                    Operacion
+                </th>
+                <th class="text-uppercase text-center align-middle bg-light text-dark small font-weight-bold">
+                    Descripcion de la
+                    operacion
+                </th>
+                <th class="text-uppercase text-center align-middle bg-light text-dark small font-weight-bold">Cliente
+                </th>
+                <th class="text-uppercase text-center align-middle bg-light text-dark small font-weight-bold">Tipo de
+                    doc
+                </th>
+                {#                <th class="text-uppercase text-center align-middle bg-light text-dark small font-weight-bold">#}
+                {#                    Serie {{ cash_set.count }}</th>#}
+                {#                <th class="text-uppercase text-center align-middle bg-light text-dark small font-weight-bold">Numero</th>#}
+                <th class="text-uppercase text-center align-middle bg-light text-dark small font-weight-bold">subtotal
+                </th>
+                <th class="text-uppercase text-center align-middle bg-light text-dark small font-weight-bold">Igv</th>
+                <th class="text-uppercase text-center align-middle bg-light text-dark small font-weight-bold">total</th>
+                {#                <th class="text-uppercase text-center align-middle bg-light text-dark small font-weight-bold">Placa</th>#}
+                <th class="text-uppercase text-center align-middle bg-light text-dark small font-weight-bold">
+                    Responsable
+                </th>
+                {#                <th class="text-uppercase text-center align-middle bg-light text-dark small font-weight-bold">Usuario</th>#}
+            </tr>
+            </thead>
+            <tbody>
+            {% for c in dictionary %}
+                <tr class=" {% if c.type == 'S' %}text-danger font-weight-bold
+                            {% elif c.type == 'E' %}text-primary font-weight-bold
+                            {% elif c.type == 'A' %}text-warning font-weight-bold
+                            {% elif c.type == 'C' %}text-info font-weight-bold
+                            {% endif %}">
+                    {% if forloop.first %}
+
+                        <td class="align-middle text-center" rowspan="{{ c.count }}" style="width: 6%;">
+                            <button status="{% if c.status %}A{% else %}C{% endif %}"
+                                    date="{{ c.date|date:"Y-m-d" }}"
+                                    pk="{{ c.id }}" type="button"
+                                    class="btn {% if c.status %}btn-danger{% else %}btn-success{% endif %} cash-update">
+                                {% if c.status %}<i class="fas fa-door-closed"></i> Cerrado {% else %}
+                                    <i class="fas fa-door-open"></i> Abierto {% endif %}
+                            </button>
+                        </td>
+                        <td class="align-middle text-success font-weight-bold text-center" style="width: 4%;"
+                            rowspan="{{ c.count }}">{{ c.date|date:"d/m/Y" }}</td>
+                        <td class="align-middle text-success font-weight-bold text-center" style="width: 4%;"
+                            rowspan="{{ c.count }}">{{ c.inputs|floatformat:2 }}</td>
+                        <td class="align-middle text-success font-weight-bold text-center" style="width: 4%;"
+                            rowspan="{{ c.count }}">{{ c.outputs|floatformat:2 }}</td>
+                        <td class="align-middle text-success font-weight-bold text-center" style="width: 4%;"
+                            rowspan="{{ c.count }}">{{ c.balance|floatformat:2 }}</td>
+                    {% endif %}
+
+                    <td class=" {% if c.type == 'S' %}text-danger font-weight-bold
+                            {% elif c.type == 'E' %}text-primary font-weight-bold
+                            {% elif c.type == 'A' %}text-warning font-weight-bold
+                            {% elif c.type == 'C' %}text-info font-weight-bold
+                            {% endif %} text-right" style="width: 4%;">{{ c.type_doc|upper }}</td>
+                    <td class=" {% if c.type == 'S' %}text-danger font-weight-bold
+                            {% elif c.type == 'E' %}text-primary font-weight-bold
+                            {% elif c.type == 'A' %}text-warning font-weight-bold
+                            {% elif c.type == 'C' %}text-info font-weight-bold
+                            {% endif %}" >{{ c.description|upper }}</td>
+
+                    <td class=" {% if c.type == 'S' %}text-danger font-weight-bold
+                            {% elif c.type == 'E' %}text-primary font-weight-bold
+                            {% elif c.type == 'A' %}text-warning font-weight-bold
+                            {% elif c.type == 'C' %}text-info font-weight-bold
+                            {% endif %} text-center">{{ c.client|upper|default_if_none:"-" }}</td>
+
+                    <td class=" {% if c.type == 'S' %}text-danger font-weight-bold
+                            {% elif c.type == 'E' %}text-primary font-weight-bold
+                            {% elif c.type == 'A' %}text-warning font-weight-bold
+                            {% elif c.type == 'C' %}text-info font-weight-bold
+                            {% endif %} text-center" style="width: 4%;">{{ c.document_type|upper }}</td>
+                    {#                    <td>{{ c.serial|default_if_none:"-" }}</td>#}
+                    {#                    <td>{{ c.n_receipt|default_if_none:"-" }}</td>#}
+                    <td class="text-right" style="width: 4%;">{{ c.subtotal|floatformat:2 }}</td>
+                    <td class="text-right" style="width: 4%;">{{ c.igv|floatformat:2 }}</td>
+                    <td class="text-right" style="width: 4%;">{{ c.total|floatformat:2 }}</td>
+                    {#                    <td>{{ c.order.distribution_mobil.truck.license_plate }}</td>#}
+                    {#                    <td>{{ c.order.distribution_mobil.pilot.full_name }}</td>#}
+                    <td class=" {% if c.type == 'S' %}text-danger font-weight-bold
+                            {% elif c.type == 'E' %}text-primary font-weight-bold
+                            {% elif c.type == 'A' %}text-warning font-weight-bold
+                            {% elif c.type == 'C' %}text-info font-weight-bold
+                            {% endif %} text-center" style="width: 4%;">{{ c.user|upper|default_if_none:"-" }}</td>
+                </tr>
+            {% endfor %}
+            <tr class="">
+                <td class="bg-secondary" colspan="13" style="background: #a8ecc7"></td>
+            </tr>
+            <tr>
+                <td class="text-right border-secondary text-uppercase " colspan="5" style="background: #a8ecc7">Cantidad de Tickets</td>
+                <td class="text-center border-secondary " colspan="1" style="background: #a8ecc7">{{ count_t|safe }}</td>
+                <td class="text-center border-secondary " style="background: #a8ecc7">S/ {{ sum_total_t|safe }}</td>
+                <td class="text-center border-secondary " colspan="6" style="background: #a8ecc7"></td>
+            </tr>
+            <tr>
+                <td class="text-right border-secondary text-uppercase " colspan="5" style="background: #a8ecc7">Cantidad de Boletas</td>
+                <td class="text-center border-secondary " colspan="1" style="background: #a8ecc7">{{ count_b|safe }}</td>
+                <td class="text-center border-secondary " style="background: #a8ecc7">S/ {{ sum_total_b|safe }}</td>
+                <td class="text-center border-secondary " colspan="6" style="background: #a8ecc7"></td>
+            </tr>
+            <tr>
+                <td class="text-right border-secondary text-uppercase " colspan="5" style="background: #a8ecc7">Cantidad de Facturas</td>
+                <td class="text-center border-secondary " colspan="1" style="background: #a8ecc7">{{ count_f|safe }}</td>
+                <td class="text-center border-secondary " style="background: #a8ecc7">S/ {{ sum_total_f|safe }}</td>
+                <td class="text-center border-secondary " colspan="6" style="background: #a8ecc7"></td>
+            </tr>
+            <tr>
+                <td class="text-right border-secondary text-uppercase font-weight-bold" colspan="5" style="background: #a8ecc7">SALDO ANTERIOR</td>
+                <td class="text-center border-secondary font-weight-bold" colspan="1" style="background: #a8ecc7"></td>
+                <td class="text-center border-secondary font-weight-bold" style="background: #a8ecc7">S/ {{ previous_balance|safe }}</td>
+                <td class="text-center border-secondary font-weight-bold" colspan="6" style="background: #a8ecc7"></td>
+            </tr>
+            <tr>
+                <td class="text-right border-secondary font-weight-bold text-primary" colspan="5" style="background: #a8ecc7">VENTAS DEL DIA AL CONTADO</td>
+                <td class="text-center border-secondary" colspan="1" style="background: #a8ecc7"></td>
+                <td class="text-center border-secondary font-weight-bold text-primary" style="background: #a8ecc7">S/ {{ total_cash }}</td>
+                <td class="text-center border-secondary" colspan="6" style="background: #a8ecc7"></td>
+            </tr>
+            <tr>
+                <td class="text-right border-secondary font-weight-bold text-primary" colspan="5" style="background: #a8ecc7">INGRESOS POR PAGO DE COMPROBANTES</td>
+                <td class="text-center border-secondary" colspan="1" style="background: #a8ecc7"></td>
+                <td class="text-center border-secondary font-weight-bold text-primary" style="background: #a8ecc7">S/ {{ inputs_pay }} </td>
+                <td class="text-center border-secondary" colspan="6" style="background: #a8ecc7"></td>
+            </tr>
+            <tr>
+                <td class="text-right border-secondary font-weight-bold" colspan="5" style="background: #a8ecc7">GASTOS DEL DIA</td>
+                <td class="text-center border-secondary" colspan="1" style="background: #a8ecc7"></td>
+                <td class="text-center border-secondary font-weight-bold" style="background: #a8ecc7">S/ {{ outputs_without_transfer|safe }}</td>
+                <td class="text-center border-secondary" colspan="6" style="background: #a8ecc7"></td>
+            </tr>
+            <tr>
+                <td class="text-right border-secondary font-weight-bold" colspan="5" style="background: #a8ecc7">TRASLADOS DEL DIA</td>
+                <td class="text-center border-secondary" colspan="1" style="background: #a8ecc7"></td>
+                <td class="text-center border-secondary font-weight-bold" style="background: #a8ecc7">S/ {{ cash_transfer|safe }}</td>
+                <td class="text-center border-secondary" colspan="6" style="background: #a8ecc7"></td>
+            </tr>
+            <tr>
+                <td class="text-right border-secondary font-weight-bold" colspan="5" style="background: #a8ecc7">SALDO DEL DIA</td>
+                <td class="text-center border-secondary" colspan="1" style="background: #a8ecc7"></td>
+                <td class="text-center border-secondary font-weight-bold" style="background: #a8ecc7">S/ {{ total_day|safe }}</td>
+                <td class="text-center border-secondary" colspan="6" style="background: #a8ecc7"></td>
+            </tr>
+            </tbody>
+        </table>
+
+{#        <table>#}
+{#            <tbody class="text-uppercase font-weight-bold" style="background: #a8ecc7">#}
+{##}
+{#            </tbody>#}
+{#        </table>#}
+
+    </div>
+{% else %}
+    <div class="alert alert-info alert-dismissible fade show mt-3" role="alert">
+        <strong>Atencion!</strong> Tu debes ingresar una fecha primero.
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+{% endif %}
+
+{% block extrajs %}
+
+    <script type="text/javascript">
+
+        $('#table-cash').bootstrapTable({
+            //pagination: true,
+            showFooter: false,
+            //search: true,
+            showExport: true,
+            //filter: true,
+            //showRefresh:true,
+            showPrint: true,
+            //showColumns: true,
+            showFullScreen: true,
+            //pageList:[10, 25, 50, 100, 'All'],
+            //showPaginationSwitch: true,
+            exportDataType: 'all',
+            exportTypes: ['pdf', 'excel', 'xlsx', 'txt', 'json', 'xml'],
+            //exportFooter: true,
+
+            exportOptions: {
+                fileName: 'Caja',
+                buttons: [{
+                    extend: 'excel',
+                    text: 'Export Search Results',
+                    className: 'btn btn-primary',
+                }],
+                type: 'pdf',
+                className: 'btn btn-primary',
+                 jspdf: {
+                    orientation: 'l',
+                    format: 'bestfit', //a3, bestfit
+                    margins: {left: 10, right: 10, top: 100, bottom: 20},
+                    autotable: {
+                        styles: {
+                            fillColor: '#fff',
+                            textColor: '#343a40',
+                            fontSize: 10,
+                            valign: 'middle',
+                            lineWidth: 0.02,
+                            lineColor: '#343a40'
+                        },
+                        tableLineColor: '#409EFF',
+                        tableWidth: 'wrap', // auto
+                        theme: 'grid',
+                        //tableExport: {onBeforeAutotable: DoBeforeAutotable, onCellData: DoCellData}
+
+                    }
+                }
+            },
+            ignoreRow: [],
+
+        });
+        {##}
+        {##}
+        {#        $('#printReportExcel').click(function () {#}
+        {#            $("#table-cash").table2excel({filename: "Caja.xls"});#}
+        {#        });#}
+
+    </script>
+
+{% endblock extrajs %}

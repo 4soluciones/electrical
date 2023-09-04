@@ -1,0 +1,128 @@
+<table class="table table-sm table-bordered" id="table-dictionary">
+    <thead>
+
+    <tr class="text-white small text-uppercase">
+        <td class="bg-primary text-center">NUMERO DE COMPROBANTE</td>
+        <td class="bg-primary text-center">PROVEEDOR</td>
+        <td class="bg-primary text-center">FECHA DE COMPRA</td>
+        <td class="bg-primary text-center">ESTADO</td>
+        <td class="bg-primary text-center">EMPLEADO</td>
+        <td class="bg-success text-center">TIPO DE PAGO</td>
+        <td class="bg-info text-center">PRODUCTO</td>
+        <td class="bg-info text-center">UNIDAD</td>
+        <td class="bg-info text-center">CANTIDAD</td>
+        <td class="bg-info text-center">PRECIO UNITARIO</td>
+        <td class="bg-info text-center">SUBTOTAL</td>
+        <td class="bg-info text-center">TOTAL FLETE</td>
+        <td class="bg-info text-center">BASE TOTAL</td>
+        <td class="bg-info text-center">IGV</td>
+        <td class="table-danger text-center font-weight-bold text-dark">TOTAL</td>
+
+        <td class="bg-success text-center">LETRA</td>
+{#        <td class="bg-primary text-center">TOTAL PAGADO</td>#}
+{#        <td class="bg-primary text-center">FECHA DE PAGO</td>#}
+{#        <td class="bg-primary text-center">PAGAR</td>#}
+    </tr>
+    </thead>
+    <tbody>
+    {#        {{ dictionary }}#}
+    {% for p in dictionary %}
+        <tr>
+            <td class="align-middle text-center"
+                rowspan="{{ p.rowspan_gt }}">{{ p.bill_number|upper }}</td>
+            <td class="align-middle text-center"
+                rowspan="{{ p.rowspan_gt }}">{{ p.supplier.name }}</td>
+            <td class="align-middle text-center"
+                rowspan="{{ p.rowspan_gt }}">{{ p.purchase_date|date:"d-m-y" }}</td>
+            <td class="align-middle text-center text-success"
+                rowspan="{{ p.rowspan_gt }}">{{ p.status }}</td>
+            <td class="align-middle text-center"
+                rowspan="{{ p.rowspan_gt }}">{{ p.user.worker_set.last.employee.names|upper }}</td>
+            <td class="align-middle text-center" rowspan="{{ p.rowspan_gt }}">{{ p.type_pay }}</td>
+
+
+                {% for d, v in p.dict_table.items %}
+                    {% if not forloop.first %}
+                        <tr>
+                    {% endif %}
+                            <td class="align-middle text-center" rowspan="1">{{ v.a.product|default:"-" }}</td>
+                            <td class="align-middle text-center" rowspan="1">{{ v.a.unit|default:"-" }}</td>
+                            <td class="align-middle text-center" rowspan="1">{{ v.a.quantity|default:"-" }}</td>
+                            <td class="align-middle text-center" rowspan="1">{{ v.a.price_unit|default:"-" }}</td>
+
+                            <td class="align-middle text-center" rowspan="1">{{ v.a.total|default:"-" }}</td>
+
+                    {% if forloop.first %}
+                            <td class="align-middle text-center" rowspan="{{ p.rowspan_gt }}">{{ p.total_freight|default:"-" }}</td>
+                            <td class="align-middle text-center" rowspan="{{ p.rowspan_gt }}">{{ p.base_total_purchase|default:"-" }}</td>
+                            <td class="align-middle text-center" rowspan="{{ p.rowspan_gt }}">{{ p.igv_total_purchase|default:"-" }}</td>
+                            <td class="align-middle text-center table-danger font-weight-bold" rowspan="{{ p.rowspan_gt }}">{{ p.total|default:"-" }}</td>
+                    {% endif %}
+                            <td class="align-middle text-center" rowspan="1">{{ v.b.due|default:"-" }}</td>
+{#                    {% if forloop.first %}#}
+{#                            <td class="align-middle text-center pay-row" rowspan="{{ p.rowspan_gt }}">{{ lp.price|safe }}</td>#}
+{#                            <td class="align-middle text-center pay-row"#}
+{#                                rowspan="{{ p.rowspan_gt }}">{{ lp.date|date:"d-m-y" }}</td>#}
+{#                            <td class="align-middle text-center button-pay p-1" rowspan="{{ p.rowspan_gt }}">#}
+{#                                <button type="button"#}
+{#                                        class="btn btn-success btn-show-payments"#}
+{#                                        data-toggle="modal"#}
+{#                                        data-target="#modal-payment-purchase"#}
+{#                                        pk="{{ p.id }}"><i#}
+{#                                        class="fas fa-dollar-sign"></i> Pagar#}
+{#                                </button>#}
+{#                            </td>#}
+{#                    {% endif %}#}
+
+                        </tr>
+
+
+                {% endfor %}
+
+
+
+
+    {% endfor %}
+    </tbody>
+</table>
+<script type="text/javascript">
+
+    $(document).on('click', '.btn-show-payments', function () {
+        let _purchase_id = $(this).attr('pk');
+
+        {#$('#lending').empty();#}
+        $.ajax({
+            url: '/accounting/get_purchases_pay/',
+            async: true,
+            dataType: 'json',
+            type: 'GET',
+            data: {
+                'purchase_id': _purchase_id,
+                'start-date': $('#id_date_initial').val(),
+                'end-date': $('#id_date_final').val(),
+            },
+            success: function (response) {
+                $('#pay-purchase').html(response.grid);
+            },
+            fail: function (response) {
+                console.log("error");
+            }
+        });
+    });
+
+    $('#table-dictionary tr.purchase td.pay-row').each(function () {
+
+        let row_pay = $(this).text();
+        if (row_pay !== '') {
+            $(this).parent('tr').find('td.button-pay button').hide();
+            {#$(this).parent('tr').find('td.button-pay').css({'background-color': '#beec96'});#}
+            $(this).parent('tr').find('td.pay-row').css({'background-color': '#28a745'});
+            {#$(this).parent('tr').css({'background-color': '#aaa'});#}
+
+
+        }
+
+
+    });
+
+</script>

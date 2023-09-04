@@ -1,0 +1,79 @@
+<div class="modal-dialog modal-dialog-centered" role="document">
+
+    <div class="modal-content">
+        <div class="modal-header" style="background-color: rgb(21,99,181);">
+            <h6 class="modal-title  text-white roboto-condensed-regular">Registro de subcategorias producto</h6>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+
+        <form id="form-subcategory" class="embed-responsive" enctype="multipart/form-data"
+              action="{% url 'sales:save_subcategory' %}" method="POST">
+            {% csrf_token %}
+
+            <div class="modal-body">
+                <div class="card border-primary">
+                    <div class="card-header" style="background-color: rgb(21,99,181);">
+                        <h6 class="card-title text-center text-white mb-0 roboto-condensed-regular">Información</h6>
+                    </div>
+                    <div class="card-body m-2">
+                        <div class="row col-md-12 m-0 p-0">
+                            <div class="col-md-12  align-self-center">
+                                <label class="m-0">Categoria</label>
+                                <select class="form-control" id="id-category" name="id-category"
+                                        required>
+                                    <option value="0">Seleccione</option>
+                                    {% for g in category_set %}
+                                        <option value="{{ g.id }}">{{ g.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row col-md-12 m-0 p-0">
+                            <div class="col-md-12  align-self-center">
+                                <label class="m-0">Nombre subcategoria</label>
+                                <input type="text"
+                                       class="form-control" name="id-name" id="id-name"
+                                       placeholder="" required
+                                       value="" maxlength="45">
+                            </div>
+                        </div>
+                    </div>
+                </div><!-- modal-body -->
+                <div class="modal-footer p-1">
+                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>
+                    &nbsp;
+                    <button id="save-subcategory" type="submit" class="btn btn-sm btn-success"> Registrar
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script type="text/javascript">
+    $('#form-subcategory').submit(function (event) {
+        event.preventDefault();
+        let data = new FormData($('#form-subcategory').get(0));
+        $.ajax({
+            url: $(this).attr('action'),
+            type: $(this).attr('method'),
+            data: data,
+            cache: false,
+            processData: false,
+            contentType: false,
+            headers: {"X-CSRFToken": '{{ csrf_token }}'},
+            success: function (response) {
+                if (response.success) {
+                    toastr.success('Informacion registrada con exito');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 400);
+                }
+            },
+            error: function (response) {
+                toastr.error('La informacion no se logro registrar');
+            }
+        });
+    });
+</script>

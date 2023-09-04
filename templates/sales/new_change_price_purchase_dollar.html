@@ -1,0 +1,109 @@
+<form id="update-change-price-purchase-dollar" action="" method="POST">
+    {% csrf_token %}
+
+    <input type="hidden" id="id_product" name="product" value="{{ product.id }}">
+
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <h4 class="mt-1 text-center"> {{ product.name }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <table class="table table-sm pay-options" id="table-price-purchase">
+        <thead>
+        <tr class="text-uppercase font-weight-lighter">
+            <th class="border-right text-center border-left align-middle">PRECIO DE COMPRA EN DOLARES</th>
+            <th class="border-right text-center border-left align-middle">NUEVO PRECIO DE COMPRA EN DOLARES</th>
+        </tr>
+        </thead>
+        {% for p in product_dict %}
+            {% for pd in p.product_detail_set.all %}
+                <tbody class="mb-2">
+                <tr pk="{{ pd.product__id }}">
+                    <td class="border-top-0 border-bottom border-right border-left text-center align-middle font-weight-bold"
+                        style="background: #bed1f3">$ {{ pd.price_purchase_dollar|safe }}</td>
+                    <td class="border-top-0 border-bottom border-right border-left text-center align-middle">
+                        <input class="form-control form-control-sm decimal text-center" type="text"
+                               id="id_new_price_purchase" name="new-price-purchase-dollar"
+                               value="" placeholder="0">
+                    </td>
+                </tr>
+                </tbody>
+            {% endfor %}
+        {% endfor %}
+    </table>
+
+    <div class="modal-footer border-0 pt-0">
+        <button type="submit" id="btn-save" class="btn btn-primary">Guardar</button>
+    </div>
+
+</form>
+
+<script type="text/javascript">
+
+    $('#update-change-price-purchase-dollar').submit(function (event) {
+        event.preventDefault();
+        let data = new FormData($('#update-change-price-purchase-dollar').get(0));
+
+        let product_id = $("#id_product").val();
+
+        $('#btn-save').attr("disabled", "true");
+
+        $.ajax({
+            url: '/sales/new_change_price_purchase_dollar_product/',
+            type: "POST",
+            data: data,
+            cache: false,
+            processData: false,
+            contentType: false,
+            success: function (response, textStatus, xhr) {
+                if (xhr.status === 200) {
+                    $('#modal-change-price-purchase-dollar').modal('hide');
+
+                    $('td.price-purchase-dollar[pk="' + product_id + '"]').html('$ ' + Number(response.new_price_purchase_dollar).toFixed(2));
+
+                    $('td.price-purchase[pk="' + product_id + '"]').html(Number(response.new_price_purchase_sol).toFixed(2));
+                    $('td.new-percent-one[pk="' + product_id + '"]').html(`S/ ${response.percent1}`);
+                    $('td.new-percent-two[pk="' + product_id + '"]').html(`S/ ${response.percent2}`);
+                    $('td.new-percent-three[pk="' + product_id + '"]').html(`S/ ${response.percent3}`);
+
+
+                    toastr.success(response['message'], '¡Bien hecho!');
+                }
+            },
+            error: function (jqXhr, textStatus, xhr) {
+                if (jqXhr.status === 500) {
+                    toastr.error(jqXhr.responseJSON.error, '¡Error de Peticións!');
+                }
+            }
+        });
+        $('#btn-save').removeAttr("disabled", "false");
+
+    });
+
+
+    $('#id_new_price_purchase').keyup(function () {
+
+        calculte()
+
+    });
+
+    function calculte() {
+        let price_purchase = parseFloat($('#id_new_price_purchase').val())
+        let percent_one = parseFloat($('th.percent-one').attr('p1'))
+        let percent_two = parseFloat($('th.percent-two').attr('p2'))
+        let percent_three = parseFloat($('th.percent-three').attr('p3'))
+
+        $("#id_new_percent_one").val(Number(percent_one * price_purchase / 100 + price_purchase).toFixed(2));
+
+        $("#id_new_percent_two").val(Number(percent_two * price_purchase / 100 + price_purchase).toFixed(2));
+
+        $("#id_new_percent_three").val(Number(percent_three * price_purchase / 100 + price_purchase).toFixed(2));
+    }
+
+</script>
+

@@ -1,0 +1,116 @@
+<table class="table table-sm text-uppercase small mt-0 mb-0">
+    <tr>
+        <td style="width: 25%;" class="border-top-0">&nbsp;</td>
+        <td style="width: 25%;" class="border-top-0">&nbsp;</td>
+        <td style="width: 25%;" class="border-top-0">&nbsp;</td>
+        <td style="width: 25%;" class="border-top-0">&nbsp;</td>
+    </tr>
+
+    <tr>
+        <td class="border-top-0" colspan="1">Tipo documento:</td>
+        <td class="border-top-0" colspan="2">Motivo:</td>
+        <td class="border-top-0" colspan="2">Documento:</td>
+    </tr>
+
+    <tr>
+
+        <td class="border-top-0" colspan="1">
+            <select class="form-control form-control-sm text-uppercase"
+                    id="id_document_type_attached"
+                    name="document_type_attached" required>
+                <option disabled value="">Seleccione...</option>
+                {% for item in choices_document_type_attached %}
+                    <option {% if item.0 == 'T' %}selected{% endif %} value="{{ item.0 }}">{{ item.1 }}</option>
+                {% endfor %}
+            </select>
+        </td>
+        <td class="border-top-0" colspan="2">
+            <select class="form-control form-control-sm text-uppercase"
+                    id="id_motive"
+                    name="motive" required>
+                <option selected disabled value="0">Seleccione...</option>
+                {% for motive in motives %}
+                        <option class="text-muted" value="{{ motive.id }}">{{ motive.description }}</option>
+                {% endfor %}
+            </select>
+        </td>
+        <td class="border-top-0" colspan="1">
+            <input type="text" class="form-control form-control-sm text-uppercase"
+                   id="id_document"
+                   name="document">
+        </td>
+    </tr>
+
+    <tr>
+
+
+    </tr>
+    <tr>
+
+
+    </tr>
+
+    <tr>
+
+        <td class="border-top-0" colspan="2">Sucursal origen:</td>
+        <td class="border-top-0" colspan="2">Sucursal destino:</td>
+
+    </tr>
+    <tr>
+
+        <td class="border-top-0" colspan="2">
+            <select class="form-control form-control-sm font-weight-bold text-uppercase"
+                    id="id_origin"
+                    name="origin" required>
+                <option selected disabled value="0">Seleccione...</option>
+                <option value="{{ subsidiary_origin.subsidiary.id }}">{{ subsidiary_origin.subsidiary.name }}
+                    - {{ subsidiary_origin.get_category_display }}</option>
+
+            </select>
+            <input type="hidden" id="id_guide" name="guide" value="{{ guide_obj.id }}">
+        </td>
+
+        <td class="border-top-0" colspan="2">
+            <select class="form-control form-control-sm text-uppercase"
+                    id="id_destiny"
+                    name="destiny" required>
+                <option selected disabled value="0">Seleccione...</option>
+                {% for ss in subsidiary_destiny %}
+                    <option value="{{ ss.subsidiary.id }}">{{ ss.subsidiary.name }} - {{ ss.get_category_display }}</option>
+                {% endfor %}
+            </select>
+        </td>
+
+    </tr>
+
+
+    <tr>
+        <td class="border-top-0 pt-2" colspan="2">Observaciones:</td>
+        <td class="border-top-0 pt-2" colspan="1"></td>
+    </tr>
+
+    <tr>
+        <td class="border-top-0" colspan="3">
+                <textarea class="form-control form-control-sm font-weight-bold text-uppercase"
+                          name="observation"
+                          id="id_observation" rows="3" cols="100"></textarea>
+        </td>
+        <td class="border-top-0 text-right" colspan="1">
+            <button type="button" id="btn-save"
+                    class="btn btn-sm btn-success btn-block pb-1 mb-1 guide-save text-center">Guardar
+            </button>
+            <button type="button" id="btn-new"
+                    class="btn btn-sm btn-success btn-block pb-1 guide-new text-center">Nuevo
+            </button>
+            {#            <br>#}
+            {#            <div class="form-check">#}
+            {#                <input class="form-check-input" type="checkbox" checked value="1" id="is-table">#}
+            {#                <label class="form-check-label" for="is-table">#}
+            {#                    Ver almacenes modo tabla#}
+            {#                </label>#}
+            {#            </div>#}
+        </td>
+
+    </tr>
+
+</table>

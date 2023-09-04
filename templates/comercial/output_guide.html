@@ -1,0 +1,547 @@
+{% extends 'home.html' %}
+{% block title %}
+    coronasoft.dev | Nota de salida
+{% endblock title %}
+
+{% block body %}
+
+    <form id="input-guide-form" action="" method="GET">
+        {% csrf_token %}
+
+        <div class="row">
+            <div class="col-sm-12">
+
+                <div class="card">
+                    <div class="card-body text-center font-weight-bolder">
+                        <h2 class="text-uppercase">Crear Nota de salida</h2>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="card-group">
+
+            <div class="card border-left border-top-0 border-right-0 border-bottom" style="flex-grow: 2">
+
+                <div class="card-header text-center font-weight-lighter">
+                    REGISTRAR SALIDA
+                </div>
+
+                <div id="io-guide-form" class="card-body">
+                    {% include "comercial/output_guide_form.html" %}
+
+                    <table class="table table-sm text-uppercase small mt-3">
+                        <tr>
+                            <td class="border-top-0 mt-2 align-middle" colspan="2" style="width: 50%">
+                                Producto:
+                            </td>
+                            <td class="border-top-0 mt-2 align-middle text-center" colspan="2"
+                                style="width: 25%">Cantidad a
+                                Enviar:
+                            </td>
+                            <td class="border-top-0 mt-2 align-middle text-center" colspan="2"
+                                style="width: 25%">Acción:
+                            </td>
+
+                        </tr>
+                        <tr product="" product_name="" sp="" price="" price_purchase="" stock="" unit="">
+                            {#                            <td class="border-top-0 pb-2" colspan="2">#}
+                            {##}
+                            {#                                <select id="id_product" name="id_product" class="form-control form-control-sm font-weight-bold text-uppercase">#}
+                            {#                                    <option disabled selected value="">Seleccione...</option>#}
+                            {#                                </select>#}
+                            {##}
+                            {#                            </td>#}
+                            <td class="align-middle text-left product-item-table border-top-0 pb-2" colspan="2">
+                                {#                <div class="btn-group">#}
+                                <input type="text"
+                                       class="form-control text-uppercase product-table dropdown-toggle"
+                                       data-toggle="dropdown" aria-expanded="false"
+                                       placeholder="Ingrese producto...">
+                                <div class="dropdown-menu"></div>
+                                {#                </div>#}
+                            </td>
+                            <td class="border-top-0 pb-2" colspan="2">
+                                <input type="text" class="form-control form-control-sm decimal"
+                                       maxlength="10"
+                                       id="id_quantity"
+                                       name="id_quantity">
+                            </td>
+                            <td class="border-top-0" colspan="2">
+                                <button class="btn btn-success btn-sm btn-block" id="add-product">
+                                    Agregar
+                                </button>
+                            </td>
+                        </tr>
+                    </table>
+                    <table id="data-guide-details"
+                           class="table text-uppercase small text-black-50 m-0 border-0">
+                        <thead>
+                        <tr class="text-center bg-light font-weight-bold" style="height: 50px;">
+                            <th scope="col" class="align-middle border-0">#</th>
+                            <th scope="col" class="align-middle border-0">Producto</th>
+                            <th scope="col" class="align-middle border-0">Cantidad</th>
+                            <th scope="col" class="align-middle border-0">Precio Unitario</th>
+                            <th scope="col" class="align-middle border-0">Total</th>
+                            <th scope="col" class="align-middle border-0">Eliminar</th>
+                        </tr>
+                        </thead>
+                        <tbody id="guide-details" class="font-weight-bold">
+
+                        </tbody>
+                        <tfoot>
+
+
+                        <tr>
+                            <th colspan="2"></th>
+                            <th colspan="2" class="align-middle"><label class="h6 m-0">TOTAL : S/</label></th>
+                            <th colspan="1" id="sum-total" class="text-right h6 font-weight-bolder align-middle p-0">
+                                0.00
+                            </th>
+                            <th colspan="1"></th>
+                        </tr>
+
+                        </tfoot>
+                    </table>
+
+                </div>
+            </div>
+
+
+            <div class="card border-left border-top-0 border-right border-bottom" style="flex-grow: 1">
+                <div class="card-header text-center font-weight-bold" id="origin-store-name">
+                    ORIGEN
+                </div>
+                <div class="card-body " id="origin-store-list" style="height: 30rem;"></div>
+            </div>
+
+            <div class="card border-left-0 border-top-0 border-right border-bottom" style="flex-grow: 1">
+                <div class="card-header text-center font-weight-bold" id="destiny-store-name">
+                    DESTINO
+                </div>
+                <div class="card-body " id="destiny-store-list" style="height: 30rem;"></div>
+            </div>
+
+
+        </div>
+
+    </form>
+
+{% endblock body %}
+
+{% block extrajs %}
+    <script type="text/javascript">
+
+        {#loader = '<div class="container text-center pt-5 css-loading">' +#}
+        {#    '<div class="row mt-5">' +#}
+        {#    '<div class="col-md-12">' +#}
+        {#    '<div class="loader" style="border: 1px solid #28a745;" >' +#}
+        {#    '<div class="loader-inner"><div class="loading one" style="background-color: #28a745;"></div></div>' +#}
+        {#    '<div class="loader-inner"><div class="loading two" style="background-color: #28a745;"></div></div>' +#}
+        {#    '<div class="loader-inner"><div class="loading three" style="background-color: #28a745;"></div></div>' +#}
+        {#    '<div class="loader-inner"><div class="loading four" style="background-color: #28a745;"></div></div>' +#}
+        {#    '</div>' +#}
+        {#    '</div>' +#}
+        {#    '</div>' +#}
+        {#    '</div>';#}
+
+        loader = '<div class="container">' +
+            '<div class="row">' +
+            '<div class="col-md-12">' +
+            '<div class="loader">' +
+            '<p>Cargando...</p>' +
+            '<div class="loader-inner"></div>' +
+            '<div class="loader-inner"></div>' +
+            '<div class="loader-inner"></div>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>';
+
+        function ResetDropDownList() {
+            $('#id_destiny').find('option').show();
+            $('#id_origin').find('option').show();
+        }
+
+
+        {#$(document).on('change', '#id_origin', function () {#}
+        {#    ResetDropDownList();#}
+        {#    if ($(this).val()) {#}
+        {##}
+        {#        $('#id_destiny option[value="' + $(this).val() + '"]').hide();#}
+        {##}
+        {#        let _origin_id = $(this).val();#}
+        {##}
+        {#$('#origin-store-list').mCustomScrollbar("destroy");#}
+        {##}
+        {#        $.ajax({#}
+        {#            url: '/comercial/get_products_by_subsidiary_store/',#}
+        {#            async: true,#}
+        {#            dataType: 'json',#}
+        {#            type: 'GET',#}
+        {#            data: {'pk': _origin_id, 'is_table': ($('#is-table').is(':checked')) ? 1 : 0},#}
+        {#            success: function (response) {#}
+        {#                $('#origin-store-list').html(response.grid);#}
+        {#                $('#origin-store-name').text(response.subsidiary_store);#}
+        {#                $('#id_product').empty().append('<option disabled selected value="">Seleccione...</option>');#}
+        {#                let _product_stores = response['product_store_set_serialized'];#}
+        {#                _product_stores.forEach(#}
+        {#                    element =>#}
+        {#                        $('#id_product').append(#}
+        {#                            '<option ' +#}
+        {#                            'value="' + element[1] + '" ' +#}
+        {#                            'sp="' + element[0] + '" ' +#}
+        {#                            'stock="' + element[3] + '" ' +#}
+        {#                            'price="' + element[4] + '" ' +#}
+        {#                            'unit="' + element[5] + '">' + element[2].toUpperCase() +#}
+        {#                            '</option>'#}
+        {#                        )#}
+        {#                )#}
+        {##}
+        {#                $("ul").parent('#origin-store-list').mCustomScrollbar();#}
+        {#            },#}
+        {#            fail: function (response) {#}
+        {#                console.log("error");#}
+        {#            }#}
+        {#        });#}
+        {#    }#}
+        {# });#}
+
+
+        {#$(document).on('change', '#id_destiny', function () {#}
+        {#    ResetDropDownList();#}
+        {#    if ($(this).val()) {#}
+        {##}
+        {#        $('#id_origin option[value="' + $(this).val() + '"]').hide();#}
+        {##}
+        {#        let _destiny_id = $(this).val();#}
+        {##}
+        {#        $('#destiny-store-list').mCustomScrollbar("destroy");#}
+        {##}
+        {#        $.ajax({#}
+        {#            url: '/comercial/get_products_by_subsidiary_store/',#}
+        {#            async: true,#}
+        {#            dataType: 'json',#}
+        {#            type: 'GET',#}
+        {#            data: {'pk': _destiny_id, 'is_table': ($('#is-table').is(':checked')) ? 1 : 0},#}
+        {#            success: function (response) {#}
+        {#                $('#destiny-store-list').html(response.grid);#}
+        {#                $('#destiny-store-name').text(response.subsidiary_store);#}
+        {#                $("ul").parent('#destiny-store-list').mCustomScrollbar();#}
+        {#            },#}
+        {#            fail: function (response) {#}
+        {#                console.log("error");#}
+        {#            }#}
+        {#        });#}
+        {#    }#}
+        {# });#}
+
+        function ResetSelected() {
+            $('#id_product option').removeAttr('selected');
+        }
+
+        $(document).on('click', '#origin-store-list ul li', function () {
+            let _id = $(this).parent('ul').attr('product-id');
+            ResetSelected();
+            $('#id_product option[value=' + _id + ']').attr('selected', 'selected');
+            $("#id_product").trigger("change");
+        });
+
+        $(document).on('change', '#id_product', function () {
+            let _id = $(this).val();
+            let _stock = $('#id_product option[value=' + _id + ']').attr('stock');
+            $('#id_quantity').val(_stock);
+        });
+
+        $(document).on('keyup', '.decimal', function () {
+
+            let val = $(this).val();
+            if (isNaN(val)) {
+                val = val.replace(/[^0-9\.]/g, '');
+                if (val.split('.').length > 2)
+                    val = val.replace(/\.+$/, "");
+            }
+            $(this).val(val);
+        });
+        $("#add-product").click(function (event) {
+            event.preventDefault();
+            let _tr = $(this).parent('td').parent('tr')
+            let _product_id = _tr.attr('product');
+            let _quantity = Number($('#id_quantity').val());
+            let _product_name = _tr.attr('product_name');
+            let _sp = _tr.attr('sp');
+            let _stock = Number(_tr.attr('stock'));
+            let _price = Number(_tr.attr('price'));
+            let _price_purchase = Number(_tr.attr('price_purchase'));
+            let _unit = _tr.attr('unit_id');
+            let _total = _quantity * _price_purchase;
+
+            if ($("#guide-details tr[pk=" + _product_id + "]").length) {
+                toastr.warning("Producto ya seleccionado, seleccione otro. ", '¡Inconcebible!');
+                return false;
+            }
+
+            if (_stock < _quantity) {
+                toastr.warning("Cantidad insuficiente. ", '¡Inconcebible!');
+                return false;
+            }
+
+            $('#guide-details').append(
+                '<tr pk="' + _product_id + '" sp="' + _sp + '" unit="' + _unit + '">' +
+                '<td class="align-middle text-center p-0 item_product">' + _product_id + '</td>' +
+                '<td class="align-middle text-center p-0">' + _product_name + '</td>' +
+                '<td class="align-middle text-center p-0 item_quantity">' + _quantity + '</td>' +
+                '<td class="align-middle text-center p-0 item-price">' + _price_purchase.toFixed(2) + '</td>' +
+                '<td class="align-middle text-center p-0 item_total">' + _total.toFixed(2) + '</td>' +
+                '<td class="text-center p-0">' + '<button type =button onclick="deleteItem(' + _product_id + ')" class="btn"><i class="fa fa-trash"></i></button>' + '</td>' +
+                '</tr>'
+            );
+            calculateTotal();
+        });
+
+        function deleteItem($id) {
+            $('#guide-details').find('tr[pk="' + $id + '"]').remove();
+            calculateTotal();
+            {#counterStrike();#}
+        }
+
+        function calculateTotal() {
+            let sum = 0;
+            $('#guide-details tr td.item_total').each(function () {
+                sum = sum + Number($(this).text());
+            });
+
+            $('#sum-total').text(sum.toFixed(2));
+        }
+
+        function hasRowDetails() {
+            let _response = false;
+            if ($("#guide-details tr").length > 0) {
+                _response = true;
+            }
+            return _response;
+        }
+
+        $('#btn-save').click(function () {
+
+            if (hasRowDetails() === false) {
+                toastr.warning("Elija los productos necesarios porfavor. ", '¡Inconcebible!');
+                return false;
+            }
+            if ($('#id_motive').val() === null) {
+                toastr.warning("Elija un motivo de la Nota de Salida. ", '¡Inconcebible!');
+                return false;
+            }
+            if ($('#id_document').val() === '') {
+                toastr.warning("Complete el numero de documento", '¡Inconcebible!');
+                $('#id_document').focus()
+                return false;
+            }
+
+            let dictionary = {
+                "Details": [],
+                "Document": $('#id_document').val(),
+                "DocumentTypeAttached": $('#id_document_type_attached').val(),
+                "Motive": $('#id_motive').val(),
+                "Origin": $('#id_origin').val(),
+                "Destiny": $('#id_destiny').val(),
+                "Observation": $('#id_observation').val(),
+                "Total": $('#sum-total').text(),
+            };
+
+            $("#guide-details tr").each(function () {
+                let detailObj = {
+                    "Product": $(this).attr('pk'),
+                    "ProductStore": $(this).attr('sp'),
+                    "Unit": $(this).attr('unit'),
+                    "Quantity": $(this).find("td.item_quantity").text(),
+                    "Price": $(this).find("td.item-price").text(),
+                };
+                dictionary.Details.push(detailObj);
+
+            });
+            console.log(dictionary)
+
+            {#$('#io-guide-form').html(loader);#}
+            $.ajax({
+                url: '/comercial/create_output_transfer/',
+                async: true,
+                dataType: 'json', // for response
+                type: 'GET',
+                data: {'transfer': JSON.stringify(dictionary)},
+                contentType: 'application/json;charset=UTF-8',
+                headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                success: function (response, textStatus, xhr) {
+                    console.log(response);
+                    if (xhr.status === 200) {
+                        toastr.success(response.message, '¡Bien hecho!');
+                        // Simulate a mouse click:
+                        window.location.href = "/comercial/get_output_note/" + response.guide_id + "/";
+                        setTimeout(() => {
+                            // location.reload();
+                            // Simulate an HTTP redirect:
+                            window.location.replace("/comercial/output_workflow/");
+                        }, 500);
+                    }
+                },
+                error: function (jqXhr, textStatus, xhr) {
+                    toastr.error(jqXhr.responseJSON.error, '¡Inconcebible!');
+                }
+            });
+
+        });
+
+        $(document).on('focusin', '.product-table', function (e) {
+            // $(this).parent('td').find('div.dropdown-menu').removeClass('show')
+
+
+            $(this).parent('td').find('div.dropdown-menu').css({
+                'background-color': 'transparent',
+                'border': 'transparent',
+                {#'margin-top': '10px'#}
+            })
+            $(this).val(' ');
+            $('#id_quantity').val('')
+        });
+
+        $(document).on('keypress', '.product-table', function (e) {
+
+            $(this).parent('td').find('div.dropdown-menu').empty()
+
+            if (e.keyCode === 13) {
+
+                e.preventDefault()
+
+                $(this).trigger("enterKey");
+                if ($('#id_origin').val() === null || $('#id_destiny').val() === null) {
+
+                    toastr.warning("SELECCIONE SUCURSAL DE ORIGEN Y DESTINO PRIMERO ", '¡ERROR DE DATOS!');
+                    return false;
+                }
+
+                let _product_name = $(this).val();
+                // let _td = $(this).parent('div.btn-group').parent('td')
+                let _td = $(this).parent('td')
+                let _menu = _td.find('.dropdown-menu')
+
+                if (_product_name.length > 3) {
+
+                    $.ajax({
+                        url: '/buys/get_product_by_criteria_table/',
+                        async: true,
+                        dataType: 'json', // for response
+                        type: 'GET',
+                        data: {
+                            'value': _product_name,
+                        },
+                        contentType: 'application/json;charset=UTF-8',
+                        headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                        success: function (response, textStatus, xhr) {
+                            if (xhr.status === 200) {
+                                let list = response.productList;
+                                _menu.css({'background-color': '#fff', 'border': '1px solid rgba(0,0,0,.15)'})
+                                for (let i = 0; i < list.length; i++) {
+                                    _menu.append(`<a class="dropdown-item product-item" unit_name="${list[i].unit}" brand="${list[i].brand}" unit_id="${list[i].unit_id}" price_sale="${list[i].price_sale}" price_purchase="${list[i].price_purchase}" stock="${list[i].stock}" sp="${list[i].product_store_id}" data-id="${list[i].id}" href="#" >${list[i].name} - ${list[i].brand}</a>`)
+                                }
+                            }
+                        },
+                        error: function (jqXhr, textStatus, xhr) {
+                            if (jqXhr.status === 500) {
+                                toastr.error(jqXhr.responseJSON.error, 'Mensaje');
+                            } else {
+                                if (textStatus === 'timeout') {
+                                    toastr.error('Failed from timeout', 'Mensaje');
+                                } else {
+                                    console.log(" STATUS: " + xhr + " " + textStatus);
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    toastr.warning('Para la busqueda ingrese minimo 3 caracteres', 'Error de llenado');
+                    return false;
+                }
+            }
+        });
+
+        $(document).on('click', '.product-item', function (e) {
+
+            let _product_id = $(this).attr('data-id');
+            let _unit_id = $(this).attr('unit_id');
+            let _product_name = $(this).text();
+            let _tr = $(this).parent('div.dropdown-menu').parent('td').parent('tr');
+            let _td = $(this).parent('div.dropdown-menu').parent('td');
+            let _select = _td.find('select.unit-product');
+            let _brand_product = $(this).attr('brand');
+            let _price_sale = $(this).attr('price_sale');
+            let _price_purchase = $(this).attr('price_purchase');
+            let _stock = $(this).attr('stock');
+            let _sp = $(this).attr('sp');
+            let _unit_product = $(this).attr('unit_name');
+            let _subsidiary_origin = $('#id_origin').val();
+            let _subsidiary_destiny = $('#id_destiny').val();
+            //$('.product-table').val(_product_name)
+
+            _tr.attr('product', _product_id);
+            _td.find('input.product-table').val(_product_name)
+            _tr.attr('product_name', _product_name);
+            _tr.attr('sp', _sp);
+            _tr.attr('price', _price_sale);
+            _tr.attr('price_purchase', _price_purchase);
+            _tr.attr('stock', _stock);
+            _tr.attr('unit', _unit_product);
+            _tr.attr('unit_id', _unit_id);
+
+            {#_tr.find('td.brand input.brand-product').val(_brand_product)#}
+            {#_tr.find('td.unit input.unit-product').val(_unit_product)#}
+            get_product_by_subsidiary_store_origin(_product_id, _subsidiary_origin);
+            get_product_by_subsidiary_store_destiny(_product_id, _subsidiary_destiny);
+            {#_tr.attr('unit_id', _unit_id)#}
+
+            {#get_units_by_product(_product_id, _tr)#}
+
+            $(this).parent('div.dropdown-menu').empty()
+            $(this).parent('div.dropdown-menu').addClass('hide')
+        });
+
+        function get_product_by_subsidiary_store_origin($product, $subsidiary_origin) {
+
+            $.ajax({
+                url: '/comercial/get_product_by_subsidiary_store_origin/',
+                async: true,
+                dataType: 'json',
+                type: 'GET',
+                data: {'subsidiary_origin': $subsidiary_origin, 'product': $product},
+                success: function (response) {
+                    $('#origin-store-list').html(response.grid);
+                    $('#origin-store-name').text(response.subsidiary_store);
+                    $("ul").parent('#destiny-store-list').mCustomScrollbar();
+                },
+                fail: function (response) {
+                    console.log("error");
+                }
+            });
+        }
+
+        function get_product_by_subsidiary_store_destiny($product, $subsidiary_destiny) {
+
+            $.ajax({
+                url: '/comercial/get_product_by_subsidiary_store_destiny/',
+                async: true,
+                dataType: 'json',
+                type: 'GET',
+                data: {'subsidiary_destiny': $subsidiary_destiny, 'product': $product},
+                success: function (response) {
+                    $('#destiny-store-list').html(response.grid);
+                    $('#destiny-store-name').text(response.subsidiary_store);
+                    $("ul").parent('#destiny-store-list').mCustomScrollbar();
+                },
+                fail: function (response) {
+                    console.log("error");
+                }
+            });
+        }
+
+    </script>
+{% endblock extrajs %}

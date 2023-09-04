@@ -1,0 +1,367 @@
+{% extends 'home.html' %}
+
+{% block title %}
+    Cuadre de inventario
+{% endblock title %}
+
+{% block body %}
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-12 col-md-12 col-lg-12">
+                <form class="form-inline" id="search-form" method="POST">
+                    {% csrf_token %}
+                    <label class="my-1 mr-2 font-weight-bold" for="brand_id">Seleccione Marca :</label>
+                    <select class="custom-select my-1 mr-sm-2" id="brand_id" name="product-brand" required>
+                        <option value="" disabled selected>SELECCIONE...</option>
+                        {% for pb in product_brand_set %}
+                            <option value="{{ pb.id }}">{{ pb.name }}</option>
+                        {% endfor %}
+
+                    </select>
+
+                    <button type="submit" class="btn btn-primary ml-2 mr-2" id="btn-search">
+                        <i class="fas fa-search-dollar"></i> Buscar
+                    </button>
+
+                    <label class="my-1 mr-2 font-weight-bold" for="date_id">Fecha de Acceso: </label>
+                    <input type="date" class="form-control my-2 mr-sm-2" id="date_id" name="date"
+                           value="{{ formatdate }}">
+
+                    <button type="button" class="btn btn-success m-1" data-toggle="modal" id="start-inventory"
+                            data-target="#modal-start-inventory" disabled>
+                        <i class="fas fa-clipboard-list"></i> Iniciar Cuadre de inventario
+                    </button>
+
+                    <button type="button" class="btn btn-outline-danger m-1" id="end-inventory"
+                            disabled>
+                        <i class="fas fa-clipboard-list"></i> Cerrar Cuadre de inventario
+                    </button>
+                    <h4 class="ml-3 mb-3 mt-3 text-primary" id="my_last_inventory"></h4>
+                </form>
+            </div>
+
+        </div>
+
+        <div id="product-grid-list"></div>
+
+    </div>
+
+    <div class="modal" id="modal-start-inventory" tabindex="-1" role="dialog">
+
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header pb-2 pt-2">
+                    <h4 class="modal-title mb-3 mt-3">Iniciar cuadre de Inventario:</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="row">
+                        <div class="col-sm-6 col-md-6 col-lg-6 mb-6">
+                            <label for="id-start-date">Fecha de Registro: </label>
+                            <input type="text" class="form-control text-center"
+                                   id="id-start-date"
+                                   name="start-date"
+                                   value="{{ format_date_hour }}">
+                        </div>
+
+                        <div class="col-sm-6 col-md-6 col-lg-6 mb-3 brand">
+                            <label for="id_modal_brand">Marca a inventariar: </label>
+                            <input type="text" class="form-control text-center brand-modal" id="id_modal_brand"
+                                   name="modal-brand"
+                                   value="" readonly>
+                            <input type="hidden" id="brand_id_modal" value="">
+                        </div>
+
+                    </div>
+                    <hr class="mb-4">
+                    <button class="btn btn-primary btn-lg btn-block" type="button" id="btn-confirm">Iniciar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="modal-inventory-exists" tabindex="-1" role="dialog">
+
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header pb-2 pt-2">
+                    <h4 class="modal-title text-center mb-3 mt-3" id="id_modal_brand_exists">
+                    </h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="row">
+                        <div class="col-sm-12 col-md-12 col-lg-12 mb-3 text-center">
+                            <label for="id-start-date">Fecha de Apertura: </label>
+                            <input type="text" class="form-control text-center"
+                                   id="id-register-date-exists"
+                                   name="register-date-exists"
+                                   value="">
+                            <input type="hidden" id="inventory_id" value="">
+                            <input type="hidden" id="brand_exists_id" value="">
+                        </div>
+
+                    </div>
+                    <hr class="mb-4">
+                    <button class="btn btn-success btn-lg btn-block" type="button" id="btn-continue-inventory">Continuar
+                        Inventario
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+{% endblock body %}
+
+{% block extrajs %}
+    <script type="text/javascript">
+
+        $('#brand_id').select2({
+            theme: 'bootstrap4',
+        });
+
+        $(document).on('change', '#brand_id', function (e) {
+
+            $('#product-grid-list').html('');
+
+            $.ajax({
+                url: '/sales/get_last_inventory/',
+                async: true,
+                dataType: 'json', // for response
+                type: 'GET',
+                data: {
+                    'brand_id': $('#brand_id').val(),
+                },
+                contentType: 'application/json;charset=UTF-8',
+                headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                success: function (response, textStatus, xhr) {
+                    if (xhr.status === 200) {
+                        toastr.success(response.message, '¡Bien hecho!');
+                        if (response.inventory_end_date.length > 0) {
+                            $('#my_last_inventory').text('Ultimo Cuadre: ' + response.inventory_end_date);
+                        }
+                    }
+                },
+                error: function (jqXhr, textStatus, xhr) {
+                    if (jqXhr.status === 500) {
+                        toastr.error(jqXhr.responseJSON.error, '¡Error de Guardado!');
+                    }
+                },
+            });
+        });
+
+        $('#search-form').submit(function (event) {
+            event.preventDefault();
+
+            let _data = new FormData($('#search-form').get(0));
+
+            $("#btn-search").attr("disabled", "true");
+
+            let brand_name = $('#brand_id option:selected').text()
+            let brand_id = $('#brand_id option:selected').val()
+
+            $('#id_modal_brand').val(brand_name);
+            $.ajax({
+                url: '/sales/inventory_store/',
+                type: "POST",
+                data: _data,
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function (response, textStatus, xhr) {
+                    if (xhr.status === 200) {
+                        if (response.grid !== undefined) {
+                            $('#product-grid-list').html(response.grid);
+                            $('#start-inventory').prop("disabled", false);
+                            $('#brand_id_modal').val(brand_id);
+                            toastr.info(response['message'], '¡Bien hecho!');
+                        } else if (response.start_date) {
+                            {#toastr.warning(response['message'], '¡Atención!');#}
+                            $('#id_modal_brand_exists').text(response.message)
+                            $('#id-register-date-exists').val(response.start_date)
+                            $('#brand_exists_id').val(response.brand_id)
+                            $('#inventory_id').val(response.inventory_id)
+                            $('#modal-inventory-exists').modal('show');
+                        }
+                    }
+                },
+                error: function (jqXhr, textStatus, xhr) {
+                    if (jqXhr.status === 500) {
+                        toastr.error(jqXhr.responseJSON.error, '¡Inconcebible!');
+                        $('#account-grid-list').html('<div class="alert alert-info alert-dismissible fade show mt-3" role="alert">\n' +
+                            '        <strong>Atencion!</strong> Tu debes ingresar una fecha primero.\n' +
+                            '        <button type="button" class="close" data-dismiss="alert" aria-label="Close">\n' +
+                            '            <span aria-hidden="true">×</span>\n' +
+                            '        </button>\n' +
+                            '    </div>');
+                    }
+                }
+            });
+            $("#btn-search").removeAttr("disabled", "false");
+            $('#search-form').modal('hide');
+
+        });
+
+        $(document).on('click', '#btn-confirm', function () {
+
+            $("#table-product-store tbody#details-grid tr").each(function () {
+                $(this).find("td.item-current-stock input.current-stock").prop("readonly", false)
+            });
+
+            $.ajax({
+                url: '/sales/save_register_inventory/',
+                async: true,
+                dataType: 'json', // for response
+                type: 'GET',
+                data: {
+                    'start_date': $('#id-start-date').val(),
+                    'brand_id': $('#brand_id_modal').val(),
+                },
+                contentType: 'application/json;charset=UTF-8',
+                headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                success: function (response, textStatus, xhr) {
+                    if (xhr.status === 200) {
+                        toastr.success(response.message, '¡Bien hecho!');
+                        $('#end-inventory').attr('inventory', response.inventory_id);
+                        $('#product-grid-list').html(response.grid);
+                    }
+                },
+                error: function (jqXhr, textStatus, xhr) {
+                    if (jqXhr.status === 500) {
+                        toastr.error(jqXhr.responseJSON.error, '¡Error de Guardado!');
+                    }
+                },
+            });
+            $('#modal-start-inventory').modal('hide');
+            $("#start-inventory").attr("disabled", "true");
+            $("#end-inventory").removeAttr("disabled", "false");
+
+
+        });
+
+        $(document).on('click', '#btn-continue-inventory', function () {
+
+            $.ajax({
+                url: '/sales/get_products_by_inventory/',
+                async: true,
+                dataType: 'json', // for response
+                type: 'GET',
+                data: {
+                    'start_date': $('#id-register-date-exists').val(),
+                    'inventory_id': $('#inventory_id').val(),
+                    'brand_id_exists': $('#brand_exists_id').val(),
+                },
+                contentType: 'application/json;charset=UTF-8',
+                headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                success: function (response, textStatus, xhr) {
+                    if (xhr.status === 200) {
+                        {#toastr.success(response.message, '¡Bien hecho!');#}
+                        $('#product-grid-list').html(response.grid);
+                        $('#end-inventory').attr('inventory', $('#inventory_id').val());
+                        $("#end-inventory").removeAttr("disabled", false);
+                    }
+                },
+                error: function (jqXhr, textStatus, xhr) {
+                    if (jqXhr.status === 500) {
+                        toastr.error(jqXhr.responseJSON.error, '¡Error de Guardado!');
+                    }
+                },
+            });
+            $('#modal-inventory-exists').modal('hide');
+
+        });
+
+        function check_status(){
+
+            let flag = false;
+
+            $("#table-product-store tbody#details-grid tr").each(function () {
+                let _status_inventory = $(this).find("td.item-status-inventory").attr("status");
+
+                if (_status_inventory > 0) {
+
+                    if (_status_inventory !== '2') {
+
+                    toastr.warning("FAVOR DE COMPLETAR EL INVENTARIO DE TODOS LOS PRODUCTOS ", '¡ADVERTENCIA!');
+                    return flag = true
+                    }
+                }
+
+            });
+            return flag
+        }
+
+
+        $(document).on('click', '#end-inventory', function () {
+
+            let _inventory_id = $('#end-inventory').attr('inventory');
+
+            let status_flag = check_status()
+
+            if (status_flag === false){
+
+                let r = confirm("¿Esta seguro que de cerrar el inventario?");
+
+                if (r === true) {
+
+                    $.ajax({
+                        url: '/sales/close_inventory/',
+                        async: true,
+                        dataType: 'json', // for response
+                        type: 'GET',
+                        data: {
+                            'inventory_id': _inventory_id,
+                        },
+                        contentType: 'application/json;charset=UTF-8',
+                        headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                        success: function (response, textStatus, xhr) {
+                            if (xhr.status === 200) {
+                                toastr.success(response.message, '¡Bien hecho!');
+                                $("#end-inventory").attr("disabled", true);
+                                $('#product-grid-list').html('');
+                                setTimeout(() => {
+                                    location.reload();
+                                }, 500);
+                            }
+                        },
+                        error: function (jqXhr, textStatus, xhr) {
+                            if (jqXhr.status === 500) {
+                                toastr.error(jqXhr.responseJSON.error, '¡Error de Guardado!');
+                            }
+                        },
+                    });
+                }
+
+            }
+            else {
+                return false;
+            }
+
+
+            {#$("#table-product-store tbody#details-grid tr").each(function () {#}
+            {#    let _status_inventory = $(this).find("td.item-status-inventory").attr("status");#}
+            {#    if (_status_inventory !== '2') {#}
+            {#        toastr.warning("FAVOR DE COMPLETAR EL INVENTARIO DE TODOS LOS PRODUCTOS ", '¡ADVERTENCIA!');#}
+            {#        return false;#}
+            {#    }#}
+            {# });#}
+
+
+
+
+
+
+        });
+
+    </script>
+{% endblock extrajs %}

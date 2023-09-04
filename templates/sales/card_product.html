@@ -1,0 +1,54 @@
+<div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+            <h5 class="modal-title">Presentaciones - Inventario de Producto</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="accordion" id="accordionExample">
+                <div class="card">
+                    <div class="card-header p-0" id="headingOne">
+                        <h4 class="mb-0">
+                            <button class="btn btn-block btn-primary border-0 collapsed" type="button"
+                                    data-toggle="collapse" id="btn-presenting"
+                                    pk="{{ id_pk }}" data-target="#collapseOne" aria-expanded="true"
+                                    aria-controls="collapseOne">
+                                Presentaciones
+                            </button>
+                        </h4>
+                    </div>
+                    <div id="collapseOne" class="collapse show" aria-labelledby="headingOne"
+                         data-parent="#accordionExample">
+                        <div class="card-body p-0">
+                            <div id="id-table-presenting"></div>
+                        </div>
+                    </div><!-- collapseOne -->
+                </div>
+                <div class="card">
+                    <div class="card-header p-0" id="headingTwo">
+                        <h2 class="mb-0">
+                            <button class="btn btn-block btn-primary border-0 collapsed" type="button"
+                                    data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false"
+                                    aria-controls="collapseTwo">
+                                Inventario inicial
+                            </button>
+                        </h2>
+                    </div>
+                    <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo"
+                         data-parent="#accordionExample">
+                        <div class="card-body p-0">
+                            <label>Esto es una prueba</label>
+                        </div>
+                    </div><!-- collapseTwo -->
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+        </div>
+    </div>
+</div>
