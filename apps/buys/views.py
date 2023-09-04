@@ -84,11 +84,11 @@ def save_purchase(request):
         check_igv = bool(int(data_purchase["Check_Igv"]))
         check_dollar = bool(int(data_purchase["Check_Dollar"]))
 
-        document_freight = str(data_purchase["Freight"][0]["DocumentFreight"])
-        serial_freight = str(data_purchase["Freight"][0]["SerialFreight"])
-        number_freight = str(data_purchase["Freight"][0]["NumberFreight"])
-        date_freight = str(data_purchase["Freight"][0]["DateFreight"])
-        total_freight = decimal.Decimal(data_purchase["Freight"][0]["TotalFreight"])
+        # document_freight = str(data_purchase["Freight"][0]["DocumentFreight"])
+        # serial_freight = str(data_purchase["Freight"][0]["SerialFreight"])
+        # number_freight = str(data_purchase["Freight"][0]["NumberFreight"])
+        # date_freight = str(data_purchase["Freight"][0]["DateFreight"])
+        # total_freight = decimal.Decimal(data_purchase["Freight"][0]["TotalFreight"])
 
         supplier_obj = Supplier.objects.get(id=int(provider_id))
 
@@ -100,11 +100,11 @@ def save_purchase(request):
             type_pay=type_pay,
             user=user_obj,
             subsidiary=subsidiary_obj,
-            document_freight=document_freight,
-            serial_freight=serial_freight,
-            number_freight=number_freight,
-            date_freight=date_freight,
-            total_freight=total_freight,
+            # document_freight=document_freight,
+            # serial_freight=serial_freight,
+            # number_freight=number_freight,
+            # date_freight=date_freight,
+            # total_freight=total_freight,
             base_total_purchase=base_total,
             igv_total_purchase=igv_total,
             total_import=total_import,

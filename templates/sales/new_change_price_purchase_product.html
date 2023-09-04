@@ -94,12 +94,12 @@
                                        value="{{ pd.update_at|date:"d/m/y G:i:s" }}" readonly>
                             </td>
                             <td class="text-right align-middle">
-                                <label class=""><b>Actualizado<br> Por:</b></label>
+                                <label class=""><b>Actualizado Por:</b></label>
                             </td>
                             <td class="text-left align-middle">
                                 <input type="text" id="id-update" name="update"
                                        class="form-control form-control-sm text-center"
-                                       value="{{ pd.user__username|upper|default_if_none:'-' }}" readonly>
+                                       value="{{ pd.user__username|default:'-'|default_if_none:'-'|upper }}" readonly>
                             </td>
                             <td></td>
                             <td></td>

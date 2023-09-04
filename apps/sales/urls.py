@@ -201,4 +201,7 @@ urlpatterns = [
 
     # Report summary sales
     path('get_report_summary_sales/', login_required(get_report_summary_sales), name='get_report_summary_sales'),
+
+    # All Products
+    path('get_all_products/', login_required(get_all_products), name='get_all_products'),
 ]

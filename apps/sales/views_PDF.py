@@ -43,7 +43,7 @@ styles.add(ParagraphStyle(name='Justify-Dotcirful', alignment=TA_JUSTIFY, leadin
                           fontSize=10))
 styles.add(ParagraphStyle(name='Center_Newgot_1', alignment=TA_CENTER, leading=11, fontName='Newgot', fontSize=9))
 styles.add(ParagraphStyle(name='Left-text', alignment=TA_LEFT, leading=8, fontName='Square', fontSize=8))
-styles.add(ParagraphStyle(name='Center-text', alignment=TA_CENTER, leading=8, fontName='Square', fontSize=8))
+styles.add(ParagraphStyle(name='Center-text', alignment=TA_CENTER, leading=8, fontName='Square', fontSize=7))
 styles.add(ParagraphStyle(name='Center_Newgot', alignment=TA_CENTER, leading=11, fontName='Newgot', fontSize=11))
 styles.add(ParagraphStyle(name='Justify_Square', alignment=TA_JUSTIFY, leading=10, fontName='Square', fontSize=10))
 styles.add(
@@ -63,7 +63,7 @@ styles.add(ParagraphStyle(name='CenterTitle-Dotcirful', alignment=TA_CENTER, lea
 styles.add(ParagraphStyle(name='CenterTitle2', alignment=TA_CENTER, leading=8, fontName='Square-Bold', fontSize=12))
 styles.add(ParagraphStyle(name='Center_Regular', alignment=TA_CENTER, leading=8, fontName='Ticketing', fontSize=10))
 styles.add(ParagraphStyle(name='Center_Bold_title', alignment=TA_CENTER,
-                          leading=14, fontName='Square-Bold', fontSize=16, spaceBefore=8, spaceAfter=8))
+                          leading=14, fontName='Square-Bold', fontSize=14, spaceBefore=8, spaceAfter=8))
 styles.add(ParagraphStyle(name='Center_Bold', alignment=TA_CENTER,
                           leading=10, fontName='Square-Bold', fontSize=10, spaceBefore=8, spaceAfter=8))
 styles.add(ParagraphStyle(name='Center2', alignment=TA_CENTER, leading=8, fontName='Ticketing', fontSize=8))
@@ -423,7 +423,7 @@ def print_ticket_order_sales(request, pk=None, t=None):  # Ticket
 
     subsidiary_obj = Subsidiary.objects.get(id=order_obj.subsidiary.id)
 
-    tbh_business_name = 'ROLDEM PERU S.A.C.'
+    tbh_business_name = 'ELECTRICAL RESPONSES E.I.R.L.'
     # tbh_business_address = 'CAL. ALTO DE LA LUNA 336 Y 338\n AREQUIPA - AREQUIPA - AREQUIPA\n RUC: 20539633075'
 
     tbh_business_address = subsidiary_obj.address
@@ -474,8 +474,8 @@ def print_ticket_order_sales(request, pk=None, t=None):  # Ticket
         ('ALIGNMENT', (0, 0), (0, -1), 'CENTER'),  # first column
         ('SPAN', (0, 0), (0, -1)),  # first row
         # ('BACKGROUND', (1, 2), (2, 2), colors.blue),  # SECOND column
-        ('TOPPADDING', (1, 1), (2, 1), -20),  # first column
-        ('TOPPADDING', (1, 2), (2, 2), -30),  # first column
+        ('TOPPADDING', (1, 1), (2, 1), -5),  # first column
+        ('TOPPADDING', (1, 2), (2, 2), -10),  # first column
     ]
     header_page.setStyle(TableStyle(style_table_header))
 
@@ -766,7 +766,7 @@ def print_quotation(request, pk=None, t=None):
     #     email_subsidiary = 'roldem@roldem.com'
 
     tbl1_col__2 = [
-        [Paragraph('ROLDEM PERU S.A.C.', styles["Justify_Newgot_title"])],
+        [Paragraph('ELECTRICAL RESPONSES E.I.R.L.', styles["Justify_Newgot_title"])],
         [Paragraph(address_subsidiary, styles['Normal'])],
         ['Celular: ' + str(telephone_subsidiary)],
         ['Teléfono Fijo: ' + str(subsidiary_obj.phone)],
@@ -1077,7 +1077,7 @@ def print_quotation(request, pk=None, t=None):
     dictionary.append(Paragraph(
         'Cumplimos con las especificaciones tecnicas del requerimiento para lograr un producto que esté a entera satisfacción de nuestros clientes.',
         styles["Center_Newgot"]))
-    dictionary.append(Paragraph('www.roldemperu.com', styles["Center_Newgot"]))
+    dictionary.append(Paragraph('www.electrical.com', styles["Center_Newgot"]))
     response = HttpResponse(content_type='application/pdf')
     doc.build(dictionary)
     response.write(buff.getvalue())
@@ -1140,7 +1140,7 @@ def print_order_bill(request, pk=None):
     #     email_user = '-'
 
     tbl1_col__2 = [
-        [Paragraph('ROLDEM PERU S.A.C.', styles["Justify_Newgot_title"])],
+        [Paragraph('ELECTRICAL RESPONSES E.I.R.L.', styles["Justify_Newgot_title"])],
         [Paragraph(subsidiary_obj.address, styles['Normal'])],
         ['Telefono: ' + str(telephone_subsidiary)],
         ['Correo: ' + str(email_subsidiary)],
@@ -1158,7 +1158,7 @@ def print_order_bill(request, pk=None):
     type_bill = 'None'
     # if services_sets.exists():
     #     services_obj = services_sets.last()
-    datatable = 'https://4soluciones.pse.pe/20539633075'
+    datatable = 'https://4soluciones.pse.pe/20603890214'
     if order_bill_set.exists():
         order_bill_obj = order_bill_set.last()
         datatable = order_bill_obj.code_qr
@@ -1524,7 +1524,7 @@ def print_order_bill(request, pk=None):
     #     dictionary.append(credit_list)
     dictionary.append(Spacer(1, 5))
     dictionary.append(total_footer)
-    dictionary.append(Paragraph('www.roldemperu.com', styles["Center_Newgot"]))
+    dictionary.append(Paragraph('www.electrical.com', styles["Center_Newgot"]))
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="{}.pdf"'.format(str(type_document) + ' ' +
                                                                              str(order_bill_obj.serial) + '-' + str(

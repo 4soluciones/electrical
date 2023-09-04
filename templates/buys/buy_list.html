@@ -11,7 +11,7 @@
                     <div class="col-sm-8 col-md-8 col-lg-8">
                         <div class="row p-2">
                             <div class="col-sm-3 col-md-3 col-lg-3">
-                                <h4 class="montserrat text-white font-weight-bold mt-4 mb-0"><label>COMPRAS:</label>
+                                <h4 class="montserrat text-white font-weight-bold mt-4 mb-0"><label>NUEVA COMPRA:</label>
                                 </h4>
                             </div>
 
@@ -33,30 +33,30 @@
                                 {##}
                                 {#                            </div>#}
 
-                                <form>
-                                    <div class="form-group row ">
+{#                                <form>#}
+{#                                    <div class="form-group row ">#}
                                         {#                                        <label for="type_change" class="col-sm-5 col-form-label">Tipo de Cambio:</label>#}
-                                        <button type="button"
-                                                class="col-sm-5 btn btn-sm btn-outline-secondary border-0 text-white btn-block p-1"
-                                                id="btn-type-change">Tipo de Cambio:
-                                        </button>
-                                        <div class="col-sm-7">
-                                            <input type="text" class="form-control text-center font-weight-bold"
-                                                   id="type_change" readonly>
-                                        </div>
-                                    </div>
-                                </form>
+{#                                        <button type="button"#}
+{#                                                class="col-sm-5 btn btn-sm btn-outline-secondary border-0 text-white btn-block p-1"#}
+{#                                                id="btn-type-change">Tipo de Cambio:#}
+{#                                        </button>#}
+{#                                        <div class="col-sm-7">#}
+{#                                            <input type="text" class="form-control text-center font-weight-bold"#}
+{#                                                   id="type_change" readonly>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                </form>#}
                             </div>
 
-                            <div class="col-sm-3 col-md-3 col-lg-3">
-                                <div class="form-check mt-4">
-                                    <input class="form-check-input check-dollar" type="checkbox" value=""
-                                           id="check_dollar">
-                                    <label class="form-check-label text-white" for="check_dollar">
-                                        COMPRA EN DOLARES
-                                    </label>
-                                </div>
-                            </div>
+{#                            <div class="col-sm-3 col-md-3 col-lg-3">#}
+{#                                <div class="form-check mt-4">#}
+{#                                    <input class="form-check-input check-dollar" type="checkbox" value=""#}
+{#                                           id="check_dollar">#}
+{#                                    <label class="form-check-label text-white" for="check_dollar">#}
+{#                                        COMPRA EN DOLARES#}
+{#                                    </label>#}
+{#                                </div>#}
+{#                            </div>#}
 
                         </div>
 
@@ -104,23 +104,23 @@
                 </div>
                 <div class="card-body p-0">
                     <div class="row border">
-                        <div class="col-sm-7 col-md-7 col-lg-7 border-right">
+                        <div class="col-sm-12 col-md-12 col-lg-12 border-right">
                             {% include "buys/buy_register.html" %}
                         </div>
-                        <div class="col-sm-5 col-md-5 col-lg-5">
-                            <div class="card">
-                                <div class="card-header">
-                                    <div class="row">
-                                        <div class="col-sm-9 col-md-9 col-lg-9">
-                                            DETALLE DE DOCUMENTOS DE FLETE
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="card-body">
-                                    {% include "buys/buys_freight.html" %}
-                                </div>
-                            </div>
-                        </div>
+{#                        <div class="col-sm-5 col-md-5 col-lg-5">#}
+{#                            <div class="card">#}
+{#                                <div class="card-header">#}
+{#                                    <div class="row">#}
+{#                                        <div class="col-sm-9 col-md-9 col-lg-9">#}
+{#                                            DETALLE DE DOCUMENTOS DE FLETE#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                                <div class="card-body">#}
+{#                                    {% include "buys/buys_freight.html" %}#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
                     </div>
 
                 </div>
@@ -537,7 +537,7 @@
                     };
                     Detail_purchase.Details.push(detailObj);
                 });
-                $("#id_freight_data_grid tbody#details-freight tr").each(function () {
+                /*$("#id_freight_data_grid tbody#details-freight tr").each(function () {
                     let detailFreight = {
                         "DocumentFreight": $(this).find("td.document-freight input.document-freight-input").val(),
                         "SerialFreight": $(this).find("td.serial-freight input.serial-freight-input").val(),
@@ -546,7 +546,7 @@
                         "TotalFreight": Number($(this).find("td.total-freight input.total-freight-input").val()),
                     }
                     Detail_purchase.Freight.push(detailFreight);
-                });
+                });*/
                 $("#id_debs_grid tbody#details-dues tr").each(function () {
                     let dataDues = {
                         "amountDue": $(this).find("td.amount-due").text().replace('S/ ', '')
@@ -921,7 +921,7 @@
             let total_document = 0;
             let _total;
 
-            total_freight = Number($("#id_freight_data_grid tbody#details-freight tr input#id_total_freight").val());
+            {#total_freight = Number($("#id_freight_data_grid tbody#details-freight tr input#id_total_freight").val());#}
 
             $("#id_detail_data_grid tbody#details-table tr").each(function () {
                 let td_total = Number($(this).find("td.total-row input.total-detail").val());
@@ -946,7 +946,7 @@
             $("#id_detail_data_grid tfoot tr input.total-foot-base").val(base.toFixed(2));
             $("#id_detail_data_grid tfoot tr input.total-foot-igv").val(igv.toFixed(2));
             $("#id_detail_data_grid tfoot tr input.total-foot-total").val(_total.toFixed(2));
-            $("#id_detail_data_grid tfoot tr input.total-foot-freight").val(total_freight.toFixed(2));
+            {#$("#id_detail_data_grid tfoot tr input.total-foot-freight").val(total_freight.toFixed(2));#}
             $("#id_detail_data_grid tfoot tr input.total-foot-document").val(total_document.toFixed(2));
         }
 

@@ -28,39 +28,39 @@
                             </div>
 
                         </div>
-                        <div class="col-sm-6 col-md-6 col-lg-6">
-                            <div class="row">
-                                <div class="col-sm-4 col-md-4 col-lg-4">
-                                    <form>
-                                        <div class="form-group row mt-3">
-                                            <button type="button"
-                                                    class="col-sm-5 btn btn-sm btn-outline-secondary font-weight-bold border-0 text-dark btn-block p-1"
-                                                    id="btn-type-change">Tipo de Cambio:
-                                            </button>
-                                            <div class="col-sm-7">
-                                                <input type="text" class="form-control text-center font-weight-bold"
-                                                       id="type_change" readonly>
-                                            </div>
-                                        </div>
-                                    </form>
-                                </div>
-                                <div class="col-sm-4 col-md-4 col-lg-4">
-                                    <div class="form-check mt-4">
-                                        <input class="form-check-input check-dollar"
-                                               {% if purchase.check_dollar %}checked{% endif %} type="checkbox" value=""
-                                               id="check_dollar">
-                                        <label class="form-check-label text-dark font-weight-bold" for="check_dollar">
-                                            COMPRA EN DOLARES
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+{#                        <div class="col-sm-6 col-md-6 col-lg-6">#}
+{#                            <div class="row">#}
+{#                                <div class="col-sm-4 col-md-4 col-lg-4">#}
+{#                                    <form>#}
+{#                                        <div class="form-group row mt-3">#}
+{#                                            <button type="button"#}
+{#                                                    class="col-sm-5 btn btn-sm btn-outline-secondary font-weight-bold border-0 text-dark btn-block p-1"#}
+{#                                                    id="btn-type-change">Tipo de Cambio:#}
+{#                                            </button>#}
+{#                                            <div class="col-sm-7">#}
+{#                                                <input type="text" class="form-control text-center font-weight-bold"#}
+{#                                                       id="type_change" readonly>#}
+{#                                            </div>#}
+{#                                        </div>#}
+{#                                    </form>#}
+{#                                </div>#}
+{#                                <div class="col-sm-4 col-md-4 col-lg-4">#}
+{#                                    <div class="form-check mt-4">#}
+{#                                        <input class="form-check-input check-dollar"#}
+{#                                               {% if purchase.check_dollar %}checked{% endif %} type="checkbox" value=""#}
+{#                                               id="check_dollar">#}
+{#                                        <label class="form-check-label text-dark font-weight-bold" for="check_dollar">#}
+{#                                            COMPRA EN DOLARES#}
+{#                                        </label>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
 
                     </div>
                     <div class="card-body p-0">
                         <div class="row border">
-                            <div class="col-sm-7 col-md-7 col-lg-7 border-right">
+                            <div class="col-sm-12 col-md-12 col-lg-12 border-right">
                                 <form id="purchase-form" action="{% url 'buys:save_purchase' %}" method="POST">
                                     {% csrf_token %}
                                     <div class="row p-1">
@@ -250,83 +250,83 @@
                                     </div>
                                 </form>
                             </div>
-                            <div class="col-sm-5 col-md-5 col-lg-5">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <div class="row">
-                                            <div class="col-sm-6 col-md-6 col-lg-6">
-                                                DETALLE DE DOCUMENTOS DE FLETE
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="table-responsive dataTables_wrapper roboto-condensed-regular">
-                                            <table id="id_freight_data_grid"
-                                                   class="table table-hover table-sm align-content-center table-bordered"
-                                                   cellspacing="0" style="width: 100%;">
-                                                <thead>
-                                                <tr class="text-center text-white" style="background: #1a77c8">
-                                                    <th scope="col" class="align-middle font-weight-normal"
-                                                        style="width: 35%;">Documento
-                                                    </th>
-                                                    <th scope="col" class="align-middle font-weight-normal"
-                                                        style="width: 10%;">Serie
-                                                    </th>
-                                                    <th scope="col" class="align-middle font-weight-normal"
-                                                        style="width: 15%;">Numero
-                                                    </th>
-                                                    <th scope="col" class="align-middle font-weight-normal"
-                                                        style="width: 15%;">Fecha
-                                                    </th>
-                                                    <th scope="col" class="align-middle font-weight-normal"
-                                                        style="width: 15%;">Importe
-                                                    </th>
-                                                </tr>
-                                                </thead>
-                                                <tbody id="details-freight">
-                                                <tr class="text-center">
-                                                    <td class="align-middle document-freight">
-                                                        <input type="text"
-                                                               class="form-control text-uppercase document-freight-input"
-                                                               id="id_document_freight"
-                                                               name="document_freight"
-                                                               value="{{ purchase.document_freight }}">
-                                                    </td>
-                                                    <td class="align-middle serial-freight">
-                                                        <input type="text"
-                                                               class="form-control text-uppercase serial-freight-input"
-                                                               id="id_serial_freight"
-                                                               name="serial_freight"
-                                                               value="{{ purchase.serial_freight }}">
-                                                    </td>
-                                                    <td class="align-middle number-freight">
-                                                        <input type="text"
-                                                               class="form-control text-uppercase number-freight-input"
-                                                               id="id_number_freight"
-                                                               name="number_freight"
-                                                               value="{{ purchase.number_freight }}">
-                                                    </td>
-                                                    <td class="align-middle date-freight">
-                                                        <input type="date" class="form-control date-freight-input"
-                                                               id="id_date_freight"
-                                                               name="date_freigh"
-                                                               value="{{ purchase.date_freight|date:"Y-m-d" }}">
-                                                    </td>
-                                                    <td class="align-middle total-freight">
-                                                        <input type="text"
-                                                               class="form-control text-right text-uppercase total-freight-input"
-                                                               id="id_total_freight"
-                                                               name="total_freight"
-                                                               placeholder="0.00"
-                                                               value="{{ purchase.total_freight|safe }}">
-                                                    </td>
-                                                </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+{#                            <div class="col-sm-5 col-md-5 col-lg-5">#}
+{#                                <div class="card">#}
+{#                                    <div class="card-header">#}
+{#                                        <div class="row">#}
+{#                                            <div class="col-sm-6 col-md-6 col-lg-6">#}
+{#                                                DETALLE DE DOCUMENTOS DE FLETE#}
+{#                                            </div>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                    <div class="card-body">#}
+{#                                        <div class="table-responsive dataTables_wrapper roboto-condensed-regular">#}
+{#                                            <table id="id_freight_data_grid"#}
+{#                                                   class="table table-hover table-sm align-content-center table-bordered"#}
+{#                                                   cellspacing="0" style="width: 100%;">#}
+{#                                                <thead>#}
+{#                                                <tr class="text-center text-white" style="background: #1a77c8">#}
+{#                                                    <th scope="col" class="align-middle font-weight-normal"#}
+{#                                                        style="width: 35%;">Documento#}
+{#                                                    </th>#}
+{#                                                    <th scope="col" class="align-middle font-weight-normal"#}
+{#                                                        style="width: 10%;">Serie#}
+{#                                                    </th>#}
+{#                                                    <th scope="col" class="align-middle font-weight-normal"#}
+{#                                                        style="width: 15%;">Numero#}
+{#                                                    </th>#}
+{#                                                    <th scope="col" class="align-middle font-weight-normal"#}
+{#                                                        style="width: 15%;">Fecha#}
+{#                                                    </th>#}
+{#                                                    <th scope="col" class="align-middle font-weight-normal"#}
+{#                                                        style="width: 15%;">Importe#}
+{#                                                    </th>#}
+{#                                                </tr>#}
+{#                                                </thead>#}
+{#                                                <tbody id="details-freight">#}
+{#                                                <tr class="text-center">#}
+{#                                                    <td class="align-middle document-freight">#}
+{#                                                        <input type="text"#}
+{#                                                               class="form-control text-uppercase document-freight-input"#}
+{#                                                               id="id_document_freight"#}
+{#                                                               name="document_freight"#}
+{#                                                               value="{{ purchase.document_freight }}">#}
+{#                                                    </td>#}
+{#                                                    <td class="align-middle serial-freight">#}
+{#                                                        <input type="text"#}
+{#                                                               class="form-control text-uppercase serial-freight-input"#}
+{#                                                               id="id_serial_freight"#}
+{#                                                               name="serial_freight"#}
+{#                                                               value="{{ purchase.serial_freight }}">#}
+{#                                                    </td>#}
+{#                                                    <td class="align-middle number-freight">#}
+{#                                                        <input type="text"#}
+{#                                                               class="form-control text-uppercase number-freight-input"#}
+{#                                                               id="id_number_freight"#}
+{#                                                               name="number_freight"#}
+{#                                                               value="{{ purchase.number_freight }}">#}
+{#                                                    </td>#}
+{#                                                    <td class="align-middle date-freight">#}
+{#                                                        <input type="date" class="form-control date-freight-input"#}
+{#                                                               id="id_date_freight"#}
+{#                                                               name="date_freigh"#}
+{#                                                               value="{{ purchase.date_freight|date:"Y-m-d" }}">#}
+{#                                                    </td>#}
+{#                                                    <td class="align-middle total-freight">#}
+{#                                                        <input type="text"#}
+{#                                                               class="form-control text-right text-uppercase total-freight-input"#}
+{#                                                               id="id_total_freight"#}
+{#                                                               name="total_freight"#}
+{#                                                               placeholder="0.00"#}
+{#                                                               value="{{ purchase.total_freight|safe }}">#}
+{#                                                    </td>#}
+{#                                                </tr>#}
+{#                                                </tbody>#}
+{#                                            </table>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
                         </div>
                     </div>
                 </div>
@@ -501,10 +501,10 @@
                                                     style="width: 20%;">
                                                     Importe Total
                                                 </th>
-                                                <th scope="col" class="align-middle font-weight-normal"
-                                                    style="width: 20%;">
-                                                    Flete
-                                                </th>
+{#                                                <th scope="col" class="align-middle font-weight-normal"#}
+{#                                                    style="width: 20%;">#}
+{#                                                    Flete#}
+{#                                                </th>#}
                                                 <th scope="col" class="align-middle font-weight-normal"
                                                     style="width: 20%;">
                                                     Total Documento
@@ -538,15 +538,15 @@
                                                         <i class="change-money">S/</i>
                                                     </div>
                                                 </td>
-                                                <td class="foot-freight">
-                                                    <div class="input-icon">
-                                                        <input type="text"
-                                                               class="form-control text-right text-uppercase total-foot-freight"
-                                                               placeholder="0.00"
-                                                               value="{{ purchase.total_freight|floatformat:-2 }}">
-                                                        <i class="change-money">S/</i>
-                                                    </div>
-                                                </td>
+{#                                                <td class="foot-freight">#}
+{#                                                    <div class="input-icon">#}
+{#                                                        <input type="text"#}
+{#                                                               class="form-control text-right text-uppercase total-foot-freight"#}
+{#                                                               placeholder="0.00"#}
+{#                                                               value="{{ purchase.total_freight|floatformat:-2 }}">#}
+{#                                                        <i class="change-money">S/</i>#}
+{#                                                    </div>#}
+{#                                                </td>#}
                                                 <td class="foot-document">
                                                     <div class="input-icon">
                                                         <input type="text"
@@ -1029,7 +1029,7 @@
             let total_document = 0;
             let _total;
 
-            total_freight = Number($("#id_freight_data_grid tbody#details-freight tr td.total-freight input#id_total_freight").val());
+            {#total_freight = Number($("#id_freight_data_grid tbody#details-freight tr td.total-freight input#id_total_freight").val());#}
 
             $("#id_detail_data_grid tbody#details-table tr").each(function () {
                 let td_total = Number($(this).find("td.total-row input.total-detail").val().replace(',', '.'));
@@ -1054,7 +1054,7 @@
             $("#id_detail_data_grid tfoot tr input.total-foot-base").val(base.toFixed(2));
             $("#id_detail_data_grid tfoot tr input.total-foot-igv").val(igv.toFixed(2));
             $("#id_detail_data_grid tfoot tr input.total-foot-total").val(_total.toFixed(2));
-            $("#id_detail_data_grid tfoot tr input.total-foot-freight").val(total_freight.toFixed(2));
+            {#$("#id_detail_data_grid tfoot tr input.total-foot-freight").val(total_freight.toFixed(2));#}
             $("#id_detail_data_grid tfoot tr input.total-foot-document").val(total_document.toFixed(2));
         }
 

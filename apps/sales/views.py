@@ -6325,3 +6325,41 @@ def get_dict_order_summaries(order_set, start_date, end_date):
         'sum_tickets': round(decimal.Decimal(sum_tickets), 2),
     })
     return tpl.render(context)
+
+
+def get_all_products(request):
+    if request.method == 'GET':
+        user_id = request.user.id
+        user_obj = User.objects.get(pk=int(user_id))
+        subsidiary_obj = get_subsidiary_by_user(user_obj)
+        # product_set = None
+        last_kardex = Kardex.objects.filter(product_store=OuterRef('id')).order_by('-id')[:1]
+
+        product_set = Product.objects.all().select_related(
+            'product_family', 'product_brand').prefetch_related(
+            Prefetch(
+                'productstore_set',
+                queryset=ProductStore.objects.select_related('subsidiary_store__subsidiary').exclude(
+                    subsidiary_store__subsidiary=3)
+                    .annotate(
+                    last_remaining_quantity=Subquery(last_kardex.values('remaining_quantity'))
+                )
+            ),
+            Prefetch(
+                'productdetail_set', queryset=ProductDetail.objects.select_related('unit')
+            ),
+        ).order_by('id')
+
+        t = loader.get_template('sales/product_grid_list.html')
+        c = ({
+            'products': product_set,
+            # 'subsidiary': subsidiary_obj
+        })
+
+        return JsonResponse({
+            'message': 'Actualizado correctamente',
+            'success': True,
+            'grid': t.render(c, request),
+        }, status=HTTPStatus.OK)
+
+    return JsonResponse({'message': 'Error de peticion.'}, status=HTTPStatus.BAD_REQUEST)

@@ -1,7 +1,7 @@
 {% extends 'home.html' %}
 
 {% block title %}
-    Listado | Productos
+    Productos
 {% endblock title %}
 {% block body %}
     <!-- Content -->
@@ -11,10 +11,10 @@
                 <form class="form-inline" method="POST">
 
                     {% csrf_token %}
-{#                                            <button type="button" onclick="showModalCreation('{% url 'sales:json_product_create' %}')"#}
-{#                                                    class="btn-sm btn-outline-success"><i class="fas fa-user-plus ml-1 mr-1"></i> Nuevo#}
-{#                                                producto#}
-{#                                            </button>#}
+                    {#                                            <button type="button" onclick="showModalCreation('{% url 'sales:json_product_create' %}')"#}
+                    {#                                                    class="btn-sm btn-outline-success"><i class="fas fa-user-plus ml-1 mr-1"></i> Nuevo#}
+                    {#                                                producto#}
+                    {#                                            </button>#}
 
                     <button type="button"
                             class="btn-sm btn-outline-success ml-1 mr-1 btn-new-product"
@@ -24,18 +24,21 @@
                         Nuevo producto
                     </button>
 
-{#                    <button type="button" onclick="showModalView('modal_family_save')"#}
-{#                            class="btn-sm btn-outline-success ml-1 mr-1">Familia#}
-{#                    </button>#}
+                    <button type="button" onclick="showModalView('modal_family_save')"
+                            class="btn-sm btn-outline-success ml-1 mr-1">Familia
+                    </button>
                     <button type="button" onclick="showModalView('modal_brand_save')"
                             class="btn-sm btn-outline-success ml-1 mr-1">Marca
                     </button>
-{#                    <button type="button" onclick="showModalView('modal_category_save')"#}
-{#                            class="btn-sm btn-outline-success ml-1 mr-1">Categoria#}
-{#                    </button>#}
-{#                    <button type="button" onclick="showModalView('modal_subcategory_save')"#}
-{#                            class="btn-sm btn-outline-success ml-1 mr-1">Subcategoria#}
-{#                    </button>#}
+                    <button type="button" onclick="showAllProducts()"
+                            class="btn-sm btn-outline-success ml-1 mr-1">Mostrar todo
+                    </button>
+                    {#                    <button type="button" onclick="showModalView('modal_category_save')"#}
+                    {#                            class="btn-sm btn-outline-success ml-1 mr-1">Categoria#}
+                    {#                    </button>#}
+                    {#                    <button type="button" onclick="showModalView('modal_subcategory_save')"#}
+                    {#                            class="btn-sm btn-outline-success ml-1 mr-1">Subcategoria#}
+                    {#                    </button>#}
                     <label class="my-1 mr-2 ml-2" for="custom-input-product-by-name">Buscar texto:</label>
                     {#                    <select class="custom-select my-1 mr-sm-2" id="id-product-pk">#}
                     {#                        <option value="" selected disabled>Seleccione</option>#}
@@ -56,20 +59,20 @@
 
                     </select>
 
-                    <button type="button"
-                            class="col-sm-1 btn btn-sm btn-outline-secondary font-weight-bold border-0 text-dark btn-block p-1"
-                            id="btn-type-change">Tipo de Cambio:
-                    </button>
-                    <div class="col-sm-1">
-                        <input type="text" class="form-control text-center font-weight-bold pr-0 pl-0"
-                               id="type_change" readonly>
-                        <input type="hidden" class="form-control text-center font-weight-bold pr-0 pl-0"
-                               id="type_change_value" readonly>
-                    </div>
-
-{#                    <button type="button" class="btn btn-primary ml-2 mr-2" id="btn-search-brand">#}
-{#                        <i class="fas fa-search-dollar"></i>#}
+{#                    <button type="button"#}
+{#                            class="col-sm-1 btn btn-sm btn-outline-secondary font-weight-bold border-0 text-dark btn-block p-1"#}
+{#                            id="btn-type-change">Tipo de Cambio:#}
 {#                    </button>#}
+{#                    <div class="col-sm-1">#}
+{#                        <input type="text" class="form-control text-center font-weight-bold pr-0 pl-0"#}
+{#                               id="type_change" readonly>#}
+{#                        <input type="hidden" class="form-control text-center font-weight-bold pr-0 pl-0"#}
+{#                               id="type_change_value" readonly>#}
+{#                    </div>#}
+
+                    {#                    <button type="button" class="btn btn-primary ml-2 mr-2" id="btn-search-brand">#}
+                    {#                        <i class="fas fa-search-dollar"></i>#}
+                    {#                    </button>#}
 
 
                     {#                        <a href="{% url 'sales:product_print' %}" class="btn-sm btn-warning"#}
@@ -83,11 +86,9 @@
             </div>
         </div>
 
+        <div id="product-grid-list"></div>
+
     </div>
-
-
-    <div id="product-grid-list"></div>
-
 
     <div class="modal fade bd-example-modal-lg" id="creation" tabindex="-1" role="dialog"
          aria-labelledby="exampleModalLabel" aria-hidden="true"></div>
@@ -162,7 +163,8 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header text-center">
-                    <h5 class="modal-title" id="exampleModalLabel1">ACTUALIZAR PRECIO DE COMPRA DEL PRODUCTO EN DOLARES:</h5>
+                    <h5 class="modal-title" id="exampleModalLabel1">ACTUALIZAR PRECIO DE COMPRA DEL PRODUCTO EN
+                        DOLARES:</h5>
                     <button type="button" class="close ml-0" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -188,7 +190,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="staticBackdropLabel">NUEVO PRODUCTO:</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                         <span aria-hidden="true">&times;</span>
+                        <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body" id="new-product">
@@ -475,12 +477,12 @@
 
         $(document).on('change', '#brand_id', function () {
             let brand_id = $(this).val();
-            if (brand_id === null){
+            if (brand_id === null) {
                 toastr.warning('¡Favor escoger primero una marca de la lista', 'Error de Datos');
                 return false;
             }
             $('#custom-input-product-by-name').val('')
-            getProducts("", "", brand_id );
+            getProducts("", "", brand_id);
         });
 
         /*$(document).on('click', '#btn-search-brand', function () {
@@ -494,7 +496,7 @@
             getProducts("", "", brand_id );
 
         });*/
-        $(document).on('click', '#btn-type-change', function (e) {
+        /*$(document).on('click', '#btn-type-change', function (e) {
             let _input_type_change = $('#type_change')
             let _input_type_change_value = $('#type_change_value')
 
@@ -526,9 +528,38 @@
             });
             return false;
         });
-        $("#btn-type-change").trigger('click');
+        $("#btn-type-change").trigger('click');*/
 
+        function showAllProducts() {
 
+            $.ajax({
+                url: '/sales/get_all_products/',
+                async: true,
+                dataType: 'json', // for response
+                type: 'GET',
+                data: {},
+                contentType: 'application/json;charset=UTF-8',
+                headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                success: function (response, textStatus, xhr) {
+                    if (xhr.status === 200) {
+                        toastr.success(response.message, '¡Bien hecho!');
+                        $('#product-grid-list').html(response.grid);
+                    }
+                },
+                error: function (jqXhr, textStatus, xhr) { // provide a bit more info about the error to the console
+                    if (jqXhr.status === 500) {
+                        toastr.error(jqXhr.responseJSON.error, '¡Error de Consulta!');
+                    } else {
+                        if (textStatus === 'timeout') {
+                            toastr.error('Failed from timeout', '¡Error de Consulta!');
+                        } else {
+                            console.log(" STATUS: " + xhr + " " + textStatus);
+                        }
+                    }
+                }
+            });
+
+        }
 
 
     </script>
