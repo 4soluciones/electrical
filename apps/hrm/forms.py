@@ -367,6 +367,7 @@ class FormWorker(forms.ModelForm):
             'occupation_private_sector': forms.Select(
                 attrs={
                     'class': 'form-control form-control-sm',
+                    'required': 'true',
                 }
             ),
             'occupation_public_sector': forms.Select(
@@ -567,6 +568,7 @@ class FormEstablishment(forms.ModelForm):
             'subsidiary': forms.Select(
                 attrs={
                     'class': 'form-control form-control-sm',
+                    'required': 'true',
                 }
             ),
         }

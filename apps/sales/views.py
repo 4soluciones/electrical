@@ -4182,7 +4182,7 @@ class SalesOrder(View):
             cash_set = Cash.objects.filter(subsidiary=subsidiary_obj, accounting_account__code__startswith='101')
             cash_deposit_set = Cash.objects.filter(accounting_account__code__startswith='104')
             family_set = ProductFamily.objects.all()
-            users_set = User.objects.filter(is_superuser=False, is_staff=True)
+            users_set = User.objects.filter(is_superuser=False)
 
             selected_choices = 'EC', 'L', 'Y'
 
