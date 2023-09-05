@@ -564,6 +564,8 @@ class Subsidiary(models.Model):
     legal_representative_surname = models.CharField(max_length=100, null=True, blank=True)
     legal_representative_dni = models.CharField(max_length=45, null=True, blank=True)
     is_main = models.BooleanField('Sede principal', default=False)
+    url = models.CharField(max_length=500, null=True, blank=True)
+    token = models.CharField(max_length=500, null=True, blank=True)
 
     def __str__(self):
         return self.name

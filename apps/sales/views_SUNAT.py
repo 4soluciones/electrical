@@ -384,17 +384,14 @@ def send_cancel_bill_nubefact(order_id):
             "codigo_unico": ""
         }
 
-    _url = 'https://www.pse.pe/api/v1/39ce7d27dbed4d89bc17db093e47a592f769b00ad949478788caf76c8085054b'
-    _authorization = 'eyJhbGciOiJIUzI1NiJ9.IjVlOGQ1OWQ2ZDcwMDQ0MGJhYmNlMTNiODI4MmVjYmQwZmY4OWI0ZGY4ZjcxNDgwZDhhMWNhNzAwNjRhNjM3NWQi.1dfeXjt0axUkKb-GXmkQ5qNA5gyMyarMY9NJjMWHrKo'
+    # _url = 'https://www.pse.pe/api/v1/39ce7d27dbed4d89bc17db093e47a592f769b00ad949478788caf76c8085054b'
+    # _authorization = 'eyJhbGciOiJIUzI1NiJ9.IjVlOGQ1OWQ2ZDcwMDQ0MGJhYmNlMTNiODI4MmVjYmQwZmY4OWI0ZGY4ZjcxNDgwZDhhMWNhNzAwNjRhNjM3NWQi.1dfeXjt0axUkKb-GXmkQ5qNA5gyMyarMY9NJjMWHrKo'
 
-    # Ruta de marin_ruc10
-    # else:
-    # _url = 'https://api.pse.pe/api/v1/370d830f67ab4adc82f3b63e4889c33ea083143671214269a789494351e5e844'
-    # _authorization = 'eyJhbGciOiJIUzI1NiJ9.ImU0NWVkYmZlN2YyMDRlM2RhOTYxYjYwYTEyNDcwYzI0N2NjZjc5YjU5OTc0NGY2Nzk2YWE2ZDFlNzczMjFlNDci.TrKJVAJaZvcgdeBejkjEeUvj_YSI3LsL_ercprbk--E'
+    url = order_bill_obj.order.subsidiary.url
+    authorization = order_bill_obj.order.subsidiary.token
 
-    url = _url
     headers = {
-        "Authorization": _authorization,
+        "Authorization": authorization,
         "Content-Type": 'application/json'
     }
     response = requests.post(url, json=params, headers=headers)
@@ -523,16 +520,14 @@ def send_bill_nubefact(order_id, serie_, is_demo=False):
         "items": items,
     }
 
-    # if is_demo:
-    _url = 'https://www.pse.pe/api/v1/39ce7d27dbed4d89bc17db093e47a592f769b00ad949478788caf76c8085054b'
-    _authorization = 'eyJhbGciOiJIUzI1NiJ9.IjVlOGQ1OWQ2ZDcwMDQ0MGJhYmNlMTNiODI4MmVjYmQwZmY4OWI0ZGY4ZjcxNDgwZDhhMWNhNzAwNjRhNjM3NWQi.1dfeXjt0axUkKb-GXmkQ5qNA5gyMyarMY9NJjMWHrKo'
-    # else:
-    # _url = 'https://api.pse.pe/api/v1/370d830f67ab4adc82f3b63e4889c33ea083143671214269a789494351e5e844'
-    # _authorization = 'eyJhbGciOiJIUzI1NiJ9.ImU0NWVkYmZlN2YyMDRlM2RhOTYxYjYwYTEyNDcwYzI0N2NjZjc5YjU5OTc0NGY2Nzk2YWE2ZDFlNzczMjFlNDci.TrKJVAJaZvcgdeBejkjEeUvj_YSI3LsL_ercprbk--E'
+    # _url = 'https://www.pse.pe/api/v1/39ce7d27dbed4d89bc17db093e47a592f769b00ad949478788caf76c8085054b'
+    # _authorization = 'eyJhbGciOiJIUzI1NiJ9.IjVlOGQ1OWQ2ZDcwMDQ0MGJhYmNlMTNiODI4MmVjYmQwZmY4OWI0ZGY4ZjcxNDgwZDhhMWNhNzAwNjRhNjM3NWQi.1dfeXjt0axUkKb-GXmkQ5qNA5gyMyarMY9NJjMWHrKo'
 
-    url = _url
+    url = order_obj.subsidiary.url
+    authorization = order_obj.subsidiary.token
+
     headers = {
-        "Authorization": _authorization,
+        "Authorization": authorization,
         "Content-Type": 'application/json'
     }
     response = requests.post(url, json=params, headers=headers)
@@ -676,17 +671,14 @@ def send_receipt_nubefact(order_id, serie_, is_demo=False):
         "items": items,
     }
 
-    # if is_demo:
-    _url = 'https://www.pse.pe/api/v1/39ce7d27dbed4d89bc17db093e47a592f769b00ad949478788caf76c8085054b'
-    _authorization = 'eyJhbGciOiJIUzI1NiJ9.IjVlOGQ1OWQ2ZDcwMDQ0MGJhYmNlMTNiODI4MmVjYmQwZmY4OWI0ZGY4ZjcxNDgwZDhhMWNhNzAwNjRhNjM3NWQi.1dfeXjt0axUkKb-GXmkQ5qNA5gyMyarMY9NJjMWHrKo'
+    # _url = 'https://www.pse.pe/api/v1/39ce7d27dbed4d89bc17db093e47a592f769b00ad949478788caf76c8085054b'
+    # _authorization = 'eyJhbGciOiJIUzI1NiJ9.IjVlOGQ1OWQ2ZDcwMDQ0MGJhYmNlMTNiODI4MmVjYmQwZmY4OWI0ZGY4ZjcxNDgwZDhhMWNhNzAwNjRhNjM3NWQi.1dfeXjt0axUkKb-GXmkQ5qNA5gyMyarMY9NJjMWHrKo'
 
-    # else:
-    #     _url = 'https://www.pse.pe/api/v1/cb5a9c35389844faa6368c0ffd4bdeb075e3c1dc4b564813ac1d5f8aba523921'
-    #     _authorization = 'eyJhbGciOiJIUzI1NiJ9.IjQzZmJiZWQ0ZjNmNDQ3M2E5NjEyY2U1ZjVlODk0YzQxMGU3YWM1OTRjZGFiNGU5ODhjNDdlMmE2NDljN2ZkOGMi.FQyoaAcuUyGUelMLI_ttscd3GI_4XyOoMiomAgTmoDQ'
+    url = order_obj.subsidiary.url
+    authorization = order_obj.subsidiary.token
 
-    url = _url
     headers = {
-        "Authorization": _authorization,
+        "Authorization": authorization,
         "Content-Type": 'application/json'
     }
     response = requests.post(url, json=params, headers=headers)

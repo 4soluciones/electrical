@@ -30,7 +30,6 @@
             </tr>
             </thead>
             <tbody>
-
             {% for product in products %}
                 <tr class="text-center" pk="{{ product.id }}">
                     <td class="align-middle" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ product.id }}</td>
@@ -116,12 +115,15 @@
                                                     pk="{{ product.id }}">
                                                     {{ product_store.get_stock_with_dot }}</td>
                                                 {% if forloop.first %}
-                                                    <td class="align-middle p-0" rowspan="2"><a type="button"
-                                                                                                class="btn-sm btn-outline-warning btn-update-stock"
-                                                                                                data-toggle="modal"
-                                                                                                data-target="#modal-changeStock"
-                                                                                                pk="{{ product.id }}"><i
-                                                            class="fas fa-edit text-dark"></i></a></td>
+                                                    <td class="align-middle p-0" rowspan="2">
+                                                        <a type="button"
+                                                           class="btn-sm btn-outline-warning btn-update-stock"
+                                                           data-toggle="modal"
+                                                           data-target="#modal-changeStock"
+                                                           pk="{{ product.id }}">
+                                                            <i class="fas fa-edit text-dark"></i>
+                                                        </a>
+                                                    </td>
                                                 {% endif %}
                                             </tr>
                                         {% endfor %}
@@ -154,7 +156,6 @@
                                             <i class="fas fa-sync-alt"></i> Ver presentaciones</a>
                                         <a href="{% url 'sales:product_print_one' product.id %}" target="print"
                                            class="dropdown-item text-light"><span class="fa fa-print"></span> print</a>
-
                                     </div>
                                 </div>
                             </td>
@@ -192,9 +193,7 @@
                         </td>
                         </tr>
                     {% endif %}
-
             {% endfor %}
-
             </tbody>
             <tfoot>
             <tr class="text-center">
@@ -206,20 +205,21 @@
                 {#                <th class="th-sm">Insumos/Receta</th>#}
                 {#                <th class="th-sm">Imagen</th>#}
                 {#                <th class="th-sm">UPDATE</th>#}
+                  <th colspan="6"></th>
+                  <th class="th-sm">S/ 254</th>
 
-
-                <th>ID</th>
-                <th class="th-sm">Código</th>
-                <th class="th-sm">Código de Barras</th>
-                <th class="th-sm">Nombre del Producto</th>
-                <th class="th-sm">Marca</th>
-                <th class="th-sm">Unidad</th>
-                <th class="th-sm">Precio Compra</th>
-                <th class="th-sm">%Porcetanje 1</th>
-                <th class="th-sm">%Porcetanje 2</th>
-                <th class="th-sm">%Porcetanje 3</th>
-                <th class="th-sm">STOCK</th>
-                <th class="th-sm">UPDATE</th>
+{#                <th>ID</th>#}
+{#                <th class="th-sm">Código</th>#}
+{#                <th class="th-sm">Código de Barras</th>#}
+{#                <th class="th-sm">Nombre del Producto</th>#}
+{#                <th class="th-sm">Marca</th>#}
+{#                <th class="th-sm">Unidad</th>#}
+{#                <th class="th-sm">Precio Compra</th>#}
+{#                <th class="th-sm">%Porcetanje 1</th>#}
+{#                <th class="th-sm">%Porcetanje 2</th>#}
+{#                <th class="th-sm">%Porcetanje 3</th>#}
+{#                <th class="th-sm">STOCK</th>#}
+{#                <th class="th-sm">UPDATE</th>#}
 
             </tr>
             </tfoot>

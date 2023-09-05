@@ -1240,6 +1240,8 @@ def create_order_detail(request):
                                                    is_demo=value_is_demo
                                                    )
                         order_bill_obj.save()
+                        order_sale_obj.voucher_type = _bill_type
+                        order_sale_obj.save()
 
                         new_loan_payments = {
                             'quantity': 0,
@@ -1312,6 +1314,8 @@ def create_order_detail(request):
                                                    is_demo=value_is_demo
                                                    )
                         order_bill_obj.save()
+                        order_sale_obj.voucher_type = _bill_type
+                        order_sale_obj.save()
 
                         new_loan_payments = {
                             'quantity': 0,
@@ -4449,6 +4453,8 @@ def get_product_list(criteria=None, value=None, brand=None):
 
     elif criteria == 'barcode':
         product_set = Product.objects.filter(productdetail__code=value)
+    print(product_set)
+
     return product_set
 
 
@@ -6077,6 +6083,7 @@ def save_quotation(request):
             way_to_pay_type=type_payment,
             has_quotation_order='S',
             order_sale_quotation=order_sale_quotation,
+            voucher_type='CO'
         )
         order_obj.save()
 

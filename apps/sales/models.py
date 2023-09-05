@@ -357,6 +357,7 @@ class ClientAssociate(models.Model):
 
 class Order(models.Model):
     TYPE_CHOICES = (('V', 'VENTA'), ('T', 'COTIZACION'))
+    VOUCHER_CHOICES = (('T', 'TICKET'), ('B', 'BOLETA'), ('F', 'FACTURA'), ('CO', 'COTIZACION'))
     STATUS_CHOICES = (('P', 'PENDIENTE'), ('C', 'COMPLETADO'), ('A', 'ANULADO'),)
     QUOTATION_CHOICES = (('P', 'PROYECTO'), ('O', 'OBRA'), ('0', 'OTRO'),)
     TYPE_CHOICES_PAYMENT = (('E', 'Efectivo'), ('D', 'Deposito'), ('C', 'Credito'))
@@ -394,6 +395,7 @@ class Order(models.Model):
                                            default='0')
     order_sale_quotation = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True,
                                              related_name="order_quotation")
+    voucher_type = models.CharField('Tipo de comprobante', max_length=2, choices=VOUCHER_CHOICES, default='T')
 
     def __str__(self):
         return str(self.pk) + " / " + str(self.type) + " / "

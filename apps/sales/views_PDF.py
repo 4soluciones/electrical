@@ -754,9 +754,20 @@ def print_quotation(request, pk=None, t=None):
 
     subsidiary_obj = Subsidiary.objects.get(id=order_obj.subsidiary.id)
 
-    telephone_subsidiary = subsidiary_obj.contact_phone
-    email_subsidiary = subsidiary_obj.email
+    telephone_subsidiary = '-'
+    email_subsidiary = '-'
+    phone_subsidiary = '-'
     address_subsidiary = subsidiary_obj.address
+
+    if subsidiary_obj.contact_phone is not None:
+        telephone_subsidiary = subsidiary_obj.contact_phone
+
+    if subsidiary_obj.email is not None:
+        email_subsidiary = subsidiary_obj.email
+
+    if subsidiary_obj.phone is not None:
+        phone_subsidiary = subsidiary_obj.phone
+
     # employee_obj = Employee.objects.filter(worker__user=order_obj.user).last()
     # if employee_obj is not None:
     #     telephone_subsidiary = employee_obj.telephone_number
@@ -769,7 +780,7 @@ def print_quotation(request, pk=None, t=None):
         [Paragraph('ELECTRICAL RESPONSES E.I.R.L.', styles["Justify_Newgot_title"])],
         [Paragraph(address_subsidiary, styles['Normal'])],
         ['Celular: ' + str(telephone_subsidiary)],
-        ['Teléfono Fijo: ' + str(subsidiary_obj.phone)],
+        ['Teléfono Fijo: ' + str(phone_subsidiary)],
         ['Correo: ' + str(email_subsidiary)],
     ]
     col_2 = Table(tbl1_col__2)
@@ -1127,10 +1138,12 @@ def print_order_bill(request, pk=None):
     I = Image(logo)
     I.drawHeight = 3.60 * inch / 2.9
     I.drawWidth = 3.9 * inch / 2.9
-    telephone_subsidiary = subsidiary_obj.contact_phone
+    telephone_subsidiary = '-'
     email_subsidiary = '-'
     if subsidiary_obj.email:
         email_subsidiary = subsidiary_obj.email
+    if subsidiary_obj.contact_phone is not None:
+        telephone_subsidiary = subsidiary_obj.contact_phone
     # employee_obj = Employee.objects.filter(worker__user=service_obj.user).last()
     # if employee_obj is not None:
     #     telephone_user = employee_obj.telephone_number
