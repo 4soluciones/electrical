@@ -2658,7 +2658,7 @@ def get_dict_orders(client_obj=None, start_date=None, end_date=None):
                 # loan_payment_set.append(loan_payment)
                 new.get('loan_payment_set').append(loan_payment)
 
-            loans_count =LoanPayment.objects.filter(order_detail__order=o).count()
+            loans_count = LoanPayment.objects.filter(order_detail__order=o).count()
             new['loans_count'] = loans_count
 
             for d in OrderDetail.objects.filter(order=o):
@@ -4382,11 +4382,12 @@ def get_product_by_criteria(request):
         user_id = request.user.id
         user_obj = User.objects.get(pk=int(user_id))
         subsidiary_obj = get_subsidiary_by_user(user_obj)
-
+        product_set = get_product_list(criteria=criteria, value=value, brand=brand_id)
         t = loader.get_template('sales/product_grid_list.html')
         c = ({
-            'products': get_product_list(criteria=criteria, value=value, brand=brand_id),
-            'subsidiary': subsidiary_obj
+            'products': product_set,
+            'subsidiary': subsidiary_obj,
+            'total_price_purchase': get_total_price_purchase(product_set)
         })
 
         return JsonResponse({
@@ -4453,9 +4454,16 @@ def get_product_list(criteria=None, value=None, brand=None):
 
     elif criteria == 'barcode':
         product_set = Product.objects.filter(productdetail__code=value)
-    print(product_set)
 
     return product_set
+
+
+def get_total_price_purchase(product_set):
+    total_price_purchase = decimal.Decimal(0.00)
+    for p in product_set:
+        for pd in p.productdetail_set.all():
+            total_price_purchase += pd.price_purchase
+    return round(total_price_purchase, 2)
 
 
 @csrf_exempt
@@ -6360,6 +6368,7 @@ def get_all_products(request):
         t = loader.get_template('sales/product_grid_list.html')
         c = ({
             'products': product_set,
+            'total_price_purchase': get_total_price_purchase(product_set)
             # 'subsidiary': subsidiary_obj
         })
 
