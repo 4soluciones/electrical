@@ -423,7 +423,7 @@ def print_ticket_order_sales(request, pk=None, t=None):  # Ticket
 
     subsidiary_obj = Subsidiary.objects.get(id=order_obj.subsidiary.id)
 
-    tbh_business_name = 'ELECTRICAL RESPONSES E.I.R.L.'
+    tbh_business_name = 'T VISION SAFE E.I.R.L.'
     # tbh_business_address = 'CAL. ALTO DE LA LUNA 336 Y 338\n AREQUIPA - AREQUIPA - AREQUIPA\n RUC: 20539633075'
 
     tbh_business_address = subsidiary_obj.address
@@ -777,7 +777,7 @@ def print_quotation(request, pk=None, t=None):
     #     email_subsidiary = 'roldem@roldem.com'
 
     tbl1_col__2 = [
-        [Paragraph('ELECTRICAL RESPONSES E.I.R.L.', styles["Justify_Newgot_title"])],
+        [Paragraph('T VISION SAFE E.I.R.L.', styles["Justify_Newgot_title"])],
         [Paragraph(address_subsidiary, styles['Normal'])],
         ['Celular: ' + str(telephone_subsidiary)],
         ['Teléfono Fijo: ' + str(phone_subsidiary)],
@@ -1153,7 +1153,7 @@ def print_order_bill(request, pk=None):
     #     email_user = '-'
 
     tbl1_col__2 = [
-        [Paragraph('ELECTRICAL RESPONSES E.I.R.L.', styles["Justify_Newgot_title"])],
+        [Paragraph('T VISION SAFE E.I.R.L.', styles["Justify_Newgot_title"])],
         [Paragraph(subsidiary_obj.address, styles['Normal'])],
         ['Telefono: ' + str(telephone_subsidiary)],
         ['Correo: ' + str(email_subsidiary)],

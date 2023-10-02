@@ -85,7 +85,14 @@
             $('#id-new-account-code').val(data['id']);
         });
 
-        $('#table-account-grid').dataTable();
+        /*$('#table-account-grid').dataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.13.3/i18n/es-ES.json"
+            },
+            buttons: [],
+            dom: 'Bfrtip',
+            pageLength: 50
+        });*/
 
         $('#btn-entity-update').fadeOut();
 
