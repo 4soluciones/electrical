@@ -67,4 +67,7 @@ urlpatterns = [
     path('save_update_purchase/', login_required(save_update_purchase), name='save_update_purchase'),
     path('delete_item_product_buy/', login_required(delete_item_product_buy), name='delete_item_product_buy'),
     path('delete_item_due/', login_required(delete_item_due), name='delete_item_due'),
+
+    # Find Product Code Bar
+    path('get_product_by_code_bar/', login_required(get_product_by_code_bar), name='get_product_by_code_bar'),
 ]

@@ -11,7 +11,8 @@
                     <div class="col-sm-8 col-md-8 col-lg-8">
                         <div class="row p-2">
                             <div class="col-sm-3 col-md-3 col-lg-3">
-                                <h4 class="montserrat text-white font-weight-bold mt-4 mb-0"><label>NUEVA COMPRA:</label>
+                                <h4 class="montserrat text-white font-weight-bold mt-4 mb-0"><label>NUEVA
+                                    COMPRA:</label>
                                 </h4>
                             </div>
 
@@ -33,30 +34,30 @@
                                 {##}
                                 {#                            </div>#}
 
-{#                                <form>#}
-{#                                    <div class="form-group row ">#}
-                                        {#                                        <label for="type_change" class="col-sm-5 col-form-label">Tipo de Cambio:</label>#}
-{#                                        <button type="button"#}
-{#                                                class="col-sm-5 btn btn-sm btn-outline-secondary border-0 text-white btn-block p-1"#}
-{#                                                id="btn-type-change">Tipo de Cambio:#}
-{#                                        </button>#}
-{#                                        <div class="col-sm-7">#}
-{#                                            <input type="text" class="form-control text-center font-weight-bold"#}
-{#                                                   id="type_change" readonly>#}
-{#                                        </div>#}
-{#                                    </div>#}
-{#                                </form>#}
+                                {#                                <form>#}
+                                {#                                    <div class="form-group row ">#}
+                                {#                                        <label for="type_change" class="col-sm-5 col-form-label">Tipo de Cambio:</label>#}
+                                {#                                        <button type="button"#}
+                                {#                                                class="col-sm-5 btn btn-sm btn-outline-secondary border-0 text-white btn-block p-1"#}
+                                {#                                                id="btn-type-change">Tipo de Cambio:#}
+                                {#                                        </button>#}
+                                {#                                        <div class="col-sm-7">#}
+                                {#                                            <input type="text" class="form-control text-center font-weight-bold"#}
+                                {#                                                   id="type_change" readonly>#}
+                                {#                                        </div>#}
+                                {#                                    </div>#}
+                                {#                                </form>#}
                             </div>
 
-{#                            <div class="col-sm-3 col-md-3 col-lg-3">#}
-{#                                <div class="form-check mt-4">#}
-{#                                    <input class="form-check-input check-dollar" type="checkbox" value=""#}
-{#                                           id="check_dollar">#}
-{#                                    <label class="form-check-label text-white" for="check_dollar">#}
-{#                                        COMPRA EN DOLARES#}
-{#                                    </label>#}
-{#                                </div>#}
-{#                            </div>#}
+                            {#                            <div class="col-sm-3 col-md-3 col-lg-3">#}
+                            {#                                <div class="form-check mt-4">#}
+                            {#                                    <input class="form-check-input check-dollar" type="checkbox" value=""#}
+                            {#                                           id="check_dollar">#}
+                            {#                                    <label class="form-check-label text-white" for="check_dollar">#}
+                            {#                                        COMPRA EN DOLARES#}
+                            {#                                    </label>#}
+                            {#                                </div>#}
+                            {#                            </div>#}
 
                         </div>
 
@@ -107,20 +108,20 @@
                         <div class="col-sm-12 col-md-12 col-lg-12 border-right">
                             {% include "buys/buy_register.html" %}
                         </div>
-{#                        <div class="col-sm-5 col-md-5 col-lg-5">#}
-{#                            <div class="card">#}
-{#                                <div class="card-header">#}
-{#                                    <div class="row">#}
-{#                                        <div class="col-sm-9 col-md-9 col-lg-9">#}
-{#                                            DETALLE DE DOCUMENTOS DE FLETE#}
-{#                                        </div>#}
-{#                                    </div>#}
-{#                                </div>#}
-{#                                <div class="card-body">#}
-{#                                    {% include "buys/buys_freight.html" %}#}
-{#                                </div>#}
-{#                            </div>#}
-{#                        </div>#}
+                        {#                        <div class="col-sm-5 col-md-5 col-lg-5">#}
+                        {#                            <div class="card">#}
+                        {#                                <div class="card-header">#}
+                        {#                                    <div class="row">#}
+                        {#                                        <div class="col-sm-9 col-md-9 col-lg-9">#}
+                        {#                                            DETALLE DE DOCUMENTOS DE FLETE#}
+                        {#                                        </div>#}
+                        {#                                    </div>#}
+                        {#                                </div>#}
+                        {#                                <div class="card-body">#}
+                        {#                                    {% include "buys/buys_freight.html" %}#}
+                        {#                                </div>#}
+                        {#                            </div>#}
+                        {#                        </div>#}
                     </div>
 
                 </div>
@@ -686,7 +687,7 @@
                                 let list = response.productList;
                                 _menu.css({'background-color': '#fff', 'border': '1px solid rgba(0,0,0,.15)'})
                                 for (let i = 0; i < list.length; i++) {
-                                    _menu.append(`<a class="dropdown-item product-item" unit_name="${list[i].unit}" brand="${list[i].brand}" unit_id="${list[i].unit_id}" href="#" data-id="${list[i].id}">${list[i].name} - ${list[i].brand}</a>`)
+                                    _menu.append(`<a class="dropdown-item product-item" barcode="${list[i].barcode}" unit_name="${list[i].unit}" brand="${list[i].brand}" unit_id="${list[i].unit_id}" href="#" data-id="${list[i].id}">${list[i].name} - ${list[i].brand}</a>`)
                                 }
 
                             }
@@ -715,6 +716,7 @@
 
             let _product_id = $(this).attr('data-id');
             let _unit_id = $(this).attr('unit_id');
+            let _barcode = $(this).attr('barcode');
             let _product_name = $(this).text();
             let _tr = $(this).parent('div.dropdown-menu').parent('td').parent('tr')
             let _td = $(this).parent('div.dropdown-menu').parent('td')
@@ -727,6 +729,7 @@
             _td.find('input.product-table').val(_product_name)
             _tr.find('td.brand input.brand-product').val(_brand_product)
             _tr.find('td.unit input.unit-product').val(_unit_product)
+            _tr.find('td.item-code-bar input.code-bar').val(_barcode)
 
             _tr.attr('unit_id', _unit_id)
 
@@ -770,6 +773,8 @@
             $('#id_detail_data_grid > tbody').append(
                 '<tr class="text-center">' +
                 '<td class="item-numero align-middle">' + '</td>' +
+                '<td class="item-code-bar align-middle text-center">' +
+                '<input type="text" class="form-control text-center text-uppercase code-bar" autocomplete="off"' + '</td>' +
                 '<td class="align-middle text-left product-item-table">' +
                 '<input type="text" class="form-control text-uppercase product-table dropdown-toggle" ' +
                 '               data-toggle="dropdown" aria-expanded="false" placeholder="Ingrese producto...">' + '<div class="dropdown-menu"></div>' + '</td>' +
@@ -987,12 +992,12 @@
             }*/
 
             $('#id_debs_grid > tbody').append(
-                 '<tr class="text-center">' +
-                 '<td class="align-middle text-center due-count">' + '</td>' +
-                 '<td class="align-middle text-center amount-due">' + 'S/ ' + _amount_due + '</td>' +
-                 '<td class="align-middle"> ' + '<button type="button" onclick="deletedues(this)" class="btn btn-danger delete-detail" style="font-size: 0.6em"><i class="fa fa-trash" style="font-size: 1.5em"></i></button>' + '</td>' +
-                 '</tr>'
-             );
+                '<tr class="text-center">' +
+                '<td class="align-middle text-center due-count">' + '</td>' +
+                '<td class="align-middle text-center amount-due">' + 'S/ ' + _amount_due + '</td>' +
+                '<td class="align-middle"> ' + '<button type="button" onclick="deletedues(this)" class="btn btn-danger delete-detail" style="font-size: 0.6em"><i class="fa fa-trash" style="font-size: 1.5em"></i></button>' + '</td>' +
+                '</tr>'
+            );
             counterStrikedebs()
             $('#amount-due').val('');
 
@@ -1006,11 +1011,58 @@
                 l++;
             });
         }
+
         function deletedues(btn) {
             btn.parentNode.parentNode.remove();
             counterStrikedebs();
         }
 
+        $(document).on('keypress', '.code-bar', function (e) {
+
+            if (e.keyCode === 13) {
+
+                e.preventDefault()
+
+                $(this).trigger("enterKey");
+                let _code_bar = $(this).val();
+                let _td = $(this).parent('td');
+                let _tr = _td.parent('tr');
+
+                if (_code_bar.length > 3) {
+
+                    $.ajax({
+                        url: '/buys/get_product_by_code_bar/',
+                        async: true,
+                        dataType: 'json', // for response
+                        type: 'GET',
+                        data: {
+                            'code_bar': _code_bar,
+                        },
+                        contentType: 'application/json;charset=UTF-8',
+                        headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                        success: function (response, textStatus, xhr) {
+                            if (response.success === true){
+                                _tr.attr('product', response.product_id);
+                                _tr.find('td.product-item-table input.product-table').val(response.product_name);
+                                _tr.find('td.brand input.brand-product').val(response.brand);
+                                _tr.find('td.unit input.unit-product').val(response.unit);
+                                _tr.attr('unit_id', response.unit_id);
+                            }
+                            if (response.success === false) {
+                                toastr.error(response.message, '¡Mensaje!');
+                            }
+                        },
+                        fail: function (response) {
+                            toastr.error(response.message, '¡Mensaje!');
+                        }
+                    });
+
+                } else {
+                    toastr.warning('ingrese un codigo de barras valido', 'Error de llenado');
+                    return false;
+                }
+            }
+        });
 
     </script>
 

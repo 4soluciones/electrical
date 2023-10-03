@@ -1729,6 +1729,8 @@ def get_product_by_criteria_table(request):
             price_sale = ''
             stock = 0
             product_store_id = ''
+            price_purchase = ''
+            barcode = ''
 
             if e.productdetail_set.exists():
                 unit_id = e.productdetail_set.last().unit.id
@@ -1752,7 +1754,8 @@ def get_product_by_criteria_table(request):
                 'price_sale': price_sale,
                 'price_purchase': price_purchase,
                 'stock': stock,
-                'product_store_id': product_store_id
+                'product_store_id': product_store_id,
+                'barcode': e.barcode if e.barcode is not None else ''
             }
             product_list.append(item_product_list)
 
@@ -2074,3 +2077,60 @@ def delete_item_due(request):
         return JsonResponse({
             'message': 'Eliminado.',
         }, status=HTTPStatus.OK)
+
+
+def get_product_by_code_bar(request):
+    if request.method == 'GET':
+        code_bar = request.GET.get('code_bar', '')
+        product_set = Product.objects.filter(barcode=str(code_bar))
+        if product_set.exists():
+            product_obj = product_set.last()
+            user_id = request.user.id
+            user_obj = User.objects.get(pk=int(user_id))
+            subsidiary_obj = get_subsidiary_by_user(user_obj)
+            subsidiary_store_obj = SubsidiaryStore.objects.get(subsidiary=subsidiary_obj, category='V')
+
+            unit_id = ''
+            unit_name = ''
+            price_sale = ''
+            stock = 0
+            product_store_id = ''
+            price_purchase = ''
+
+            if product_obj.productdetail_set.exists():
+                unit_id = product_obj.productdetail_set.last().unit.id
+                unit_name = product_obj.productdetail_set.last().unit.name
+                price_sale = product_obj.productdetail_set.last().price_sale
+                price_purchase = product_obj.productdetail_set.last().price_purchase
+
+            product_store_set = ProductStore.objects.filter(product_id=product_obj.id, subsidiary_store=subsidiary_store_obj)
+            if product_store_set.exists():
+                product_store_obj = product_store_set.first()
+                stock = product_store_obj.stock
+                product_store_id = product_store_obj.id
+
+            return JsonResponse({
+                'success': True,
+                'product_code_bar': product_obj.barcode,
+                'product_id': product_obj.id,
+                'product_name': product_obj.name,
+                'brand': product_obj.product_brand.name,
+                'unit': unit_name,
+                'unit_id': unit_id,
+                'price_sale': price_sale,
+                'price_purchase': price_purchase,
+                'stock': stock,
+                'product_store_id': product_store_id
+            }, status=HTTPStatus.OK)
+        return JsonResponse({
+            'success': False,
+            'message': 'NO EXISTE CÓDIGO DE BARRAS'
+        })
+    return JsonResponse({'message': 'Error de peticion.'}, status=HTTPStatus.BAD_REQUEST)
+
+
+
+
+
+
+

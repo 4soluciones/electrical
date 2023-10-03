@@ -5,7 +5,8 @@
         <thead>
         <tr class="text-center text-white" style="background: #1a77c8">
             <th scope="col" class="align-middle font-weight-normal" style="width: 3%;">Nº</th>
-            <th scope="col" class="align-middle font-weight-normal" style="width: 38%;">Descripción de Artículo</th>
+            <th scope="col" class="align-middle font-weight-normal" style="width: 7%;">Codigo de barras</th>
+            <th scope="col" class="align-middle font-weight-normal" style="width: 31%;">Descripción de Artículo</th>
             <th scope="col" class="align-middle font-weight-normal" style="width: 8%;">Marca</th>
             <th scope="col" class="align-middle font-weight-normal" style="width: 5%;">Cantidad</th>
             <th scope="col" class="align-middle font-weight-normal" style="width: 7%;">Unidad Medida</th>
@@ -23,6 +24,10 @@
 
         <tr class="" product="" unit_id="">
             <td class="item-numero align-middle text-center">1</td>
+            <td class="item-code-bar align-middle text-center">
+                <input type="text" aria-label="..."
+                       class="form-control text-center text-uppercase code-bar" autocomplete="off">
+            </td>
             <td class="align-middle text-left product-item-table">
                 {#                <div class="btn-group">#}
                 <input type="text"
@@ -90,7 +95,7 @@
         <tfoot id="details-table-foot">
 
         <tr>
-            <td class="border-0" colspan="2"></td>
+            <td class="border-0" colspan="3"></td>
 
             <td class="border td-table-foot" colspan="11">
                 <div class="form-check mt-5">
