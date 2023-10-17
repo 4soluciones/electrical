@@ -87,12 +87,12 @@ $(document).ready(function() {
 (function($){
     $(window).on("load",function(){
     	
-        $(".page-content, .nav-lateral-content").mCustomScrollbar({
+       /* $(".page-content, .nav-lateral-content").mCustomScrollbar({
         	theme:"dark",
         	scrollbarPosition: "inside",
         	autoHideScrollbar: true,
         	scrollButtons: {enable: true}
-        });
+        });*/
 
 		// used to display a toast
 		toastr.options = {
