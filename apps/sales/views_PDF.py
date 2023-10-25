@@ -500,7 +500,7 @@ def print_ticket_order_sales(request, pk=None, t=None):  # Ticket
             [('DIRECCIÓN: ', p1)] +
             [('ATENDIDO POR: ', order_obj.user.username.upper() + " ")] +
             [('FECHA: ', _format_date + '  HORA: ' + _format_time)] +
-            [('TIPO DE PAGO: ',  order_obj.get_way_to_pay_type_display().upper())],
+            [('TIPO DE PAGO: ', order_obj.get_way_to_pay_type_display().upper())],
             colWidths=colwiths_table)
     elif client_type != '06':
         p0 = Paragraph(client_name.upper(), styles["Left"])
@@ -1214,7 +1214,7 @@ def print_order_bill(request, pk=None):
     if email is None:
         email = '-'
     info_address = ''
-    payment = 'EFECTIVO'
+    payment = order_obj.get_way_to_pay_type_display()
     description = '-'
     detail_credit = []
     cash_flow_set = CashFlow.objects.filter(order=order_obj)
@@ -1279,7 +1279,7 @@ def print_order_bill(request, pk=None):
         ['Fecha Emision: ', Paragraph(order_obj.create_at.strftime("%d-%m-%Y"), styles['Left_Square'])],
         ['Vendedor: ', Paragraph(order_obj.user.username.upper(), styles['Left_Square'])],
         # ['Moneda: ', 'coin'],
-        ['Cond. Venta: ', Paragraph(str(payment), styles['Left_Square'])],
+        ['Cond. Venta: ', Paragraph(str(payment.upper()), styles['Left_Square'])],
         # ['Nº Proyecto : ', Paragraph(str(nro_project), styles['Left_Square'])],
         # ['Nº Compra Cliente: ', Paragraph(str(nro_purchase_client), styles['Left_Square'])]
     ]
@@ -1564,7 +1564,6 @@ def print_orders_sales(request, start_date=None, end_date=None):
     total_credit = decimal.Decimal(0)
     total_deposit = decimal.Decimal(0)
 
-
     user_dict = {}
 
     # format_start_date = datetime.datetime(start_date)
@@ -1582,7 +1581,8 @@ def print_orders_sales(request, start_date=None, end_date=None):
 
     sum_sales = 0
 
-    _tbl_header = ('REPORTE DE VENTAS DE LA SEDE ' + subsidiary_obj.name + ' DESDE ' + start_date + ' HASTA ' + end_date,)
+    _tbl_header = (
+    'REPORTE DE VENTAS DE LA SEDE ' + subsidiary_obj.name + ' DESDE ' + start_date + ' HASTA ' + end_date,)
 
     ana_c = Table([_tbl_header], colWidths=[_bts * 100 / 100])
 
@@ -1604,19 +1604,19 @@ def print_orders_sales(request, start_date=None, end_date=None):
         'PREC.', 'SUBTOT.')
 
     colwiths_table_title = [
-                            _bts * 5 / 100,  # TIPO
-                            _bts * 4 / 100,  # SERIE
-                            _bts * 6 / 100,  # NRO
-                            _bts * 15 / 100,  # CLIENTE
-                            _bts * 10 / 100,  # USUARIO
-                            _bts * 5 / 100,  # TOTAL
-                            _bts * 7 / 100,  # FECHA
-                            _bts * 28 / 100,  # PRODUCTO
-                            _bts * 5 / 100,  # UNIDAD
-                            _bts * 5 / 100,  # CANTIDAD
-                            _bts * 5 / 100,  # PRECIO
-                            _bts * 5 / 100,  # SUBTOTAL
-                            ]
+        _bts * 5 / 100,  # TIPO
+        _bts * 4 / 100,  # SERIE
+        _bts * 6 / 100,  # NRO
+        _bts * 15 / 100,  # CLIENTE
+        _bts * 10 / 100,  # USUARIO
+        _bts * 5 / 100,  # TOTAL
+        _bts * 7 / 100,  # FECHA
+        _bts * 28 / 100,  # PRODUCTO
+        _bts * 5 / 100,  # UNIDAD
+        _bts * 5 / 100,  # CANTIDAD
+        _bts * 5 / 100,  # PRECIO
+        _bts * 5 / 100,  # SUBTOTAL
+    ]
     _rows = []
     _rows_users = []
     _rows.append(td_title)
@@ -1720,19 +1720,19 @@ def print_orders_sales(request, start_date=None, end_date=None):
 
             for od in o.orderdetail_set.all():
                 _rows.append((
-                              type_bill,
-                              _serial,
-                              str(_correlative).zfill(8),
-                              Paragraph(o.client.names.upper(), styles["Center"]),
-                              o.user.worker_set.last().employee.names.upper(),
-                              o.total,
-                              o.create_at.date().strftime("%d-%m-%Y"),
-                              Paragraph(od.product.name.upper(), styles["Center"]),
-                              od.unit.name,
-                              int(od.quantity_sold),
-                              od.price_unit,
-                              od.multiply().quantize(decimal.Decimal('0.00'), rounding=decimal.ROUND_HALF_EVEN),
-                              ))
+                    type_bill,
+                    _serial,
+                    str(_correlative).zfill(8),
+                    Paragraph(o.client.names.upper(), styles["Center"]),
+                    o.user.worker_set.last().employee.names.upper(),
+                    o.total,
+                    o.create_at.date().strftime("%d-%m-%Y"),
+                    Paragraph(od.product.name.upper(), styles["Center"]),
+                    od.unit.name,
+                    int(od.quantity_sold),
+                    od.price_unit,
+                    od.multiply().quantize(decimal.Decimal('0.00'), rounding=decimal.ROUND_HALF_EVEN),
+                ))
 
                 _sum_total_multiply += od.multiply()
 
@@ -1774,11 +1774,11 @@ def print_orders_sales(request, start_date=None, end_date=None):
 
         else:
             _rows.append((
-                          type_bill,
-                          _serial,
-                          str(_correlative).zfill(8),
-                          str('ANULADA'),
-                          ))
+                type_bill,
+                _serial,
+                str(_correlative).zfill(8),
+                str('ANULADA'),
+            ))
 
             detail_style.append(('SPAN', (0, y1), (0, y2)))
             detail_style.append(('SPAN', (1, y1), (1, y2)))
@@ -1838,7 +1838,8 @@ def print_orders_sales(request, start_date=None, end_date=None):
     _rows_users.append(td_title_users)
 
     for u, v in user_dict.items():
-        _rows_users.append((str(v.get('user_names')).upper(), v.get('total_sold'), v.get('total_bills'), v.get('total_receipts'), v.get('total_tickets')))
+        _rows_users.append((str(v.get('user_names')).upper(), v.get('total_sold'), v.get('total_bills'),
+                            v.get('total_receipts'), v.get('total_tickets')))
 
     ana_c5 = Table(_rows_users, colWidths=colwiths_table_user)
 
@@ -1850,11 +1851,12 @@ def print_orders_sales(request, start_date=None, end_date=None):
                              _bts_2 * 25 / 100,  # CONTADO
                              _bts_2 * 25 / 100,  # CREDITO
                              _bts_2 * 25 / 100,  # DEPOSITO
-                           ]
+                             ]
 
     _table_totals = [
         ['VENTA TOTAL', 'TOTAL CONTADO', 'TOTAL CREDITO', 'TOTAL DEPOSITO'],
-        [str(decimal.Decimal(round(sum, 2))), str(decimal.Decimal(round(total_cash, 2))), str(decimal.Decimal(round(total_credit, 2))), str(decimal.Decimal(round(total_deposit, 2)))]
+        [str(decimal.Decimal(round(sum, 2))), str(decimal.Decimal(round(total_cash, 2))),
+         str(decimal.Decimal(round(total_credit, 2))), str(decimal.Decimal(round(total_deposit, 2)))]
     ]
 
     ana_c6 = Table(_table_totals, colWidths=colwiths_table_totals)
