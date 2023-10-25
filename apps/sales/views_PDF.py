@@ -978,12 +978,12 @@ def print_quotation(request, pk=None, t=None):
          Paragraph('CODIGO DE CUENTA INTERBANCARIO', styles['Center_Newgot_1'])],
 
         [Paragraph('CUENTAS BCP', styles['Center_Newgot_1']),
-         Paragraph('SOLES', styles['Center-text']), Paragraph('215-2023417-0-71', styles['Center-text']),
-         Paragraph('002-215-002023417071-28', styles['Center-text'])],
+         Paragraph('SOLES', styles['Center-text']), Paragraph('215-9908678-0-71', styles['Center-text']),
+         Paragraph('002-215-009908678071-27', styles['Center-text'])],
 
-        [Paragraph('CUENTAS BCP', styles['Center_Newgot_1']),
-         Paragraph('SOLES', styles['Center-text']), Paragraph('215-9844079-0-56', styles['Center-text']),
-         Paragraph('002-215-009844079056-20', styles['Center-text'])],
+        # [Paragraph('CUENTAS BCP', styles['Center_Newgot_1']),
+        #  Paragraph('SOLES', styles['Center-text']), Paragraph('215-9844079-0-56', styles['Center-text']),
+        #  Paragraph('002-215-009844079056-20', styles['Center-text'])],
         #
         # [Paragraph('CUENTA BBVA', styles['Center_Newgot_1']),
         #  Paragraph('SOLES', styles['Left-text']), Paragraph('0011 0418 0100018341 16', styles['Left-text']),
@@ -1365,12 +1365,12 @@ def print_order_bill(request, pk=None):
          Paragraph('CODIGO DE CUENTA INTERBANCARIO', styles['Center_Newgot_1'])],
 
         [Paragraph('CUENTAS BCP', styles['Center_Newgot_1']),
-         Paragraph('SOLES', styles['Center-text']), Paragraph('215-2023417-0-71', styles['Center-text']),
-         Paragraph('002-215-002023417071-28', styles['Center-text'])],
+         Paragraph('SOLES', styles['Center-text']), Paragraph('215-9908678-0-71', styles['Center-text']),
+         Paragraph('002-215-009908678071-27', styles['Center-text'])],
 
-        [Paragraph('CUENTAS BCP', styles['Center_Newgot_1']),
-         Paragraph('SOLES', styles['Center-text']), Paragraph('215-9844079-0-56', styles['Center-text']),
-         Paragraph('002-215-009844079056-20', styles['Center-text'])],
+        # [Paragraph('CUENTAS BCP', styles['Center_Newgot_1']),
+        #  Paragraph('SOLES', styles['Center-text']), Paragraph('215-9844079-0-56', styles['Center-text']),
+        #  Paragraph('002-215-009844079056-20', styles['Center-text'])],
 
         # [Paragraph('CUENTA BBVA', styles['Center_Newgot_1']),
         #  Paragraph('SOLES', styles['Left-text']), Paragraph('0011 0418 0100018341 16', styles['Left-text']),
@@ -1386,7 +1386,7 @@ def print_order_bill(request, pk=None):
     ]
     t_bank = Table(table_bank, colWidths=[_bts * 7 / 100, _bts * 7 / 100, _bts * 24 / 100, _bts * 24 / 100])
     style_bank = [
-        ('SPAN', (0, 1), (0, 2)),
+        # ('SPAN', (0, 1), (0, 2)),
         ('RIGHTPADDING', (0, 0), (-1, -1), 0),
         ('LEFTPADDING', (0, 0), (-1, -1), 3),
         ('ALIGNMENT', (0, 0), (-1, -1), 'CENTER'),
