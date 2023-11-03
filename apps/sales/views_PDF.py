@@ -424,7 +424,6 @@ def print_ticket_order_sales(request, pk=None, t=None):  # Ticket
     subsidiary_obj = Subsidiary.objects.get(id=order_obj.subsidiary.id)
 
     tbh_business_name = 'T VISION SAFE E.I.R.L.'
-    # tbh_business_address = 'CAL. ALTO DE LA LUNA 336 Y 338\n AREQUIPA - AREQUIPA - AREQUIPA\n RUC: 20539633075'
 
     tbh_business_address = subsidiary_obj.address
     tbh_ruc = subsidiary_obj.ruc
@@ -619,7 +618,7 @@ def print_ticket_order_sales(request, pk=None, t=None):  # Ticket
         ('SPAN', (0, 0), (1, 0)),  # first row
     ]
 
-    datatable = 'https://4soluciones.pse.pe/20539633075'
+    datatable = 'https://4soluciones.pse.pe/20603890214'
     ana_c9 = Table([(qr_code(datatable), '')], colWidths=[_wt * 99 / 100, _wt * 1 / 100])
     ana_c9.setStyle(TableStyle(my_style_table6))
 
@@ -791,7 +790,7 @@ def print_quotation(request, pk=None, t=None):
     col_2.setStyle(TableStyle(style_table_col_2))
 
     tbl1_col__3 = [
-        [Paragraph('RUC: 20539633075 ', styles["Center_Newgot_title"])],
+        [Paragraph('RUC: 20603890214', styles["Center_Newgot_title"])],
         [Paragraph('COTIZACIÓN Nº', styles["Center_Newgot_title"])],
         [Paragraph(order_obj.subsidiary.serial + '-' + str(str(order_obj.correlative_sale).zfill(10)),
                    styles["Center_Newgot_title"])],
@@ -1177,7 +1176,7 @@ def print_order_bill(request, pk=None):
         datatable = order_bill_obj.code_qr
         type_bill = order_bill_obj.get_type_display().upper()
     tbl1_col__3 = [
-        [Paragraph('RUC 20539633075', styles["Center_Newgot_title"])],
+        [Paragraph('RUC 20603890214', styles["Center_Newgot_title"])],
         [Paragraph(str(type_bill) + ' ELECTRÓNICA', styles["Center_Newgot_title"])],
         [Paragraph(order_bill_obj.serial + '-' + str(str(order_bill_obj.n_receipt).zfill(8)),
                    styles["Center_Newgot_title"])],
@@ -1471,7 +1470,7 @@ def print_order_bill(request, pk=None):
                                                                                                       'documento '
                                                                                                       'visita',
                    styles["Left-text"])],
-        [Paragraph('https://4soluciones.pse.pe/20539633075', styles["Left-text"])],
+        [Paragraph('https://4soluciones.pse.pe/20603890214', styles["Left-text"])],
         [Paragraph(
             'Emitido mediante un PROVEEDOR Autorizado por la SUNAT mediante Resolución de Intendencia No.034-005-0005315',
             styles["Left-text"])],
