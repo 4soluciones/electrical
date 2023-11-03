@@ -147,7 +147,7 @@ def print_ticket_order_passenger(request, pk=None):  # Boleto de viaje boleta / 
     client_name = ""
     client_address = ""
 
-    tbh_business_name_address = 'ROLDEN PERU S.A.C.\nCAL.PIZARRO NRO. 525 (FRENTE EDIFICIO NICOLAS DE PIEROLA) AREQUIPA - AREQUIPA - AREQUIPA\n RUC: 20606782650'
+    tbh_business_name_address = 'CAR.VIA EVITAMIENTO 608 MZA. 21\nLOTE. 5 C.P. SEMI RURAL PACHACUTEC ZONA H (SECCION 5)\n RUC: 20603890214'
 
     date = order_obj.programming_seat.programming.departure_date
     _format_time = order_obj.programming_seat.programming.get_turn_display()
@@ -1536,7 +1536,7 @@ def print_order_bill(request, pk=None):
     #     dictionary.append(credit_list)
     dictionary.append(Spacer(1, 5))
     dictionary.append(total_footer)
-    dictionary.append(Paragraph('www.electrical.com', styles["Center_Newgot"]))
+    # dictionary.append(Paragraph('www.electrical.com', styles["Center_Newgot"]))
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="{}.pdf"'.format(str(type_document) + ' ' +
                                                                              str(order_bill_obj.serial) + '-' + str(
