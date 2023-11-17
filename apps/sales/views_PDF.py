@@ -994,7 +994,7 @@ def print_quotation(request, pk=None, t=None):
     ]
     t_bank = Table(table_bank, colWidths=[_bts * 7 / 100, _bts * 7 / 100, _bts * 24 / 100, _bts * 24 / 100])
     style_bank = [
-        ('SPAN', (0, 1), (0, 2)),
+        # ('SPAN', (0, 1), (0, 2)),
         # ('SPAN', (0, 3), (0, 4)),
         ('RIGHTPADDING', (0, 0), (-1, -1), 0),
         ('LEFTPADDING', (0, 0), (-1, -1), 3),
