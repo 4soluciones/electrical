@@ -59,16 +59,16 @@
 
                     </select>
 
-{#                    <button type="button"#}
-{#                            class="col-sm-1 btn btn-sm btn-outline-secondary font-weight-bold border-0 text-dark btn-block p-1"#}
-{#                            id="btn-type-change">Tipo de Cambio:#}
-{#                    </button>#}
-{#                    <div class="col-sm-1">#}
-{#                        <input type="text" class="form-control text-center font-weight-bold pr-0 pl-0"#}
-{#                               id="type_change" readonly>#}
-{#                        <input type="hidden" class="form-control text-center font-weight-bold pr-0 pl-0"#}
-{#                               id="type_change_value" readonly>#}
-{#                    </div>#}
+                    {#                    <button type="button"#}
+                    {#                            class="col-sm-1 btn btn-sm btn-outline-secondary font-weight-bold border-0 text-dark btn-block p-1"#}
+                    {#                            id="btn-type-change">Tipo de Cambio:#}
+                    {#                    </button>#}
+                    {#                    <div class="col-sm-1">#}
+                    {#                        <input type="text" class="form-control text-center font-weight-bold pr-0 pl-0"#}
+                    {#                               id="type_change" readonly>#}
+                    {#                        <input type="hidden" class="form-control text-center font-weight-bold pr-0 pl-0"#}
+                    {#                               id="type_change_value" readonly>#}
+                    {#                    </div>#}
 
                     {#                    <button type="button" class="btn btn-primary ml-2 mr-2" id="btn-search-brand">#}
                     {#                        <i class="fas fa-search-dollar"></i>#}
@@ -560,6 +560,58 @@
             });
 
         }
+
+
+        $(document).on('click', '.edit-first-price', function () {
+            $('#first_price_purchase').removeAttr('readonly')
+        });
+
+        $(document).on('keypress', '.first_price_purchase', function (e) {
+            if (e.keyCode === 13) {
+                e.preventDefault()
+                $(this).trigger("enterKey");
+                let _new_price_purchase = $(this).val();
+                let _ps = $(this).attr('ps');
+
+                $.ajax({
+                    url: '/sales/calculate_square_quantity/',
+                    dataType: 'json',
+                    type: 'GET',
+                    data: {
+                        'ps': _ps,
+                        'new_price_purchase': _new_price_purchase
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            toastr.success(response.message, '¡Bien hecho!');
+                            $('#kardex-grid-list').html(response.form);
+                        }
+                    },
+                    fail: function (response) {
+                        console.log(response);
+                    }
+                });
+            }
+        });
+
+         $(document).on('click', '#btn-search', function (e) {
+            var search = $("#search").attr('pk');
+            $.ajax({
+                url: '/sales/get_list_kardex/',
+                dataType: 'json',
+                type: 'GET',
+                data: {'pk': search, 'subsidiary_store': $("#id_subsidiary_store").val()},
+                success: function (response) {
+                    console.log(response);
+                    if (response.success) {
+                        $('#kardex-grid-list').html(response.form);
+                    }
+                },
+                fail: function (response) {
+                    console.log(response);
+                }
+            });
+        });
 
 
     </script>

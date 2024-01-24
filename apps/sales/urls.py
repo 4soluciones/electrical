@@ -204,4 +204,6 @@ urlpatterns = [
 
     # All Products
     path('get_all_products/', login_required(get_all_products), name='get_all_products'),
+
+    path('calculate_square_quantity/', login_required(calculate_square_quantity), name='calculate_square_quantity'),
 ]

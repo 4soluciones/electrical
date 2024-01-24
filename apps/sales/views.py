@@ -6379,3 +6379,54 @@ def get_all_products(request):
         }, status=HTTPStatus.OK)
 
     return JsonResponse({'message': 'Error de peticion.'}, status=HTTPStatus.BAD_REQUEST)
+
+
+def calculate_square_quantity(request):
+    if request.method == 'GET':
+        ps_id = request.GET.get('ps', '')
+        new_price_purchase = request.GET.get('new_price_purchase', '').replace(',', '.')
+
+        kardex_set = Kardex.objects.filter(product_store__id=ps_id).order_by('create_at')
+        kardex_initial = Kardex.objects.filter(product_store__id=ps_id, operation='C').first()
+        var_remaining_quantity = kardex_initial.remaining_quantity
+        var_remaining_price = decimal.Decimal(new_price_purchase.replace(',', '.'))
+        var_remaining_price_total = kardex_initial.remaining_price_total
+
+        for k in kardex_set:
+            if k.operation == 'E':
+                var_remaining_quantity += k.quantity
+                if var_remaining_quantity == 0:
+                    var_remaining_price = 0
+                else:
+                    var_remaining_price = (var_remaining_price_total + k.price_total) / var_remaining_quantity
+                var_remaining_price_total = var_remaining_quantity * var_remaining_price
+
+                k.remaining_quantity = var_remaining_quantity
+                k.remaining_price = var_remaining_price
+                k.remaining_price_total = var_remaining_price_total
+                k.save()
+            elif k.operation == 'S':
+                var_remaining_quantity -= k.quantity
+                var_remaining_price_total = var_remaining_quantity * var_remaining_price
+                k.remaining_quantity = var_remaining_quantity
+                k.remaining_price = var_remaining_price
+                k.remaining_price_total = var_remaining_price_total
+                k.save()
+
+            kardex_initial.remaining_price = decimal.Decimal(new_price_purchase)
+            kardex_initial.save()
+
+        last_inventory = Kardex.objects.filter(id__lt=OuterRef("pk"), product_store__id=ps_id).order_by(
+            "-id")
+
+        inventories = Kardex.objects.filter(product_store__id=ps_id).annotate(
+            last_remaining_quantity=Subquery(last_inventory.values('remaining_quantity')[:1])
+        ).order_by('id')
+
+        t = loader.get_template('sales/kardex_grid_list.html')
+        c = ({'inventories': inventories})
+        return JsonResponse({
+            'success': True,
+            'message': 'Actualizado correctamente',
+            'form': t.render(c),
+        })
