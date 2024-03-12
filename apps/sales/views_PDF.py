@@ -1213,6 +1213,7 @@ def print_order_bill(request, pk=None):
     if email is None:
         email = '-'
     info_address = ''
+    type_payment = order_obj.way_to_pay_type
     payment = order_obj.get_way_to_pay_type_display()
     description = '-'
     detail_credit = []
@@ -1274,11 +1275,15 @@ def print_order_bill(request, pk=None):
     nro_purchase_client = 'nro_purchase_client'
     if nro_purchase_client is None:
         nro_purchase_client = '-'
+    _row_payment_deposit = []
+    if type_payment == 'D':
+        _row_payment_deposit = ['Depósito a: ', Paragraph(str(order_obj.cashflow_set.last().cash.name), styles['Left_Square'])]
     tbl2_col2 = [
         ['Fecha Emision: ', Paragraph(order_obj.create_at.strftime("%d-%m-%Y"), styles['Left_Square'])],
         ['Vendedor: ', Paragraph(order_obj.user.username.upper(), styles['Left_Square'])],
         # ['Moneda: ', 'coin'],
         ['Cond. Venta: ', Paragraph(str(payment.upper()), styles['Left_Square'])],
+        _row_payment_deposit
         # ['Nº Proyecto : ', Paragraph(str(nro_project), styles['Left_Square'])],
         # ['Nº Compra Cliente: ', Paragraph(str(nro_purchase_client), styles['Left_Square'])]
     ]

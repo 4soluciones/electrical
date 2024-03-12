@@ -4,8 +4,7 @@
 
         <div class="modal-header text-center">
 
-
-            <h5 class="modal-title font-weight-bold">DESTINAR - ALMACEN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</h5>
+            <h5 class="modal-title font-weight-bold">ASIGNAR ALMACEN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</h5>
             <h5 class="modal-title ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; COMPRA
                 Nº: {{ purchase.bill_number|upper }}</h5>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -19,12 +18,11 @@
             {% csrf_token %}
 
             <div class="modal-body">
-                <table class="table" id="table-header" style="width: 100%;">
+                <table class="table roboto-condensed-regular" id="table-header" style="width: 100%;">
                     <tr>
-
                         <td style="width: 16%; font-size: 15px" class="align-middle font-weight-bold text-uppercase">
                             Fecha:&nbsp; {{ purchase.purchase_date|date:"d-m-Y" }}</td>
-                        <td style="width: 10%" class="align-middle font-weight-bold text-uppercase">Almacen destino:
+                        <td style="width: 10%; font-size: 12px" class="align-middle font-weight-bold text-uppercase">Almacen destino:
                         </td>
                         <td style="width: 14%" class="align-middle">
                             <select class="form-control font-weight-bold" id="id_almacen" name="almacen" required>
@@ -82,7 +80,7 @@
                         </td>
                     </tr>
                 </table>
-                <table class="table table-bordered table-striped align-content-center response table-hover table-sm"
+                <table class="table table-bordered table-striped align-content-center response table-hover table-sm roboto-condensed-regular"
                        style="width: 100%;">
 
                     <thead>

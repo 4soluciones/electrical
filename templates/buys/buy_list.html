@@ -24,109 +24,110 @@
 
                             </div>
 
-                            <div class="col-sm-4 col-md-4 col-lg-4 mt-3">
-                                {#                                <label>Tipo de Cambio</label>#}
-                                {#                                <input type="text" class="form-control text-uppercase" id="id_ruc_provider"#}
-                                {#                                       name="ruc_provider"#}
-                                {#                                       placeholder="Ingrese RUC"#}
-                                {#                                       size="11"#}
-                                {#                                       value="" required>#}
-                                {##}
-                                {#                            </div>#}
-
-                                {#                                <form>#}
-                                {#                                    <div class="form-group row ">#}
-                                {#                                        <label for="type_change" class="col-sm-5 col-form-label">Tipo de Cambio:</label>#}
-                                {#                                        <button type="button"#}
-                                {#                                                class="col-sm-5 btn btn-sm btn-outline-secondary border-0 text-white btn-block p-1"#}
-                                {#                                                id="btn-type-change">Tipo de Cambio:#}
-                                {#                                        </button>#}
-                                {#                                        <div class="col-sm-7">#}
-                                {#                                            <input type="text" class="form-control text-center font-weight-bold"#}
-                                {#                                                   id="type_change" readonly>#}
-                                {#                                        </div>#}
-                                {#                                    </div>#}
-                                {#                                </form>#}
+                            <div class="col-sm-3 col-md-3 col-lg-3 mt-3">
+                                <form>
+                                    <div class="form-group row">
+                                        <button type="button"
+                                                class="col-sm-5 btn btn-sm btn-outline-secondary border-0 text-white btn-block p-1"
+                                                id="btn-type-change">Tipo de Cambio:
+                                        </button>
+                                        <div class="col-sm-7">
+                                            <input type="text" class="form-control text-center font-weight-bold"
+                                                   id="type_change" readonly>
+                                        </div>
+                                    </div>
+                                </form>
                             </div>
 
-                            {#                            <div class="col-sm-3 col-md-3 col-lg-3">#}
-                            {#                                <div class="form-check mt-4">#}
-                            {#                                    <input class="form-check-input check-dollar" type="checkbox" value=""#}
-                            {#                                           id="check_dollar">#}
-                            {#                                    <label class="form-check-label text-white" for="check_dollar">#}
-                            {#                                        COMPRA EN DOLARES#}
-                            {#                                    </label>#}
-                            {#                                </div>#}
-                            {#                            </div>#}
-
+                            <div class="col-sm-2 col-md-2 col-lg-2">
+                                <div class="form-check mt-4">
+                                    <input class="form-check-input check-dollar" type="checkbox" value=""
+                                           id="check_dollar">
+                                    <label class="form-check-label text-white" for="check_dollar">
+                                        COMPRA EN DOLARES
+                                    </label>
+                                </div>
+                            </div>
                         </div>
 
-
-                    </div>
-                    <div class="col-sm-4 col-md-4 col-lg-4">
-                        <div class="row">
-                            {#                            <div class="col-sm-4 col-md-4 col-lg-4">#}
-                            {#                                <label>Tipo de Cambio</label>#}
-                            {#                                <input type="text" class="form-control text-uppercase" id="id_ruc_provider"#}
-                            {#                                       name="ruc_provider"#}
-                            {#                                       placeholder="Ingrese RUC"#}
-                            {#                                       size="11"#}
-                            {#                                       value="" required>#}
-                            {##}
-                            {#                            </div>#}
-                            {##}
-                            {#                                <form>#}
-                            {#                                    <div class="form-group row mt-3">#}
-                            {#                                        <label for="type_change" class="col-sm-5 col-form-label">Tipo de Cambio:</label>#}
-                            {#                                        <button type="button"#}
-                            {#                                                class="col-sm-5 btn btn-sm btn-outline-secondary border-0 text-white btn-block p-1"#}
-                            {#                                                id="btn-type-change">Tipo de Cambio:#}
-                            {#                                        </button>#}
-                            {#                                        <div class="col-sm-7">#}
-                            {#                                            <input type="text" class="form-control text-center font-weight-bold"#}
-                            {#                                                   id="type_change" readonly>#}
-                            {#                                        </div>#}
-                            {#                                    </div>#}
-                            {#                                </form>#}
-                            {#                            </div>#}
-                            {#                            <div class="col-sm-4 col-md-4 col-lg-4">#}
-                            {#                                <div class="form-check mt-4">#}
-                            {#                                    <input class="form-check-input check-dollar" type="checkbox" value=""#}
-                            {#                                           id="check_dollar">#}
-                            {#                                    <label class="form-check-label text-white" for="check_dollar">#}
-                            {#                                        COMPRA EN DOLARES#}
-                            {#                                    </label>#}
-                            {#                                </div>#}
-                            {#                            </div>#}
-
-                        </div>
-                    </div>
-
-                </div>
-                <div class="card-body p-0">
-                    <div class="row border">
-                        <div class="col-sm-12 col-md-12 col-lg-12 border-right">
-                            {% include "buys/buy_register.html" %}
-                        </div>
-                        {#                        <div class="col-sm-5 col-md-5 col-lg-5">#}
-                        {#                            <div class="card">#}
-                        {#                                <div class="card-header">#}
-                        {#                                    <div class="row">#}
-                        {#                                        <div class="col-sm-9 col-md-9 col-lg-9">#}
-                        {#                                            DETALLE DE DOCUMENTOS DE FLETE#}
-                        {#                                        </div>#}
-                        {#                                    </div>#}
-                        {#                                </div>#}
-                        {#                                <div class="card-body">#}
-                        {#                                    {% include "buys/buys_freight.html" %}#}
+                        {#                            <div class="col-sm-3 col-md-3 col-lg-3">#}
+                        {#                                <div class="form-check mt-4">#}
+                        {#                                    <input class="form-check-input check-dollar" type="checkbox" value=""#}
+                        {#                                           id="check_dollar">#}
+                        {#                                    <label class="form-check-label text-white" for="check_dollar">#}
+                        {#                                        COMPRA EN DOLARES#}
+                        {#                                    </label>#}
                         {#                                </div>#}
                         {#                            </div>#}
-                        {#                        </div>#}
+
                     </div>
 
+
                 </div>
+                <div class="col-sm-4 col-md-4 col-lg-4">
+                    <div class="row">
+                        {#                            <div class="col-sm-4 col-md-4 col-lg-4">#}
+                        {#                                <label>Tipo de Cambio</label>#}
+                        {#                                <input type="text" class="form-control text-uppercase" id="id_ruc_provider"#}
+                        {#                                       name="ruc_provider"#}
+                        {#                                       placeholder="Ingrese RUC"#}
+                        {#                                       size="11"#}
+                        {#                                       value="" required>#}
+                        {##}
+                        {#                            </div>#}
+                        {##}
+                        {#                                <form>#}
+                        {#                                    <div class="form-group row mt-3">#}
+                        {#                                        <label for="type_change" class="col-sm-5 col-form-label">Tipo de Cambio:</label>#}
+                        {#                                        <button type="button"#}
+                        {#                                                class="col-sm-5 btn btn-sm btn-outline-secondary border-0 text-white btn-block p-1"#}
+                        {#                                                id="btn-type-change">Tipo de Cambio:#}
+                        {#                                        </button>#}
+                        {#                                        <div class="col-sm-7">#}
+                        {#                                            <input type="text" class="form-control text-center font-weight-bold"#}
+                        {#                                                   id="type_change" readonly>#}
+                        {#                                        </div>#}
+                        {#                                    </div>#}
+                        {#                                </form>#}
+                        {#                            </div>#}
+                        {#                            <div class="col-sm-4 col-md-4 col-lg-4">#}
+                        {#                                <div class="form-check mt-4">#}
+                        {#                                    <input class="form-check-input check-dollar" type="checkbox" value=""#}
+                        {#                                           id="check_dollar">#}
+                        {#                                    <label class="form-check-label text-white" for="check_dollar">#}
+                        {#                                        COMPRA EN DOLARES#}
+                        {#                                    </label>#}
+                        {#                                </div>#}
+                        {#                            </div>#}
+
+                    </div>
+                </div>
+
+            </div>
+            <div class="card-body p-0">
+                <div class="row border">
+                    <div class="col-sm-12 col-md-12 col-lg-12 border-right">
+                        {% include "buys/buy_register.html" %}
+                    </div>
+                    {#                        <div class="col-sm-5 col-md-5 col-lg-5">#}
+                    {#                            <div class="card">#}
+                    {#                                <div class="card-header">#}
+                    {#                                    <div class="row">#}
+                    {#                                        <div class="col-sm-9 col-md-9 col-lg-9">#}
+                    {#                                            DETALLE DE DOCUMENTOS DE FLETE#}
+                    {#                                        </div>#}
+                    {#                                    </div>#}
+                    {#                                </div>#}
+                    {#                                <div class="card-body">#}
+                    {#                                    {% include "buys/buys_freight.html" %}#}
+                    {#                                </div>#}
+                    {#                            </div>#}
+                    {#                        </div>#}
+                </div>
+
             </div>
         </div>
+    </div>
 
     </div>
 
@@ -1041,7 +1042,7 @@
                         contentType: 'application/json;charset=UTF-8',
                         headers: {"X-CSRFToken": '{{ csrf_token }}'},
                         success: function (response, textStatus, xhr) {
-                            if (response.success === true){
+                            if (response.success === true) {
                                 _tr.attr('product', response.product_id);
                                 _tr.find('td.product-item-table input.product-table').val(response.product_name);
                                 _tr.find('td.brand input.brand-product').val(response.brand);
