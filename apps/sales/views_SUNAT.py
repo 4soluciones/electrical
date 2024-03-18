@@ -444,11 +444,14 @@ def send_bill_nubefact(order_id, serie_, is_demo=False):
         igv_total = igv_total + igv
         total_perceptron = (total * 2) / 100
         total_with_perceptron = total + total_perceptron
+        _unit = 'NIU'
+        if d.unit.name == 'ZZ':
+            _unit = 'ZZ'
 
         # redondear a un decimal
         item = {
             "item": index,  # index para los detalles
-            "unidad_de_medida": 'NIU',  # NIU viene del nubefact NIU=PRODUCTO
+            "unidad_de_medida": _unit,  # NIU viene del nubefact NIU=PRODUCTO
             "codigo": "001",  # codigo del producto opcional
             "codigo_producto_sunat": "10000000",  # codigo del producto excel-sunat
             "descripcion": d.product.name,
@@ -589,6 +592,7 @@ def send_receipt_nubefact(order_id, serie_, is_demo=False):
     sub_total = 0
     total = 0
     igv_total = 0
+
     for d in details:
         base_total = d.quantity_sold * d.price_unit  # 5 * 20 = 100
         base_amount = base_total / decimal.Decimal(1.1800)  # 100 / 1.18 = 84.75
@@ -596,11 +600,13 @@ def send_receipt_nubefact(order_id, serie_, is_demo=False):
         sub_total = sub_total + base_amount
         total = total + base_total
         igv_total = igv_total + igv
+        _unit = 'NIU'
+        if d.unit.name == 'ZZ':
+            _unit = 'ZZ'
 
-        # redondear a un decimal
         item = {
             "item": index,  # index para los detalles
-            "unidad_de_medida": 'NIU',  # NIU viene del nubefact NIU=PRODUCTO
+            "unidad_de_medida": _unit,  # NIU viene del nubefact NIU=PRODUCTO
             "codigo": "001",  # codigo del producto opcional
             "codigo_producto_sunat": "10000000",  # codigo del producto excel-sunat
             "descripcion": d.product.name,
@@ -627,7 +633,7 @@ def send_receipt_nubefact(order_id, serie_, is_demo=False):
         "sunat_transaction": 1,
         "cliente_tipo_de_documento": client_document_id,
         "cliente_numero_de_documento": client_document_number,
-        "cliente_denominacion": client_obj.names,
+        "cliente_denominacion": client_obj.names.upper(),
         "cliente_direccion": client_first_address,
         "cliente_email": client_obj.email,
         "cliente_email_1": "",

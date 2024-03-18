@@ -322,7 +322,7 @@
                     if (xhr.status === 200) {
                         {#toastr.success(response.message, '¡Bien hecho!');#}
                         {#console.log(response)#}
-                        _input_type_change.val('$' + response.buy);
+                        _input_type_change.val('$' + response.sell);
                         {#_provider.attr('provider', response.pk);#}
                         {#$('#loading-666').hide();#}
                     }

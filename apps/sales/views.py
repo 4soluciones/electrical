@@ -1148,36 +1148,12 @@ def create_order_detail(request):
             }
             new_detail_order_obj = OrderDetail.objects.create(**new_detail_order)
             new_detail_order_obj.save()
-            if order_type == 'V':
+            if order_type == 'V' and unit_obj.name != 'ZZ':
                 store_product_id = int(detail['Store'])
-                # product_store = ProductStore.objects.get(pk=int(store_product_id))
-                # old_stock = product_store.stock
-                # last_kardex = Kardex.objects.filter(product_store_id=product_store.id).order_by('id').last()
-                # last_remaining_quantity = last_kardex.remaining_quantity
-
                 product_store_obj = ProductStore.objects.get(id=store_product_id)
                 quantity_minimum_unit = calculate_minimum_unit(quantity, unit_obj, product_obj)
                 kardex_ouput(product_store_obj.id, quantity_minimum_unit,
                              order_detail_obj=new_detail_order_obj)
-
-                '''if old_stock < 0 or last_remaining_quantity < 0:
-
-                    obj_detail_to_delete = OrderDetail.objects.filter(order=order_sale_obj)
-                    obj_detail_to_delete.delete()
-                    order_sale_obj.delete()
-
-                    data = {'error': 'El stock del producto: ' + str(product_obj.name.upper()) + ', Se encuentra en negativo, favor de corregir en el kardex o contactar con Sistemas'}
-                    response = JsonResponse(data)
-                    response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
-                    delete_and_increment(order_sale_obj)
-                    return response
-
-                else:
-
-                    product_store_obj = ProductStore.objects.get(id=store_product_id)
-                    quantity_minimum_unit = calculate_minimum_unit(quantity, unit_obj, product_obj)
-                    kardex_ouput(product_store_obj.id, quantity_minimum_unit,
-                    order_detail_obj=new_detail_order_obj)'''
 
         if order_type == 'V':
             if type_payment != 'C' and _type != 'E':

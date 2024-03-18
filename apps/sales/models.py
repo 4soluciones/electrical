@@ -102,7 +102,6 @@ class SubsidiaryStore(models.Model):
 
 
 class Product(models.Model):
-    VALVULE_CHOICES = (('N', 'NO ESPECIFICA'), ('P', 'PREMIUM'), ('R', 'ROSCA'), ('P', 'PRESION'),)
     id = models.AutoField(primary_key=True)
     name = models.CharField('Nombre', max_length=150)
     name_search = models.CharField('Nombre Buscador', max_length=500, null=True, blank=True)

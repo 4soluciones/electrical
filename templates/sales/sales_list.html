@@ -1496,7 +1496,11 @@
             } else {
                 toastr.warning('Stock insuficiente en almacen');
             }*/
-            let _flag_stock = await check_stock(quantity, product_id)
+            let _flag_stock = true
+            if (name_unit !== 'ZZ')
+            {
+                _flag_stock = await check_stock(quantity, product_id)
+            }
 
             if (_flag_stock === true) {
                 addOrderDetail(unit_id, product_id, quantity, price, name_unit, unescape(name_product), store_id, quantity_minim, product_brand);

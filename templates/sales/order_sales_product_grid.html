@@ -55,7 +55,9 @@
                             {#                            {% if product.product_detail_set.count > 0 %}#}
                             <table class="table table-sm text-uppercase small table-prices" style="width: 100%;">
                                 <thead>
-                                <th style="width: 10%;" class="small font-weight-normal">Precio Compra</th>
+                                {% if perms.admin %}
+                                    <th style="width: 10%;" class="small font-weight-normal">Precio Compra</th>
+                                {% endif %}
                                 <th style="width: 20%;" class="small font-weight-normal">Cantidad</th>
                                 <th style="width: 70%;" class="small font-weight-normal">Precios (%)</th>
                                 </thead>
@@ -64,9 +66,12 @@
                                     <tr product="{{ product.id }}" productname="{{ product.name }}"
                                         unit="{{ obj.unit.id }}" unitname="{{ obj.unit.name }}" product_brand="{{ product.product_brand.name }}"
                                         quantity_minum="{{ obj.quantity_minimum|safe }}">
-                                        <td class="align-middle text-center font-weight-bold quantity-sales-price">
-                                            S/ {{ obj.price_purchase|safe }} <span class="font-weight-lighter">{{ obj.update_at|date:"d/m/y" }}</span>
-                                        </td>
+                                        {% if perms.admin %}
+                                            <td class="align-middle text-center font-weight-bold quantity-sales-price">
+                                                S/ {{ obj.price_purchase|safe }} <span
+                                                    class="font-weight-lighter">{{ obj.update_at|date:"d/m/y" }}</span>
+                                            </td>
+                                        {% endif %}
                                         <td class="align-middle text-center quantity-sales-price">
                                             {#                                                oninput="validity.valid||(value='');" enteros#}
                                             <input type="number" class="form-control quantity-select text-center" min="0"
