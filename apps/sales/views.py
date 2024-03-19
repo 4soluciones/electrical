@@ -4385,7 +4385,7 @@ def get_product_list(criteria=None, value=None, brand=None):
 
     elif brand is not None:
         last_kardex = Kardex.objects.filter(product_store=OuterRef('id')).order_by('-id')[:1]
-        product_set = Product.objects.filter(product_brand_id=brand).select_related(
+        product_set = Product.objects.filter(product_brand_id=brand, is_enabled=True).select_related(
             'product_family', 'product_brand').prefetch_related(
             Prefetch(
                 'productstore_set',
@@ -4413,7 +4413,7 @@ def get_product_list(criteria=None, value=None, brand=None):
             else:
                 full_query = full_query & q
 
-        product_set = product_query.filter(full_query).select_related(
+        product_set = product_query.filter(full_query, is_enabled=True).select_related(
             'product_family', 'product_brand').prefetch_related(
             Prefetch(
                 'productstore_set',
@@ -6326,7 +6326,7 @@ def get_all_products(request):
         # product_set = None
         last_kardex = Kardex.objects.filter(product_store=OuterRef('id')).order_by('-id')[:1]
 
-        product_set = Product.objects.all().select_related(
+        product_set = Product.objects.filter(is_enabled=True).select_related(
             'product_family', 'product_brand').prefetch_related(
             Prefetch(
                 'productstore_set',
