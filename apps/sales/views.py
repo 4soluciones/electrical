@@ -4201,8 +4201,8 @@ def get_product_sales_grid_new(request):
         user_id = request.user.id
         user_obj = User.objects.get(pk=int(user_id))
         subsidiary_obj = get_subsidiary_by_user(user_obj)
-        sales_store = SubsidiaryStore.objects.filter(
-            subsidiary=subsidiary_obj, category='V').first()
+        # sales_store = SubsidiaryStore.objects.filter(
+        #     subsidiary=subsidiary_obj, category='V').first()
         last_kardex = Kardex.objects.filter(product_store=OuterRef('id')).order_by('-id')[:1]
         product_set = None
 
@@ -4214,7 +4214,7 @@ def get_product_sales_grid_new(request):
             product_query = Product.objects
             full_query = None
 
-            product_brand_set = ProductBrand.objects.filter(name__icontains=value.upper())
+            # product_brand_set = ProductBrand.objects.filter(name__icontains=value.upper())
 
             for i in range(0, len(array_value)):
                 q = Q(name__icontains=array_value[i]) | Q(product_brand__name__icontains=array_value[i])
@@ -4223,7 +4223,7 @@ def get_product_sales_grid_new(request):
                 else:
                     full_query = full_query & q
 
-            product_set = product_query.filter(full_query).select_related(
+            product_set = product_query.filter(full_query, is_enabled=True).select_related(
                 'product_family', 'product_brand').prefetch_related(
                 Prefetch(
                     'productstore_set',
@@ -4239,7 +4239,7 @@ def get_product_sales_grid_new(request):
             ).order_by('id')
 
         if value == '' and barcode != '':
-            product_set = Product.objects.filter(barcode=barcode).select_related(
+            product_set = Product.objects.filter(barcode=barcode, is_enabled=True).select_related(
                 'product_family', 'product_brand').prefetch_related(
                 Prefetch(
                     'productstore_set',
