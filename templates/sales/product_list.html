@@ -602,7 +602,7 @@
                 type: 'GET',
                 data: {'pk': search, 'subsidiary_store': $("#id_subsidiary_store").val()},
                 success: function (response) {
-                    console.log(response);
+                    //console.log(response);
                     if (response.success) {
                         $('#kardex-grid-list').html(response.form);
                     }

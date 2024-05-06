@@ -1,7 +1,11 @@
 {% load operations %}
 {% if inventories %}
-
-    <table class="table table-bordered table-sm table-striped">
+    <div class="text-right container-fluid pt-0 pb-2">
+        <button type="button" id="btn_export_excel" class="btn btn-success">
+            <i class="fas fa-file-csv"></i> Excel
+        </button>
+    </div>
+    <table class="table table-bordered table-sm table-striped" id="table-kardex">
         <thead>
         <tr>
             <th scope="col" style="text-transform: uppercase;" colspan="5"
@@ -33,7 +37,6 @@
             <th scope="col" style="text-transform: uppercase;"
                 class="align-middle text-center table-primary text-black-50 small">Tipo de operación
             </th>
-
             <th scope="col" style="text-transform: uppercase;"
                 class="align-middle text-center table-secondary text-black-50 small">Cantidad
             </th>
@@ -69,7 +72,6 @@
         <tr class="detail">
             {% for kardex in inventories %}
                 <tr class="detail">
-
                     <td class="align-middle text-primary">{{ kardex.id }}</td>
                     <td class="align-middle text-primary text-center">{{ kardex.create_at|date:"Y/m/d" }}</td>
                     <td class="align-middle text-primary text-center">
@@ -179,7 +181,6 @@
                             0
                         {% endif %}
                     </td>
-
                     <td class="align-middle text-danger text-center">{{ kardex.remaining_quantity }}</td>
                     <td class="align-middle text-danger text-right">
                         {% if kardex.operation == 'C' %}
@@ -203,10 +204,27 @@
 
                 </tr>
             {% endfor %}
-
         </tbody>
     </table>
-
 {% else %}
     Lo sentimos, no hay kardex registradas.
 {% endif %}
+
+
+<script type="text/javascript">
+
+    $(document).on('click', '#btn_export_excel', function (e) {
+        $("#table-kardex").table2excel({
+            // exclude CSS class
+            exclude: ".noExl",
+            name: "Worksheet Name",
+            filename: "Reporte Kardex", //do not include extension
+            fileext: ".xls", // file extension
+            preserveColors: true,
+            exclude_img: true,
+            exclude_links: true,
+            exclude_inputs: true
+        });
+    });
+
+</script>
