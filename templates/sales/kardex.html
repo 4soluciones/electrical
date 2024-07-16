@@ -49,6 +49,27 @@
                             </div>
                         </div>
                         <div class="form-group row mx-sm-3">
+                            <label for="id_date_initial" class="col-sm-2 col-form-label">Rango de Búsqueda:</label>
+                            <label for="id_date_initial" class="col-sm-1 col-form-label">Desde:</label>
+
+                            <div class="col-sm-3">
+                                <input type="date"
+                                       class="form-control"
+                                       name="start-date"
+                                       id="id_date_initial"
+                                       value="{{ date_now }}" required>
+
+                            </div>
+                            <label for="id_date_final" class="col-sm-1 col-form-label">Hasta:</label>
+                            <div class="col-sm-3">
+                                <input type="date"
+                                       class="form-control"
+                                       name="end-date"
+                                       id="id_date_final"
+                                       value="{{ date_now }}" required>
+                            </div>
+                        </div>
+                        <div class="form-group row mx-sm-3">
                             <div class="col-sm-12 text-right">
                                 <button type="button" id="btn-search" class="btn btn-primary">Buscar</button>
                             </div>
@@ -61,7 +82,7 @@
 
 
             <div id="kardex-grid-list">
-{#                {% include "sales/kardex_grid_list.html" %}#}
+                {#                {% include "sales/kardex_grid_list.html" %}#}
             </div>
 
         </div><!-- modal-body -->
@@ -87,4 +108,31 @@
 
     $("#id_subsidiary_store").chained("#id_subsidiary");
 
+    $('#btn-search').on('click', function () {
+
+        let search = $("#search").attr('pk');
+        let _start_date = $('#id_date_initial').val();
+        let _end_date = $('#id_date_final').val();
+
+        $.ajax({
+            url: '/sales/get_list_kardex/',
+            dataType: 'json',
+            type: 'GET',
+            data: {
+                'pk': search,
+                'subsidiary_store': $("#id_subsidiary_store").val(),
+                'start_date': _start_date,
+                'end_date': _end_date
+            },
+            success: function (response) {
+                console.log(response);
+                if (response.success) {
+                    $('#kardex-grid-list').html(response.form);
+                }
+            },
+            fail: function (response) {
+                console.log(response);
+            }
+        });
+    });
 </script>

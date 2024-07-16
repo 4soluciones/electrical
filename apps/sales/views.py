@@ -331,6 +331,8 @@ def get_recipe_by_product(request):
 
 def get_kardex_by_product(request):
     data = dict()
+    mydate = datetime.now()
+    formatdate = mydate.strftime("%Y-%m-%d")
     if request.method == 'GET':
         pk = request.GET.get('pk', '')
         try:
@@ -340,7 +342,7 @@ def get_kardex_by_product(request):
             response = JsonResponse(data)
             response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
             return response
-        products = Product.objects.all()
+        # products = Product.objects.all()
         subsidiaries = Subsidiary.objects.all()
         subsidiaries_stores = SubsidiaryStore.objects.filter(category='V')
         # check product detail
@@ -353,7 +355,8 @@ def get_kardex_by_product(request):
             'subsidiaries': subsidiaries,
             'basic_product_detail': basic_product_detail,
             'subsidiaries_stores': subsidiaries_stores,
-            'products': products,
+            # 'products': products,
+            'date_now': formatdate,
         })
 
         return JsonResponse({
@@ -367,6 +370,8 @@ def get_list_kardex(request):
     if request.method == 'GET':
         pk = request.GET.get('pk', '')
         pk_subsidiary_store = request.GET.get('subsidiary_store', '')
+        start_date = request.GET.get('start_date', '')
+        end_date = request.GET.get('end_date', '')
 
         try:
             product = Product.objects.get(id=pk)
@@ -390,11 +395,14 @@ def get_list_kardex(request):
 
         inventories = None
         if product_store.count() > 0:
-            # inventories = Kardex.objects.filter(product_store=product_store[0]).order_by('id')
-            last_inventory = Kardex.objects.filter(id__lt=OuterRef("pk"), product_store=product_store[0]).order_by(
-                "-id")
-            inventories = Kardex.objects.filter(product_store=product_store[0]).annotate(
-                last_remaining_quantity=Subquery(last_inventory.values('remaining_quantity')[:1])
+            inventories = Kardex.objects.filter(
+                product_store=product_store[0], create_at__date__range=[start_date, end_date]
+            ).select_related(
+                'product_store__product',
+                'purchase_detail',
+                'order_detail__order',
+                'loan_payment',
+                'guide_detail__guide__guide_motive',
             ).order_by('id')
 
         t = loader.get_template('sales/kardex_grid_list.html')
