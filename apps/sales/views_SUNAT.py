@@ -431,6 +431,7 @@ def send_bill_nubefact(order_id, serie_, is_demo=False):
     formatdate = register_date.strftime("%d-%m-%Y")
 
     items = []
+    credit = []
     index = 1
     sub_total = 0
     total = 0
@@ -438,17 +439,17 @@ def send_bill_nubefact(order_id, serie_, is_demo=False):
     payment = 'Contado'
     description = '-'
     if order_obj.way_to_pay_type == 'C':
-        description = order_obj.pay_condition + 'Dias'
+        description = order_obj.pay_condition + ' Dias'
         payment = 'Credito'
         credits_detail = PaymentFees.objects.filter(order=order_obj)
-        j = 0
+        j = 1
         for c in credits_detail:
             vent_credit = {
                 "cuota": j,
-                "fecha_de_pago": c.date,
-                "importe": c.amount
+                "fecha_de_pago": c.date.strftime("%d-%m-%Y"),
+                "importe": float(round(c.amount, 2))
             }
-            items.append(vent_credit)
+            credit.append(vent_credit)
             j = j + 1
     else:
         payment = 'Contado'
@@ -539,6 +540,7 @@ def send_bill_nubefact(order_id, serie_, is_demo=False):
         "bienes_region_selva": "",
         "servicios_region_selva": "",
         "items": items,
+        "venta_al_credito": credit,
     }
 
     # _url = 'https://www.pse.pe/api/v1/39ce7d27dbed4d89bc17db093e47a592f769b00ad949478788caf76c8085054b'
@@ -551,6 +553,7 @@ def send_bill_nubefact(order_id, serie_, is_demo=False):
         "Authorization": authorization,
         "Content-Type": 'application/json'
     }
+
     response = requests.post(url, json=params, headers=headers)
 
     if response.status_code == 200:

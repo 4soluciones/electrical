@@ -1234,43 +1234,43 @@ def create_order_detail(request):
                         order_bill_obj.save()
                         order_sale_obj.voucher_type = _bill_type
                         order_sale_obj.save()
+                        if type_payment != 'C':
+                            new_loan_payments = {
+                                'quantity': 0,
+                                'price': sale_total,
+                                'create_at': _date,
+                                'type': 'V',
+                                'operation_date': _date,
+                                'order_detail': new_detail_order_obj,
+                                'product': product_obj,
+                            }
+                            new_loan_payment_obj = LoanPayment.objects.create(**new_loan_payments)
+                            new_loan_payment_obj.save()
 
-                        new_loan_payments = {
-                            'quantity': 0,
-                            'price': sale_total,
-                            'create_at': _date,
-                            'type': 'V',
-                            'operation_date': _date,
-                            'order_detail': new_detail_order_obj,
-                            'product': product_obj,
-                        }
-                        new_loan_payment_obj = LoanPayment.objects.create(**new_loan_payments)
-                        new_loan_payment_obj.save()
-
-                        new_transaction_payment = {
-                            'payment': sale_total,
-                            'type': type_payment,
-                            'operation_code': cod_operation,
-                            'loan_payment': new_loan_payment_obj,
-                        }
-                        new_transaction_payment_obj = TransactionPayment.objects.create(**new_transaction_payment)
-                        new_transaction_payment_obj.save()
-                        cash_finality_obj = Cash.objects.get(id=int(cash_finality))
-                        new_cash_flow = {
-                            'transaction_date': _date,
-                            'created_at': _date,
-                            'description': 'FACTURA: ' + str(
-                                order_bill_obj.serial) + '-' + str(order_bill_obj.n_receipt).zfill(6),
-                            'type': type_payment,
-                            'total': sale_total,
-                            'operation_code': cod_operation,
-                            'cash': cash_finality_obj,
-                            'order': order_sale_obj,
-                            'user': user_obj,
-                            'document_type_attached': _type
-                        }
-                        new_cash_flow_obj = CashFlow.objects.create(**new_cash_flow)
-                        new_cash_flow_obj.save()
+                            new_transaction_payment = {
+                                'payment': sale_total,
+                                'type': type_payment,
+                                'operation_code': cod_operation,
+                                'loan_payment': new_loan_payment_obj,
+                            }
+                            new_transaction_payment_obj = TransactionPayment.objects.create(**new_transaction_payment)
+                            new_transaction_payment_obj.save()
+                            cash_finality_obj = Cash.objects.get(id=int(cash_finality))
+                            new_cash_flow = {
+                                'transaction_date': _date,
+                                'created_at': _date,
+                                'description': 'FACTURA: ' + str(
+                                    order_bill_obj.serial) + '-' + str(order_bill_obj.n_receipt).zfill(6),
+                                'type': type_payment,
+                                'total': sale_total,
+                                'operation_code': cod_operation,
+                                'cash': cash_finality_obj,
+                                'order': order_sale_obj,
+                                'user': user_obj,
+                                'document_type_attached': _type
+                            }
+                            new_cash_flow_obj = CashFlow.objects.create(**new_cash_flow)
+                            new_cash_flow_obj.save()
 
                     else:
                         objects_to_delete = OrderDetail.objects.filter(order=order_sale_obj)
@@ -1308,43 +1308,43 @@ def create_order_detail(request):
                         order_bill_obj.save()
                         order_sale_obj.voucher_type = _bill_type
                         order_sale_obj.save()
+                        if type_payment != 'C':
+                            new_loan_payments = {
+                                'quantity': 0,
+                                'price': sale_total,
+                                'create_at': _date,
+                                'type': 'V',
+                                'operation_date': _date,
+                                'order_detail': new_detail_order_obj,
+                                'product': product_obj,
+                            }
+                            new_loan_payment_obj = LoanPayment.objects.create(**new_loan_payments)
+                            new_loan_payment_obj.save()
 
-                        new_loan_payments = {
-                            'quantity': 0,
-                            'price': sale_total,
-                            'create_at': _date,
-                            'type': 'V',
-                            'operation_date': _date,
-                            'order_detail': new_detail_order_obj,
-                            'product': product_obj,
-                        }
-                        new_loan_payment_obj = LoanPayment.objects.create(**new_loan_payments)
-                        new_loan_payment_obj.save()
-
-                        new_transaction_payment = {
-                            'payment': sale_total,
-                            'type': type_payment,
-                            'operation_code': cod_operation,
-                            'loan_payment': new_loan_payment_obj,
-                        }
-                        new_transaction_payment_obj = TransactionPayment.objects.create(**new_transaction_payment)
-                        new_transaction_payment_obj.save()
-                        cash_finality_obj = Cash.objects.get(id=int(cash_finality))
-                        new_cash_flow = {
-                            'transaction_date': _date,
-                            'created_at': _date,
-                            'description': 'BOLETA: ' + str(
-                                order_bill_obj.serial) + '-' + str(order_bill_obj.n_receipt).zfill(6),
-                            'type': type_payment,
-                            'total': sale_total,
-                            'operation_code': cod_operation,
-                            'cash': cash_finality_obj,
-                            'order': order_sale_obj,
-                            'user': user_obj,
-                            'document_type_attached': _type
-                        }
-                        new_cash_flow_obj = CashFlow.objects.create(**new_cash_flow)
-                        new_cash_flow_obj.save()
+                            new_transaction_payment = {
+                                'payment': sale_total,
+                                'type': type_payment,
+                                'operation_code': cod_operation,
+                                'loan_payment': new_loan_payment_obj,
+                            }
+                            new_transaction_payment_obj = TransactionPayment.objects.create(**new_transaction_payment)
+                            new_transaction_payment_obj.save()
+                            cash_finality_obj = Cash.objects.get(id=int(cash_finality))
+                            new_cash_flow = {
+                                'transaction_date': _date,
+                                'created_at': _date,
+                                'description': 'BOLETA: ' + str(
+                                    order_bill_obj.serial) + '-' + str(order_bill_obj.n_receipt).zfill(6),
+                                'type': type_payment,
+                                'total': sale_total,
+                                'operation_code': cod_operation,
+                                'cash': cash_finality_obj,
+                                'order': order_sale_obj,
+                                'user': user_obj,
+                                'document_type_attached': _type
+                            }
+                            new_cash_flow_obj = CashFlow.objects.create(**new_cash_flow)
+                            new_cash_flow_obj.save()
 
                     else:
                         objects_to_delete = OrderDetail.objects.filter(order=order_sale_obj)
