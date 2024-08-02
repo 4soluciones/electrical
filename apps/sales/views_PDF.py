@@ -1254,6 +1254,7 @@ def print_order_bill(request, pk=None):
     if type_client == '06':
         info_address = client_obj.clientaddress_set.last().address
     nro_project = 'name project'
+    credit_list = None
     if nro_project is None:
         nro_project = '-'
     tbl2_col1 = [
@@ -1278,6 +1279,34 @@ def print_order_bill(request, pk=None):
     _row_payment_deposit = []
     if type_payment == 'D':
         _row_payment_deposit = ['Depósito a: ', Paragraph(str(order_obj.cashflow_set.last().cash.name), styles['Left_Square'])]
+    elif type_payment == 'C':
+        cnt = 0
+        detail_credit.append(
+            ('MODALIDAD DE PAGO', 'CUOTAS ', 'FECHA',
+             'IMPORTE'))
+        for c in order_obj.paymentfees_set.all():
+            amount = c.amount
+            cnt = cnt + 1
+            detail_credit.append(
+                ('CREDITO POR PAGAR', 'CUOTA ' + str(cnt), str(c.date.strftime('%d-%m-%Y')),
+                 str(round(amount, 2))))
+        credit_list = Table(detail_credit,
+                            colWidths=[_bts * 60 / 100,
+                                       _bts * 10 / 100,
+                                       _bts * 20 / 100,
+                                       _bts * 10 / 100])
+        style_credit = [
+            ('ALIGNMENT', (0, 0), (2, -1), 'CENTER'),
+            ('ALIGNMENT', (3, 0), (-1, -1), 'RIGHT'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('SPAN', (0, 1), (0, -1)),
+            ('FONTNAME', (0, 0), (-1, -1), 'Square'),
+            ('GRID', (0, 0), (-1, -1), 0.3, colors.darkgray),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('BACKGROUND', (0, 0), (-1, 0), colors.darkgray),  # four column
+            # ('BACKGROUND', (4, 0), (4, -1), colors.blue),  # four column
+        ]
+        credit_list.setStyle(TableStyle(style_credit))
     tbl2_col2 = [
         ['Fecha Emision: ', Paragraph(order_obj.create_at.strftime("%d-%m-%Y"), styles['Left_Square'])],
         ['Vendedor: ', Paragraph(order_obj.user.username.upper(), styles['Left_Square'])],
@@ -1302,6 +1331,8 @@ def print_order_bill(request, pk=None):
         # ('GRID', (0, 0), (0, 1), 3.5, colors.red)
     ]
     header2_page.setStyle(TableStyle(style_table_header))
+
+
     # ------------ENCABEZADO DEL DETALLE-------------------#
     style_table_header_detail = [
         ('FONTNAME', (0, 0), (-1, -1), 'Newgot'),  # all columns
@@ -1537,8 +1568,8 @@ def print_order_bill(request, pk=None):
     dictionary.append(detail_body)
     dictionary.append(Spacer(1, 5))
     dictionary.append(total_page)
-    # if cash_flow_set.last().type_payment == 'C':
-    #     dictionary.append(credit_list)
+    if order_obj.way_to_pay_type == 'C':
+        dictionary.append(credit_list)
     dictionary.append(Spacer(1, 5))
     dictionary.append(total_footer)
     # dictionary.append(Paragraph('www.electrical.com', styles["Center_Newgot"]))

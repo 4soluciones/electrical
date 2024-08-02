@@ -1096,6 +1096,7 @@ def create_order_detail(request):
         type_quotation = data_sale["type_quotation"]
         type_name_quotation = data_sale["name_type_quotation"]
         observation = data_sale["observation"]
+        condition_days = data_sale["condition_days"]
 
         if order_type == 'T' and order_sale_quotation is None:
             has_quotation_order = 'S'
@@ -1124,6 +1125,7 @@ def create_order_detail(request):
             'way_to_pay_type': type_payment,
             'has_quotation_order': has_quotation_order,
             'order_sale_quotation': order_sale_quotation_obj,
+            'pay_condition': condition_days
         }
         order_sale_obj = Order.objects.create(**new_order_sale)
         order_sale_obj.save()
@@ -1165,6 +1167,7 @@ def create_order_detail(request):
 
         if order_type == 'V':
             if type_payment != 'C' and _type != 'E':
+
                 new_loan_payments = {
                     'quantity': 0,
                     'price': sale_total,
@@ -1203,6 +1206,11 @@ def create_order_detail(request):
                 new_cash_flow_obj.save()
 
             if _type == 'E':
+                if type_payment == 'C':
+                    for c in data_sale['credit']:
+                        PaymentFees.objects.create(date=c['date'], order=order_sale_obj,
+                                                   amount=decimal.Decimal(c['amount']))
+
                 if _bill_type == 'F':
                     r = send_bill_nubefact(order_sale_obj.id, subsidiary_obj.serial, True)
                     msg_sunat = r.get('sunat_description')

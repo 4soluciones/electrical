@@ -252,10 +252,62 @@
                                            placeholder="">
                                 </div>
                             </div>
-                            <div class="row col-sm-12 m-0 p-0 text-center pl-1 pr-0" id="credit" style="display: none">
-                                <label for="id-credit-client" class="mb-0 text-center"> Deuda </label>
-                                <input type="text" class="form-control form-control-sm " id="id-credit-client"
-                                       value="Credito del cliente" readonly>
+                            <div class="row col-sm-12 m-0 p-0" id="credit" style="display: none">
+                                <div class="col-sm-3 pl-1 pr-0">
+                                    <label for="pay_condition" class="mb-0 text-uppercase">Condición de
+                                        pago</label>
+                                    <div class="input-group input-group-sm">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">A</span>
+                                        </div>
+                                        <input type="number" class="form-control text-center" id="condition_days"
+                                               name="condition_days"
+                                               aria-label="Amount (to the nearest dollar)">
+                                        <div class="input-group-append">
+                                            <span class="input-group-text">Días</span>
+                                        </div>
+                                    </div>
+                                    {#                                        <label for="pay_condition" class="mb-0">Condicion de pago</label>#}
+                                    {#                                        <input type="text" class="form-control form-control-sm text-uppercase"#}
+                                    {#                                               id="pay_condition"#}
+                                    {#                                               name="pay_condition">#}
+                                </div>
+                                <div class="col-sm-2 pl-1 pr-0 text-center">
+                                    <label for="btn-add-detail" class="mb-0 text-center text-white">
+                                        Pagos </label>
+                                    <button id="btn-add-detail" class="btn btn-sm btn-secondary"
+                                            type="button"
+                                            onclick="AddDetailsCredit()">
+                                        Agregar
+                                    </button>
+                                </div>
+                                <div class="col-sm-7 pl-1 pr-0">
+                                    <input type="hidden" class="form-control form-control-sm text-right"
+                                           id="amount-credit-total" name="amount-credit-total" value="0.00"
+                                           readonly>
+                                    <div class="card-body mt-3 p-0">
+                                        <table class="bg-light table-sm " id="id-table-credit"
+                                               style="width: 100%;">
+                                            {#                                        <thead class="text-uppercase small text-center">#}
+                                            {#                                        <tr class="bg-info text-white">#}
+                                            {#                                            <th scope="col" class="font-weight-normal" style="width: 15%;">#}
+                                            {#                                                Nº#}
+                                            {#                                            </th>#}
+                                            {#                                            <th scope="col" class="font-weight-normal" style="width: 35%;">#}
+                                            {#                                                Fecha#}
+                                            {#                                            </th>#}
+                                            {#                                            <th scope="col" class="font-weight-normal" style="width: 30%;">#}
+                                            {#                                                Importe#}
+                                            {#                                            </th>#}
+                                            {#                                            <th scope="col" class="font-weight-normal" style="width: 20%;">#}
+                                            {#                                                Eliminar#}
+                                            {#                                            </th>#}
+                                            {#                                        </tr>#}
+                                            {#                                        </thead>#}
+                                            <tbody id="credit_details"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-2 text-uppercase small pl-1 pr-1">

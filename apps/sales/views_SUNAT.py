@@ -435,6 +435,24 @@ def send_bill_nubefact(order_id, serie_, is_demo=False):
     sub_total = 0
     total = 0
     igv_total = 0
+    payment = 'Contado'
+    description = '-'
+    if order_obj.way_to_pay_type == 'C':
+        description = order_obj.pay_condition + 'Dias'
+        payment = 'Credito'
+        credits_detail = PaymentFees.objects.filter(order=order_obj)
+        j = 0
+        for c in credits_detail:
+            vent_credit = {
+                "cuota": j,
+                "fecha_de_pago": c.date,
+                "importe": c.amount
+            }
+            items.append(vent_credit)
+            j = j + 1
+    else:
+        payment = 'Contado'
+
     for d in details:
         base_total = d.quantity_sold * d.price_unit  # 5 * 20 = 100
         base_amount = base_total / decimal.Decimal(1.1800)  # 100 / 1.18 = 84.75
@@ -512,8 +530,8 @@ def send_bill_nubefact(order_id, serie_, is_demo=False):
         "tipo_de_nota_de_debito": "",
         "enviar_automaticamente_a_la_sunat": 'true',
         "enviar_automaticamente_al_cliente": 'false',
-        "condiciones_de_pago": "",
-        "medio_de_pago": "",
+        "condiciones_de_pago": str(description),
+        "medio_de_pago": str(payment),
         "placa_vehiculo": "",
         "orden_compra_servicio": "",
         "formato_de_pdf": "",

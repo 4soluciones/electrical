@@ -395,6 +395,7 @@ class Order(models.Model):
     order_sale_quotation = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True,
                                              related_name="order_quotation")
     voucher_type = models.CharField('Tipo de comprobante', max_length=2, choices=VOUCHER_CHOICES, default='T')
+    pay_condition = models.CharField('Payment Condition', max_length=50, null=True, blank=True)
 
     def __str__(self):
         return str(self.pk) + " / " + str(self.type) + " / "
@@ -848,6 +849,16 @@ class Inventory(models.Model):
     subsidiary_store = models.ForeignKey(
         'SubsidiaryStore', verbose_name='Almacen Sucursal', on_delete=models.SET_NULL, null=True, blank=True)
     user = models.ForeignKey(User, verbose_name='Usuario', on_delete=models.CASCADE, null=True, blank=True)
+
+    def __str__(self):
+        return str(self.id)
+
+
+class PaymentFees(models.Model):
+    id = models.AutoField(primary_key=True)
+    order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True, blank=True)
+    date = models.DateField(null=True, blank=True)
+    amount = models.DecimalField('Importe', max_digits=30, decimal_places=15, default=0)
 
     def __str__(self):
         return str(self.id)
