@@ -979,7 +979,7 @@
                 "order_type": 'V',
                 "Serie": $('#id_serie').val(),
                 "BillType": sessionStorage.BillType,
-                "Date": $('#date').val(),
+                "issueDate": $('#issue_date').val(),
                 "Demo": ($('#demo').is(':checked')) ? 1 : 0,
                 "type_payment": $('#transaction_payment_type').val(),
                 "cash": $('#id_cash').val(),
@@ -1875,7 +1875,7 @@
                 "order_type": $('#id-type-order').val(),
                 "Serie": $('#id_serie').val(),
                 "BillType": sessionStorage.BillType,
-                "Date": $('#date').val(),
+                "issueDate": $('#issue_date').val(),
                 "Demo": ($('#demo').is(':checked')) ? 1 : 0,
                 "type_payment": $('#transaction_payment_type').val(),
                 "cash": $('#id_cash').val(),
@@ -1916,7 +1916,7 @@
                 sales.Details.push(detailObj);
             });
 
-            {#console.log(sales)#}
+            console.log(sales)
 
             $.ajax({
                 url: '/sales/update_quotation/',
@@ -2093,7 +2093,7 @@
             let total = parseFloat($('#sum-total').val()).toFixed(2);
             let valor = parseFloat($('#amount-credit-total').val()).toFixed(2);
             let _days = isNaN(parseInt($('#condition_days').val(), 10)) ? 0 : parseInt($('#condition_days').val(), 10);
-            let dateInput = $('#date');
+            let dateInput = $('#issue_date');
             let currentDate = new Date(dateInput.val())
             currentDate.setDate(currentDate.getDate() + 1);
             currentDate.setDate(currentDate.getDate() + _days);

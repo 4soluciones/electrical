@@ -1217,40 +1217,9 @@ def print_order_bill(request, pk=None):
     payment = order_obj.get_way_to_pay_type_display()
     description = '-'
     detail_credit = []
-    cash_flow_set = CashFlow.objects.filter(order=order_obj)
-    # if cash_flow_set:
-    #     # payment = cash_flow_set.last().get_type_display()
-    #     # if cash_flow_set.last().type == 'E':
-    #         description = 'descripcion'
-    #         cnt = 0
-    #         detail_credit.append(
-    #             ('MODALIDAD DE PAGO', 'CUOTAS ', 'FECHA',
-    #              'IMPORTE'))
-    #         for c in order_obj.paymentfees_set.all():
-    #             cnt = cnt + 1
-    #             detail_credit.append(
-    #                 ('CREDITO POR PAGAR', 'CUOTA ' + str(cnt), str(c.date.strftime('%d-%m-%Y')),
-    #                  str(round(c.amount, 2))))
-    #         credit_list = Table(detail_credit,
-    #                             colWidths=[_bts * 60 / 100,
-    #                                        _bts * 10 / 100,
-    #                                        _bts * 20 / 100,
-    #                                        _bts * 10 / 100])
-    #         style_credit = [
-    #             ('ALIGNMENT', (0, 0), (2, -1), 'CENTER'),
-    #             ('ALIGNMENT', (3, 0), (-1, -1), 'RIGHT'),
-    #             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-    #             ('SPAN', (0, 1), (0, -1)),
-    #             ('FONTNAME', (0, 0), (-1, -1), 'Square'),
-    #             ('GRID', (0, 0), (-1, -1), 0.3, colors.darkgray),
-    #             ('FONTSIZE', (0, 0), (-1, -1), 10),
-    #             # ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-    #             # ('RIGHTPADDING', (3, 0), (3, -1), 10),  # first column
-    #             ('BACKGROUND', (0, 0), (-1, 0), colors.darkgray),  # four column
-    #             # ('BACKGROUND', (4, 0), (4, -1), colors.blue),  # four column
-    #         ]
-    #         credit_list.setStyle(TableStyle(style_credit))
-
+    # cash_flow_set = CashFlow.objects.filter(order=order_obj)
+    if order_obj.way_to_pay_type == 'C':
+        description = 'A ' + str(order_obj.pay_condition) + ' DÍAS'
     if type_client == '06':
         info_address = client_obj.clientaddress_set.last().address
     nro_project = 'name project'

@@ -324,17 +324,15 @@
                             </select>
                         </div>
                         <div class="col-md-3 text-uppercase small pl-0 pr-0">
-                            <label for="hour" class="mb-0">Fecha y Hora</label>
-                            <input type="date" class="form-control form-control-sm" id="date"
-                                   value="{{ date }}"
-                                   readonly
-                                   placeholder="Fecha">
+                            <label for="issue_date" class="mb-0">Fecha de Emision</label>
+                            <input type="date" class="form-control form-control-sm" id="issue_date"
+                                   value="{{ date }}">
                         </div>
                     </div>
 
                     <div class="form-row mt-1 ml-0 mr-2" id="form_quotation" style="display: none">
                         <div class="col-md-2 text-uppercase small pl-1 pr-0">
-                            <label for="hour" class="mb-0">Valido hasta:</label>
+                            <label for="id_validity_date" class="mb-0">Valido hasta:</label>
                             <input type="date" class="form-control form-control-sm" id="id_validity_date"
                                    value="{{ date }}">
                         </div>

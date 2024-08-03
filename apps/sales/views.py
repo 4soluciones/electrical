@@ -1033,7 +1033,7 @@ def create_order_detail(request):
         type_payment = data_sale["type_payment"]
         cash_finality = None
         has_quotation_order = ''
-        _date_today = str(data_sale["Date"])
+        issue_date = str(data_sale["issueDate"])
         # _date = datetime.now()
         _date = utc_to_local(datetime.now())
         if type_payment == 'E':
@@ -1125,7 +1125,8 @@ def create_order_detail(request):
             'way_to_pay_type': type_payment,
             'has_quotation_order': has_quotation_order,
             'order_sale_quotation': order_sale_quotation_obj,
-            'pay_condition': condition_days
+            'pay_condition': condition_days,
+            'issue_date': issue_date
         }
         order_sale_obj = Order.objects.create(**new_order_sale)
         order_sale_obj.save()

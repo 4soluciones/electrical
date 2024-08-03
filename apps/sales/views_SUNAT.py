@@ -427,7 +427,7 @@ def send_bill_nubefact(order_id, serie_, is_demo=False):
     client_first_address = client_obj.clientaddress_set.first()
     client_document = client_obj.clienttype_set.filter(document_type_id='06').first()
     # client_department = Dep/artment.objects.get(id=client_first_address.district[:2])
-    register_date = order_obj.create_at
+    register_date = order_obj.issue_date
     formatdate = register_date.strftime("%d-%m-%Y")
 
     items = []

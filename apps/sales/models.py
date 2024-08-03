@@ -396,6 +396,7 @@ class Order(models.Model):
                                              related_name="order_quotation")
     voucher_type = models.CharField('Tipo de comprobante', max_length=2, choices=VOUCHER_CHOICES, default='T')
     pay_condition = models.CharField('Payment Condition', max_length=50, null=True, blank=True)
+    issue_date = models.DateField('Fecha de emision', null=True, blank=True)
 
     def __str__(self):
         return str(self.pk) + " / " + str(self.type) + " / "
