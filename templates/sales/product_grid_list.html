@@ -32,7 +32,7 @@
             <tbody>
             {% for product in products %}
                 <tr class="text-center" pk="{{ product.id }}">
-                    <td class="align-middle" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ product.id }}</td>
+                    <td class="align-middle" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ forloop.counter  }}</td>
                     <td class="align-middle" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">
                         {% if product.code %}
                             {{ product.code|zfill:6 }}

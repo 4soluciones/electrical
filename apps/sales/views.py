@@ -53,11 +53,14 @@ class ProductList(View):
         user_obj = User.objects.get(id=int(user))
         subsidiary_obj = get_subsidiary_by_user(user_obj)
         product_brand_set = ProductBrand.objects.all()
+        mydate = datetime.now()
+        formatdate = mydate.strftime("%Y-%m-%d")
         context = {
             'products': self.get_queryset(),
             'subsidiary': subsidiary_obj,
             'product_brand_set': product_brand_set,
-            'form': self.form_class
+            'form': self.form_class,
+            'date': formatdate
         }
         return context
 

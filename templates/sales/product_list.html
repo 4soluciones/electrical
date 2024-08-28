@@ -75,9 +75,9 @@
                     {#                    </button>#}
 
 
-                    {#                        <a href="{% url 'sales:product_print' %}" class="btn-sm btn-warning"#}
-                    {#                           target="print"><span#}
-                    {#                                class="fa fa-print"></span> Imprimir</a>#}
+                    <button type="button" class="btn-sm btn-outline-success my-1 mr-2 ml-2" id="report-excel">
+                        <i class="fas fa-file-excel"></i> Kardex Total
+                    </button>
 
                 </form>
             </div>
@@ -200,6 +200,52 @@
             </div>
         </div>
     </div>
+
+    {#MODAL DE KARDEX TOTAL EXCEL#}
+    <div class="modal fade" id="modal-excel-kardex" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered modal-lg roboto-condensed-regular">
+            <div class="modal-content">
+                <div class="modal-header text-center">
+                    <h5 class="modal-title roboto-condensed-regular font-weight-bold" id="exampleModalLabel1">KARDEX
+                        TOTAL:</h5>
+                    <button type="button" class="close ml-0" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="report-kardex">
+                    <div class="card-group">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <div class="row pb-1">
+                                    <div class="col-sm-5 col-md-5 col-lg-5">
+                                        <label for="product_id" class="col-form-label">Fecha Inicial:</label>
+                                        <input type="date" class="form-control form-control-sm" id="start_date"
+                                               value="{{ date }}">
+                                    </div>
+                                    <div class="col-sm-5 col-md-5 col-lg-5">
+                                        <label for="product_id" class="col-form-label">Fecha Final:</label>
+                                        <input type="date" class="form-control form-control-sm" id="end_date"
+                                               value="{{ date }}">
+                                    </div>
+                                    <div class="col-sm-2 col-md-2 col-lg-2">
+                                        <label for="product_id" class="col-form-label">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                                        <button type="button" class="btn-sm btn-success btn-block"
+                                                id="excel">
+                                            <i class="fas fa-file-excel"></i> Generar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 
 
 
@@ -594,24 +640,35 @@
             }
         });
 
-         /*$(document).on('click', '#btn-search', function (e) {
-            var search = $("#search").attr('pk');
-            $.ajax({
-                url: '/sales/get_list_kardex/',
-                dataType: 'json',
-                type: 'GET',
-                data: {'pk': search, 'subsidiary_store': $("#id_subsidiary_store").val()},
-                success: function (response) {
-                    //console.log(response);
-                    if (response.success) {
-                        $('#kardex-grid-list').html(response.form);
-                    }
-                },
-                fail: function (response) {
-                    console.log(response);
-                }
-            });
-        });*/
+        $(document).on('click', '#report-excel', function () {
+            $('#modal-excel-kardex').modal('show');
+        });
+
+        document.getElementById('excel').addEventListener('click', function () {
+            const startDate = document.getElementById('start_date').value;
+            const endDate = document.getElementById('end_date').value;
+            window.location.href = `/sales/export_all_products/${startDate}/${endDate}/`;
+        });
+
+
+        /*$(document).on('click', '#btn-search', function (e) {
+           var search = $("#search").attr('pk');
+           $.ajax({
+               url: '/sales/get_list_kardex/',
+               dataType: 'json',
+               type: 'GET',
+               data: {'pk': search, 'subsidiary_store': $("#id_subsidiary_store").val()},
+               success: function (response) {
+                   //console.log(response);
+                   if (response.success) {
+                       $('#kardex-grid-list').html(response.form);
+                   }
+               },
+               fail: function (response) {
+                   console.log(response);
+               }
+           });
+       });*/
 
 
     </script>

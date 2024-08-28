@@ -1,5 +1,7 @@
 from django.urls import path
 from django.contrib.auth.decorators import login_required
+
+from apps.sales.excels import export_all_products
 from apps.sales.views import *
 from apps.sales.views_SUNAT import query_dni
 from apps.sales.views_PDF import product_print, print_ticket_order_sales, print_quotation, print_order_bill, print_orders_sales
@@ -206,4 +208,7 @@ urlpatterns = [
     path('get_all_products/', login_required(get_all_products), name='get_all_products'),
 
     path('calculate_square_quantity/', login_required(calculate_square_quantity), name='calculate_square_quantity'),
+
+    # EXCEL
+    path('export_all_products/<str:start_date>/<str:end_date>/', login_required(export_all_products), name='export_all_products'),
 ]
