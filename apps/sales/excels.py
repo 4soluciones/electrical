@@ -128,7 +128,8 @@ def export_all_products(request, start_date=None, end_date=None):
 
         for product, entries in kardex_by_product.items():
             sheet_name = sanitize_sheet_name(truncate_sheet_name(product))
-            worksheet = workbook.add_worksheet(sheet_name)
+            unique_sheet_name = get_unique_sheet_name(sheet_name, workbook)
+            worksheet = workbook.add_worksheet(unique_sheet_name)
 
             worksheet.merge_range('A1:C1', 'Descripción', merge_format)
             worksheet.merge_range('D1:F1', 'Entradas', merge_format)
@@ -204,3 +205,12 @@ def sanitize_sheet_name(sheet_name):
     for char in invalid_chars:
         sheet_name = sheet_name.replace(char, '-')
     return sheet_name[:31]
+
+
+def get_unique_sheet_name(sheet_name, workbook):
+    original_name = sheet_name
+    counter = 1
+    while sheet_name.lower() in (s.name.lower() for s in workbook.worksheets()):
+        sheet_name = f"{original_name[:29]}-{counter}"  # Deja espacio para el sufijo numérico
+        counter += 1
+    return sheet_name
