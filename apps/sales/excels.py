@@ -127,7 +127,7 @@ def export_all_products(request, start_date=None, end_date=None):
                                             'font_name': 'Arial', 'font_size': 10})
 
         for product, entries in kardex_by_product.items():
-            sheet_name = truncate_sheet_name(product)
+            sheet_name = sanitize_sheet_name(truncate_sheet_name(product))
             worksheet = workbook.add_worksheet(sheet_name)
 
             worksheet.merge_range('A1:C1', 'Descripción', merge_format)
@@ -197,3 +197,10 @@ def truncate_sheet_name(name, max_length=31):
 
 def all_fields_empty(entry):
     return all(value == '' for value in entry.values())
+
+
+def sanitize_sheet_name(sheet_name):
+    invalid_chars = '[]:*?/\\'
+    for char in invalid_chars:
+        sheet_name = sheet_name.replace(char, '-')
+    return sheet_name[:31]
