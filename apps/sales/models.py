@@ -102,6 +102,7 @@ class SubsidiaryStore(models.Model):
 
 
 class Product(models.Model):
+    TYPE_CHOICES = (('P', 'PRODUCTO'), ('S', 'SERVICE'))
     id = models.AutoField(primary_key=True)
     name = models.CharField('Nombre', max_length=150)
     name_search = models.CharField('Nombre Buscador', max_length=500, null=True, blank=True)
@@ -111,32 +112,19 @@ class Product(models.Model):
     stock_max = models.IntegerField('Stock Maximo', default=0)
     product_family = models.ForeignKey('ProductFamily', on_delete=models.CASCADE)
     product_brand = models.ForeignKey('ProductBrand', on_delete=models.CASCADE)
-    photo = models.ImageField(upload_to='product/',
-                              default='pic_folder/None/no-img.jpg', blank=True)
+    photo = models.ImageField(upload_to='product/', default='pic_folder/None/no-img.jpg', blank=True)
     photo_thumbnail = ImageSpecField([Adjust(contrast=1.2, sharpness=1.1), ResizeToFill(
         100, 100)], source='photo', format='JPEG', options={'quality': 90})
     barcode = models.CharField('Codigo de barras', max_length=45, null=True, blank=True)
-    # valvule = models.CharField('Tipo de Valvula', max_length=1,
-    #                            choices=VALVULE_CHOICES, default='N', )
-    # product_subcategory = models.ForeignKey('ProductSubcategory', on_delete=models.CASCADE)
-
-    # is_supply = models.BooleanField('Suministro', default=False)
-    # is_merchandise = models.BooleanField('Mercancia', default=False)
-    # is_epp = models.BooleanField('EPP', default=False)
-    # is_equipment = models.BooleanField('Equipo', default=False)
-    # is_machine = models.BooleanField('Maquina', default=False)
-    # is_purchased = models.BooleanField('Comprado', default=False)
-    # is_manufactured = models.BooleanField('Fabricado', default=False)
-    # is_imported = models.BooleanField('Importado', default=False)
     is_enabled = models.BooleanField('Habilitado', default=True)
-
-    # is_granel = models.BooleanField('Granel', default=False)
+    type_product = models.CharField('Tipo de Producto', max_length=1, choices=TYPE_CHOICES, default='P')
+    is_serial = models.BooleanField('Tiene Serie', default=True)
 
     def __str__(self):
         return str(self.name) + " - " + str(self.code)
 
     def calculate_minimum_unit(self):
-        response = ProductDetail.objects.filter(product__id=self.id).values('product__id').annotate(
+        response = ProductDetail.objects.filter(product__id=self.id, product__type_product='P').values('product__id').annotate(
             minimum=Min('quantity_minimum'))
         if response:
             return response[0].get('minimum')
@@ -144,11 +132,13 @@ class Product(models.Model):
             return 0
 
     def calculate_minimum_unit_id(self):
-        response = self.productdetail_set.filter(quantity_minimum=self.calculate_minimum_unit()).first().unit.id
+        response = self.productdetail_set.filter(quantity_minimum=self.calculate_minimum_unit(),
+                                                 product__type_product='P').first().unit.id
         return response
 
     def calculate_minimum_price_sale(self):
-        response = self.productdetail_set.filter(quantity_minimum=self.calculate_minimum_unit()).first().price_sale
+        response = self.productdetail_set.filter(quantity_minimum=self.calculate_minimum_unit(),
+                                                 product__type_product='P').first().price_sale
         return response
 
     class Meta:
