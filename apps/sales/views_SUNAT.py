@@ -363,6 +363,7 @@ def query_api_peru(nro_doc, type_document):
 
 
 def send_cancel_bill_nubefact(order_id):
+    context = ''
     params = {}
     order_bill_obj = OrderBill.objects.get(order_id=int(order_id))
     if order_bill_obj.type == '1':
@@ -408,11 +409,19 @@ def send_cancel_bill_nubefact(order_id):
             'key': result.get("key"),
         }
     else:
-        result = response.json()
-        context = {
-            'errors': result.get("errors"),
-            'codigo': result.get("codigo"),
-        }
+        if response.status_code == 400:
+            response_data = response.json()
+            error_message = response_data.get('errors')
+            if error_message == 'Invoice anulado anteriormente':
+                context = {
+                    'enlace': "Anulado",
+                }
+            else:
+                result = response.json()
+                context = {
+                    'errors': result.get("errors"),
+                    'codigo': result.get("codigo"),
+                }
     return context
 
 
