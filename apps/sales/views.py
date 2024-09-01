@@ -1738,18 +1738,17 @@ def get_dict_order_queries(order_set, start_date, end_date, is_pdf=False, is_uni
         type_bill = 'TICKET'
         order_bill_set = OrderBill.objects.filter(order=o.id)
 
-        if o.status != 'A':
-            if order_bill_set.exists():
-                order_bill_obj = order_bill_set.first()
+        if order_bill_set.exists():
+            order_bill_obj = order_bill_set.first()
 
-                if order_bill_obj.type == '1':
-                    type_bill = 'FACTURA'
-                    serial_bill = order_bill_obj.serial
-                    correlative_bill = order_bill_obj.n_receipt
-                elif order_bill_obj.type == '2':
-                    type_bill = 'BOLETA'
-                    serial_bill = order_bill_obj.serial
-                    correlative_bill = order_bill_obj.n_receipt
+            if order_bill_obj.type == '1':
+                type_bill = 'FACTURA'
+                serial_bill = order_bill_obj.serial
+                correlative_bill = order_bill_obj.n_receipt
+            elif order_bill_obj.type == '2':
+                type_bill = 'BOLETA'
+                serial_bill = order_bill_obj.serial
+                correlative_bill = order_bill_obj.n_receipt
 
         order = {
             'id': o.id,
@@ -5090,15 +5089,16 @@ def cancel_order(request):
                     _price_unit = d.price_unit
                     _subtotal = d.quantity_sold * d.price_unit
                     product_detail_obj = ProductDetail.objects.get(product=product_obj, unit=unit_obj)
-                    _minimum_quantity = product_detail_obj.quantity_minimum
+                    if product_detail_obj.unit.name != 'ZZ':
+                        _minimum_quantity = product_detail_obj.quantity_minimum
 
-                    product_store_obj = ProductStore.objects.get(product__id=_product_id,
-                                                                 subsidiary_store__subsidiary=subsidiary_obj,
-                                                                 subsidiary_store__category='V')
+                        product_store_obj = ProductStore.objects.get(product__id=_product_id,
+                                                                     subsidiary_store__subsidiary=subsidiary_obj,
+                                                                     subsidiary_store__category='V')
 
-                    kardex_input(product_store_id=product_store_obj.id, price_unit=_price_unit,
-                                 quantity_purchased=_quantity_sold,
-                                 order_detail_obj=d)
+                        kardex_input(product_store_id=product_store_obj.id, price_unit=_price_unit,
+                                     quantity_purchased=_quantity_sold,
+                                     order_detail_obj=d)
 
                 order_obj.status = 'A'
                 order_obj.save()

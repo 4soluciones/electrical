@@ -45,82 +45,30 @@
     {% for p in dictionary %}
         <tr pk="{{ p.id }}">
             {% for d in p.order_detail_set %}
-                {% if p.status == 'A' %}
-                    {% if forloop.first %}
-                        <td class="align-middle text-center" {% if p.status == 'A' %}
-                            style="background-color: #ee8888 !important;"  {% endif %}>{{ p.id }}</td>
-                        <td class="align-middle text-center font-weight-bold" {% if p.status == 'A' %}
-                            style="background-color: #ee8888 !important;"  {% endif %}
-                        >{{ p.subsidiary }}</td>
-                        <td class="align-middle text-center" {% if p.status == 'A' %}
-                            style="background-color: #ee8888 !important;"  {% endif %}>{{ p.type_bill }}</td>
-                        <td class="align-middle text-center" {% if p.status == 'A' %}
-                            style="background-color: #ee8888 !important;"  {% endif %}>
-                            {% if p.order_bill %}
-                                {{ p.serial_bill }}
-                            {% else %}
-                                {{ p.serial }}
-                            {% endif %}
-                        </td>
-                        <td class="align-middle text-center" style="background-color: #ee8888 !important;">
-                            {% if p.order_bill %}
-                                {{ p.correlative_bill|zfill:8 }}
-                            {% else %}
-                                {{ p.correlative_sale|zfill:8 }}
-                            {% endif %}
-                        </td>
-                        <td class="align-middle text-center font-weight-bold"
-                            style="background-color: #ee8888 !important;" colspan="11">ANULADA
-                        </td>
-                    {% endif %}
-                {% else %}
-                    {% if forloop.first %}
-                        <td class="align-middle text-center" rowspan="{{ p.details }}"
-                                {% if p.way_to_pay == 'D' %}
-                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ p.id }}</td>
-                        <td class="align-middle text-center font-weight-bold" rowspan="{{ p.details }}"
-                                {% if p.way_to_pay == 'D' %}
-                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}
-                        >{{ p.subsidiary }}</td>
-                        <td class="align-middle text-center" rowspan="{{ p.details }}"
-                                {% if p.way_to_pay == 'D' %}
-                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ p.type_bill }}</td>
-                        <td class="align-middle text-center" rowspan="{{ p.details }}"
-                                {% if p.way_to_pay == 'D' %}
-                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>
-                            {% if p.order_bill %}
-                                {{ p.serial_bill }}
-                            {% else %}
-                                {{ p.serial }}
-                            {% endif %}
-                        </td>
-                        <td class="align-middle text-center" rowspan="{{ p.details }}"
-                                {% if p.way_to_pay == 'D' %}
-                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>
-                            {% if p.order_bill %}
-                                {{ p.correlative_bill|zfill:8 }}
-                            {% else %}
-                                {{ p.correlative_sale|zfill:8 }}
-                            {% endif %}
-                        </td>
-                        <td class="align-middle text-center" rowspan="{{ p.details }}"
-                                {% if p.way_to_pay == 'D' %}
-                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ p.client|upper }}</td>
-                        <td class="align-middle text-center" rowspan="{{ p.details }}"
-                                {% if p.way_to_pay == 'D' %}
-                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}
-                        >{{ p.user.worker_set.last.employee.names|upper }}</td>
-                        <td class="align-middle text-right text-danger" rowspan="{{ p.details }}"
-                                {% if p.way_to_pay == 'D' %}
-                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}
-                        >{{ p.total|floatformat:2 }}</td>
-                        <td class="align-middle text-center" rowspan="{{ p.details }}"
-                                {% if p.way_to_pay == 'D' %}
-                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}
-                        >{{ p.create_at|date:"d-m-y" }}</td>
-                        <td class="align-middle text-center text-success noExl" rowspan="{{ p.details }}"
-                                {% if p.way_to_pay == 'D' %}
-                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>
+                {% if forloop.first %}
+                    <td class="align-middle text-center" rowspan="{{ p.details }}" {% if p.status == 'A' %}style="background-color: #ee8888 !important;"  {% endif %} {% if p.way_to_pay == 'D' %}style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ p.id }}</td>
+                    <td class="align-middle text-center font-weight-bold" rowspan="{{ p.details }}" {% if p.status == 'A' %}style="background-color: #ee8888 !important;"  {% endif %} {% if p.way_to_pay == 'D' %}style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ p.subsidiary }}</td>
+                    <td class="align-middle text-center" rowspan="{{ p.details }}" {% if p.status == 'A' %}style="background-color: #ee8888 !important;"  {% endif %} {% if p.way_to_pay == 'D' %}style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ p.type_bill }}</td>
+                    <td class="align-middle text-center" rowspan="{{ p.details }}" {% if p.status == 'A' %}style="background-color: #ee8888 !important;"  {% endif %} {% if p.way_to_pay == 'D' %}style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>
+                        {% if p.order_bill %}
+                            {{ p.serial_bill }}
+                        {% else %}
+                            {{ p.serial }}
+                        {% endif %}
+                    </td>
+                    <td class="align-middle text-center" rowspan="{{ p.details }}" {% if p.status == 'A' %}style="background-color: #ee8888 !important;"  {% endif %} {% if p.way_to_pay == 'D' %}style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>
+                        {% if p.order_bill %}
+                            {{ p.correlative_bill|zfill:8 }}
+                        {% else %}
+                            {{ p.correlative_sale|zfill:8 }}
+                        {% endif %}
+                    </td>
+                    <td class="align-middle text-center" rowspan="{{ p.details }}" {% if p.status == 'A' %}style="background-color: #ee8888 !important;"  {% endif %} {% if p.way_to_pay == 'D' %}style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ p.client|upper }}</td>
+                    <td class="align-middle text-center" rowspan="{{ p.details }}" {% if p.status == 'A' %}style="background-color: #ee8888 !important;"  {% endif %} {% if p.way_to_pay == 'D' %} style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ p.user.worker_set.last.employee.names|upper }}</td>
+                    <td class="align-middle text-right text-danger" rowspan="{{ p.details }}" {% if p.status == 'A' %}style="background-color: #ee8888 !important;"  {% endif %} {% if p.way_to_pay == 'D' %} style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ p.total|floatformat:2 }}</td>
+                    <td class="align-middle text-center" rowspan="{{ p.details }}" {% if p.status == 'A' %}style="background-color: #ee8888 !important;"  {% endif %} {% if p.way_to_pay == 'D' %} style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ p.create_at|date:"d-m-y" }}</td>
+                    <td class="align-middle text-center noExl" rowspan="{{ p.details }}" {% if p.status == 'A' %}style="background-color: #ee8888 !important;"  {% endif %} {% if p.way_to_pay == 'D' %} style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>
+                        {% if p.status != 'A' %}
                             {% if p.order_bill %}
                                 <a class="btn btn-primary ml-1 my-1 montserrat"
                                    href="{% url 'sales:print_order_bill'  p.id %}"
@@ -136,51 +84,32 @@
                                    target="print">
                                     <span class="fa fa-print"></span></a>
                             {% endif %}
-                        </td>
-                        <td class="align-middle text-center text-success noExl" rowspan="{{ p.details }}"
-                                {% if p.way_to_pay == 'D' %}
-                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>
-                            <a class="btn btn-danger ml-1 my-1 btn-cancel" data-bs-toggle="tooltip"
-                               pk="{{ p.id }}"
+                        {% else %}
+                           <span class="font-weight-bold">ANULADA</span>
+                        {% endif %}
+                    </td>
+                    <td class="align-middle text-center text-success noExl" rowspan="{{ p.details }}" {% if p.status == 'A' %}style="background-color: #ee8888 !important;"  {% endif %} {% if p.way_to_pay == 'D' %} style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>
+                        {% if p.status != 'A' %}
+                            <a class="btn btn-danger ml-1 my-1 btn-cancel" data-bs-toggle="tooltip" pk="{{ p.id }}"
                                href="#" data-bs-placement="top" title="ANULAR VENTA">
                                 <i class="fas fa-ban"></i></a>
-                        </td>
-                        {#                        <td class="align-middle text-center" >{{ d.id }}</td>#}
-
-                        <td class="align-middle text-center" {% if p.way_to_pay == 'D' %}
-                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ d.comentary|upper }}</td>
-                        <td class="align-middle text-center" {% if p.way_to_pay == 'D' %}
-                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ d.unit }}</td>
-                        <td class="align-middle text-right text-primary text-center"
-                                {% if p.way_to_pay == 'D' %}
-                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ d.quantity_sold|floatformat }}</td>
-                        <td class="align-middle text-right text-success" {% if p.way_to_pay == 'D' %}
-                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ d.price_unit|floatformat:2 }}</td>
-                        <td class="align-middle text-right text-success" {% if p.way_to_pay == 'D' %}
-                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ d.multiply|floatformat:2 }}</td>
-                        </tr>
-                        {##}
-                    {% else %}
-                        <tr class="text-center purchase ">
-                            {#                            <td class="align-middle text-center">{{ d.id }}</td>#}
-                            <td class="align-middle text-center" {% if p.way_to_pay == 'D' %}
-                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ d.comentary|upper }}</td>
-                            <td class="align-middle text-center" {% if p.way_to_pay == 'D' %}
-                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ d.unit }}</td>
-                            <td class="align-middle text-right text-primary text-center"
-                                    {% if p.way_to_pay == 'D' %}
-                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ d.quantity_sold|floatformat }}</td>
-                            <td class="align-middle text-right text-success" {% if p.way_to_pay == 'D' %}
-                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ d.price_unit|floatformat:2 }}</td>
-                            <td class="align-middle text-right text-success" {% if p.way_to_pay == 'D' %}
-                            style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ d.multiply|floatformat:2 }}</td>
-                        </tr>
-                    {% endif %}
-
+                        {% endif %}
+                    </td>
+                    <td class="align-middle text-center" {% if p.status == 'A' %}style="background-color: #ee8888 !important;"  {% endif %} {% if p.way_to_pay == 'D' %} style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ d.comentary|upper }}</td>
+                    <td class="align-middle text-center" {% if p.status == 'A' %}style="background-color: #ee8888 !important;"  {% endif %} {% if p.way_to_pay == 'D' %} style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ d.unit }}</td>
+                    <td class="align-middle text-right text-primary text-center" {% if p.status == 'A' %}style="background-color: #ee8888 !important;"  {% endif %} {% if p.way_to_pay == 'D' %} style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ d.quantity_sold|floatformat }}</td>
+                    <td class="align-middle text-right text-success" {% if p.status == 'A' %}style="background-color: #ee8888 !important;"  {% endif %} {% if p.way_to_pay == 'D' %} style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ d.price_unit|floatformat:2 }}</td>
+                    <td class="align-middle text-right text-success" {% if p.status == 'A' %}style="background-color: #ee8888 !important;"  {% endif %} {% if p.way_to_pay == 'D' %} style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ d.multiply|floatformat:2 }}</td>
+                    </tr>
+                {% else %}
+                    <tr class="text-center purchase ">
+                        <td class="align-middle text-center" {% if p.status == 'A' %}style="background-color: #ee8888 !important;"  {% endif %} {% if p.way_to_pay == 'D' %} style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ d.comentary|upper }}</td>
+                        <td class="align-middle text-center" {% if p.status == 'A' %}style="background-color: #ee8888 !important;"  {% endif %} {% if p.way_to_pay == 'D' %} style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ d.unit }}</td>
+                        <td class="align-middle text-right text-primary text-center" {% if p.status == 'A' %}style="background-color: #ee8888 !important;"  {% endif %} {% if p.way_to_pay == 'D' %} style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ d.quantity_sold|floatformat }}</td>
+                        <td class="align-middle text-right text-success" {% if p.status == 'A' %}style="background-color: #ee8888 !important;"  {% endif %} {% if p.way_to_pay == 'D' %} style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ d.price_unit|floatformat:2 }}</td>
+                        <td class="align-middle text-right text-success" {% if p.status == 'A' %}style="background-color: #ee8888 !important;"  {% endif %} {% if p.way_to_pay == 'D' %} style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>{{ d.multiply|floatformat:2 }}</td>
+                    </tr>
                 {% endif %}
-
-
-
             {% endfor %}
 
     {% endfor %}
