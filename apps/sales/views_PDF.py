@@ -1301,7 +1301,6 @@ def print_order_bill(request, pk=None):
     ]
     header2_page.setStyle(TableStyle(style_table_header))
 
-
     # ------------ENCABEZADO DEL DETALLE-------------------#
     style_table_header_detail = [
         ('FONTNAME', (0, 0), (-1, -1), 'Newgot'),  # all columns
@@ -1318,7 +1317,7 @@ def print_order_bill(request, pk=None):
     width_table = [_bts * 8 / 100, _bts * 8 / 100, _bts * 12 / 100, _bts * 42 / 100, _bts * 14 / 100, _bts * 16 / 100]
     header_detail = Table([('Item', 'Cantidad', 'Unidad', 'Descripción', 'Precio U.', 'Total')], colWidths=width_table)
     header_detail.setStyle(TableStyle(style_table_header_detail))
-    line = '-------------------------------------------------------------------------------------------------------------'
+
     # -------------------DETAIL---------------------#
     style_table_detail = [
         ('FONTNAME', (0, 0), (-1, -1), 'Square'),
@@ -1332,7 +1331,20 @@ def print_order_bill(request, pk=None):
         ('BOTTOMPADDING', (0, 0), (-1, -1), 4),  # all columns
         # ('BACKGROUND', (1, 0), (1, -1),  colors.green),  # four column
     ]
+    style_table_serial = [
+        ('FONTNAME', (0, 0), (-1, -1), 'Square'),
+        ('GRID', (0, 0), (-1, -1), 0.3, colors.darkgray),
+        ('FONTSIZE', (0, 0), (-1, -1), 8),
+        # ('LEFTPADDING', (0, 0), (0, -1), 10),  # first column
+        # ('ALIGNMENT', (0, 0), (-1, -1), 'CENTER'),  # all column
+        # ('ALIGNMENT', (2, 0), (2, -1), 'LEFT'),  # three column
+        # ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),  # first column
+        # ('RIGHTPADDING', (3, 0), (3, -1), 10),  # first column
+        # ('BOTTOMPADDING', (0, 0), (-1, -1), 4),  # all columns
+        # ('BACKGROUND', (1, 0), (1, -1),  colors.green),  # four column
+    ]
     detail_rows = []
+    serials_rows = []
     count = 0
     _total = 0
     for detail in order_obj.orderdetail_set.all():
@@ -1340,16 +1352,42 @@ def print_order_bill(request, pk=None):
         _product = Paragraph(str(detail.commentary), styles["Justify_Square"])
         _product_plus_brand = Paragraph(str(detail.commentary.upper()) + ' - ' + str(detail.product.product_brand.name),
                                         styles["Justify_Square"])
-        detail_rows.append(
-            (str(count), str(decimal.Decimal(round(detail.quantity_sold, 2))), str(detail.unit.description),
-             _product_plus_brand,
-             str(detail.price_unit), str(round(detail.quantity_sold * detail.price_unit, 2))))
+
+        detail_rows.append((
+            str(count),
+            str(decimal.Decimal(round(detail.quantity_sold, 2))),
+            str(detail.unit.description),
+            _product_plus_brand,
+            str(detail.price_unit),
+            str(round(detail.quantity_sold * detail.price_unit, 2))
+        ))
+
         _total = _total + detail.quantity_sold * detail.price_unit
+
+        # Si hay seriales, agregar una fila adicional con la tabla de seriales
+        if detail.productserial_set.all():
+            serials = [str(s.serial_number) for s in detail.productserial_set.all()]
+            columns = 2
+
+            # Organizar los seriales en filas con un número fijo de columnas
+            serials_rows = [serials[i:i + columns] for i in range(0, len(serials), columns)]
+
+            # Crear la tabla de seriales
+            serials_table = Table(serials_rows, colWidths=[_bts * 20 / 100] * columns)
+            serials_table.setStyle(TableStyle(style_table_serial))
+
+            # Añadir la tabla de seriales como una fila en blanco seguida de la tabla de seriales
+            detail_rows.append((' ', ' ', ' ', serials_table))
     detail_body = Table(detail_rows,
                         colWidths=[_bts * 8 / 100, _bts * 8 / 100, _bts * 12 / 100, _bts * 42 / 100, _bts * 14 / 100,
                                    _bts * 16 / 100])
     detail_body.setStyle(TableStyle(style_table_detail))
-    # difference = sub_total * decimal.Decimal(0.18)
+
+    content = [detail_body]
+
+    if serials_rows:
+        serials = Table([serials_rows], colWidths=[_bts * 8 / 100, _bts * 8 / 100, _bts * 12 / 100, _bts * 42 / 100])
+        content.append(serials)
 
     _text = 'DESCUENTO'
     _discount = decimal.Decimal(0.00)
@@ -1543,9 +1581,9 @@ def print_order_bill(request, pk=None):
     dictionary.append(total_footer)
     # dictionary.append(Paragraph('www.electrical.com', styles["Center_Newgot"]))
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="{}.pdf"'.format(str(type_document) + ' ' +
-                                                                             str(order_bill_obj.serial) + '-' + str(
-        order_bill_obj.n_receipt))
+    # response['Content-Disposition'] = 'attachment; filename="{}.pdf"'.format(str(type_document) + ' ' +
+    #                                                                          str(order_bill_obj.serial) + '-' + str(
+    #     order_bill_obj.n_receipt))
     doc.build(dictionary)
     response.write(buff.getvalue())
     buff.close()

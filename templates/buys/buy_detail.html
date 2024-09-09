@@ -7,8 +7,8 @@
             <th scope="col" class="align-middle font-weight-normal" style="width: 3%;">Nº</th>
             <th scope="col" class="align-middle font-weight-normal" style="width: 7%;">Codigo de barras</th>
             <th scope="col" class="align-middle font-weight-normal" style="width: 31%;">Descripción de Artículo</th>
-            <th scope="col" class="align-middle font-weight-normal" style="width: 8%;">Marca</th>
-            <th scope="col" class="align-middle font-weight-normal" style="width: 5%;">Cantidad</th>
+            {#            <th scope="col" class="align-middle font-weight-normal" style="width: 8%;">Marca</th>#}
+            <th scope="col" class="align-middle font-weight-normal" style="width: 10%;">Cantidad</th>
             <th scope="col" class="align-middle font-weight-normal" style="width: 7%;">Unidad Medida</th>
             <th scope="col" class="align-middle font-weight-normal" style="width: 6%;">Valor Unitario</th>
             <th scope="col" class="align-middle font-weight-normal" style="width: 5%;">%Dto.1</th>
@@ -16,13 +16,13 @@
             <th scope="col" class="align-middle font-weight-normal" style="width: 5%;">%Dto.3</th>
             <th scope="col" class="align-middle font-weight-normal" style="width: 5%;">%Dto.4</th>
             <th scope="col" class="align-middle font-weight-normal" style="width: 6%;">Importe</th>
-            <th scope="col" class="align-middle font-weight-normal" style="width: 3%;">Afecta Kardex</th>
+            {#            <th scope="col" class="align-middle font-weight-normal" style="width: 3%;">Afecta Kardex</th>#}
             <th scope="col" class="align-middle font-weight-normal" style="width: 4%;">Eliminar</th>
         </tr>
         </thead>
         <tbody id="details-table">
 
-        <tr class="" product="" unit_id="">
+        <tr class="text-center item-row" product="" unit_id="">
             <td class="item-numero align-middle text-center">1</td>
             <td class="item-code-bar align-middle text-center">
                 <input type="text" aria-label="..."
@@ -37,12 +37,18 @@
                 <div class="dropdown-menu"></div>
                 {#                </div>#}
             </td>
-            <td class="align-middle brand">
-                <input type="text" class="form-control text-center text-uppercase brand-product" id="brand_id"
-                       name="brand" readonly>
-            </td>
+            {#            <td class="align-middle brand">#}
+            {#                <input type="text" class="form-control text-center text-uppercase brand-product" id="brand_id"#}
+            {#                       name="brand" readonly>#}
+            {#            </td>#}
             <td class="align-middle item-quantity">
-                <input type="text" class="form-control text-center quantity-product text-uppercase" placeholder="0">
+                {#                <input type="text" class="form-control text-center quantity-product text-uppercase" placeholder="0">#}
+                <div class="input-group">
+                    <input type="text" class="form-control text-center quantity-product text-uppercase" placeholder="0">
+                    <div class="input-group-append">
+                        <button type="button" class="btn btn-warning btn-sm add-serial"> Series</button>
+                    </div>
+                </div>
             </td>
             <td class="align-middle unit">
                 <input type="text" class="form-control text-center text-uppercase unit-product" id="unit_product_id"
@@ -79,15 +85,50 @@
                     <i class="change-money">S/</i>
                 </div>
             </td>
-            <td class="item-check text-center align-middle">
-                <div class="form-check">
-                    <input class="form-check-input position-static check-kardex" type="checkbox" value="" checked>
-                </div>
-            </td>
+            {#            <td class="item-check text-center align-middle">#}
+            {#                <div class="form-check">#}
+            {#                    <input class="form-check-input position-static check-kardex" type="checkbox" value="" checked>#}
+            {#                </div>#}
+            {#            </td>#}
             <td class="align-middle">
                 {#                                <button type="button" onclick="deleteItem(  id_product  )" class="btn btn-danger delete-detail"><i#}
                 {#                                        class="fa fa-trash"></i></button>#}
             </td>
+        </tr>
+        <tr class="product-serial">
+{#            <td class="text-right align-middle" colspan="2"></td>#}
+{#            <td class="text-right align-middle">#}
+{#                <div id="accordion">#}
+{#                    <div class="card">#}
+{#                        <div class="card-header p-0" id="heading-{{ c.id }}">#}
+{#                            <h5 class="mb-0 text-center">#}
+{#                                <button class="btn btn-link collapsed text-dark roboto-condensed-regular font-weight-bold"#}
+{#                                        data-toggle="collapse" style="font-size: 11px"#}
+{#                                        data-target="#collapse-{{ c.id }}" aria-expanded="false"#}
+{#                                        aria-controls="collapse-{{ c.id }}">#}
+{#                                    Seriales <i class="fas fa-sort-down"></i>#}
+{#                                </button>#}
+{#                            </h5>#}
+{#                        </div>#}
+{#                        <div id="collapse-{{ c.id }}" class="collapse" aria-labelledby="heading-{{ c.id }}"#}
+{#                             data-parent="#accordion">#}
+{#                            <div class="card-body p-0">#}
+{#                                <table class="table table-sm align-content-center table-bordered mb-0">#}
+{#                                    <tbody id="details-serial">#}
+{#                                    <tr>#}
+{#                                        <td class="text-right align-middle text-center">1</td>#}
+{#                                        <td class="text-right align-middle">#}
+{#                                            <input type="text" class="form-control" placeholder="..." aria-label=""#}
+{#                                                   aria-describedby="basic-addon1">#}
+{#                                        </td>#}
+{#                                    </tr>#}
+{#                                    </tbody>#}
+{#                                </table>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </td>#}
         </tr>
 
         </tbody>
@@ -112,7 +153,7 @@
                         <th scope="col" class="align-middle font-weight-normal" style="width: 20%;">Base Imponible</th>
                         <th scope="col" class="align-middle font-weight-normal" style="width: 20%;">IGV (18%)</th>
                         <th scope="col" class="align-middle font-weight-normal" style="width: 20%;">Importe Total</th>
-{#                        <th scope="col" class="align-middle font-weight-normal" style="width: 20%;">Flete</th>#}
+                        {#                        <th scope="col" class="align-middle font-weight-normal" style="width: 20%;">Flete</th>#}
                         <th scope="col" class="align-middle font-weight-normal" style="width: 20%;">Total Documento</th>
                     <tbody id="table-detail-foot">
                     <tr class="text-center">
@@ -137,13 +178,13 @@
                                        placeholder="0.00"><i class="change-money">S/</i>
                             </div>
                         </td>
-{#                        <td class="foot-freight">#}
-{#                            <div class="input-icon">#}
-{#                                <input type="text" class="form-control text-right text-uppercase total-foot-freight"#}
-{#                                       placeholder="0.00">#}
-{#                                <i class="change-money font-weight-lighter">S/</i>#}
-{#                            </div>#}
-{#                        </td>#}
+                        {#                        <td class="foot-freight">#}
+                        {#                            <div class="input-icon">#}
+                        {#                                <input type="text" class="form-control text-right text-uppercase total-foot-freight"#}
+                        {#                                       placeholder="0.00">#}
+                        {#                                <i class="change-money font-weight-lighter">S/</i>#}
+                        {#                            </div>#}
+                        {#                        </td>#}
                         <td class="foot-document">
                             <div class="input-icon">
                                 <input type="text" class="form-control text-right text-uppercase total-foot-document"

@@ -1,0 +1,203 @@
+<div class="modal-dialog" role="document">
+
+    <div class="modal-content">
+        <div class="modal-header" style="background-color: rgb(21,99,181);">
+            <h6 class="modal-title  text-white roboto-condensed-regular">Escoger series a vender:</h6>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="close-modal">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+
+
+        <div class="modal-body">
+            <div class="card border-primary">
+                <div class="card-header" style="background-color: rgb(21,99,181);">
+                    <h6 class="card-title text-center text-white mb-0 roboto-condensed-regular">{{ product_obj.name|upper }}</h6>
+                    <input type="hidden" value="{{ product_obj.id }}" id="product">
+                    <input type="hidden" value="{{ product_store_obj.id }}" id="product_store">
+                    <input type="hidden" value="{{ product_store_obj.stock }}" id="current_stock">
+                </div>
+                <div class="card-body m-0 p-3">
+                    <div class="row col-md-12 m-0 p-0">
+                        <div class="card-body p-0">
+                            <div class="table-responsive dataTables_wrapper m-0 p-0"
+                                 style="overflow-y: scroll; height: 600px; width: auto; overflow-x: hidden;">
+                                <table class="table table-sm align-content-center table-bordered mb-0">
+                                    <tbody id="details-serial">
+                                    {% for s in product_serial %}
+                                        <tr style="height: 50px;">
+                                            <td class="text-right align-middle text-center">{{ forloop.counter }}</td>
+                                            <td class="text-right align-middle text-center pb-4 item-check">
+                                                <div class="form-check">
+                                                    <input class="form-check-input check-serial" aria-label=""
+                                                           style="transform: scale(1.4);"
+                                                           type="checkbox" value="" data-serial-id="{{ s.id }}">
+                                                </div>
+                                            </td>
+                                            <td class="text-right item-serial align-middle">
+                                                <input type="text" class="form-control serial"
+                                                       aria-label="" readonly
+                                                       value="{{ s.serial_number }}"
+                                                       aria-describedby="basic-addon1">
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-2">
+                    <div class="card-body m-0 text-center p-0">
+                        {#                        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>#}
+                        <button id="select-serial" type="button" class="btn btn-sm btn-block btn-success"> Seleccionar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        let productID = $('#product').val();
+        let storeID = $('#product_store').val();
+        let product = product_dict.find(p => p.id === parseInt(productID));
+
+        if (product) {
+            let productStore = product.product_store.find(ps => ps.id === parseInt(storeID));
+            if (productStore) {
+                productStore.serial.forEach(serial => {
+                    if (serial.status === 'P') {
+                        let checkbox = $('input.check-serial[data-serial-id="' + serial.id + '"]');
+                        if (checkbox.length) {
+                            checkbox.prop('checked', true);
+                        }
+                    }
+                });
+            }
+        }
+    });
+
+    $(".check-serial").change(function () {
+
+        let productId = $('#product').val();
+        let ps = $('#product_store').val();
+        let tr = $('#product-list').find("tr[product=" + productId + "]");
+        let tbody = tr.find('td.td-table-stock table.table-stock-headquarters tbody');
+        let tr_store = tbody.find("tr[store_id=" + ps + "]");
+        let stock = tr_store.find("td.item-stock button.btn-stock")
+        let current_stock = Number(stock.text().trim())
+
+        let tbody_quantity = tr.find('td.item-prices table.table-prices tbody');
+        let tr_quantity = tbody_quantity.find("tr[product=" + productId + "]");
+        let quantity = tr_quantity.find('td.quantity-sales-price input.quantity-select')
+
+        let checkedCount = $(".check-serial:checked").length;
+        if ($(this).prop('checked')) {
+            current_stock -= 1;
+        } else {
+            current_stock += 1;
+        }
+        stock.text(current_stock);
+        quantity.val(checkedCount);
+
+    });
+
+    $("#close-modal").click(function () {
+
+        let current_stock = $('#current_stock').val()
+        let productID = $('#product').val();
+        let store_id = $('#product_store').val();
+        let tr = $('#product-list').find("tr[product=" + productID + "]");
+        let tbody = tr.find('td.td-table-stock table.table-stock-headquarters tbody');
+        let tr_store = tbody.find("tr[store_id=" + store_id + "]");
+        let stock = tr_store.find("td.item-stock button.btn-stock")
+
+        let tbody_quantity = tr.find('td.item-prices table.table-prices tbody');
+        let tr_quantity = tbody_quantity.find("tr[product=" + productID + "]");
+        let quantity = tr_quantity.find('td.quantity-sales-price input.quantity-select')
+        let product = product_dict.find(p => p.id === parseInt(productID));
+        let _tr = $("#sales-details tr[product=" + productID + "]");
+        if (_tr.length === 0) {
+            if (product) {
+                let productStore = product.product_store.find(ps => ps.id === parseInt(store_id));
+                if (productStore) {
+                    productStore.serial.forEach(serial => {
+                        serial.status = 'C';
+                    });
+                }
+                stock.text(parseInt(current_stock))
+                quantity.val('')
+
+            }
+        }
+    });
+
+    $("#select-serial").click(function () {
+
+        let productID = $('#product').val();
+        let tbody_check = $('#details-serial');
+        let store_id = $('#product_store').val();
+        let _tr = $("#sales-details tr[product=" + productID + "]");
+        let selectedSerials = [];
+
+        tbody_check.find('tr td.item-check input.check-serial').each(function () {
+            let checkbox = $(this);
+            let serialID = checkbox.attr('data-serial-id');
+            let product = product_dict.find(p => p.id === parseInt(productID));
+            if (product) {
+                let productStore = product.product_store.find(ps => ps.id === parseInt(store_id));
+                if (productStore) {
+                    let serial = productStore.serial.find(s => s.id === parseInt(serialID));
+
+                    if (serial && serial.status === 'P') {
+                        selectedSerials.push(serial.serial); // Agregar el serial al array
+                    }
+
+                    if (checkbox.prop('checked')) {
+                        if (serial && serial.status === 'C') {
+                            serial.status = 'P';
+                            selectedSerials.push(serial.serial);
+                        }
+                    } else {
+                        if (serial && serial.status === 'P') {
+                            serial.status = 'C';
+                        }
+                    }
+
+                }
+            }
+        });
+
+
+        if (_tr.length) {
+            let _next_tr = _tr.next('tr.product-serial');
+            if (_next_tr.length) {
+                let serials = '';
+                for (let i = 0; i < selectedSerials.length; i++) {
+                    serials += '<tr>' +
+                        '<td class="text-right align-middle item-serial">' +
+                        '<input type="text" class="form-control text-center serial" readonly value="' + selectedSerials[i] + '" aria-label="" aria-describedby="basic-addon1">' +
+                        '</td>' +
+                        '</tr>';
+                }
+                _next_tr.find('tbody#details-serial-' + productID).html(serials);
+                let _new_quantity = Number(selectedSerials.length)
+                let _price = Number(_tr.find('td.item-price input.input-price').val());
+                let _new_detail_total = _new_quantity * _price
+                _tr.find('td.item-quantity input.input-quantity').val(((_new_quantity).toFixed(2)).toString())
+                _tr.find('td.item-total input.input-total-detail').val(_new_detail_total.toFixed(2));
+                calculateTotal();
+            } else {
+                console.error("No se encontró ninguna fila.");
+            }
+        }
+
+        $('#modal-serial').modal('hide');
+    });
+
+
+</script>

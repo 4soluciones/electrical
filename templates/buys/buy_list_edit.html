@@ -26,37 +26,7 @@
                                     </button>
                                 </div>
                             </div>
-
                         </div>
-{#                        <div class="col-sm-6 col-md-6 col-lg-6">#}
-{#                            <div class="row">#}
-{#                                <div class="col-sm-4 col-md-4 col-lg-4">#}
-{#                                    <form>#}
-{#                                        <div class="form-group row mt-3">#}
-{#                                            <button type="button"#}
-{#                                                    class="col-sm-5 btn btn-sm btn-outline-secondary font-weight-bold border-0 text-dark btn-block p-1"#}
-{#                                                    id="btn-type-change">Tipo de Cambio:#}
-{#                                            </button>#}
-{#                                            <div class="col-sm-7">#}
-{#                                                <input type="text" class="form-control text-center font-weight-bold"#}
-{#                                                       id="type_change" readonly>#}
-{#                                            </div>#}
-{#                                        </div>#}
-{#                                    </form>#}
-{#                                </div>#}
-{#                                <div class="col-sm-4 col-md-4 col-lg-4">#}
-{#                                    <div class="form-check mt-4">#}
-{#                                        <input class="form-check-input check-dollar"#}
-{#                                               {% if purchase.check_dollar %}checked{% endif %} type="checkbox" value=""#}
-{#                                               id="check_dollar">#}
-{#                                        <label class="form-check-label text-dark font-weight-bold" for="check_dollar">#}
-{#                                            COMPRA EN DOLARES#}
-{#                                        </label>#}
-{#                                    </div>#}
-{#                                </div>#}
-{#                            </div>#}
-{#                        </div>#}
-
                     </div>
                     <div class="card-body p-0">
                         <div class="row border">
@@ -108,7 +78,7 @@
                                         </div>
 
                                         <div class="col-sm-2 col-md-2 col-lg-2 pl-1 pr-1">
-                                             <label>Tipo doc.</label>
+                                            <label>Tipo doc.</label>
                                             <select id="id_type_bill" name="type_bill" class="form-control">
                                                 {% if purchase.type_bill == 'T' %}
                                                     <option selected value="T">TICKET</option>
@@ -180,9 +150,12 @@
                                         <div class="col-sm-2 col-md-2 col-lg-2 pr-1 pl-1 dues d-none">
                                             <label>Monto:</label>
                                             <div class="input-group">
-                                                <input type="number" class="form-control text-right" placeholder="INGRESE MONTO"
-                                                       aria-label="Recipient's username" aria-describedby="add-dues" id="amount-due">
-                                                <button class="btn btn-outline-success" type="button" id="add-dues">+</button>
+                                                <input type="number" class="form-control text-right"
+                                                       placeholder="INGRESE MONTO"
+                                                       aria-label="Recipient's username" aria-describedby="add-dues"
+                                                       id="amount-due">
+                                                <button class="btn btn-outline-success" type="button" id="add-dues">+
+                                                </button>
                                             </div>
                                         </div>
 
@@ -200,22 +173,32 @@
                                                            class="table table-hover table-sm align-content-center table-bordered mb-0"
                                                            cellspacing="0" style="width: 100%;">
                                                         <thead>
-                                                        <tr class="text-center text-white text-uppercase" style="background: #1a77c8">
-                                                            <th scope="col" class="align-middle font-weight-normal" style="width: 5%;">Nº cuotas</th>
-                                                            <th scope="col" class="align-middle font-weight-normal" style="width: 20%;">Monto</th>
-                                                            <th scope="col" class="align-middle font-weight-normal" style="width: 5%;">Eliminar</th>
+                                                        <tr class="text-center text-white text-uppercase"
+                                                            style="background: #1a77c8">
+                                                            <th scope="col" class="align-middle font-weight-normal"
+                                                                style="width: 5%;">Nº cuotas
+                                                            </th>
+                                                            <th scope="col" class="align-middle font-weight-normal"
+                                                                style="width: 20%;">Monto
+                                                            </th>
+                                                            <th scope="col" class="align-middle font-weight-normal"
+                                                                style="width: 5%;">Eliminar
+                                                            </th>
                                                         </tr>
                                                         </thead>
                                                         <tbody id="details-dues">
                                                         {% for du in purchase.purchasedues_set.all %}
                                                             <tr class="text-center" due_id="{{ du.id }}">
                                                                 <td class="align-middle text-center due-count">{{ forloop.counter }}</td>
-                                                                <td class="align-middle text-center amount-due">S/ {{ du.due|safe }}</td>
+                                                                <td class="align-middle text-center amount-due">
+                                                                    S/ {{ du.due|safe }}</td>
                                                                 <td class="align-middle">
-                                                                    <button type="button" onclick="deleteDues(this, {{ du.id }})"
+                                                                    <button type="button"
+                                                                            onclick="deleteDues(this, {{ du.id }})"
                                                                             class="btn btn-danger delete-detail"
                                                                             style="font-size: 0.6em">
-                                                                            <i class="fa fa-trash" style="font-size: 1.5em"></i>
+                                                                        <i class="fa fa-trash"
+                                                                           style="font-size: 1.5em"></i>
                                                                     </button>
                                                                 </td>
                                                             </tr>
@@ -246,87 +229,9 @@
                                                     class="btn btn-sm btn-success btn-block">Agregar Detalle +
                                             </button>
                                         </div>
-
                                     </div>
                                 </form>
                             </div>
-{#                            <div class="col-sm-5 col-md-5 col-lg-5">#}
-{#                                <div class="card">#}
-{#                                    <div class="card-header">#}
-{#                                        <div class="row">#}
-{#                                            <div class="col-sm-6 col-md-6 col-lg-6">#}
-{#                                                DETALLE DE DOCUMENTOS DE FLETE#}
-{#                                            </div>#}
-{#                                        </div>#}
-{#                                    </div>#}
-{#                                    <div class="card-body">#}
-{#                                        <div class="table-responsive dataTables_wrapper roboto-condensed-regular">#}
-{#                                            <table id="id_freight_data_grid"#}
-{#                                                   class="table table-hover table-sm align-content-center table-bordered"#}
-{#                                                   cellspacing="0" style="width: 100%;">#}
-{#                                                <thead>#}
-{#                                                <tr class="text-center text-white" style="background: #1a77c8">#}
-{#                                                    <th scope="col" class="align-middle font-weight-normal"#}
-{#                                                        style="width: 35%;">Documento#}
-{#                                                    </th>#}
-{#                                                    <th scope="col" class="align-middle font-weight-normal"#}
-{#                                                        style="width: 10%;">Serie#}
-{#                                                    </th>#}
-{#                                                    <th scope="col" class="align-middle font-weight-normal"#}
-{#                                                        style="width: 15%;">Numero#}
-{#                                                    </th>#}
-{#                                                    <th scope="col" class="align-middle font-weight-normal"#}
-{#                                                        style="width: 15%;">Fecha#}
-{#                                                    </th>#}
-{#                                                    <th scope="col" class="align-middle font-weight-normal"#}
-{#                                                        style="width: 15%;">Importe#}
-{#                                                    </th>#}
-{#                                                </tr>#}
-{#                                                </thead>#}
-{#                                                <tbody id="details-freight">#}
-{#                                                <tr class="text-center">#}
-{#                                                    <td class="align-middle document-freight">#}
-{#                                                        <input type="text"#}
-{#                                                               class="form-control text-uppercase document-freight-input"#}
-{#                                                               id="id_document_freight"#}
-{#                                                               name="document_freight"#}
-{#                                                               value="{{ purchase.document_freight }}">#}
-{#                                                    </td>#}
-{#                                                    <td class="align-middle serial-freight">#}
-{#                                                        <input type="text"#}
-{#                                                               class="form-control text-uppercase serial-freight-input"#}
-{#                                                               id="id_serial_freight"#}
-{#                                                               name="serial_freight"#}
-{#                                                               value="{{ purchase.serial_freight }}">#}
-{#                                                    </td>#}
-{#                                                    <td class="align-middle number-freight">#}
-{#                                                        <input type="text"#}
-{#                                                               class="form-control text-uppercase number-freight-input"#}
-{#                                                               id="id_number_freight"#}
-{#                                                               name="number_freight"#}
-{#                                                               value="{{ purchase.number_freight }}">#}
-{#                                                    </td>#}
-{#                                                    <td class="align-middle date-freight">#}
-{#                                                        <input type="date" class="form-control date-freight-input"#}
-{#                                                               id="id_date_freight"#}
-{#                                                               name="date_freigh"#}
-{#                                                               value="{{ purchase.date_freight|date:"Y-m-d" }}">#}
-{#                                                    </td>#}
-{#                                                    <td class="align-middle total-freight">#}
-{#                                                        <input type="text"#}
-{#                                                               class="form-control text-right text-uppercase total-freight-input"#}
-{#                                                               id="id_total_freight"#}
-{#                                                               name="total_freight"#}
-{#                                                               placeholder="0.00"#}
-{#                                                               value="{{ purchase.total_freight|safe }}">#}
-{#                                                    </td>#}
-{#                                                </tr>#}
-{#                                                </tbody>#}
-{#                                            </table>#}
-{#                                        </div>#}
-{#                                    </div>#}
-{#                                </div>#}
-{#                            </div>#}
                         </div>
                     </div>
                 </div>
@@ -380,8 +285,8 @@
                                 </thead>
                                 <tbody id="details-table">
                                 {% for pd in purchase.purchasedetail_set.all %}
-
-                                    <tr class="" product="{{ pd.product.id }}" unit_id="{{ pd.unit.id }}" pd_id="{{ pd.id }}">
+                                    <tr class="item-row" product="{{ pd.product.id }}" unit_id="{{ pd.unit.id }}"
+                                        pd_id="{{ pd.id }}">
                                         <td class="item-numero align-middle text-center">{{ forloop.counter }}</td>
                                         <td class="align-middle text-left product-item-table">
                                             <input type="text"
@@ -460,17 +365,60 @@
                                             </div>
                                         </td>
                                         <td class="align-middle text-center">
-                                            <button type="button" onclick="deleteItem({{ pd.product.id }})" pd_id="{{ pd.id }}"
+                                            <button type="button" onclick="deleteItem({{ pd.product.id }})"
+                                                    pd_id="{{ pd.id }}"
                                                     class="btn btn-danger delete-detail"><i
                                                     class="fa fa-trash"></i></button>
                                         </td>
                                     </tr>
+                                    {% if pd.productserial_set.all %}
+                                        <tr class="product-serial">
+                                            <td class="text-right align-middle" colspan="1"></td>
+                                            <td class="text-right align-middle">
+                                                <div id="accordion">
+                                                    <div class="card">
+                                                        <div class="card-header p-0" id="heading-{{ pd.product.id }}">
+                                                            <h5 class="mb-0 text-center">
+                                                                <button class="btn btn-link collapsed text-dark roboto-condensed-regular font-weight-bold"
+                                                                        data-toggle="collapse" style="font-size: 11px"
+                                                                        data-target="#collapse-{{ pd.product.id }}"
+                                                                        aria-expanded="false"
+                                                                        aria-controls="collapse-{{ pd.product.id }}">
+                                                                    Seriales <i class="fas fa-sort-down"></i>
+                                                                </button>
+                                                            </h5>
+                                                        </div>
+                                                        <div id="collapse-{{ pd.product.id }}" class="collapse"
+                                                             aria-labelledby="heading-{{ pd.product.id }}"
+                                                             data-parent="#accordion">
+                                                            <div class="card-body p-0">
+                                                                <table class="table table-sm align-content-center table-bordered mb-0">
+                                                                    <tbody id="details-serial-{{ pd.product.id }}">
+                                                                    {% for s in pd.productserial_set.all %}
+                                                                        <tr>
+                                                                            <td class="text-right align-middle text-center">{{ forloop.counter }}</td>
+                                                                            <td class="text-right item-serial align-middle">
+{#                                                                                <input type="hidden" value="{{ s.id }}">#}
+                                                                                <input type="text" class="form-control serial"
+                                                                                       aria-label=""
+                                                                                       value="{{ s.serial_number }}"
+                                                                                       aria-describedby="basic-addon1">
+                                                                            </td>
+                                                                        </tr>
+                                                                    {% endfor %}
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
                                 {% endfor %}
-
                                 </tbody>
 
                                 <tfoot id="details-table-foot">
-
                                 <tr>
                                     <td class="border-0" colspan="2"></td>
 
@@ -501,10 +449,10 @@
                                                     style="width: 20%;">
                                                     Importe Total
                                                 </th>
-{#                                                <th scope="col" class="align-middle font-weight-normal"#}
-{#                                                    style="width: 20%;">#}
-{#                                                    Flete#}
-{#                                                </th>#}
+                                                {#                                                <th scope="col" class="align-middle font-weight-normal"#}
+                                                {#                                                    style="width: 20%;">#}
+                                                {#                                                    Flete#}
+                                                {#                                                </th>#}
                                                 <th scope="col" class="align-middle font-weight-normal"
                                                     style="width: 20%;">
                                                     Total Documento
@@ -538,15 +486,15 @@
                                                         <i class="change-money">S/</i>
                                                     </div>
                                                 </td>
-{#                                                <td class="foot-freight">#}
-{#                                                    <div class="input-icon">#}
-{#                                                        <input type="text"#}
-{#                                                               class="form-control text-right text-uppercase total-foot-freight"#}
-{#                                                               placeholder="0.00"#}
-{#                                                               value="{{ purchase.total_freight|floatformat:-2 }}">#}
-{#                                                        <i class="change-money">S/</i>#}
-{#                                                    </div>#}
-{#                                                </td>#}
+                                                {#                                                <td class="foot-freight">#}
+                                                {#                                                    <div class="input-icon">#}
+                                                {#                                                        <input type="text"#}
+                                                {#                                                               class="form-control text-right text-uppercase total-foot-freight"#}
+                                                {#                                                               placeholder="0.00"#}
+                                                {#                                                               value="{{ purchase.total_freight|floatformat:-2 }}">#}
+                                                {#                                                        <i class="change-money">S/</i>#}
+                                                {#                                                    </div>#}
+                                                {#                                                </td>#}
                                                 <td class="foot-document">
                                                     <div class="input-icon">
                                                         <input type="text"
@@ -1166,12 +1114,12 @@
             let _amount_due = $('#amount-due').val();
 
             $('#id_debs_grid > tbody').append(
-                 '<tr class="text-center" due_id="NaN">' +
-                 '<td class="align-middle text-center due-count">' + '</td>' +
-                 '<td class="align-middle text-center amount-due">' + 'S/ ' + _amount_due + '</td>' +
-                 '<td class="align-middle"> ' + '<button type="button" onclick="deleteDues(this)" class="btn btn-danger delete-detail" style="font-size: 0.6em"><i class="fa fa-trash" style="font-size: 1.5em"></i></button>' + '</td>' +
-                 '</tr>'
-             );
+                '<tr class="text-center" due_id="NaN">' +
+                '<td class="align-middle text-center due-count">' + '</td>' +
+                '<td class="align-middle text-center amount-due">' + 'S/ ' + _amount_due + '</td>' +
+                '<td class="align-middle"> ' + '<button type="button" onclick="deleteDues(this)" class="btn btn-danger delete-detail" style="font-size: 0.6em"><i class="fa fa-trash" style="font-size: 1.5em"></i></button>' + '</td>' +
+                '</tr>'
+            );
             counterStrikedebs()
             $('#amount-due').val('');
 
@@ -1180,7 +1128,7 @@
         $('#purchase-form').submit(function (event) {
             event.preventDefault();
 
-            if ($("#id_detail_data_grid tbody#details-table tr").length > 0 && $('.product-table').val() !== '') {
+            if ($("#id_detail_data_grid tbody#details-table tr.item-row").length > 0 && $('.product-table').val() !== '') {
                 let table_foot = $("#id_detail_data_grid tfoot#details-table-foot tr td.td-table-foot").find("#id_detail_data_foot tbody#table-detail-foot tr")
                 let Detail_purchase = {
                     "Invoice": $('#id_factura').val(),
@@ -1192,7 +1140,7 @@
                     "Base_Total": Number(table_foot.find("td.foot-base input.total-foot-base").val().replace(',', '.')),
                     "Igv_Total": Number(table_foot.find("td.foot-igv input.total-foot-igv").val().replace(',', '.')),
                     "Import_Total": Number(table_foot.find("td.foot-total input.total-foot-total").val().replace(',', '.')),
-                    "TotalFreight": Number(table_foot.find("td.foot-freight input.total-foot-freight").val().replace(',', '.')),
+                    //"TotalFreight": Number(table_foot.find("td.foot-freight input.total-foot-freight").val().replace(',', '.')),
                     "Total_Document": Number(table_foot.find("td.foot-document input.total-foot-document").val().replace(',', '.')),
                     "Check_Igv": ($("#id_detail_data_grid tfoot#details-table-foot tr td.td-table-foot").find("div.form-check input.check-igv").is(':checked')) ? 1 : 0,
                     "Check_Dollar": ($("#check_dollar").is(':checked')) ? 1 : 0,
@@ -1200,10 +1148,11 @@
                     "Freight": [],
                     "Dues": [],
                 };
-                $("#id_detail_data_grid tbody#details-table tr").each(function () {
+                $("#id_detail_data_grid tbody#details-table tr.item-row").each(function () {
+                    let productID = $(this).attr('product')
                     let detailObj = {
                         "ProductDetail": $(this).attr('pd_id'),
-                        "Product": $(this).attr('product'),
+                        "Product": productID,
                         "Quantity": $(this).find("td.item-quantity input.quantity-product").val(),
                         "Unit": $(this).attr('unit_id'),
                         "Price": Number($(this).find("td.item-price input.price-unit-product").val().replace(',', '.')),
@@ -1214,10 +1163,17 @@
                         "Dto4": Number($(this).find("td.item-discount4 input.discount4").val().replace(',', '.')),
                         "Total": Number($(this).find("td.item-total input.total-detail").val().replace(',', '.')),
                         "Check_kardex": ($(this).find("td.item-check div.form-check input.check-kardex").is(':checked')) ? 1 : 0,
+                        "Serials": []
                     };
+                    $(this).next('tr.product-serial').find(`tbody#details-serial-${productID} tr`).each(function () {
+                        let serialObj = {
+                            "Serial": $(this).find('td.item-serial input.serial').val()
+                        }
+                        detailObj.Serials.push(serialObj);
+                    });
                     Detail_purchase.Details.push(detailObj);
                 });
-                $("#id_freight_data_grid tbody#details-freight tr").each(function () {
+                /*$("#id_freight_data_grid tbody#details-freight tr").each(function () {
                     let detailFreight = {
                         "DocumentFreight": $(this).find("td.document-freight input.document-freight-input").val(),
                         "SerialFreight": $(this).find("td.serial-freight input.serial-freight-input").val(),
@@ -1226,7 +1182,7 @@
                         "TotalFreight": Number($(this).find("td.total-freight input.total-freight-input").val()),
                     }
                     Detail_purchase.Freight.push(detailFreight);
-                });
+                });*/
                 $("#id_debs_grid tbody#details-dues tr").each(function () {
                     let dataDues = {
                         "amountId": $(this).attr('due_id'),
@@ -1235,6 +1191,7 @@
                     Detail_purchase.Dues.push(dataDues)
 
                 });
+                console.log(Detail_purchase)
                 {#console.log(JSON.stringify(Detail_purchase))#}
 
                 $.ajax({
@@ -1251,10 +1208,9 @@
                     success: function (response, textStatus, xhr) {
                         if (xhr.status === 200) {
                             toastr.success(response.message, '¡COMPRA ACTUALIZADA CORRECTAMENTE!');
-                             setTimeout(() => {
+                            setTimeout(() => {
                                 window.open("/buys/get_purchase_list/", '_self');
                             }, 1000);
-
                         }
                     },
                     error: function (jqXhr, textStatus, xhr) {

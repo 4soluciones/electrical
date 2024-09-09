@@ -1,12 +1,9 @@
 {% if purchases_store %}
-
-
     <div class="card border-info m-3">
         <div class="card-header bg-info">
-            <h4 class="card-title text-center text-white">LISTA DE COMPRAS EN ALMACEN</h4>
+            <h4 class="card-title text-center text-white roboto-condensed-regular">LISTA DE COMPRAS EN ALMACEN</h4>
         </div>
-
-        <div class="card-body">
+        <div class="card-body roboto-condensed-regular">
             <div class="table-responsive dataTables_wrapper ">
                 <table id="purchase-store-data-grid"
                        class="table table-primary table-striped align-content-center table-bordered response"
@@ -24,22 +21,24 @@
                     </tr>
                     </thead>
                     <tbody>
-
                     {% for p in purchases_store %}
                         <tr class="text-center ">
                             <td>{{ p.id }}</td>
                             <td>{{ p.supplier.name|upper }}</td>
                             <td>{{ p.bill_number|upper }}</td>
-                            <td>{{ p.purchase_date }}</td>
+                            <td>{{ p.purchase_date|date:'d-m-Y' }}</td>
                             <td>{{ p.total_import|floatformat:2 }}</td>
                             <td>{{ p.user.worker_set.last.employee.names|upper }}</td>
                             <td class=" text-success bg-white">{{ p.get_status_display }}</td>
                             <td class="p-1">
-                                <button type="button"  class="btn btn-success btn-show-detail" pk="{{ p.id }}"><i class="fa fa-bars"></i></button>
+                               <button type="button" class="btn btn-sm btn-show-detail"
+                                        pk="{{ p.id }}">
+                                    <i class="fas fa-sort-down fa-lg see-icon"></i>
+                                </button>
                             </td>
                         </tr>
                          <tr style="display: none">
-                            <td colspan="7" class="table-details-purchase bg-white"></td>
+                            <td colspan="7" class="table-details-purchase bg-white p-0"></td>
                          </tr>
                     {% endfor %}
                     </tbody>

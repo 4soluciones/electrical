@@ -36,7 +36,7 @@ class FormProduct(forms.ModelForm):
         fields = ('name',
                   'observation', 'code', 'stock_min',
                   'stock_max', 'product_family', 'product_brand', 'photo',
-                  'barcode',  'is_enabled',
+                  'barcode',  'is_enabled', 'type_product'
                   # , 'valvule', 'product_subcategory',
                   # 'is_supply', 'is_merchandise', 'is_epp', 'is_equipment',
                   # 'is_machine', 'is_purchased', 'is_manufactured', 'is_imported', 'is_granel'
@@ -54,6 +54,7 @@ class FormProduct(forms.ModelForm):
             # 'valvule': 'Tipo de Valvula',
             # 'product_subcategory': 'Subcategoria',
             'is_enabled': 'Habilitado',
+            'type_product': 'Tipo de Producto',
             # 'is_supply': 'Suministro',
             # 'is_merchandise': 'Mercancia',
             # 'is_epp': 'EPP',
@@ -117,6 +118,11 @@ class FormProduct(forms.ModelForm):
                 attrs={
                     'class': 'form-control form-control-sm',
                     'autocomplete': 'off',
+                }
+            ),
+            'type_product': forms.Select(
+                attrs={
+                    'class': 'form-control form-control-sm',
                 }
             ),
             'is_enabled': forms.CheckboxInput(

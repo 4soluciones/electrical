@@ -1,147 +1,239 @@
-{% if product_dic %}
-<div class="card roboto-condensed-regular" xmlns="http://www.w3.org/1999/html">
-    <div class="card-body m-0 p-1">
-        <div class="table-responsive dataTables_wrapper m-0 p-0"
-             style="overflow-y: scroll; height: 700px; width: auto; overflow-x: hidden;">
-            <table id="product-data-grid" class="table table-bordered table-hover" cellspacing="0" style="width: 100%;">
-                <thead>
-                <tr class="text-center text-white text-uppercase" style="background: #0671a9">
-                    <th class="th-sm font-weight-normal" style="width: 40%;">Producto</th>
-                    <th class="th-sm font-weight-normal" style="width: 5%;">Marca</th>
-                    <th class="th-sm font-weight-normal" style="width: 10%;">Stock en sedes</th>
-                    <th class="th-sm font-weight-normal" style="width: 45%;">Unidades</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for product in product_dic %}
-                    <tr class="text-center m-0 p-0" product="{{ product.id }}">
-                        <td class="align-middle">
-                            <address class="text-left">
-                                {{ product.name|upper }}<br>
-                                {#                                Codigo: {{ product.code }}<br>#}
-                                {#                                Familia: {{ product.product_family.name }}<br>#}
-{#                                                                Marca: {{ product.product_brand.name }}#}
-                            </address>
-                        </td>
-                        <td class="align-middle">
-                            <address class="text-left">
-                                {{ product.product_brand.name }}<br>
-                            </address>
-                        </td>
-                        <td class="p-0 td-table-stock">
-                            {#                            {% if product.product_store_set.count > 0 %}#}
-                            <table class="table table-sm text-uppercase small table-stock-headquarters">
-                                <thead>
-                                <th class="small font-weight-normal">Sede</th>
-{#                                <th class="small font-weight-normal">Almacen</th>#}
-                                <th class="small font-weight-normal">Stock</th>
-                                </thead>
-                                <tbody>
-                                {% for product_store in product.productstore_set.all %}
-                                    <tr
-                                            store_="{{ product_store.subsidiary_store.category }}"
-                                            store_id="{{ product_store.id }}"
-                                            class="{% if product_store.subsidiary_store.subsidiary.id == subsidiary.id %}text-danger my-subsidiary{% endif %}">
-                                        <td class="align-middle">{{ product_store.subsidiary_store.subsidiary.name }}</td>
-{#                                        <td class="align-middle">{{ product_store.subsidiary_store.name }}</td>#}
-                                        <td class="item-stock align-middle {% if product_store.subsidiary_store.category == 'V' and product_store.subsidiary_store.subsidiary.id == subsidiary.id %}bg-success text-white montserrat {% endif %}">{{ product_store.stock|safe }}</td>
-                                    </tr>
-                                {% endfor %}
-                                </tbody>
-                            </table>
-                            {#                            {% endif %}#}
-                        </td>
-                        <td class="p-0">
-                            {#                            {% if product.product_detail_set.count > 0 %}#}
-                            <table class="table table-sm text-uppercase small table-prices" style="width: 100%;">
-                                <thead>
-                                {% if perms.admin %}
-                                    <th style="width: 10%;" class="small font-weight-normal">Precio Compra</th>
-                                {% endif %}
-                                <th style="width: 20%;" class="small font-weight-normal">Cantidad</th>
-                                <th style="width: 70%;" class="small font-weight-normal">Precios (%)</th>
-                                </thead>
-                                <tbody>
-                                {% for obj in product.productdetail_set.all %}
-                                    <tr product="{{ product.id }}" productname="{{ product.name }}"
-                                        unit="{{ obj.unit.id }}" unitname="{{ obj.unit.name }}" product_brand="{{ product.product_brand.name }}"
-                                        quantity_minum="{{ obj.quantity_minimum|safe }}">
-                                        {% if perms.admin %}
-                                            <td class="align-middle text-center font-weight-bold quantity-sales-price">
-                                                S/ {{ obj.price_purchase|safe }} <span
-                                                    class="font-weight-lighter">{{ obj.update_at|date:"d/m/y" }}</span>
-                                            </td>
-                                        {% endif %}
-                                        <td class="align-middle text-center quantity-sales-price">
-                                            {#                                                oninput="validity.valid||(value='');" enteros#}
-                                            <input type="number" class="form-control quantity-select text-center" min="0"
-                                                   onkeyup="if(this.value<0){this.value= this.value * -1}"
-                                                   placeholder="" value="">
-                                        </td>
-                                        <td class="align-middle p-1 prices-list">
-                                            <div class="row m-0 p-0">
-                                                <div class="col text-center p-0">
-                                                    <button type="button" pk="{{ obj.id }}"
-                                                            ip="{{ obj.get_calculate_price1|safe }}"
-                                                            class="btn btn-outline-primary btn-one p-1">
-                                                        {{ obj.get_calculate_price1|safe }}
-                                                    </button>
-                                                </div>
-                                                <div class="col text-center p-0">
-                                                    <button type="button" pk="{{ obj.id }}"
-                                                            ip="{{ obj.get_calculate_price2|safe }}"
-                                                            class="btn btn-outline-primary btn-two p-1">
-                                                        {{ obj.get_calculate_price2|safe }}
-                                                    </button>
-                                                </div>
-                                                <div class="col text-center p-0">
-                                                    <button type="button" pk="{{ obj.id }}"
-                                                            ip="{{ obj.get_calculate_price3|safe }}"
-                                                            class="btn btn-outline-primary btn-three p-1">
-                                                        {{ obj.get_calculate_price3|safe }}
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                                </tbody>
-                            </table>
-                            {#                            {% endif %}#}
-                        </td>
+{% if product_dict %}
+    <div class="card roboto-condensed-regular">
+        <div class="card-body p-0">
+            <input type="hidden" value="{{ type_search }}">
+            <div class="table-responsive dataTables_wrapper m-0 p-0"
+                 style="overflow-y: scroll; height: 845px; width: auto; overflow-x: hidden;">
+                <table id="product-data-grid" class="table table-bordered table-hover">
+                    <thead>
+                    <tr class="text-center text-white text-uppercase" style="background: #0671a9">
+                        <th class="th-sm font-weight-normal" style="width: 35%;">Productos</th>
+                        <th class="th-sm font-weight-normal" style="width: 20%;">Stock</th>
+                        <th class="th-sm font-weight-normal" style="width: 45%;">Cantidad/Precios</th>
                     </tr>
-                {% endfor %}
-                </tbody>
-                <tfoot>
-                <tr class="text-center text-white text-uppercase" style="background: #0671a9">
-                    <th class="th-sm font-weight-normal" style="width: 23%;">Producto</th>
-                    <th class="th-sm font-weight-normal" style="width: 2%;">Marca</th>
-                    <th class="th-sm font-weight-normal" style="width: 22%;">Stock en sedes</th>
-                    <th class="th-sm font-weight-normal" style="width: 53%;">Unidades</th>
-                </tr>
-                </tfoot>
-            </table>
+                    </thead>
+                    <tbody id="product-list">
+                    {% for product in product_dict %}
+                        <tr class="text-center m-0 p-0" product="{{ product.id }}" type_search="{{ type_search }}">
+                            <td class="align-middle item-product text-left">
+                                {{ product.name|upper }}<br>
+                                Marca: {{ product.product_brand.name|upper }}<br>
+                                Cod. Barras: {{ product.barcode|default_if_none:'-' }}<br>
+                                {% if type_search == 'S' %}
+                                    <input type="hidden" class="serial-id"
+                                           value="{{ product.productstore_set.all.last.productserial_set.all.last.id }}">
+                                    <span class="text-danger font-weight-bold">Serial:</span>
+                                    <span class="text-danger font-weight-bold serial">{{ product.productstore_set.all.last.productserial_set.all.last.serial_number }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="p-0 td-table-stock">
+                                <table class="table table-sm text-uppercase small table-stock-headquarters m-0">
+                                    <thead>
+                                    <tr>
+                                        <th class="small font-weight-normal">Sede</th>
+                                        <th class="small font-weight-normal">Stock</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for product_store in product.productstore_set.all %}
+                                        <tr store_="{{ product_store.subsidiary_store.category }}"
+                                            store_id="{{ product_store.id }}"
+                                            product_serial="{% if product_store.productserial_set.all %}true{% else %}false{% endif %}"
+                                            class="{% if product_store.subsidiary_store.subsidiary.id == subsidiary.id %}text-danger my-subsidiary{% endif %}">
+                                            <td class="align-middle">{{ product_store.subsidiary_store.subsidiary.name }}</td>
+                                            {#                                        <td class="item-stock align-middle {% if product_store.subsidiary_store.category == 'V' and product_store.subsidiary_store.subsidiary.id == subsidiary.id %}bg-success text-white {% endif %}" style="font-size: 15px">#}
+                                            <td class="item-stock align-middle text-white {% if product_store.productserial_set.all %}bg-success{% else %}bg-warning{% endif %}"
+                                                style="font-size: 15px">
+                                                <button type="button" ps="{{ product_store.id }}"
+                                                        product="{{ product.id }}"
+                                                        class="btn text-white btn-block p-1 font-weight-bold btn-stock">
+                                                    {{ product_store.stock|floatformat:0 }}
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </td>
+                            <td class="p-0 item-prices">
+                                <table class="table table-sm text-uppercase table-prices m-0">
+                                    <thead>
+                                    {% if perms.admin %}
+                                        <th style="width: 20%;" class="small font-weight-normal">Compra</th>
+                                    {% endif %}
+                                    <th style="width: 20%;" class="font-weight-normal">Cantidad</th>
+                                    <th style="width: 60%;" class="font-weight-normal">Precios (%)</th>
+                                    </thead>
+                                    <tbody>
+                                    {% for obj in product.productdetail_set.all %}
+                                        <tr product="{{ product.id }}" productname="{{ product.name }}"
+                                            unit="{{ obj.unit.id }}" unitname="{{ obj.unit.name }}"
+                                            product_brand="{{ product.product_brand.name }}"
+                                            quantity_minum="{{ obj.quantity_minimum|safe }}">
+                                            {% if perms.admin %}
+                                                <td class="align-middle text-center font-weight-bold quantity-sales-price small">
+                                                    S/ {{ obj.price_purchase|safe }} <span
+                                                        class="font-weight-lighter">{{ obj.update_at|date:"d/m/y" }}</span>
+                                                </td>
+                                            {% endif %}
+                                            <td class="align-middle text-center quantity-sales-price">
+                                                <input type="number" class="form-control quantity-select text-center"
+                                                       min="0"
+                                                       onkeyup="if(this.value<0){this.value= this.value * -1}"
+                                                       style="font-size: 20px"
+                                                       placeholder="0"
+                                                       {% if product.productstore_set.all.last.productserial_set.all %}readonly{% endif %}
+                                                       {% if type_search == 'S' %}value="1" readonly
+                                                       {% else %}value=""{% endif %}
+                                                >
+                                            </td>
+                                            <td class="align-middle p-1 prices-list">
+                                                <div class="row m-0 p-0">
+                                                    <div class="col text-center p-1">
+                                                        <button type="button" pk="{{ obj.id }}"
+                                                                ip="{{ obj.get_calculate_price1|safe }}"
+                                                                class="btn btn-outline-primary btn-block btn-one p-1">
+                                                            {{ obj.get_calculate_price1|safe }}
+                                                        </button>
+                                                    </div>
+                                                    <div class="col text-center p-1">
+                                                        <button type="button" pk="{{ obj.id }}"
+                                                                ip="{{ obj.get_calculate_price2|safe }}"
+                                                                class="btn btn-outline-primary btn-block btn-two p-1">
+                                                            {{ obj.get_calculate_price2|safe }}
+                                                        </button>
+                                                    </div>
+                                                    <div class="col text-center p-1">
+                                                        <button type="button" pk="{{ obj.id }}"
+                                                                ip="{{ obj.get_calculate_price3|safe }}"
+                                                                class="btn btn-outline-primary btn-block btn-three p-1">
+                                                            {{ obj.get_calculate_price3|safe }}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-</div>
 {% else %}
     <div class="alert alert-info alert-dismissible fade show mt-3" role="alert">
-        <strong>Atencion!</strong> No existen Productos registrados con ese nombre.
+        <strong>Atencion!</strong> No existen productos con el texto ingresado, Revise el tipo de bùsqueda.
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
             <span aria-hidden="true">&times;</span>
         </button>
     </div>
 {% endif %}
+
 <script>
-     {#$('#product-data-grid').DataTable({#}
-            {#"dom": '<"top"i>rt<"bottom"flp><"clear">',#}
-            {#"sDom": '<"row view-filter"<"col-sm-12"<"pull-left"l><"pull-right"f><"clearfix">>>t<"row view-pager"<"col-sm-12"<"text-center"ip>>>',#}
-            {#"dom": '<lf<t>ip>',#}
-            {#"dom": '<"top"i>rt<"bottom"flp><"clear">',#}
-     {#       "language": {#}
-     {#           "url": "//cdn.datatables.net/plug-ins/1.10.15/i18n/Spanish.json"#}
-     {#       },#}
-     {#       lengthChange: false,#}
-     {#       dom: 'Qfrtip'#}
-     {#   });#}
+
+    $(document).ready(function () {
+
+        let type_search = $('#type_search').val()
+        if (type_search === 'S') {
+
+            let tr = $('#product-data-grid tbody tr');
+            let productID = tr.attr('product');
+            let storeID = tr.find('td.td-table-stock table.table-stock-headquarters tbody tr').attr('store_id');
+            let serialID = tr.find('td.item-product input.serial-id').val();
+
+            let _tr_detail = $('tbody#sales-details tr.product');
+            let serials = '';
+
+            let tbody = tr.find('td.td-table-stock table.table-stock-headquarters tbody');
+            let tr_store = tbody.find("tr[store_id=" + storeID + "]");
+            let stock = tr_store.find("td.item-stock button.btn-stock");
+
+            let td_prices = tr.find('td.item-prices table.table-prices tbody td.prices-list');
+
+            let current_stock = Number(stock.text().trim());
+
+            let product = product_dict.find(p => p.id === parseInt(productID));
+            if (product) {
+                let productStore = product.product_store.find(ps => ps.id === parseInt(storeID));
+                if (productStore) {
+                    let serial = productStore.serial.find(s => s.id === parseInt(serialID));
+                    if (serial && serial.status === 'C') {
+                        serial.status = 'P';
+                    }
+                }
+            }
+            stock.text(current_stock - 1)
+            //console.log(product_dict)
+
+            _tr_detail.each(function () {
+                let currentRow = $(this);
+                if (parseInt(currentRow.attr('product')) === parseInt(productID)) {
+                    let _tr_serial = currentRow.next('tr.product-serial[product="' + productID + '"]');
+                    let _number_serial = tr.find('td.item-product span.serial').text();
+                    if (_tr_serial.find('td.item-serial').length > 0) {
+                        let _quantity_detail = parseInt(currentRow.find('td.item-quantity input.input-quantity').val());
+                        let _new_stock = _quantity_detail + 1
+                        currentRow.find('td.item-quantity input.input-quantity').val(_new_stock.toFixed(2))
+                        _tr_serial.find('tbody#details-serial-' + productID).append(
+                            '<tr>' +
+                            '<td class="text-right align-middle item-serial">' +
+                            '<input type="text" class="form-control text-center serial" readonly value="' + _number_serial + '" aria-describedby="basic-addon1">' +
+                            '</td>' +
+                            '</tr>'
+                        );
+                        stock.text(current_stock - _new_stock)
+
+                        let _new_quantity = Number(_new_stock)
+                        let _price = Number(currentRow.find('td.item-price input.input-price').val());
+                        let _new_detail_total = _new_quantity * _price
+                        currentRow.find('td.item-total input.input-total-detail').val(_new_detail_total.toFixed(2));
+                        calculateTotal();
+
+                        td_prices.addClass('d-none')
+                    } else {
+                        serials = '<tr>' +
+                            '<td class="text-right align-middle item-serial">' +
+                            '<input type="text" class="form-control text-center serial" readonly value="' + _number_serial + '" aria-describedby="basic-addon1">' +
+                            '</td>' +
+                            '</tr>';
+                        _tr_serial.append(
+                            '<td class="text-right align-middle" colspan="1"></td>' +
+                            '<td class="text-right align-middle serial-column">' +
+                            '<div id="accordion">' +
+                            '<div class="card">' +
+                            '<div class="card-header p-0" id="heading-' + productID + '">' +
+                            '<h5 class="mb-0 text-center">' +
+                            '<button class="btn btn-link collapsed text-dark roboto-condensed-regular font-weight-bold p-0"' +
+                            'data-toggle="collapse" style="font-size: 11px"' +
+                            'data-target="#collapse-' + productID + '" aria-expanded="false" aria-controls="collapse-' + productID + '">' +
+                            'Seriales<i class="fas fa-sort-down"></i>' +
+                            '</button>' +
+                            '</h5>' +
+                            '</div>' +
+                            '<div id="collapse-' + productID + '" class="collapse" aria-labelledby="heading-' + productID + '" data-parent="#accordion">' +
+                            '<div class="card-body p-0">' +
+                            '<table class="table table-sm align-content-center table-bordered mb-0">' +
+                            '<tbody id="details-serial-' + productID + '"">' +
+                            serials +
+                            '</tbody>' +
+                            '</table>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</td>' +
+                            '</tr>'
+                        );
+                    }
+                    $('#collapse-' + productID).collapse('show');
+                }
+            });
+        }
+
+    });
+
 </script>

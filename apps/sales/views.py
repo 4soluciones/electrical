@@ -1024,11 +1024,8 @@ def get_correlative_order(_subsidiary=None, _type=None):
 
 
 def create_order_detail(request):
-    id_sales = 0
     type_doc = ''
-    new_detail_order_obj = None
     product_obj = None
-    date_cash = None
     order_sale_obj = None
     if request.method == 'GET':
         sale_request = request.GET.get('sales', '')
@@ -1037,14 +1034,11 @@ def create_order_detail(request):
         cash_finality = None
         has_quotation_order = ''
         issue_date = str(data_sale["issueDate"])
-        # _date = datetime.now()
         _date = utc_to_local(datetime.now())
         if type_payment == 'E':
             cash_finality = data_sale["cash"]
-            date_cash = data_sale["date_cash"]
         elif type_payment == 'D':
             cash_finality = data_sale["cash_deposit"]
-            date_cash = _date
         cod_operation = str(data_sale["cod_operation"])
 
         client_address = str(data_sale["Address"])
@@ -1090,15 +1084,13 @@ def create_order_detail(request):
 
         msg_sunat = ''
         sunat_pdf = ''
-        is_demo = bool(int(data_sale["Demo"]))
-        value_is_demo = 'D'
 
-        validity_date = data_sale["validity_date"]
-        date_completion = data_sale["date_completion"]
-        place_delivery = data_sale["place_delivery"]
-        type_quotation = data_sale["type_quotation"]
-        type_name_quotation = data_sale["name_type_quotation"]
-        observation = data_sale["observation"]
+        # validity_date = data_sale["validity_date"]
+        # date_completion = data_sale["date_completion"]
+        # place_delivery = data_sale["place_delivery"]
+        # type_quotation = data_sale["type_quotation"]
+        # type_name_quotation = data_sale["name_type_quotation"]
+        # observation = data_sale["observation"]
         condition_days = data_sale["condition_days"]
 
         if order_type == 'T' and order_sale_quotation is None:
@@ -1119,12 +1111,12 @@ def create_order_detail(request):
             'create_at': _date,
             'correlative_sale': get_correlative_order(subsidiary_obj, order_type),
             'subsidiary': subsidiary_obj,
-            'validity_date': validity_date,
-            'date_completion': date_completion,
-            'place_delivery': place_delivery,
-            'type_quotation': type_quotation,
-            'type_name_quotation': type_name_quotation,
-            'observation': observation,
+            # 'validity_date': validity_date,
+            # 'date_completion': date_completion,
+            # 'place_delivery': place_delivery,
+            # 'type_quotation': type_quotation,
+            # 'type_name_quotation': type_name_quotation,
+            # 'observation': observation,
             'way_to_pay_type': type_payment,
             'has_quotation_order': has_quotation_order,
             'order_sale_quotation': order_sale_quotation_obj,
@@ -1133,14 +1125,14 @@ def create_order_detail(request):
         }
         order_sale_obj = Order.objects.create(**new_order_sale)
         order_sale_obj.save()
-        id_sales = order_sale_obj.id
 
         if order_sale_quotation_obj is not None:
             order_sale_quotation_obj.order_sale_quotation = order_sale_obj
             order_sale_quotation_obj.save()
 
+        order_detail_obj = None
+
         type_doc = order_sale_obj.type
-        new_detail_order = None
         for detail in data_sale['Details']:
             quantity = decimal.Decimal(detail['Quantity'])
             price = decimal.Decimal(detail['Price'])
@@ -1151,34 +1143,39 @@ def create_order_detail(request):
             unit_obj = Unit.objects.get(id=unit_id)
             commentary = str(detail['_commentary'])
 
-            new_detail_order = {
-                'order': order_sale_obj,
-                'product': product_obj,
-                'quantity_sold': quantity,
-                'price_unit': price,
-                'unit': unit_obj,
-                'commentary': commentary,
-                'status': 'V'
-            }
-            new_detail_order_obj = OrderDetail.objects.create(**new_detail_order)
-            new_detail_order_obj.save()
+            order_detail_obj = OrderDetail(
+                order=order_sale_obj,
+                product=product_obj,
+                quantity_sold=quantity,
+                price_unit=price,
+                unit=unit_obj,
+                commentary=commentary,
+                status='V'
+            )
+            order_detail_obj.save()
+
             if order_type == 'V' and unit_obj.name != 'ZZ':
+                if detail['Serials'] != '':
+                    for serial in detail['Serials']:
+                        product_serial_obj = ProductSerial.objects.get(serial_number=serial['Serial'])
+                        product_serial_obj.order_detail = order_detail_obj
+                        product_serial_obj.status = 'V'
+                        product_serial_obj.save()
+
                 store_product_id = int(detail['Store'])
                 product_store_obj = ProductStore.objects.get(id=store_product_id)
                 quantity_minimum_unit = calculate_minimum_unit(quantity, unit_obj, product_obj)
-                kardex_ouput(product_store_obj.id, quantity_minimum_unit,
-                             order_detail_obj=new_detail_order_obj)
+                kardex_ouput(product_store_obj.id, quantity_minimum_unit, order_detail_obj=order_detail_obj)
 
         if order_type == 'V':
             if type_payment != 'C' and _type != 'E':
-
                 new_loan_payments = {
                     'quantity': 0,
                     'price': sale_total,
                     'create_at': _date,
                     'type': 'V',
                     'operation_date': _date,
-                    'order_detail': new_detail_order_obj,
+                    'order_detail': order_detail_obj,
                     'product': product_obj,
                 }
                 new_loan_payment_obj = LoanPayment.objects.create(**new_loan_payments)
@@ -1233,7 +1230,6 @@ def create_order_detail(request):
                                                    n_receipt=r.get('numero'),
                                                    status='E',
                                                    created_at=order_sale_obj.create_at,
-                                                   is_demo=value_is_demo
                                                    )
                         order_bill_obj.save()
                         order_sale_obj.voucher_type = _bill_type
@@ -1245,7 +1241,7 @@ def create_order_detail(request):
                                 'create_at': _date,
                                 'type': 'V',
                                 'operation_date': _date,
-                                'order_detail': new_detail_order_obj,
+                                'order_detail': order_detail_obj,
                                 'product': product_obj,
                             }
                             new_loan_payment_obj = LoanPayment.objects.create(**new_loan_payments)
@@ -1307,7 +1303,6 @@ def create_order_detail(request):
                                                    n_receipt=r.get('numero'),
                                                    status='E',
                                                    created_at=order_sale_obj.create_at,
-                                                   is_demo=value_is_demo
                                                    )
                         order_bill_obj.save()
                         order_sale_obj.voucher_type = _bill_type
@@ -1319,7 +1314,7 @@ def create_order_detail(request):
                                 'create_at': _date,
                                 'type': 'V',
                                 'operation_date': _date,
-                                'order_detail': new_detail_order_obj,
+                                'order_detail': order_detail_obj,
                                 'product': product_obj,
                             }
                             new_loan_payment_obj = LoanPayment.objects.create(**new_loan_payments)
@@ -1374,7 +1369,7 @@ def create_order_detail(request):
     return JsonResponse({
         'id_sales': order_sale_obj.id,
         'type_doc': type_doc,
-        'message': 'VENTA REALIZADA',
+        'message': 'Venta Generada Correctamente',
     }, status=HTTPStatus.OK)
 
 
@@ -4220,20 +4215,14 @@ def get_product_sales_grid_new(request):
         user_id = request.user.id
         user_obj = User.objects.get(pk=int(user_id))
         subsidiary_obj = get_subsidiary_by_user(user_obj)
-        # sales_store = SubsidiaryStore.objects.filter(
-        #     subsidiary=subsidiary_obj, category='V').first()
-        last_kardex = Kardex.objects.filter(product_store=OuterRef('id')).order_by('-id')[:1]
         product_set = None
-
         value = request.GET.get('value', '')
-        barcode = request.GET.get('barcode', '')
+        type_search = request.GET.get('type', '')
 
-        if value != '' and barcode == '':
+        if type_search == 'P':
             array_value = value.split()
             product_query = Product.objects
             full_query = None
-
-            # product_brand_set = ProductBrand.objects.filter(name__icontains=value.upper())
 
             for i in range(0, len(array_value)):
                 q = Q(name__icontains=array_value[i]) | Q(product_brand__name__icontains=array_value[i])
@@ -4246,10 +4235,8 @@ def get_product_sales_grid_new(request):
                 'product_family', 'product_brand').prefetch_related(
                 Prefetch(
                     'productstore_set',
-                    queryset=ProductStore.objects.select_related('subsidiary_store__subsidiary').exclude(
-                        subsidiary_store__subsidiary=3)
-                        .annotate(
-                        last_remaining_quantity=Subquery(last_kardex.values('remaining_quantity'))
+                    queryset=ProductStore.objects.select_related('subsidiary_store__subsidiary').prefetch_related(
+                        Prefetch('productserial_set')
                     )
                 ),
                 Prefetch(
@@ -4257,15 +4244,13 @@ def get_product_sales_grid_new(request):
                 ),
             ).order_by('id')
 
-        if value == '' and barcode != '':
-            product_set = Product.objects.filter(barcode=barcode, is_enabled=True).select_related(
+        elif type_search == 'B':
+            product_set = Product.objects.filter(barcode=value, is_enabled=True).select_related(
                 'product_family', 'product_brand').prefetch_related(
                 Prefetch(
                     'productstore_set',
-                    queryset=ProductStore.objects.select_related('subsidiary_store__subsidiary').exclude(
-                        subsidiary_store__subsidiary=3)
-                        .annotate(
-                        last_remaining_quantity=Subquery(last_kardex.values('remaining_quantity'))
+                    queryset=ProductStore.objects.select_related('subsidiary_store__subsidiary').prefetch_related(
+                        Prefetch('productserial_set')
                     )
                 ),
                 Prefetch(
@@ -4273,14 +4258,66 @@ def get_product_sales_grid_new(request):
                 ),
             ).order_by('id')
 
+        elif type_search == 'S':
+            product_set = Product.objects.filter(is_enabled=True, productstore__productserial__status='C',
+                                                 productstore__productserial__serial_number=value).select_related(
+                'product_family', 'product_brand'
+            ).prefetch_related(
+                Prefetch(
+                    'productstore_set',
+                    queryset=ProductStore.objects.select_related('subsidiary_store__subsidiary').prefetch_related(
+                        Prefetch(
+                            'productserial_set',
+                            queryset=ProductSerial.objects.filter(serial_number=value)
+                        )
+                    )
+                ),
+                Prefetch(
+                    'productdetail_set', queryset=ProductDetail.objects.select_related('unit')
+                ),
+            ).order_by('id')
+            # product_set = ProductSerial.objects.filter(serial_number=value, status='C',
+            #                                            product_store__product__is_enabled=True).select_related(
+            #     'product_store', 'product_store__product').order_by('id')
+
+        # print(get_products_serial_dict(product_set))
         t = loader.get_template('sales/order_sales_product_grid.html')
         c = ({
             'subsidiary': subsidiary_obj,
-            'product_dic': product_set
+            'product_dict': product_set,
+            'type_search': type_search
         })
         return JsonResponse({
             'grid': t.render(c, request),
+            'product_set': get_products_serial_dict(product_set),
         })
+
+
+def get_products_serial_dict(product_set):
+    product_serial_dict = []
+    if product_set:
+        for p in product_set:
+            product_item = {
+                'id': p.id,
+                'name': p.name,
+                'product_store': []
+            }
+            for ps in p.productstore_set.all():
+                item_store = {
+                    'id': ps.id,
+                    'stock': ps.stock,
+                    'serial': []
+                }
+                for s in ps.productserial_set.filter(status='C'):
+                    item_serial = {
+                        'id': s.id,
+                        'status': s.status,
+                        'serial': s.serial_number
+                    }
+                    item_store.get('serial').append(item_serial)
+                product_item.get('product_store').append(item_store)
+            product_serial_dict.append(product_item)
+    return product_serial_dict
 
 
 def get_product_sales_grid(request):
@@ -4341,12 +4378,6 @@ def get_product_sales_grid(request):
                 'two',
                 'three',
             )
-
-            # @property
-            # def get_total(self):
-            #     return self.from_a + self.from_b
-            #
-            # Revenue.objects.filter(from_a__gt=10).values('from_a', 'from_b', 'get_total')
 
             product_item = {
                 'id': p['id'],
@@ -6426,3 +6457,28 @@ def calculate_square_quantity(request):
             'message': 'Actualizado correctamente',
             'form': t.render(c),
         })
+
+
+def modal_serial(request):
+    if request.method == 'GET':
+        ps_id = request.GET.get('ps', '')
+        product_store_obj = ProductStore.objects.get(id=int(ps_id))
+        product_serial_set = ProductSerial.objects.filter(product_store__id=int(ps_id), status='C')
+        if product_serial_set.exists():
+            product_obj = product_store_obj.product
+            tpl = loader.get_template('sales/modal_serial.html')
+            context = ({
+                'product_serial': product_serial_set,
+                'product_obj': product_obj,
+                'product_store_obj': product_store_obj
+            })
+            return JsonResponse({
+                'success': True,
+                'form': tpl.render(context, request),
+            }, status=HTTPStatus.OK)
+
+        else:
+            return JsonResponse({
+                'success': False,
+                'message': 'El Producto no cuenta con Stock en Series. Revisar el Producto'
+            }, status=HTTPStatus.OK)

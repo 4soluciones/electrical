@@ -102,7 +102,7 @@ class SubsidiaryStore(models.Model):
 
 
 class Product(models.Model):
-    TYPE_CHOICES = (('P', 'PRODUCTO'), ('S', 'SERVICE'))
+    TYPE_CHOICES = (('P', 'PRODUCTO'), ('S', 'SERVICIO'))
     id = models.AutoField(primary_key=True)
     name = models.CharField('Nombre', max_length=150)
     name_search = models.CharField('Nombre Buscador', max_length=500, null=True, blank=True)
@@ -201,16 +201,23 @@ class ProductStore(models.Model):
     def get_stock_with_dot(self):
         return str(self.stock).replace(',', '.')
 
-    def conversion_mml_g_stock(self):
-        paint_converter = ProductStore.objects.filter(product__product_family__id=4)
-        if paint_converter.count() > 0:
-            response = float(self.stock) / float(3785.41)
-        return response
-
     class Meta:
         unique_together = ('product', 'subsidiary_store',)
         verbose_name = 'Almacen de producto (Lote)'
         verbose_name_plural = 'Almacenes de producto (Lotes)'
+
+
+class ProductSerial(models.Model):
+    STATUS_CHOICES = (('C', 'COMPRADO'), ('V', 'VENDIDO'), ('A', 'ANULADO'), ('P', 'PENDIENTE'))
+    id = models.AutoField(primary_key=True)
+    status = models.CharField('Estado', max_length=1, choices=STATUS_CHOICES, default='C')
+    product_store = models.ForeignKey('ProductStore', on_delete=models.CASCADE, null=True, blank=True)
+    serial_number = models.CharField('Numero de Serie', max_length=100, null=True, blank=True)
+    purchase_detail = models.ForeignKey('buys.PurchaseDetail', on_delete=models.CASCADE, null=True, blank=True)
+    order_detail = models.ForeignKey('sales.OrderDetail', on_delete=models.CASCADE, null=True, blank=True)
+
+    def __str__(self):
+        return str(self.id)
 
 
 class Supplier(models.Model):

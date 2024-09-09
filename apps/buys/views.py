@@ -13,12 +13,13 @@ import json
 import decimal
 from datetime import datetime
 from ..sales.models import Product, Unit, Supplier, SubsidiaryStore, \
-    ProductStore, ProductDetail, Kardex, ProductBrand, MoneyChange, TransactionPayment
+    ProductStore, ProductDetail, Kardex, ProductBrand, MoneyChange, TransactionPayment, ProductSerial
 from django.core import serializers
 from django.db.models import Min, Sum, Max, Q, Prefetch, Subquery, OuterRef, Value
 
 from ..sales.views_SUNAT import query_api_amigo, query_api_facturacioncloud, query_api_money, query_apis_net_money, \
     query_apis_net_dni_ruc
+from django.db import transaction, IntegrityError
 
 
 class Home(TemplateView):
@@ -140,37 +141,40 @@ def save_purchase(request):
             dt4 = decimal.Decimal(detail['Dto4'])
 
             total_detail = decimal.Decimal(detail['Total'])
-            checked_kardex = bool(int(detail["Check_kardex"]))
+            # checked_kardex = bool(int(detail["Check_kardex"]))
 
-            new_purchase_detail = {
-                'purchase': purchase_obj,
-                'product': product_obj,
-                'quantity': quantity,
-                'unit': unit_obj,
-                'price_unit': price,
-                'price_unit_discount': price_unit_discount,
-                'discount_one': dt1,
-                'discount_two': dt2,
-                'discount_three': dt3,
-                'discount_four': dt4,
-                'total_detail': total_detail,
-                'check_kardex': checked_kardex,
-            }
-            new_purchase_detail_obj = PurchaseDetail.objects.create(**new_purchase_detail)
-            new_purchase_detail_obj.save()
+            purchase_detail_obj = PurchaseDetail(
+                purchase=purchase_obj,
+                product=product_obj,
+                quantity=quantity,
+                unit=unit_obj,
+                price_unit=price,
+                price_unit_discount=price_unit_discount,
+                discount_one=dt1,
+                discount_two=dt2,
+                discount_three=dt3,
+                discount_four=dt4,
+                total_detail=total_detail,
+            )
+            purchase_detail_obj.save()
+
+            for serial in detail['Serials']:
+                product_serial_obj = ProductSerial(
+                    serial_number=serial['Serial'],
+                    purchase_detail=purchase_detail_obj,
+                    status='P'
+                )
+                product_serial_obj.save()
 
         return JsonResponse({
-            'message': 'COMPRA REGISTRADA CORRECTAMENTE.',
-
+            'message': 'Compra Registrada Correctamente',
         }, status=HTTPStatus.OK)
 
 
-# guardar detalle de compras en almacenes
 @csrf_exempt
 def save_detail_purchase_store(request):
     if request.method == 'GET':
         purchase_request = request.GET.get('details_purchase', '')
-        freight = 0
         data_purchase = json.loads(purchase_request)
 
         user_id = request.user.id
@@ -184,18 +188,11 @@ def save_detail_purchase_store(request):
         if data_purchase["Freight"] is not None:
             freight = decimal.Decimal(data_purchase["Freight"])
 
-        # CONSULTA SI LA COMPRA YA ESTA EN ALMACEN Y ROMPE LA SECUENCIA
         if purchase_obj.status == 'A':
             data = {'error': 'LOS PRODUCTOS YA ESTAN ASIGNADOS A SU ALMACEN.'}
             response = JsonResponse(data)
             response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
             return response
-
-        total_quantity = purchase_obj.total_quantity_details()
-
-        # user_id = request.user.id
-        # user_obj = User.objects.get(id=int(user_id))
-        # subsidiary_obj = get_subsidiary_by_user(user_obj)
 
         try:
             subsidiary_store_obj = SubsidiaryStore.objects.get(id=subsidiary_store_id)
@@ -205,77 +202,96 @@ def save_detail_purchase_store(request):
             response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
             return response
 
-        for detail in data_purchase['Details']:
-            price_unit_with_discount_plus_freight = 0
-            price_unit_igv_money_change = 0
-            price_unit_igv_money_change_plus_freight = 0
-            price_unit_real = 0
+        try:
+            with transaction.atomic():
+                for detail in data_purchase['Details']:
+                    price_unit_with_discount_plus_freight = 0
+                    price_unit_igv_money_change = 0
+                    price_unit_igv_money_change_plus_freight = 0
+                    price_unit_real = 0
 
-            quantity = decimal.Decimal((detail['Quantity']).replace(",", "."))
-            price = decimal.Decimal((detail['Price']).replace(",", "."))
-            price_unit_with_discount = decimal.Decimal((detail['PriceUnitDiscount']).replace(",", "."))
+                    quantity = decimal.Decimal((detail['Quantity']).replace(",", "."))
+                    price = decimal.Decimal((detail['Price']).replace(",", "."))
+                    price_unit_with_discount = decimal.Decimal((detail['PriceUnitDiscount']).replace(",", "."))
 
-            if detail['PriceUnitDiscountPlusFreight'] is not None:
-                price_unit_with_discount_plus_freight = decimal.Decimal(detail['PriceUnitDiscountPlusFreight'])
+                    if detail['PriceUnitDiscountPlusFreight'] is not None:
+                        price_unit_with_discount_plus_freight = decimal.Decimal(detail['PriceUnitDiscountPlusFreight'])
 
-            if detail['PriceUnitIgvMoneyChange'] is not None:
-                price_unit_igv_money_change = decimal.Decimal(detail['PriceUnitIgvMoneyChange'])
+                    if detail['PriceUnitIgvMoneyChange'] is not None:
+                        price_unit_igv_money_change = decimal.Decimal(detail['PriceUnitIgvMoneyChange'])
 
-            if detail['PriceUnitIgvMoneyChangePlusFreight'] is not None:
-                price_unit_igv_money_change_plus_freight = decimal.Decimal(detail['PriceUnitIgvMoneyChangePlusFreight'])
+                    if detail['PriceUnitIgvMoneyChangePlusFreight'] is not None:
+                        price_unit_igv_money_change_plus_freight = decimal.Decimal(
+                            detail['PriceUnitIgvMoneyChangePlusFreight'])
 
-            # recuperamos del producto
-            product_id = int(detail['Product'])
-            product_obj = Product.objects.get(id=product_id)
+                    product_id = int(detail['Product'])
+                    product_obj = Product.objects.get(id=product_id)
 
-            # recuperamos la unidad
-            unit_id = int(detail['Unit'])
-            unit_obj = Unit.objects.get(id=unit_id)
+                    unit_id = int(detail['Unit'])
+                    unit_obj = Unit.objects.get(id=unit_id)
 
-            checked = bool(int(detail["Check"]))
-            product_detail_obj = ProductDetail.objects.get(product__id=product_id, unit=unit_obj)
+                    checked = bool(int(detail["Check"]))
+                    product_detail_obj = ProductDetail.objects.get(product__id=product_id, unit=unit_obj)
 
-            if check_dollar:
-                price_unit_real = price_unit_igv_money_change_plus_freight
-                product_detail_obj.price_purchase_dollar = price_unit_with_discount
-            elif check_soles:
-                price_unit_real = price_unit_with_discount_plus_freight
+                    if check_dollar:
+                        price_unit_real = price_unit_igv_money_change_plus_freight
+                        product_detail_obj.price_purchase_dollar = price_unit_with_discount
+                    elif check_soles:
+                        price_unit_real = price_unit_with_discount_plus_freight
 
-            if checked:
-                product_detail_obj.price_purchase = decimal.Decimal(price_unit_real)
-                product_detail_obj.user = user_obj
-                product_detail_obj.save()
+                    if checked:
+                        product_detail_obj.price_purchase = decimal.Decimal(price_unit_real)
+                        product_detail_obj.user = user_obj
+                        product_detail_obj.save()
 
-            # store_id = int(detail['Store'])
-            # store_obj = SubsidiaryStore.objects.get(id=store_id)
+                    try:
+                        product_store_obj = ProductStore.objects.get(product=product_obj,
+                                                                     subsidiary_store=subsidiary_store_obj)
+                    except ProductStore.DoesNotExist:
+                        product_store_obj = None
+                    unit_min_detail_product = ProductDetail.objects.get(product=product_obj,
+                                                                        unit=unit_obj).quantity_minimum
 
-            try:
-                product_store_obj = ProductStore.objects.get(product=product_obj, subsidiary_store=subsidiary_store_obj)
-            except ProductStore.DoesNotExist:
-                product_store_obj = None
-            unit_min_detail_product = ProductDetail.objects.get(product=product_obj, unit=unit_obj).quantity_minimum
+                    purchase_detail = int(detail['PurchaseDetail'])
+                    purchase_detail_obj = PurchaseDetail.objects.get(id=purchase_detail)
 
-            purchase_detail = int(detail['PurchaseDetail'])
-            purchase_detail_obj = PurchaseDetail.objects.get(id=purchase_detail)
+                    if product_store_obj is None:
 
-            if product_store_obj is None:
-                new_product_store_obj = ProductStore(
-                    product=product_obj,
-                    subsidiary_store=subsidiary_store_obj,
-                    stock=unit_min_detail_product * quantity
-                )
-                new_product_store_obj.save()
-                kardex_initial(new_product_store_obj, unit_min_detail_product * quantity, price_unit_real,
-                               purchase_detail_obj=purchase_detail_obj)
-            else:
-                kardex_input(product_store_obj.id, unit_min_detail_product * quantity, price_unit_real,
-                             purchase_detail_obj=purchase_detail_obj)
+                        new_product_store_obj = ProductStore(
+                            product=product_obj,
+                            subsidiary_store=subsidiary_store_obj,
+                            stock=unit_min_detail_product * quantity
+                        )
+                        new_product_store_obj.save()
+
+                        product_serial_set = ProductSerial.objects.filter(purchase_detail=purchase_detail_obj)
+                        if product_serial_set.exists():
+                            for s in product_serial_set:
+                                s.product_store = new_product_store_obj
+                                s.status = 'C'
+                                s.save()
+                        kardex_initial(new_product_store_obj, unit_min_detail_product * quantity, price_unit_real,
+                                       purchase_detail_obj=purchase_detail_obj)
+                    else:
+                        product_serial_set = ProductSerial.objects.filter(purchase_detail=purchase_detail_obj)
+                        if product_serial_set.exists():
+                            for s in product_serial_set:
+                                s.product_store = product_store_obj
+                                s.status = 'C'
+                                s.save()
+                        kardex_input(product_store_obj.id, unit_min_detail_product * quantity, price_unit_real,
+                                     purchase_detail_obj=purchase_detail_obj)
+
+        except IntegrityError:
+            data = {'error': 'HUBO UN ERROR AL ASIGNAR LOS PRODUCTOS AL ALMACÉN. REVISAR LOS PRODUCTOS O CONTACTAR CON SISTEMAS.'}
+            response = JsonResponse(data)
+            response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+            return response
 
         purchase_obj.status = 'A'
         purchase_obj.save()
         return JsonResponse({
-            'message': 'PRODUCTO(S) ALMACENADO',
-
+            'message': 'PRODUCTOS ASIGNADOS AL ALMACEN ' + str(subsidiary_store_obj.name),
         }, status=HTTPStatus.OK)
 
 
@@ -448,8 +464,6 @@ def get_detail_purchase_store(request):
 
         for p in purchase_set:
 
-            purchase_detail = p.purchasedetail_set.all()
-
             purchase = {
                 'id': p.id,
                 'date': p.purchase_date,
@@ -473,7 +487,7 @@ def get_detail_purchase_store(request):
             }
             freight_calculate = float(p.total_freight / p.total_quantity_details())
 
-            for d in purchase_detail:
+            for d in p.purchasedetail_set.all():
 
                 if p.check_igv:
                     price_unit_real = round(float(d.price_unit_discount), 2)
@@ -505,7 +519,16 @@ def get_detail_purchase_store(request):
                     'price_unit_discount_plus_freight': round(price_unit_real + freight_calculate, 2),
                     'price_unit_discount_with_igv_money_change': price_unit_discount_with_igv_money_change,
                     'price_unit_discount_with_igv_money_change_freight': price_unit_discount_with_igv_money_change_freight,
+                    'serials': []
                 }
+                for s in d.productserial_set.all().order_by('id'):
+                    serials = {
+                        'id': s.id,
+                        'status': s.status,
+                        'serial': s.serial_number,
+                    }
+                    details.get('serials').append(serials)
+
                 purchase.get('purchase_detail_set').append(details)
 
             dictionary.append(purchase)
@@ -1911,11 +1934,11 @@ def save_update_purchase(request):
         check_igv = bool(int(data_purchase["Check_Igv"]))
         check_dollar = bool(int(data_purchase["Check_Dollar"]))
 
-        document_freight = str(data_purchase["Freight"][0]["DocumentFreight"])
-        serial_freight = str(data_purchase["Freight"][0]["SerialFreight"])
-        number_freight = str(data_purchase["Freight"][0]["NumberFreight"])
-        date_freight = str(data_purchase["Freight"][0]["DateFreight"])
-        total_freight = decimal.Decimal(data_purchase["Freight"][0]["TotalFreight"])
+        # document_freight = str(data_purchase["Freight"][0]["DocumentFreight"])
+        # serial_freight = str(data_purchase["Freight"][0]["SerialFreight"])
+        # number_freight = str(data_purchase["Freight"][0]["NumberFreight"])
+        # date_freight = str(data_purchase["Freight"][0]["DateFreight"])
+        # total_freight = decimal.Decimal(data_purchase["Freight"][0]["TotalFreight"])
 
         supplier_obj = Supplier.objects.get(id=int(provider_id))
 
@@ -1939,12 +1962,12 @@ def save_update_purchase(request):
             purchase_obj.type_pay = type_pay
             purchase_obj.user = user_obj
             purchase_obj.subsidiary = subsidiary_obj
-            purchase_obj.document_freight = document_freight
-            purchase_obj.serial_freight = serial_freight
-            purchase_obj.document_freight = document_freight
-            purchase_obj.number_freight = number_freight
-            purchase_obj.date_freight = date_freight
-            purchase_obj.total_freight = total_freight
+            # purchase_obj.document_freight = document_freight
+            # purchase_obj.serial_freight = serial_freight
+            # purchase_obj.document_freight = document_freight
+            # purchase_obj.number_freight = number_freight
+            # purchase_obj.date_freight = date_freight
+            # purchase_obj.total_freight = total_freight
             purchase_obj.base_total_purchase = base_total
             purchase_obj.igv_total_purchase = igv_total
             purchase_obj.total_import = total_import
@@ -1952,12 +1975,32 @@ def save_update_purchase(request):
             purchase_obj.check_igv = check_igv
             purchase_obj.check_dollar = check_dollar
 
+            for du in data_purchase['Dues']:
+
+                if du['amountId'] != 'NaN':
+
+                    du_id = int(du['amountId'])
+                    purchase_due_obj = PurchaseDues.objects.get(id=du_id)
+                    amount_due = decimal.Decimal(du['amountDue'])
+
+                    purchase_due_obj.purchase = purchase_obj
+                    purchase_due_obj.due = amount_due
+                    purchase_due_obj.save()
+
+                else:
+                    amount_due = decimal.Decimal(du['amountDue'])
+
+                    purchase_due_obj = PurchaseDues(
+                        purchase=purchase_obj,
+                        due=amount_due
+                    )
+                    purchase_due_obj.save()
+
             for detail in data_purchase['Details']:
 
                 if detail['ProductDetail'] != 'NaN':
 
                     product_detail_id = int(detail['ProductDetail'])
-
                     purchase_detail_obj = PurchaseDetail.objects.get(id=product_detail_id)
 
                     product_id = int(detail['Product'])
@@ -1992,6 +2035,9 @@ def save_update_purchase(request):
                     purchase_detail_obj.check_kardex = checked_kardex
                     purchase_detail_obj.save()
 
+                    product_serial_to_delete = ProductSerial.objects.filter(purchase_detail=purchase_detail_obj)
+                    product_serial_to_delete.delete()
+
                 else:
                     product_id = int(detail['Product'])
                     product_obj = Product.objects.get(id=product_id)
@@ -2009,51 +2055,35 @@ def save_update_purchase(request):
                     dt4 = decimal.Decimal(detail['Dto4'])
 
                     total_detail = decimal.Decimal(detail['Total'])
-                    checked_kardex = bool(int(detail["Check_kardex"]))
+                    # checked_kardex = bool(int(detail["Check_kardex"]))
 
-                    new_purchase_detail = {
-                        'purchase': purchase_obj,
-                        'product': product_obj,
-                        'quantity': quantity,
-                        'unit': unit_obj,
-                        'price_unit': price,
-                        'price_unit_discount': price_unit_discount,
-                        'discount_one': dt1,
-                        'discount_two': dt2,
-                        'discount_three': dt3,
-                        'discount_four': dt4,
-                        'total_detail': total_detail,
-                        'check_kardex': checked_kardex,
-                    }
-                    new_purchase_detail_obj = PurchaseDetail.objects.create(**new_purchase_detail)
-                    new_purchase_detail_obj.save()
-
-            for du in data_purchase['Dues']:
-
-                if du['amountId'] != 'NaN':
-
-                    du_id = int(du['amountId'])
-                    purchase_due_obj = PurchaseDues.objects.get(id=du_id)
-                    amount_due = decimal.Decimal(du['amountDue'])
-
-                    purchase_due_obj.purchase = purchase_obj
-                    purchase_due_obj.due = amount_due
-                    purchase_due_obj.save()
-
-                else:
-                    amount_due = decimal.Decimal(du['amountDue'])
-
-                    purchase_due_obj = PurchaseDues(
+                    purchase_detail_obj = PurchaseDetail(
                         purchase=purchase_obj,
-                        due=amount_due
+                        product=product_obj,
+                        quantity=quantity,
+                        unit=unit_obj,
+                        price_unit=price,
+                        price_unit_discount=price_unit_discount,
+                        discount_one=dt1,
+                        discount_two=dt2,
+                        discount_three=dt3,
+                        discount_four=dt4,
+                        total_detail=total_detail,
                     )
-                    purchase_due_obj.save()
+                    purchase_detail_obj.save()
+
+                for serial in detail['Serials']:
+                    product_serial_obj = ProductSerial(
+                        serial_number=serial['Serial'],
+                        purchase_detail=purchase_detail_obj,
+                        status='P'
+                    )
+                    product_serial_obj.save()
 
             purchase_obj.save()
 
         return JsonResponse({
-            'message': 'COMPRA ACTUALIZADA CORRECTAMENTE.',
-
+            'message': 'Compra Actualizada',
         }, status=HTTPStatus.OK)
 
 
@@ -2103,7 +2133,8 @@ def get_product_by_code_bar(request):
                 price_sale = product_obj.productdetail_set.last().price_sale
                 price_purchase = product_obj.productdetail_set.last().price_purchase
 
-            product_store_set = ProductStore.objects.filter(product_id=product_obj.id, subsidiary_store=subsidiary_store_obj)
+            product_store_set = ProductStore.objects.filter(product_id=product_obj.id,
+                                                            subsidiary_store=subsidiary_store_obj)
             if product_store_set.exists():
                 product_store_obj = product_store_set.first()
                 stock = product_store_obj.stock
@@ -2127,10 +2158,3 @@ def get_product_by_code_bar(request):
             'message': 'NO EXISTE CÓDIGO DE BARRAS'
         })
     return JsonResponse({'message': 'Error de peticion.'}, status=HTTPStatus.BAD_REQUEST)
-
-
-
-
-
-
-

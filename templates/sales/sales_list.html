@@ -7,64 +7,6 @@
 
 {% block body %}
 
-    <style type="text/css">
-        /* scrollbar_vertical */
-        .mCSB_scrollTools {
-            background-color: #f3efef;
-        }
-
-        .mCSB_draggerRail {
-            background-color: #17b7ce !important;
-        }
-
-        .mCSB_dragger_bar {
-            background-color: #0d76e0 !important;
-        }
-
-        /* ---- isotope ---- */
-
-        /* .grid {
-          border: 1px solid #333;
-        } */
-
-        /* clear fix */
-        .grid:after {
-            content: '';
-            display: block;
-            clear: both;
-        }
-
-        .dollar {
-        {#display: inline-block;#} position: relative;
-        }
-
-        .dollar input {
-            padding-left: 6px;
-        }
-
-        .dollar:before {
-            position: absolute;
-            content: "S/.";
-            left: 4px;
-            top: 3px;
-        }
-
-        .dollar-table {
-        {#display: inline-block;#} position: relative;
-        }
-
-        .dollar-table input {
-            padding-left: 6px;
-        }
-
-        .dollar-table:before {
-            position: absolute;
-            content: "S/.";
-            left: 12px;
-            top: 10px;
-        }
-    </style>
-
     {% if error != "" %}
         <div class="alert alert-danger" role="alert">
             <h4 class="alert-heading">Inconcebible!</h4>
@@ -73,51 +15,21 @@
         </div>
     {% endif %}
 
-    {% if distribution %}
+    <input type="hidden" class="form-control form-control-sm type" id="id_order_sale_quotation" value="">
+    <input type="hidden" class="form-control form-control-sm type" id="id_order_sale_quotation_correlative" value="">
 
-        <input type="hidden" class="form-control form-control-sm distribution" id="id_distribution"
-               value="{{ distribution }}" readonly="true">
-        <input type="hidden" class="form-control form-control-sm type" id="type" value="R" readonly="true">
-
-    {% else %}
-
-        {% if electronic_invoice %}
-
-            <input type="hidden" class="form-control form-control-sm distribution" id="id_distribution" value="0"
-                   readonly="true">
-            <input type="hidden" class="form-control form-control-sm type" id="type" value="E" readonly="true">
-        {% else %}
-
-            <input type="hidden" class="form-control form-control-sm distribution" id="id_distribution" value="0"
-                   readonly="true">
-            <input type="hidden" class="form-control form-control-sm type" id="type" value="V" readonly="true">
-
-        {% endif %}
-    {% endif %}
-
-    <input type="hidden" class="form-control form-control-sm type" id="id_order_sale_quotation" value=""
-           readonly="true">
-    <input type="hidden" class="form-control form-control-sm type" id="id_order_sale_quotation_correlative" value=""
-           readonly="true">
-
-    <div class="card-group">
-        <div class="card col-sm-5 p-0">
-            <div class="col-sm-12 m-0 p-0 vh-100 row justify-content-center align-items-center">
-                <div id="product_list_sales">
-                    <strong>Atencion!</strong> Ingrese un texto para comenzar la búsqueda...
-                </div>
-                <div class="loader-container col-auto" id="loader-product" style="display: none">
-                    <div class="loader"></div>
-                    {#                    <div class="loader2"></div>#}
-                </div>
-                {#  {% include "sales/order_sales_product_grid.html" %}#}
-                {#                {% include "sales/sales_grid_tab1.html" %}#}
+    <div class="card-group m-2 bg-light" style="display: flex;">
+        <div class="card p-0" style="flex: 0 0 46%;">
+            <div id="product_list_sales" class="roboto-condensed-regular">
+                <strong class="m-0 p-0 vh-100 row justify-content-center align-items-center">Atencion! Ingrese un texto
+                    para comenzar la búsqueda...</strong>
+            </div>
+            <div class="loader-container col-auto" id="loader-product" style="display: none">
+                <div class="loader"></div>
             </div>
         </div>
 
-        <div class="card col-sm-7 p-0" id="tab-two">
-            {#            {% include "sales/sales_grid_tab2.html" %}#}
-            {#            {% include "sales/order_sales_product_grid.html" %}#}
+        <div class="card p-0" style="flex: 0 0 54%;" id="tab-two">
             {% include "sales/sales_grid_tab1.html" %}
         </div>
 
@@ -317,7 +229,9 @@
     </div>
     <!----------------------- Modal Client----------------------------->
 
-
+    <div class="modal fade" id="modal-serial" tabindex="-1" role="dialog"
+         aria-labelledby="ModalHelpTitle" data-backdrop="static" data-keyboard="false"
+         aria-hidden="true"></div>
 
     <div class="mr-3 ml-0" style="
             display: none;
@@ -330,24 +244,7 @@
             {#height: 46em;#}
             !important;bottom: 560px;
             padding-right: 65em;
-            padding-top: 2em;" id="loading-666">
-
-    </div>
-
-    {#    <div class="mr-3 ml-0" style="#}
-    {#            display: none;#}
-    {#            position: absolute;#}
-    {#            top: 57px;#}
-    {#            left: 956px;#}
-    {#            background: #e9ecef;#}
-    {#            opacity: 0.5;#}
-    {#            width: 100%;#}
-    {#height: 46em;#}
-    {#            !important;bottom: 560px;#}
-    {#            padding-right: 65em;#}
-    {#            padding-top: 2em;" id="loading-bill">#}
-    {##}
-    {#    </div>#}
+            padding-top: 2em;" id="loading-666"></div>
     <div class="mr-3 ml-0" style="
             display: none;
             position: absolute;
@@ -359,9 +256,7 @@
             {#height: 46em;#}
             {#!important;bottom: 560px;#}
             padding-right: 4em;
-            padding-top: -4em;" id="loading-bill">
-
-    </div>
+            padding-top: -4em;" id="loading-bill"></div>
 
     <style>
         div.dataTables_wrapper div#product-data-grid_filter {
@@ -376,37 +271,11 @@
     </style>
 {% endblock body %}
 
-
 {% block extrajs %}
 
     <script type="text/javascript">
         $('#sum-total').val('0.00');
-        {#$('#product-data-grid').DataTable({#}
-        {#    responsive: true,#}
-        {#    "pageLength": 100,#}
-        {#    "lengthMenu": [100, 250, 500, "All"],#}
-        {#    initComplete: function () {#}
-        {#        this.api().columns().every(function () {#}
-        {#            var column = this;#}
-        {#            $('#dataTables-example .head .head_hide').html('');#}
-        {##}
-        {#            var select = $('<select id="formfilter" class="filterdropdown"><option value="">' + $(column.header()).text() + '</option></select>')#}
-        {#                .appendTo($(column.header()).empty())#}
-        {#                .on('change', function () {#}
-        {#                    var val = $.fn.dataTable.util.escapeRegex(#}
-        {#                        $(this).val()#}
-        {#                    );#}
-        {#                    column#}
-        {#                        .search(val ? '^' + val + '$' : '', true, false)#}
-        {#                        .draw();#}
-        {#                });#}
-        {##}
-        {#            column.data().unique().sort().each(function (d, j) {#}
-        {#                select.append('<option value="' + d + '">' + d + '</option>')#}
-        {#            });#}
-        {#        });#}
-        {#    }#}
-        {# });#}
+
         setTimeout(() => {
             $(".quicksearch").focus();
         }, 500);
@@ -558,15 +427,10 @@
                 $('#id_client').focus();
                 return false;
             }
-            {#let pk = $(this).attr('pk');#}
-            {#sessionStorage.setItem("product_id", pk);#}
-
-            // Comprobar si hay filas en los detalles
             if (hasRowDetails()) {
                 // Comprobar si hay filas de un producto especifico
             }
             $('#add-modal').empty();
-            // Cargamos el modal tarifas del producto
             $.ajax({
                 url: '/sales/' + ruta + '/',
                 async: true,
@@ -583,13 +447,8 @@
                 }
             });
 
-        };
-        {#Sirve para convertir select en autocompletar#}
+        }
 
-        {#$('#id_serie').select2({#}
-        {#    theme: 'bootstrap4',#}
-        {# });#}
-        {#Selecciona un cliente del autocomplit #}
         $(document).on('change', '#document_type_sender', function () {
             let _val = $(this).val();
             if (_val === '01') {
@@ -616,12 +475,6 @@
                 $('#id_address').val('')
             }
         });
-
-        /*$(document).on('click', '#id_client_name', function (e){
-            {#console.log('si entro')#}
-            {#$('#id_client_name').trigger('change.select2');#}
-        });*/
-
 
         $(document).on('change', '#id_client_name', function (e) {
 
@@ -742,67 +595,16 @@
             return _response;
         }
 
-        // sales_grid_tab2 - btn Ver Precios
-        {#$(document).on('click', '.card-item-product', function () {#}
-        {#    if (($('#id_client option:selected').val() == '0') && ($('#id_client_name option:selected').val() == '0')) {#}
-        {#        toastr.warning('¡Elija un cliente porfavor!', 'Mensaje!');#}
-        {#        $('#id_client').focus();#}
-        {#        return false;#}
-        {#    }#}
-        {#    let _product_id = $(this).attr('pk');#}
-        {#    sessionStorage.setItem("product_id", _product_id);#}
-        {##}
-        {#    // Comprobar si hay filas en los detalles#}
-        {#    if (hasRowDetails()) {#}
-        {#        // Comprobar si hay filas de un producto especifico#}
-        {##}
-        {#    }#}
-        {#    $('#rates').empty();#}
-        {#    // Cargamos el modal tarifas del producto#}
-        {#    $.ajax({#}
-        {#        url: '/sales/get_rate_product/',#}
-        {#        async: true,#}
-        {#        dataType: 'json',#}
-        {#        type: 'GET',#}
-        {#        data: {'product': _product_id, 'distribution': $('#id_distribution').val()},#}
-        {#        success: function (response) {#}
-        {#            $('#rates').html(response.grid);#}
-        {#        },#}
-        {#        fail: function (response) {#}
-        {#            console.log("error");#}
-        {#        }#}
-        {#    });#}
-        {# });#}
-
-        // sales_grid_tab1 - sumar total de los detalles
         function calculateTotal() {
-
             var sum = 0;
-            $('#sales-details tr td.item-total').each(function () {
+            $('#sales-details tr.product td.item-total').each(function () {
                 let total_detail = Number($(this).find('input.input-total-detail').val());
                 {#console.log(total_detail)#}
                 sum = sum + total_detail;
             });
-
-
             $('#sum-total').val(sum.toFixed(2));
-
         }
 
-        // sales_grid_tab1 - eliminar un detalle segun id producto
-        function deleteItem($product, $unit) {
-            let quantity_delete = 0
-            let quantity_min = 0
-            let rows = $('#sales-details').find("tr[product=" + $product + "][pu=" + $unit + "]");
-            quantity_delete = parseFloat(rows.find('td.item-quantity input.input-quantity').val());
-            quantity_min = parseFloat(rows.find('td.item-unit').attr('unit_min'));
-            $('#sales-details').find("tr[product=" + $product + "][pu=" + $unit + "]").remove();
-            let _row = $('table#product-data-grid tbody tr[product=' + $product + ']');
-            let old_stock = parseFloat(_row.find('td.td-table-stock table.table-stock-headquarters tbody tr.my-subsidiary[store_="V"] td.item-stock').text());
-            _row.find('td.td-table-stock table.table-stock-headquarters tbody tr.my-subsidiary[store_="V"] td.item-stock').text((old_stock + (quantity_delete * quantity_min)).toFixed(2));
-            calculateTotal();
-            counterStrike();
-        }
 
         function add_client_advancement($product, $_unit, $value) {
 
@@ -846,23 +648,15 @@
             })
         }
 
-        // reasigna numero de fila a los detalles
         function counterStrike() {
             var index = 1;
-            $('#sales-details tr').each(function () {
+            $('#sales-details tr.product').each(function () {
                 $(this).attr('i', index);
                 $(this).children('td:first').text(index);
                 index++;
             });
 
         }
-
-        /*
-                $('#save-order').click(function () {
-
-                    createSales();
-
-                });*/
 
         function create_voucher($type_doc, $print) {
 
@@ -973,25 +767,25 @@
                 "Client": $('#id-client-sender').val(),
                 "Address": $('#id_address').val(),
                 "SaleTotal": $('#sum-total').val(),
-                "TransactionPaymentType": $('#transaction_payment_type').val(),
-                "Distribution": $('#id_distribution').val(),
+                //"TransactionPaymentType": $('#transaction_payment_type').val(),
+                //"Distribution": $('#id_distribution').val(),
                 "Type": $type_doc,
                 "order_type": 'V',
                 "Serie": $('#id_serie').val(),
                 "BillType": sessionStorage.BillType,
                 "issueDate": $('#issue_date').val(),
-                "Demo": ($('#demo').is(':checked')) ? 1 : 0,
+                //"Demo": ($('#demo').is(':checked')) ? 1 : 0,
                 "type_payment": $('#transaction_payment_type').val(),
                 "cash": $('#id_cash').val(),
                 "date_cash": $('#id_date').val(),
                 "cash_deposit": $('#id_cash_deposit').val(),
                 "cod_operation": $('#code-operation').val(),
-                "validity_date": $('#id_validity_date').val(),
-                "date_completion": $('#id_date_completion').val(),
-                "place_delivery": $('#id_place_delivery').val(),
-                "type_quotation": $('#id_type_quotation').val(),
-                "observation": $('#id_observation').val(),
-                "name_type_quotation": $('#id_name_type_quotation').val(),
+                //"validity_date": $('#id_validity_date').val(),
+                //"date_completion": $('#id_date_completion').val(),
+                //"place_delivery": $('#id_place_delivery').val(),
+                //"type_quotation": $('#id_type_quotation').val(),
+                //"observation": $('#id_observation').val(),
+                //"name_type_quotation": $('#id_name_type_quotation').val(),
                 "order_sale_quotation": Number($('#id_order_sale_quotation').val()),
                 "userID": $('#user_id').val(),
                 "condition_days": $('#condition_days').val()
@@ -999,7 +793,7 @@
 
             // Recorre cada detalle de producto (son 2 arrays) each -> recorre
 
-            $("#sales-details tr").each(function () {
+            $("#sales-details tr.product").each(function () {
                 let _quantity = $(this).find("td.item-quantity input.input-quantity").val();
                 if (_quantity === '' || _quantity <= 0) {
                     toastr.warning('Ingrese un valor valido para la cantidad');
@@ -1010,15 +804,23 @@
                     toastr.warning('Ingrese un valor valido para el precio');
                     return false
                 }
+                let productID = $(this).attr('product')
                 let detailObj = {
-                    "Product": $(this).attr('product'),
+                    "Product": productID,
                     "Unit": $(this).find("td.item-unit").attr('pu'),
                     "Quantity": parseFloat($(this).find("td.item-quantity input.input-quantity").val()).toFixed(2),
                     "Price": parseFloat($(this).find("td.item-price input.input-price").val()).toFixed(2),
                     "DetailTotal": parseFloat($(this).find("td.item-total input.input-total-detail").val()).toFixed(2),
                     "_commentary": $(this).find("td.item-product input.input-product-name").val(),
-                    "Store": $(this).attr("store_p")
+                    "Store": $(this).attr("store_p"),
+                    "Serials": []
                 };
+                $(this).next('tr.product-serial').find(`tbody#details-serial-${productID} tr`).each(function () {
+                    let serialObj = {
+                        "Serial": $(this).find('td.item-serial input.serial').val()
+                    }
+                    detailObj.Serials.push(serialObj);
+                });
                 sales.Details.push(detailObj);
             });
             $("#credit_details tr").each(function () {
@@ -1029,7 +831,6 @@
                 sales.credit.push(creditObj);
             });
 
-            {#$('#loading-bill').html(loader2).show();#}
             $("#save-order").slideUp("fast");
             $("#btn-invoice-ticket").slideUp("fast");
             $("#btn-bill-ticket").slideUp("fast");
@@ -1038,12 +839,7 @@
 
             $(".menu-sales").addClass('d-none');
 
-            {#console.log('$print', $print);#}
-            {#console.log('$type_doc', $type_doc);#}
-
-            {#console.log('type_doc', $type_doc)#}
-            {#console.log('print', $print)#}
-
+            console.log(sales)
             $.ajax({
                 url: '/sales/create_order_detail/',
                 async: true,
@@ -1065,16 +861,9 @@
                         if ($type_doc === 'T' && $print === 'T') {
                             window.open("/sales/print_ticket_order_sales/" + response.id_sales + "/" + '0' + "/", '_blank');
                         } else if ($type_doc === 'F' || $type_doc === 'B') {
-
                             if ($print === 'T') {
-                                {#console.log('if de print ticket electronico')#}
-                                {#console.log('type_doc', $type_doc)#}
-                                {#console.log('print', $print)#}
                                 window.open("/sales/print_ticket_order_sales/" + response.id_sales + "/" + '1' + "/", '_blank');
                             } else if ($print === 'A4') {
-                                {#console.log('if de print A4 electronico')#}
-                                {#console.log('type_doc', $type_doc)#}
-                                {#console.log('print', $print)#}
                                 window.location.href = "/sales/print_order_bill/" + response.id_sales + "/";
                             }
                         }
@@ -1282,113 +1071,16 @@
             _str = _str.replace(',', '.');
             $(this).text(_str);
         });
-        {#$('#add-all-details').click(function () {#}
-        {#$(document).on('click', '#add-all-details', function () {#}
-        {#    let _sum_detail_quantity = 0;#}
-        {#    let _sum_product_rate_quantity = 0;#}
-        {#    let _detail_quantity = 0;#}
-        {#    $("#sales-details tr[product=" + sessionStorage.product_id + "]").each(function () {#}
-        {#        _detail_quantity = parseFloat($(this).find('td.item-quantity').text());#}
-        {#        _sum_detail_quantity = _sum_detail_quantity + _detail_quantity;#}
-        {#    })#}
-        {##}
-        {#    $('table tbody#product-rates tr').each(function () {#}
-        {##}
-        {#        let cont_sequence = true;#}
-        {#        let row = 0;#}
-        {#        let _input_quantity = $(this).find("td input.quantity").val();#}
-        {#        let _unit = $(this).attr('unit_id');#}
-        {##}
-        {#        let _input_price = $(this).find("td input.price").val();#}
-        {##}
-        {#        if (_input_quantity !== '' && _input_price !== '') {#}
-        {#            let _quantity = parseFloat(_input_quantity);#}
-        {#            let _product = $(this).attr('product_id');#}
-        {#            let _unit = $(this).attr('unit_id');#}
-        {#            let _stock = parseFloat($('#store-rates').find("tr.selected-item td.current-stock").text());#}
-        {#            _sum_product_rate_quantity = _sum_product_rate_quantity + _quantity;#}
-        {#            {% if distribution is None and electronic_invoice is None %}#}
-        {#                if (_quantity > _stock || _sum_product_rate_quantity > _stock ||#}
-        {#                    (_sum_detail_quantity > 0 && _sum_detail_quantity + _sum_product_rate_quantity > _stock)) {#}
-        {#                    toastr.warning('Stock Insuficiente', '¡MENSAJE!');#}
-        {#                    $('.modal-rate').modal('hide');#}
-        {#                    return false;#}
-        {#                }#}
-        {#            {% endif %}#}
-        {#            if ($("#sales-details tr[product=" + _product + "][pu=" + _unit + "]").length) {#}
-        {#                let $msg = 'El producto con este tipo de unidad ya se encuentra en el registro.';#}
-        {#                toastr.warning($msg, '¡MENSAJE!');#}
-        {#                return false;#}
-        {#            }#}
-        {#if ($("#id-table-detail-order tr[product=" + _product + "][pu=" + _unit + "]").length) {#}
-        {#    let row = $("#id-table-detail-order tr[product=" + _product + "][pu=" + _unit + "]")#}
-        {#    if ((_product_store_stock - _quantity_search * _quantity_minimum) >= 0) {#}
-        {#        new_quantity = parseFloat(row.find('td.item-quantity').text()) + new_quantity;#}
-        {#        row.find('td.item-quantity').text(new_quantity.toFixed(2));#}
-        {#        _total = parseFloat(_price_sale) * parseFloat(new_quantity);#}
-        {#        row.find('td.item-total').text(_total.toFixed(2));#}
-        {#        _div_barcode.parents('div.card-product').find('input.product-stock').val(_product_store_stock - _quantity_search * _quantity_minimum);#}
-        {#        calculateTotal();#}
-        {#        val_ = true#}
-        {#    } else {#}
-        {#        toastr.warning('Cantidad insuficiente en stock', 'Mensaje');#}
-        {#    }#}
-        {# }#}
-        {#            addDetail($(this));#}
-        {#        }#}
-        {##}
-        {#    });#}
-        {#    $('#add-modal').empty();#}
-        {#    $('#add-modal').modal('hide');#}
-        {#    $(".quicksearch").val('');#}
-        {#    setTimeout(() => {#}
-        {#        $(".quicksearch").focus();#}
-        {#    }, 500);#}
-        {##}
-        {# });#}
 
-        {#function addDetail($tr) {#}
-        {##}
-        {#    let _unit_id = $tr.attr('unit_id');#}
-        {#    let _product_id = $tr.attr('product_id');#}
-        {#    let _product_name = $tr.attr('product_name');#}
-        {#    let _quantity = parseFloat($tr.find("td input.quantity").val());#}
-        {#    let _price = parseFloat($tr.find("td input.price").val());#}
-        {#    let _total = _quantity * _price;#}
-        {#    let _unit = $tr.find("td.unit-name").text();#}
-        {#    let _product_store = $('#store-rates').find("tr.selected-item").attr('ps');#}
-        {#    $('#sales-details').append(#}
-        {#        '<tr product="' + _product_id + '" store_p="' + _product_store + '" pu="' + _unit_id + '" class="text-uppercase small text-center">' +#}
-        {#        '<td class="align-middle">' + '</td>' +#}
-        {#        '<td class="align-middle">' + _product_name + '</td>' +#}
-        {#        '<td class="align-middle item-quantity">' + _quantity + '</td>' +#}
-        {#        '<td class="align-middle item-unit" pu="' + _unit_id + '">' + _unit + '</td>' +#}
-        {#        '<td class="align-middle item-price">' + _price.toFixed(2) + '</td>' +#}
-        {#        '<td class="align-middle item-total">' + _total.toFixed(2) + '</td>' +#}
-        {#        '<td>' + '<button type="button" onclick="deleteItem(' + _product_id + ',' + _unit_id + ')" class="btn btn-danger btn-sm">' +#}
-        {#        '<i class="fa fa-trash"></i></button>' + '</td>' +#}
-        {#        '</tr>'#}
-        {#    );#}
-        {#    calculateTotal();#}
-        {#    counterStrike();#}
-        {# }#}
 
         if ($("#type").length) {
             if ($("#type").val() == 'E') {
                 $("#save-order").hide()
             } else {
-                {#$(".quote").hide();#}
-                {#$(".invoice").hide();#}
-                {#$(".receipt").hide();#}
-                {#$(".series").hide()#}
-                {#$("#demo").hide()#}
             }
         }
 
         function printPdf($url) {
-            {#myWindow = window.open($url);#}
-            {#myWindow.close;  //optional, to close the new window as soon as it opens#}
-            //this ensures user doesn't have to close the pop-up manually
             let link = document.createElement('a');
             link.href = $url;
             link.download = 'file.pdf';
@@ -1465,63 +1157,235 @@
 
 
         $(document).on('click', 'table#product-data-grid tbody tr td table.table-prices tbody tr td.prices-list div button', async function () {
-            let value = $(this).attr('pk');
+
+            let tr = $(this).closest('tr');
+            let _tr_product = $(this).closest('tbody').closest('td').parent('tr');
+            let _type_search = _tr_product.attr('type_search');
+            let product_serial = _tr_product.find('td.td-table-stock table.table-stock-headquarters tbody tr').attr('product_serial');
+
             let price = parseFloat($(this).attr('ip'));
-            let tr = $(this).parent('div').parent('div').parent('td').parent('tr');
             let unit_id = tr.attr('unit');
             let name_unit = tr.attr('unitname');
             let product_id = tr.attr('product');
-            let product_brand = tr.attr('product_brand');
+
             let name_product = tr.attr('productname');
             let quantity_minim = parseFloat(tr.attr('quantity_minum'));
             let quantity = parseFloat(tr.find('td.quantity-sales-price input.quantity-select').val());
-            let stock = parseFloat(tr.parent('tbody').parents('table.table-prices').parent('td').parent('tr').find('td.td-table-stock table.table-stock-headquarters tbody tr.my-subsidiary[store_="V"] td.item-stock').text());
+            let stock = parseInt(tr.parent('tbody').closest('td').parent('tr').find('td.td-table-stock table.table-stock-headquarters tbody tr.my-subsidiary[store_="V"] td.item-stock').text());
+
             let store_id = tr.parent('tbody').parents('table.table-prices').parent('td').parent('tr').find('td.td-table-stock table.table-stock-headquarters tbody tr.my-subsidiary').attr('store_id');
+
+            let $serialElement = tr.closest('table').parent('td').parent('tr').find('td.item-product span.serial');
+            let serial = '';
+            if ($serialElement.length > 0) {
+                serial = $serialElement.text()
+            } else {
+                let product = product_dict.find(p => p.id === parseInt(product_id));
+                if (product) {
+                    let productStore = product.product_store.find(ps => ps.id === parseInt(store_id));
+                    if (productStore) {
+                        serial = productStore.serial
+                            .filter(ps => ps.status === 'P')
+                            .map(ps => ps.serial);
+                    }
+                }
+            }
+
+            let quantity_input = tr.find('td.quantity-sales-price input.quantity-select');
+
             if (isNaN(quantity)) {
-                toastr.warning('Ingrese la cantidad del producto');
-                tr.find('td.quantity-sales-price input.quantity-select').val('')
+                toastr.warning('INGRESE LA CANTIDAD DEL PRODUCTO O SELECCIONE SERIES');
+                quantity_input.val('')
                 return false
             }
             if (quantity === '' || quantity === 0) {
-                toastr.warning('Ingrese la cantidad del producto');
-                tr.find('td.quantity-sales-price input.quantity-select').val('')
+                toastr.warning('INGRESE LA CANTIDAD DEL PRODUCTO O SELECCIONE SERIES');
+                quantity_input.val('')
                 return false
             }
             if (quantity < 0) {
-                toastr.warning('La cantidad debe ser un valor positivo');
-                tr.find('td.quantity-sales-price input.quantity-select').val('')
+                toastr.warning('LA CANTIDAD DEBE SER UN VALOR POSITIVO');
+                quantity_input.val('')
                 return false
             }
-            if ($("#sales-details tr[product=" + product_id + "][pu=" + unit_id + "]").length) {
-                let $msg = 'El producto con este tipo de unidad ya se encuentra en el registro.';
-                toastr.warning($msg, 'Mensaje');
-                tr.find('td.quantity-sales-price input.quantity-select').val('')
-                return false;
-            }
 
-            /*if (quantity * quantity_minim <= stock) {
-                addOrderDetail(unit_id, product_id, quantity, price, name_unit, unescape(name_product), store_id, quantity_minim, product_brand);
-                tr.parent('tbody').parents('table.table-prices').parent('td').parent('tr').find('td.td-table-stock table.table-stock-headquarters tbody tr.my-subsidiary[store_="V"] td.item-stock').text((stock - quantity * quantity_minim).toFixed(2));
-            } else {
-                toastr.warning('Stock insuficiente en almacen');
-            }*/
-            let _flag_stock = true
-            if (name_unit !== 'ZZ') {
-                _flag_stock = await check_stock(quantity, product_id)
-            }
+            if (product_serial === 'false') {
+                if ($("#sales-details tr[product=" + product_id + "][pu=" + unit_id + "]").length) {
+                    let $msg = 'EL PRODUCTO CON ESTE TIPO DE UNIDAD YA SE ENCUENTRA EN EL REGISTRO.';
+                    toastr.warning($msg, 'Mensaje');
+                    quantity_input.val('')
+                    return false;
+                }
+                let _flag_stock = true
 
-            if (_flag_stock === true) {
-                addOrderDetail(unit_id, product_id, quantity, price, name_unit, unescape(name_product), store_id, quantity_minim, product_brand);
-                tr.parent('tbody').parents('table.table-prices').parent('td').parent('tr').find('td.td-table-stock table.table-stock-headquarters tbody tr.my-subsidiary[store_="V"] td.item-stock').text((stock - quantity * quantity_minim).toFixed(2));
-            } else {
-                toastr.warning('STOCK INSUFICIENTE EN ALMACEN');
-            }
+                if (name_unit !== 'ZZ') {
+                    _flag_stock = await check_stock(quantity, product_id)
+                }
+                if (_flag_stock === true) {
+                    addOrderDetail(unit_id, product_id, quantity, price, name_unit, unescape(name_product), store_id, quantity_minim, serial, product_serial);
+                    tr.parent('tbody').parents('table.table-prices').parent('td').parent('tr').find('td.td-table-stock table.table-stock-headquarters tbody tr.my-subsidiary[store_="V"] td.item-stock button.btn-stock').text(stock - quantity * quantity_minim);
+                } else {
+                    toastr.warning('STOCK INSUFICIENTE EN ALMACEN');
+                }
 
-            tr.find('td.quantity-sales-price input.quantity-select').val('');
+            } else if (product_serial === 'true') {
+                if ($("#sales-details tr[product=" + product_id + "][pu=" + unit_id + "]").length) {
+                    let $msg = 'EL PRODUCTO CON ESTE TIPO DE UNIDAD YA SE ENCUENTRA EN EL REGISTRO.';
+                    toastr.warning($msg, 'Mensaje');
+                    return false;
+                }
+                let td_prices = tr.find('td.prices-list');
+                addOrderDetailSerial(unit_id, product_id, quantity, price, name_unit, unescape(name_product), store_id, quantity_minim, serial, product_serial);
+                td_prices.find('div.row button').each(function () {
+                    $(this).attr('disabled', true);
+                });
+            }
+            //quantity_input.val('');
+
         });
 
+        function deleteItem($product, $unit, $product_serial, $product_store) {
+            let rows = $('#sales-details').find("tr[product=" + $product + "][pu=" + $unit + "]");
+            let _row = $('table#product-data-grid tbody tr[product=' + $product + ']');
+            let quantity_delete = parseInt(rows.find('td.item-quantity input.input-quantity').val());
+            let quantity_min = parseFloat(rows.find('td.item-unit').attr('unit_min'));
+            let old_stock = parseInt(_row.find('td.td-table-stock table.table-stock-headquarters tbody tr.my-subsidiary[store_="V"] td.item-stock').text());
+            let new_stock = old_stock + (quantity_delete * quantity_min)
+            let btn_stock = _row.find('td.td-table-stock table.table-stock-headquarters tbody tr.my-subsidiary[store_="V"] td.item-stock button.btn-stock');
+            if ($product_serial === false) {
+                btn_stock.text(new_stock);
+
+            } else if ($product_serial === true) {
+                let product = product_dict.find(p => p.id === parseInt($product));
+                let td_quantity = _row.find('td.item-prices table.table-prices tbody td.quantity-sales-price');
+                let td_prices = _row.find('td.item-prices table.table-prices tbody td.prices-list');
+
+                if (product) {
+                    let productStore = product.product_store.find(ps => ps.id === parseInt($product_store));
+                    if (productStore) {
+                        productStore.serial.forEach(serial => {
+                            serial.status = 'C';
+                        });
+                    }
+                    //let countStatusC = productStore.serial.filter(serial => serial.status === 'C').length;
+                    btn_stock.text(new_stock);
+                    //console.log(product_dict)
+                }
+                let _next_row = rows.next('tr.product-serial')
+                _next_row.remove()
+
+                td_prices.find('div.row button').each(function () {
+                    $(this).attr('disabled', false);
+                });
+                td_quantity.find('input.quantity-select').val('')
+
+            }
+            rows.remove();
+            calculateTotal();
+            counterStrike();
+        }
+
+        function addOrderDetail(a, b, c, d, e, f, g, h, serial, _product_serial) {
+
+            let _unit_id = a
+            let _product_id = b
+            let _quantity = parseFloat(c)
+            let _price = parseFloat(d)
+            let _total = _quantity * _price
+            let _unit = e
+            let _product_name = escapeHtml(f)
+            let _product_store = g
+            let _quantity_minim = parseFloat(h)
+            $('#sales-details').append(
+                '<tr detail_id="' + 'NaN' + '" product="' + _product_id + '" store_p="' + _product_store + '" pu="' + _unit_id + '" class="text-uppercase small text-center product" style="font-size: 14px;">' +
+                '<td class="align-middle">' + '</td>' +
+                '<td class="align-middle text-left item-product">' + '<input type="text" class="form-control form-control-sm input-product-name" readonly value="' + _product_name + '">' + '</td>' +
+                '<td class="align-middle item-quantity">' + '<input type="number" class="form-control form-control-sm text-right input-quantity" disabled value="' + _quantity.toFixed(2) + '">' + '</td>' +
+                '<td class="align-middle item-unit" pu="' + _unit_id + '" unit_min="' + _quantity_minim + '">' + _unit + '</td>' +
+                '<td class="align-middle item-price">' + '<input type="number" class="form-control form-control-sm text-right input-price" value="' + _price.toFixed(2) + '">' + '</td>' +
+                '<td class="align-middle item-total">' + '<input type="number" class="form-control form-control-sm text-right input-total-detail" value="' + _total.toFixed(2) + '">' + '</td>' +
+                '<td>' + '<button type="button" onclick="deleteItem(' + _product_id + ',' + _unit_id + ',' + _product_serial + ',' + _product_store + ')" class="btn btn-danger btn-sm">' +
+                '<i class="fa fa-trash"></i></button>' + '</td>' +
+                '</tr>' +
+                '<tr class="product-serial" product="' + _product_id + '">' + '</tr>'
+            );
+            calculateTotal();
+            counterStrike();
+        }
+
+        function addOrderDetailSerial(a, b, c, d, e, f, g, h, serial, _product_serial) {
+            let _unit_id = a
+            let _product_id = b
+            let _quantity = parseFloat(c)
+            let _price = parseFloat(d)
+            let _total = _quantity * _price
+            let _unit = e
+            let _product_name = escapeHtml(f)
+            let _product_store = g
+            let _quantity_minim = parseFloat(h)
+
+            let serials = '<tr>' +
+                '<td class="text-right align-middle item-serial">' +
+                '<input type="text" class="form-control text-center serial" readonly value="' + serial + '" aria-label="" aria-describedby="basic-addon1">' +
+                '</td>' +
+                '</tr>';
+            if (Array.isArray(serial)) {
+                serials = '';
+                for (let i = 0; i < serial.length; i++) {
+                    serials += '<tr>' +
+                        '<td class="text-right align-middle item-serial">' +
+                        '<input type="text" class="form-control text-center serial" readonly value="' + serial[i] + '" aria-label="" aria-describedby="basic-addon1">' +
+                        '</td>' +
+                        '</tr>';
+                }
+            }
+
+            $('#sales-details').append(
+                '<tr detail_id="' + 'NaN' + '" product="' + _product_id + '" store_p="' + _product_store + '" pu="' + _unit_id + '" class="text-uppercase small text-center product" style="font-size: 14px;">' +
+                '<td class="align-middle">' + '</td>' +
+                '<td class="align-middle text-left item-product">' + '<input type="text" class="form-control form-control-sm input-product-name" readonly value="' + _product_name + '">' + '</td>' +
+                '<td class="align-middle item-quantity">' + '<input type="number" class="form-control form-control-sm text-right input-quantity" disabled value="' + _quantity.toFixed(2) + '">' + '</td>' +
+                '<td class="align-middle item-unit" pu="' + _unit_id + '" unit_min="' + _quantity_minim + '">' + _unit + '</td>' +
+                '<td class="align-middle item-price">' + '<input type="number" class="form-control form-control-sm text-right input-price" value="' + _price.toFixed(2) + '">' + '</td>' +
+                '<td class="align-middle item-total">' + '<input type="number" class="form-control form-control-sm text-right input-total-detail" value="' + _total.toFixed(2) + '">' + '</td>' +
+                '<td>' + '<button type="button" onclick="deleteItem(' + _product_id + ',' + _unit_id + ',' + _product_serial + ',' + _product_store + ')" class="btn btn-danger btn-sm">' +
+                '<i class="fa fa-trash"></i></button>' + '</td>' +
+                '</tr>' +
+                '<tr class="product-serial" product="' + _product_id + '">' +
+                '<td class="text-right align-middle" colspan="1"></td>' +
+                '<td class="text-right align-middle serial-column">' +
+                '<div id="accordion">' +
+                '<div class="card">' +
+                '<div class="card-header p-0" id="heading-' + _product_id + '">' +
+                '<h5 class="mb-0 text-center">' +
+                '<button class="btn btn-link collapsed text-dark roboto-condensed-regular font-weight-bold p-0"' +
+                'data-toggle="collapse" style="font-size: 11px"' +
+                'data-target="#collapse-' + _product_id + '" aria-expanded="false" aria-controls="collapse-' + _product_id + '">' +
+                'Seriales<i class="fas fa-sort-down"></i>' +
+                '</button>' +
+                '</h5>' +
+                '</div>' +
+                '<div id="collapse-' + _product_id + '" class="collapse" aria-labelledby="heading-' + _product_id + '" data-parent="#accordion">' +
+                '<div class="card-body p-0">' +
+                '<table class="table table-sm align-content-center table-bordered mb-0">' +
+                '<tbody id="details-serial-' + _product_id + '"">' +
+                serials +
+                '</tbody>' +
+                '</table>' +
+                '</div>' +
+                '</div>' +
+                '</div>' +
+                '</div>' +
+                '</td>' +
+                '</tr>'
+            );
+            $('#collapse-' + _product_id).collapse('show');
+            calculateTotal();
+            counterStrike();
+        }
+
         function escapeHtml(text) {
-            var map = {
+            let map = {
                 '&': '&amp;',
                 '<': '&lt;',
                 '>': '&gt;',
@@ -1532,44 +1396,6 @@
             return text.replace(/[&<>"']/g, function (m) {
                 return map[m];
             });
-        }
-
-
-        function addOrderDetail(a, b, c, d, e, f, g, h, i) {
-
-            let _unit_id = a
-            let _product_id = b
-            let _quantity = parseFloat(c)
-            let _price = parseFloat(d)
-            let _total = _quantity * _price
-            let _unit = e
-            let _product_name = escapeHtml(f)
-            let _product_brand = i
-            let _product_store = g
-            let _quantity_minim = parseFloat(h)
-
-            //console.log(perms.admin)
-            /*if (perms) {
-                console.log('true')
-            }
-            else{
-                console.log('false')
-            }*/
-
-            $('#sales-details').append(
-                '<tr detail_id="' + 'NaN' + '" product="' + _product_id + '" store_p="' + _product_store + '" pu="' + _unit_id + '" class="text-uppercase small text-center" style="font-size: 14px;">' +
-                '<td class="align-middle">' + '</td>' +
-                '<td class="align-middle text-left item-product">' + '<input type="text" class="form-control form-control-sm input-product-name" value="' + _product_name + ' - ' + _product_brand + '">' + '</td>' +
-                '<td class="align-middle item-quantity">' + '<input type="number" class="form-control form-control-sm text-right input-quantity" disabled value="' + _quantity.toFixed(2) + '">' + '</td>' +
-                '<td class="align-middle item-unit" pu="' + _unit_id + '" unit_min="' + _quantity_minim + '">' + _unit + '</td>' +
-                '<td class="align-middle item-price">' + '<input type="number" class="form-control form-control-sm text-right input-price" value="' + _price.toFixed(2) + '">' + '</td>' +
-                '<td class="align-middle item-total">' + '<input type="number" class="form-control form-control-sm text-right input-total-detail" value="' + _total.toFixed(2) + '">' + '</td>' +
-                '<td>' + '<button type="button" onclick="deleteItem(' + _product_id + ',' + _unit_id + ')" class="btn btn-danger btn-sm">' +
-                '<i class="fa fa-trash"></i></button>' + '</td>' +
-                '</tr>'
-            );
-            calculateTotal();
-            counterStrike();
         }
 
         $('#id-family').change(function () {
@@ -1596,6 +1422,8 @@
         });
         $(document).on('keypress', '#custom-search-product', function (e) {
 
+            let type_search = $('#type_search').val()
+
             $('#product_list_sales').empty();
             $('#custom-search-barcode').val(' ')
 
@@ -1611,12 +1439,14 @@
                     toastr.warning('¡Favor de ingresar una busqueda', 'Error de Datos');
                     return false;
                 }
-                getProductsByNameOrBarcode(_product_name, '')
+                getProductsByType(_product_name, type_search)
 
             }
         });
 
         $(document).on('keypress', '#custom-search-barcode', function (e) {
+
+            let type_search = $('#type_search').val()
 
             $('#product_list_sales').empty();
             $('#custom-search-product').val(' ');
@@ -1633,13 +1463,14 @@
                     toastr.warning('¡Favor de ingresar un codigo de barras', 'Error de Datos');
                     return false;
                 }
-                getProductsByNameOrBarcode('', _barcode)
+                getProductsByType(_barcode, type_search)
 
             }
         });
 
+        let product_dict = {}
 
-        function getProductsByNameOrBarcode($product_name, $barcode) {
+        function getProductsByType($value, $type) {
 
             $('div#loader-product').css('display', '');
             $.ajax({
@@ -1648,15 +1479,15 @@
                 dataType: 'json', // for response
                 type: 'GET',
                 data: {
-                    'value': $product_name,
-                    'barcode': $barcode
+                    'value': $value,
+                    'type': $type
                 },
                 contentType: 'application/json;charset=UTF-8',
                 headers: {"X-CSRFToken": '{{ csrf_token }}'},
                 success: function (response, textStatus, xhr) {
                     if (xhr.status === 200) {
                         toastr.success(response.message, '¡Bien hecho!');
-                        {#$('#product-grid-list').html(response.grid);#}
+                        product_dict = response.product_set
                         $('#product_list_sales').html(response.grid).slideDown();
                         $('div#loader-product').css('display', 'none');
                     }
@@ -2118,8 +1949,6 @@
             } else {
                 toastr.warning('Monto completado')
             }
-
-
         }
 
         function calculateTotalPayment() {
@@ -2168,6 +1997,56 @@
                 _response = true;
             }
             return _response;
+        }
+
+        $(document).on('click', '.btn-stock', function (e) {
+            let productID = $(this).attr("product");
+            let store_id = $(this).attr("ps");
+            let stock = $(this).text().trim();
+            if (stock <= 0) {
+                let foundPending = false;
+                let product = product_dict.find(p => p.id === parseInt(productID));
+                if (product) {
+                    let productStore = product.product_store.find(ps => ps.id === parseInt(store_id));
+                    if (productStore) {
+                        productStore.serial.forEach(serial => {
+                            if (serial.status === 'P') {
+                                foundPending = true;
+                            }
+                        });
+                    }
+                }
+                if (foundPending) {
+                    openModalStock(store_id)
+                } else {
+                    toastr.warning('No tiene stock del producto seleccionado', 'Error de llenado');
+                    return false;
+                }
+            } else {
+                openModalStock(store_id)
+            }
+
+        });
+
+        function openModalStock(store_id) {
+            $.ajax({
+                url: '/sales/modal_serial/',
+                dataType: 'json',
+                type: 'GET',
+                data: {'ps': store_id},
+                success: function (response, textStatus, xhr) {
+                    if (response.success) {
+                        $('#modal-serial').html(response.form);
+                        $('#modal-serial').modal('show');
+
+                    } else {
+                        toastr.error(response.message, 'Error');
+                    }
+                },
+                fail: function (response) {
+                    toastr.error('Ocurrio un problema al mostrar el formulario', '¡Mensaje!');
+                }
+            });
         }
 
 

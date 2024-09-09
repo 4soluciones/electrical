@@ -1,33 +1,76 @@
-<table class="table table-success table-striped align-content-center table-bordered  table-details">
+<table class="table table-success align-content-center table-bordered  table-details">
     <thead>
-        <tr  class="text-center bg-success text-white" style="height: 5px">
-            <td class="text-center">Producto</td>
-            <td class="text-center">Marca</td>
-            <td class="text-center">Cantidad</td>
-            <td class="text-center">Unidad</td>
-            <td class="text-center">Precio</td>
-            <td class="text-center">Total</td>
-        </tr>
+    <tr class="text-center bg-success text-white" style="height: 5px">
+        <td class="text-center">Producto</td>
+        <td class="text-center">Marca</td>
+        <td class="text-center">Cantidad</td>
+        <td class="text-center">Unidad</td>
+        <td class="text-center">Precio</td>
+        <td class="text-center">Total</td>
+    </tr>
     </thead>
     <tbody>
     {% for dt in details %}
         <tr class="table-primary">
             <td class="text-center">{{ dt.product.name }}</td>
-            <td class="text-center">{{ dt.product.product_brand.name }}</td>
+            <td class="text-center">{{ dt.product.product_brand.name|upper }}</td>
             <td class="text-center">{{ dt.quantity|floatformat:0 }}</td>
             <td class="text-center">{{ dt.unit.name }}</td>
             <td class="text-right">{{ dt.price_unit|floatformat:2 }}</td>
-            <td class="text-right">{{ dt.multiplicate|floatformat:2 }}</td>
+            <td class="text-right">{{ dt.multiplicate|floatformat:2|safe }}</td>
         </tr>
+        {% if dt.productserial_set.all %}
+            <tr class="product-serial">
+                <td class="text-right align-middle">
+                    <div id="accordion-{{ dt.product.id }}">
+                        <div class="card">
+                            <div class="card-header p-0" id="heading-{{ dt.product.id }}">
+                                <h5 class="mb-0 text-center">
+                                    <button class="btn btn-link collapsed text-dark roboto-condensed-regular font-weight-bold"
+                                            type="button"
+                                            data-toggle="collapse"
+                                            data-target="#collapse-{{ dt.product.id }}"
+                                            aria-expanded="false"
+                                            aria-controls="collapse-{{ dt.product.id }}"
+                                            style="font-size: 11px;">
+                                        Seriales <i class="fas fa-sort-down"></i>
+                                    </button>
+                                </h5>
+                            </div>
+                            <div id="collapse-{{ dt.product.id }}" class="collapse"
+                                 aria-labelledby="heading-{{ dt.product.id }}"
+                                 data-parent="#accordion-{{ dt.product.id }}">
+                                <div class="card-body p-0">
+                                    <table class="table table-sm align-content-center table-bordered mb-0">
+                                        <tbody id="details-serial">
+                                        {% for s in dt.productserial_set.all %}
+                                            <tr>
+                                                <td class="text-right align-middle text-center">{{ forloop.counter }}</td>
+                                                <td class="text-right align-middle">
+                                                    <input type="text" class="form-control text-center" readonly
+                                                           aria-label="" value="{{ s.serial_number }}"
+                                                           aria-describedby="basic-addon1">
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        {% endif %}
     {% endfor %}
     </tbody>
 </table>
 <script>
 
-    $('.table-details tbody tr td').each(function () {
+    /*$('.table-details tbody tr td').each(function () {
         let _str = $(this).text();
         _str = _str.replace(',', '.');
         $(this).text(_str);
-    });
+    });*/
 
 </script>

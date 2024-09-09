@@ -1,12 +1,9 @@
 {% if purchases %}
-
-
-    <div class="card border-info m-3">
-
+    <div class="card border-info m-3 roboto-condensed-regular">
         <div class="card-header bg-info">
             <form>
                 <div class="form-group row mt-3">
-                    <h4 class="card-title text-center text-white col-sm-10">LISTA DE COMPRAS REALIZADAS</h4>
+                    <h4 class="card-title text-center text-white col-sm-10 roboto-condensed-regular font-weight-bold">LISTA DE COMPRAS REALIZADAS</h4>
                     <button type="button"
                             class="col-sm-1 btn btn-sm btn-outline-secondary font-weight-bold border-0 text-dark btn-block p-1"
                             id="btn-type-change">Tipo de Cambio:
@@ -20,11 +17,9 @@
                 </div>
             </form>
         </div>
-
     </div>
 
-
-    <div class="card-body">
+    <div class="card-body roboto-condensed-regular">
         <div class="table-responsive dataTables_wrapper ">
             <table id="puchase-data-grid"
                    class="table table-primary table-striped align-content-center table-bordered response"
@@ -36,7 +31,7 @@
                     <th class="th-sm">Numero comprobante</th>
                     <th class="th-sm">Fecha compra</th>
                     <th class="th-sm">Total</th>
-                    <th class="th-sm">Empleado</th>
+                    <th class="th-sm">Usuario</th>
                     <th class="th-sm">Estado</th>
                     <th class="th-sm">Accion</th>
                 </tr>
@@ -48,13 +43,12 @@
                         <td>{{ p.id }}</td>
                         <td>{{ p.supplier.name|upper }}</td>
                         <td>{{ p.bill_number|upper }}</td>
-                        <td>{{ p.purchase_date }}</td>
-                        <td>S/ {{ p.total_purchase|safe }}</td>
+                        <td>{{ p.purchase_date|date:'d-m-Y' }}</td>
+                        <td>{% if p.check_dollar %}${% else %}S/{% endif %}{{ p.total_purchase|safe }}</td>
                         <td>{{ p.user.worker_set.last.employee.names|upper }}</td>
                         <td class="{% if p.status == 'S' %}  text-danger {% else %} text-success
                             {% endif %} bg-white">{{ p.get_status_display }}</td>
                         <td class="p-1">
-
                             <div class="btn-group">
                                 <button type="button" class="btn btn-success  dropdown-toggle"
                                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -79,7 +73,8 @@
                     <th class="th-sm">Proveedor</th>
                     <th class="th-sm">Numero comprobante</th>
                     <th class="th-sm">Fecha compra</th>
-                    <th class="th-sm">Empleado</th>
+                    <th class="th-sm">Total</th>
+                    <th class="th-sm">Usuario</th>
                     <th class="th-sm">Estado</th>
                     <th class="th-sm">Accion</th>
                 </tr>

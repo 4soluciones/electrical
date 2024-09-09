@@ -211,4 +211,8 @@ urlpatterns = [
 
     # EXCEL
     path('export_all_products/<str:start_date>/<str:end_date>/', login_required(export_all_products), name='export_all_products'),
+
+    # SELL SERIAL
+    path('modal_serial/', login_required(modal_serial), name='modal_serial'),
+
 ]
