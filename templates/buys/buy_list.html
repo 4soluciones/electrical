@@ -365,7 +365,7 @@
                     success: function (response, textStatus, xhr) {
                         if (xhr.status === 200) {
                             toastr.success(response.message, '¡Bien hecho!');
-                            console.log(response)
+                            //console.log(response)
                             _provider.val(response.result);
                             _provider.attr('provider', response.pk);
                             $('#loading-666').hide();
@@ -412,8 +412,7 @@
                     console.log(response);
                 }
             });
-
-        };
+        }
 
         function limper_form(request) {
             $('#id_fechacompra').val('');
@@ -422,7 +421,7 @@
             $('#id_proveedor option:first').attr('selected', 'selected');
             $('#id_proveedor').trigger('change');
             $('#id_detail_data_grid tbody#details').empty();
-        };
+        }
 
         function limper(request) {
             $('#id_cantidad').val('');
@@ -435,7 +434,8 @@
 
             {#$('#id_producto option[value=0]').attr('selected','selected');#}
             {#$('#id_unidad option[value=0]').attr('selected','selected');#}
-        };
+        }
+
         $('#id_import').keyup(function () {
             let _total = parseFloat($(this).val());
             if (_total !== '') {
@@ -492,11 +492,45 @@
             }
         });
 
-        $('#purchase-form').submit(function (event) {
+        async function checkDuplicatePurchase() {
+            let supplier = $('#id_provider').attr("provider");
+            let type_bill = $('#id_type_bill').val();
+            let correlative = $('#id_factura').val();
+            let _flag_stock = true
+            await $.ajax({
+                url: '/buys/check_purchase/',
+                dataType: 'json',
+                type: 'GET',
+                data: {
+                    'supplier': supplier,
+                    'type_bill': type_bill,
+                    'correlative': correlative
+                },
+                success: function (response, textStatus, xhr) {
+                    {#console.log(response)#}
+                    {#console.log(textStatus)#}
+                    {#console.log(xhr)#}
+                    if (response.success) {
+                        _flag_stock = response.flag;
+                    }
+                },
+                error: function (jqXhr, textStatus, xhr) {
+                    toastr.error('¡ERROR!');
+                }
+            });
+            return _flag_stock
+        }
+
+        $('#purchase-form').submit(async function (event) {
             event.preventDefault();
 
             if ($('#payment_type').val() === '0') {
                 toastr.warning('¡Selecione el tipo de pago!', 'Mensaje');
+                return false;
+            }
+            let _flag_duplicate = await checkDuplicatePurchase()
+            if (_flag_duplicate === true) {
+                toastr.error('LA COMPRA YA FUE REGISTRADA EN EL SISTEMA, FAVOR DE REVISAR LOS DATOS');
                 return false;
             }
 
@@ -562,9 +596,8 @@
                     Detail_purchase.Dues.push(dataDues)
 
                 });
-                console.log(Detail_purchase)
+                //console.log(Detail_purchase)
                 //console.log(JSON.stringify(Detail_purchase))
-
                 $.ajax({
                     url: '/buys/save_purchase/',
                     async: true,
@@ -820,7 +853,6 @@
                 '<td class="align-middle"> ' + '<button type="button" onclick="deleteItem2(this)" class="btn btn-danger delete-detail"><i class="fa fa-trash"></i></button>' + '</td>' +
                 '</tr>' +
                 ' <tr class="product-serial">' + '</tr>'
-
             );
             counterStrike2()
         });
@@ -1098,7 +1130,7 @@
                 toastr.warning('Ingrese una cantidad', 'Error de llenado');
                 return false;
             }
-             _tr.empty();
+            _tr.empty();
             let serials = '';
             for (let i = 0; i < _quantity.val(); i++) {
                 let _number = i + 1;
@@ -1137,28 +1169,64 @@
                 '</td>' +
                 '</tr>'
             );
-             $('#collapse-' + productID).collapse('show');
+            $('#collapse-' + productID).collapse('show');
         });
 
-        $(document).on('keydown', 'input.serial', function (e) {
+        $(document).on('keydown', 'input.serial', async function (e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 let $currentInput = $(this);
                 let currentValue = $currentInput.val();
                 let $previousInput = $currentInput.closest('tr').prev('tr').find('input.serial');
+                let tbodyId = $currentInput.closest('tbody').attr('id');
+                let $productId = tbodyId.split('-').pop();
+                let $nextInput = $currentInput.closest('tr').next('tr').find('input.serial');
 
                 if ($previousInput.length && currentValue === $previousInput.val()) {
                     toastr.warning('El valor ingresado es igual al anterior. Por favor, ingrese un valor diferente.');
                     $currentInput.val('');
                     return;
                 }
+                let _flag_duplicate = await checkSerial(currentValue, $productId)
+                if (_flag_duplicate === true) {
+                    toastr.error('LA SERIE ' + currentValue + ' YA FUE REGISTRADA ANTERIORMENTE, REVISAR STOCK');
+                    $currentInput.val('');
+                    return false;
+                }
 
-                let $nextInput = $currentInput.closest('tr').next('tr').find('input.serial');
                 if ($nextInput.length) {
                     $nextInput.focus();
                 }
             }
         });
+
+        async function checkSerial(serial, $productId) {
+
+            let _flag_serial = true
+
+            await $.ajax({
+                url: '/buys/check_serial/',
+                async: true,
+                dataType: 'json', // for response
+                type: 'GET',
+                data: {
+                    'serial': serial,
+                    'product': $productId,
+                },
+                contentType: 'application/json;charset=UTF-8',
+                headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                success: function (response, textStatus, xhr) {
+                    if (xhr.status === 200) {
+                        _flag_serial = response.flag;
+                    }
+                },
+                error: function (jqXhr, textStatus, xhr) {
+                    toastr.error('¡ERROR!');
+                }
+            });
+            return _flag_serial
+
+        }
 
     </script>
 

@@ -70,4 +70,8 @@ urlpatterns = [
 
     # Find Product Code Bar
     path('get_product_by_code_bar/', login_required(get_product_by_code_bar), name='get_product_by_code_bar'),
+
+    # Check Purchase
+    path('check_purchase/', login_required(check_purchase), name='check_purchase'),
+    path('check_serial/', login_required(check_serial), name='check_serial'),
 ]

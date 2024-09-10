@@ -2158,3 +2158,44 @@ def get_product_by_code_bar(request):
             'message': 'NO EXISTE CÓDIGO DE BARRAS'
         })
     return JsonResponse({'message': 'Error de peticion.'}, status=HTTPStatus.BAD_REQUEST)
+
+
+def check_purchase(request):
+    if request.method == 'GET':
+        flag = False
+        supplier = request.GET.get('supplier', '')
+        type_bill = request.GET.get('type_bill', '')
+        correlative = request.GET.get('correlative', '')
+
+        purchase_set = Purchase.objects.filter(supplier__id=int(supplier), type_bill=type_bill, bill_number=correlative)
+        if purchase_set.exists():
+            return JsonResponse({
+                'success': True,
+                'flag': True
+            })
+        else:
+            return JsonResponse({
+                'success': True,
+                'flag': flag
+            })
+    return JsonResponse({'message': 'Error de peticion.'}, status=HTTPStatus.BAD_REQUEST)
+
+
+def check_serial(request):
+    if request.method == 'GET':
+        flag = False
+        serial = request.GET.get('serial', '')
+        product = request.GET.get('product', '')
+
+        product_serial_set = ProductSerial.objects.filter(serial_number=serial)
+        if product_serial_set.exists():
+            return JsonResponse({
+                'success': True,
+                'flag': True
+            })
+        else:
+            return JsonResponse({
+                'success': True,
+                'flag': flag
+            })
+    return JsonResponse({'message': 'Error de peticion.'}, status=HTTPStatus.BAD_REQUEST)
