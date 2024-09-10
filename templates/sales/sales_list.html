@@ -1177,6 +1177,7 @@
 
             let $serialElement = tr.closest('table').parent('td').parent('tr').find('td.item-product span.serial');
             let serial = '';
+
             if ($serialElement.length > 0) {
                 serial = $serialElement.text()
             } else {
@@ -1239,6 +1240,9 @@
                 td_prices.find('div.row button').each(function () {
                     $(this).attr('disabled', true);
                 });
+            }
+            else {
+                addOrderDetail(unit_id, product_id, quantity, price, name_unit, unescape(name_product), store_id, quantity_minim, serial, product_serial);
             }
             //quantity_input.val('');
 
