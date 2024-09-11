@@ -147,7 +147,7 @@ urlpatterns = [
     path('get_modal_change_price_purchase/', login_required(get_modal_change_price_purchase), name='get_modal_change_price_purchase'),
     path('new_change_price_purchase/', login_required(new_change_price_purchase), name='new_change_price_purchase'),
 
-    path('print_order_bill/<int:pk>/', print_order_bill, name='print_order_bill'),
+    path('print_order_bill/<int:pk>/<str:check>/', print_order_bill, name='print_order_bill'),
 
     # List quotation
     path('get_sales_quotation_by_subsidiary/', login_required(get_sales_quotation_by_subsidiary), name='get_sales_quotation_by_subsidiary'),

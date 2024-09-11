@@ -70,10 +70,16 @@
                     <td class="align-middle text-center noExl" rowspan="{{ p.details }}" {% if p.status == 'A' %}style="background-color: #ee8888 !important;"  {% endif %} {% if p.way_to_pay == 'D' %} style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>
                         {% if p.status != 'A' %}
                             {% if p.order_bill %}
-                                <a class="btn btn-primary ml-1 my-1 montserrat"
-                                   href="{% url 'sales:print_order_bill'  p.id %}"
-                                   target="print">
-                                    <span class="fas fa-file-invoice"></span></a>
+                                <div class="btn-group" role="group" aria-label="Basic example">
+                                    <a class="btn btn-secondary btn-sm ml-0 my-0" data-toggle="tooltip" data-placement="left" title="Con Serial"
+                                       href="{% url 'sales:print_order_bill' p.id 'true' %}"
+                                       target="print">
+                                        <span class="fas fa-file-invoice"></span></a>
+                                    <a class="btn btn-primary btn-sm ml-0 my-0" data-toggle="tooltip" data-placement="top" title="Sin Serial"
+                                       href="{% url 'sales:print_order_bill' p.id 'false' %}"
+                                       target="print">
+                                        <span class="fas fa-file-invoice"></span></a>
+                                </div>
                                 <a class="btn btn-green ml-1 my-1 montserrat"
                                    href="{% url 'sales:print_ticket_order_sales'  p.id 1 %}"
                                    target="print">

@@ -11,7 +11,7 @@ from reportlab.lib.colors import black, blue, red, Color
 from reportlab.lib.pagesizes import landscape, A5, portrait, letter
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.platypus import SimpleDocTemplate, Paragraph, TableStyle, Spacer, Image, Flowable
+from reportlab.platypus import SimpleDocTemplate, Paragraph, TableStyle, Spacer, Image, Flowable, PageBreak
 from reportlab.platypus import Table
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.graphics.shapes import Drawing
@@ -53,6 +53,7 @@ styles.add(ParagraphStyle(name='Left_Square', alignment=TA_LEFT, leading=10, fon
 styles.add(ParagraphStyle(name='Right_Newgot', alignment=TA_RIGHT, leading=12, fontName='Newgot', fontSize=12))
 styles.add(ParagraphStyle(name='Justify_Bold', alignment=TA_JUSTIFY, leading=8, fontName='Square-Bold', fontSize=8))
 styles.add(ParagraphStyle(name='Justify_Newgot', alignment=TA_JUSTIFY, leading=10, fontName='Newgot', fontSize=10))
+styles.add(ParagraphStyle(name='Center_Newgot_serial', alignment=TA_CENTER, leading=10, fontName='Newgot', fontSize=10))
 styles.add(ParagraphStyle(name='Center', alignment=TA_CENTER, leading=8, fontName='Square', fontSize=8))
 styles.add(
     ParagraphStyle(name='Center-Dotcirful', alignment=TA_CENTER, leading=12, fontName='Dotcirful-Regular', fontSize=10))
@@ -1122,7 +1123,7 @@ class OutputInvoiceGuide(Flowable):
         canvas.restoreState()
 
 
-def print_order_bill(request, pk=None):
+def print_order_bill(request, pk=None, check=None):
     _a4 = (8.3 * inch, 11.7 * inch)
     ml = 0.25 * inch
     mr = 0.25 * inch
@@ -1247,7 +1248,8 @@ def print_order_bill(request, pk=None):
         nro_purchase_client = '-'
     _row_payment_deposit = []
     if type_payment == 'D':
-        _row_payment_deposit = ['Depósito a: ', Paragraph(str(order_obj.cashflow_set.last().cash.name), styles['Left_Square'])]
+        _row_payment_deposit = ['Depósito a: ',
+                                Paragraph(str(order_obj.cashflow_set.last().cash.name), styles['Left_Square'])]
     elif type_payment == 'C':
         cnt = 0
         detail_credit.append(
@@ -1312,36 +1314,31 @@ def print_order_bill(request, pk=None):
         ('BOTTOMPADDING', (0, 0), (-1, -1), 5),  # all columns
         ('RIGHTPADDING', (1, 0), (1, -1), 10),  # second column
         ('ALIGNMENT', (0, 0), (-1, -1), 'CENTER'),  # all column
-        ('ALIGNMENT', (2, 0), (2, -1), 'LEFT'),  # second column
+        # ('ALIGNMENT', (3, 0), (3, -1), 'LEFT'),
+        ('ALIGNMENT', (4, 0), (5, 0), 'RIGHT'),
     ]
-    width_table = [_bts * 8 / 100, _bts * 8 / 100, _bts * 12 / 100, _bts * 42 / 100, _bts * 14 / 100, _bts * 16 / 100]
-    header_detail = Table([('Item', 'Cantidad', 'Unidad', 'Descripción', 'Precio U.', 'Total')], colWidths=width_table)
+    width_table = [_bts * 8 / 100, _bts * 8 / 100, _bts * 12 / 100, _bts * 46 / 100, _bts * 12 / 100, _bts * 14 / 100]
+    header_detail = Table([('Cant.', 'Unidad', 'Código', 'Descripción', 'Precio U.', 'Total')], colWidths=width_table)
     header_detail.setStyle(TableStyle(style_table_header_detail))
 
     # -------------------DETAIL---------------------#
     style_table_detail = [
         ('FONTNAME', (0, 0), (-1, -1), 'Square'),
         ('GRID', (0, 0), (-1, -1), 0.3, colors.darkgray),
+        # ('GRID', (2, 0), (2, -1), 0.0, colors.darkgray),
         ('FONTSIZE', (0, 0), (-1, -1), 12),
+        ('FONTSIZE', (2, 0), (2, -1), 10),
         ('LEFTPADDING', (0, 0), (0, -1), 10),  # first column
         ('ALIGNMENT', (0, 0), (-1, -1), 'CENTER'),  # all column
         ('ALIGNMENT', (2, 0), (2, -1), 'LEFT'),  # three column
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),  # first column
+        ('ALIGNMENT', (4, 0), (5, -1), 'RIGHT'),  # first column
         ('RIGHTPADDING', (3, 0), (3, -1), 10),  # first column
         ('BOTTOMPADDING', (0, 0), (-1, -1), 4),  # all columns
-        # ('BACKGROUND', (1, 0), (1, -1),  colors.green),  # four column
-    ]
-    style_table_serial = [
-        ('FONTNAME', (0, 0), (-1, -1), 'Square'),
-        ('GRID', (0, 0), (-1, -1), 0.3, colors.darkgray),
-        ('FONTSIZE', (0, 0), (-1, -1), 8),
-        # ('LEFTPADDING', (0, 0), (0, -1), 10),  # first column
-        # ('ALIGNMENT', (0, 0), (-1, -1), 'CENTER'),  # all column
-        # ('ALIGNMENT', (2, 0), (2, -1), 'LEFT'),  # three column
-        # ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),  # first column
-        # ('RIGHTPADDING', (3, 0), (3, -1), 10),  # first column
-        # ('BOTTOMPADDING', (0, 0), (-1, -1), 4),  # all columns
-        # ('BACKGROUND', (1, 0), (1, -1),  colors.green),  # four column
+        # ('LINEABOVE', (2, 0), (2, -1), 0.3, colors.aquamarine),  # Línea arriba en columna 2
+        # ('LINEBELOW', (2, 0), (2, -1), 0.3, colors.aquamarine),  # Línea abajo en columna 2
+        ('LINERIGHT', (2, 0), (2, 0), 0.3, colors.green),
+        # ('BACKGROUND', (2, 0), (2, -1),  colors.green),  # four column
     ]
     detail_rows = []
     serials_rows = []
@@ -1350,44 +1347,21 @@ def print_order_bill(request, pk=None):
     for detail in order_obj.orderdetail_set.all():
         count = count + 1
         _product = Paragraph(str(detail.commentary), styles["Justify_Square"])
-        _product_plus_brand = Paragraph(str(detail.commentary.upper()) + ' - ' + str(detail.product.product_brand.name),
-                                        styles["Justify_Square"])
-
+        _product_plus_brand = Paragraph(str(detail.commentary.upper()), styles["Justify_Square"])
         detail_rows.append((
-            str(count),
+            # str(count),
             str(decimal.Decimal(round(detail.quantity_sold, 2))),
-            str(detail.unit.description),
+            Paragraph(str(detail.unit.description), styles["Justify_Square"]),
+            detail.product.code,
             _product_plus_brand,
             str(detail.price_unit),
             str(round(detail.quantity_sold * detail.price_unit, 2))
         ))
 
         _total = _total + detail.quantity_sold * detail.price_unit
-
-        # Si hay seriales, agregar una fila adicional con la tabla de seriales
-        if detail.productserial_set.all():
-            serials = [str(s.serial_number) for s in detail.productserial_set.all()]
-            columns = 2
-
-            # Organizar los seriales en filas con un número fijo de columnas
-            serials_rows = [serials[i:i + columns] for i in range(0, len(serials), columns)]
-
-            # Crear la tabla de seriales
-            serials_table = Table(serials_rows, colWidths=[_bts * 20 / 100] * columns)
-            serials_table.setStyle(TableStyle(style_table_serial))
-
-            # Añadir la tabla de seriales como una fila en blanco seguida de la tabla de seriales
-            detail_rows.append((' ', ' ', ' ', serials_table))
     detail_body = Table(detail_rows,
-                        colWidths=[_bts * 8 / 100, _bts * 8 / 100, _bts * 12 / 100, _bts * 42 / 100, _bts * 14 / 100,
-                                   _bts * 16 / 100])
+                        colWidths=[_bts * 8 / 100, _bts * 8 / 100, _bts * 15 / 100, _bts * 43 / 100, _bts * 12 / 100, _bts * 14 / 100])
     detail_body.setStyle(TableStyle(style_table_detail))
-
-    content = [detail_body]
-
-    if serials_rows:
-        serials = Table([serials_rows], colWidths=[_bts * 8 / 100, _bts * 8 / 100, _bts * 12 / 100, _bts * 42 / 100])
-        content.append(serials)
 
     _text = 'DESCUENTO'
     _discount = decimal.Decimal(0.00)
@@ -1553,7 +1527,53 @@ def print_order_bill(request, pk=None):
     ]
     total_footer.setStyle(TableStyle(style_total_footer))
 
-    type_document = order_obj.orderbill.get_type_display().upper()
+    #  NEW PAGE
+
+    style_header_serial = [
+        ('FONTNAME', (0, 0), (-1, -1), 'Newgot'),
+        ('GRID', (0, 0), (-1, -1), 1, colors.darkgray),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        # ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        # ('BACKGROUND', (0, 0), (0, 0), colors.aquamarine),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('ALIGNMENT', (0, 0), (-1, -1), 'CENTER'),
+        ('ALIGNMENT', (2, 0), (2, -1), 'RIGHT'),
+    ]
+    style_detail_serial = [
+        ('FONTNAME', (0, 0), (-1, -1), 'Square'),
+        ('GRID', (0, 0), (-1, -1), 1, colors.darkgray),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('VALIGN', (0, 0), (0, -1), 'TOP'),
+        # ('BACKGROUND', (0, 0), (0, -1), colors.aquamarine),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('ALIGNMENT', (0, 0), (-1, -1), 'CENTER'),
+        ('ALIGNMENT', (2, 0), (2, -1), 'RIGHT'),
+    ]
+    width_table = [_bts * 20 / 100, _bts * 60 / 100, _bts * 10 / 100, _bts * 10 / 100]
+    header_serial = Table([('Código', 'Descripción', 'Cant.',
+                            Paragraph('Unidad<br/>Medida', styles['Center_Newgot_serial']))], colWidths=width_table)
+    header_serial.setStyle(TableStyle(style_header_serial))
+
+    detail_rows = []
+    detail_serial = []
+
+    for detail in order_obj.orderdetail_set.all():
+        if detail.productserial_set.exists():
+            _product_code = Paragraph(str(detail.product.code), styles["Justify_Square"])
+            _quantity = round(detail.quantity_sold, 2)
+            _unit = detail.unit.name
+
+            serial_numbers = [str(s.serial_number) for s in detail.productserial_set.all()]
+            serials_text = ", ".join(serial_numbers)
+
+            serials_paragraph = Paragraph(serials_text, styles["Normal"])
+
+            detail_rows.append((_product_code, serials_paragraph, _quantity, _unit))
+
+    if detail_rows:
+        detail_serial = Table(detail_rows,
+                              colWidths=[_bts * 20 / 100, _bts * 60 / 100, _bts * 10 / 100, _bts * 10 / 100])
+        detail_serial.setStyle(TableStyle(style_detail_serial))
 
     buff = io.BytesIO()
     doc = SimpleDocTemplate(buff,
@@ -1579,11 +1599,17 @@ def print_order_bill(request, pk=None):
         dictionary.append(credit_list)
     dictionary.append(Spacer(1, 5))
     dictionary.append(total_footer)
+
+    if check == 'true':
+        dictionary.append(PageBreak())
+        dictionary.append(header_serial)
+        dictionary.append(detail_serial)
+
     # dictionary.append(Paragraph('www.electrical.com', styles["Center_Newgot"]))
     response = HttpResponse(content_type='application/pdf')
-    # response['Content-Disposition'] = 'attachment; filename="{}.pdf"'.format(str(type_document) + ' ' +
-    #                                                                          str(order_bill_obj.serial) + '-' + str(
-    #     order_bill_obj.n_receipt))
+    response['Content-Disposition'] = 'attachment; filename="{}.pdf"'.format(str(order_obj.get_voucher_type_display()) + ' ' +
+                                                                             str(order_bill_obj.serial) + '-' + str(
+        order_bill_obj.n_receipt))
     doc.build(dictionary)
     response.write(buff.getvalue())
     buff.close()
@@ -1624,7 +1650,7 @@ def print_orders_sales(request, start_date=None, end_date=None):
     sum_sales = 0
 
     _tbl_header = (
-    'REPORTE DE VENTAS DE LA SEDE ' + subsidiary_obj.name + ' DESDE ' + start_date + ' HASTA ' + end_date,)
+        'REPORTE DE VENTAS DE LA SEDE ' + subsidiary_obj.name + ' DESDE ' + start_date + ' HASTA ' + end_date,)
 
     ana_c = Table([_tbl_header], colWidths=[_bts * 100 / 100])
 

@@ -1030,6 +1030,7 @@ def create_order_detail(request):
     if request.method == 'GET':
         sale_request = request.GET.get('sales', '')
         data_sale = json.loads(sale_request)
+        check_print_series = data_sale["CheckPrintSeries"]
         type_payment = data_sale["type_payment"]
         cash_finality = None
         has_quotation_order = ''
@@ -1362,7 +1363,8 @@ def create_order_detail(request):
                     'msg_sunat': msg_sunat,
                     'sunat_pdf': sunat_pdf,
                     'id_sales': order_sale_obj.id,
-                    'type_doc': type_doc
+                    'type_doc': type_doc,
+                    'check_print_series': check_print_series
                     # 'grid': tpl.render(context),
                 }, status=HTTPStatus.OK)
 

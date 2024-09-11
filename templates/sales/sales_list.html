@@ -40,7 +40,7 @@
 
     <div class="modal fade" id="modal-voucher" tabindex="-1" role="dialog" aria-labelledby="ModalHelpTitle"
          aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-dialog modal-lg modal-dialog-centered roboto-condensed-regular" role="document">
             <div class="modal-content">
                 <div class="modal-header" style="background: #0b55a4">
                     <h6 class="modal-title  text-white">TIPOS DE COMPROBANTES</h6>
@@ -57,7 +57,7 @@
                             <div class="card m-0" style="border-color: #0f478a">
 
                                 <div class="card-header text-center" style="background: #0f478a">
-                                    <label class="card-title m-0 text-white">COMPROBANTES FORMATO TICKETS</label>
+                                    <label class="card-title m-0 text-white"> FORMATO TICKETS</label>
                                 </div>
 
                                 <div class="card-body">
@@ -90,9 +90,22 @@
                         <div class="col-sm-6">
                             <div class="card m-0" style="border-color: #0f478a">
                                 <div class="card-header text-center" style="background: #0f478a">
-                                    <label class="card-title m-0 text-white">COMPROBANTES FORMATO A4</label>
+                                    <label class="card-title m-0 text-white"> FORMATO A4</label>
                                 </div>
-                                <div class="card-body">
+                                <div class="card-body pt-2">
+                                    <div class="row col-sm-12">
+                                        <div class="col-sm-12 text-center">
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input check-print-series" type="checkbox"
+                                                       value=""
+                                                       id="check_print_series">
+                                                <label class="form-check-label font-weight-bold text-danger"
+                                                       for="check_print_series">
+                                                    IMPRIMIR SERIES
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="row col-sm-12 p-0 m-0">
 
                                         <div class="col-sm-6">
@@ -788,7 +801,8 @@
                 //"name_type_quotation": $('#id_name_type_quotation').val(),
                 "order_sale_quotation": Number($('#id_order_sale_quotation').val()),
                 "userID": $('#user_id').val(),
-                "condition_days": $('#condition_days').val()
+                "condition_days": $('#condition_days').val(),
+                "CheckPrintSeries": $('#check_print_series').prop('checked')
             };
 
             // Recorre cada detalle de producto (son 2 arrays) each -> recorre
@@ -864,8 +878,7 @@
                             if ($print === 'T') {
                                 window.open("/sales/print_ticket_order_sales/" + response.id_sales + "/" + '1' + "/", '_blank');
                             } else if ($print === 'A4') {
-                                window.location.href = "/sales/print_order_bill/" + response.id_sales + "/";
-                            }
+                                window.location.href = "/sales/print_order_bill/" + response.id_sales + "/" + response.check_print_series + "/"                            }
                         }
                         clearForm();
                         setTimeout(() => {
