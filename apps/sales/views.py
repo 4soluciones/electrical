@@ -5129,6 +5129,14 @@ def cancel_order(request):
                                                                      subsidiary_store__subsidiary=subsidiary_obj,
                                                                      subsidiary_store__category='V')
 
+                        product_serial_set = ProductSerial.objects.filter(order_detail=d,
+                                                                          roduct_store=product_store_obj)
+                        if product_serial_set.exists():
+                            product_serial_obj = product_serial_set.last()
+                            product_serial_obj.order_detail = None
+                            product_serial_obj.status = 'C'
+                            product_serial_obj.save()
+
                         kardex_input(product_store_id=product_store_obj.id, price_unit=_price_unit,
                                      quantity_purchased=_quantity_sold,
                                      order_detail_obj=d)
@@ -5162,6 +5170,14 @@ def cancel_order(request):
                 product_store_obj = ProductStore.objects.get(product__id=_product_id,
                                                              subsidiary_store__subsidiary=subsidiary_obj,
                                                              subsidiary_store__category='V')
+
+                product_serial_set = ProductSerial.objects.filter(order_detail=d,
+                                                                  roduct_store=product_store_obj)
+                if product_serial_set.exists():
+                    product_serial_obj = product_serial_set.last()
+                    product_serial_obj.order_detail = None
+                    product_serial_obj.status = 'C'
+                    product_serial_obj.save()
 
                 kardex_input(product_store_id=product_store_obj.id, price_unit=_price_unit,
                              quantity_purchased=_quantity_sold,
