@@ -473,6 +473,15 @@ class Order(models.Model):
                 response = response + s.multiply()
         return response
 
+    def get_document(self):
+        order_bill_set = OrderBill.objects.filter(order=self.pk)
+        if order_bill_set:
+            order_bill_obj = order_bill_set.first()
+            response = str(order_bill_obj.serial) + '-' + str(order_bill_obj.n_receipt).zfill(6)
+        else:
+            response = str(self.subsidiary.serial) + '-' + str(self.correlative_sale)
+        return response
+
     class Meta:
         verbose_name = 'Orden'
         verbose_name_plural = 'Ordenes'

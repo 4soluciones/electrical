@@ -5,7 +5,7 @@
             <i class="fas fa-file-csv"></i> Excel
         </button>
     </div>
-    <table class="table table-bordered table-sm table-striped" id="table-kardex">
+    <table class="table table-bordered table-sm table-striped roboto-condensed-regular" id="table-kardex">
         <thead>
         <tr>
             <th scope="col" style="text-transform: uppercase;" colspan="5"
@@ -87,13 +87,25 @@
                         {% elif kardex.requirement_detail.id %}
                             <span class="text-primary">RD:{{ kardex.requirement_detail.id }}</span>
                         {% elif kardex.purchase_detail.id %}
-                            <span class="text-success">COMPRA[PD]:{{ kardex.purchase_detail.id }}</span>
+                            <span class="text-secondary">
+{#                                COMPRA[PD]:{{ kardex.purchase_detail.id }}#}
+                                COMPRA<br>{{ kardex.purchase_detail.purchase.bill_number }}
+                            </span>
                             {#                {% elif kardex.manufacture_detail.id %}#}
                             {#                    <span class="text-primary">PRODUCCION[MD]:{{ kardex.manufacture_detail.id }}</span>#}
                             {#                {% elif kardex.manufacture_recipe.id %}#}
                             {#                    <span class="text-primary">RECETA[MR]:{{ kardex.manufacture_recipe.id }}</span>#}
                         {% elif kardex.order_detail.id %}
-                            <span class="text-success">VENTA[{{ kardex.order_detail.order.type }}][OD]:{{ kardex.order_detail.id }}</span>
+                            {% if kardex.operation == 'E' and kardex.order_detail.order.status == 'A' %}
+                                <span class="text-danger" od="{{ kardex.order_detail.id }}">
+                                    VENTA<br>(ANULADA)<br>{{ kardex.order_detail.order.get_document }}
+                                </span>
+                            {% else %}
+                                <span class="text-success" od="{{ kardex.order_detail.id }}">
+                                    VENTA<br>{{ kardex.order_detail.order.get_document }}
+                                </span>
+                            {% endif %}
+
                             {#                {% elif kardex.distribution_detail.id %}#}
                             {#                    <span class="text-primary">DISTRIBUCION[DD]:{{ kardex.distribution_detail.id }}</span><br>#}
                             {#                    <span class="text-primary">PLACA: {{ kardex.distribution_detail.distribution_mobil.truck.license_plate }}</span>#}
@@ -185,9 +197,11 @@
                     <td class="align-middle text-danger text-right">
                         {% if kardex.operation == 'C' %}
                             <div class="input-group input-group-sm mb-3">
-                                <input type="text" class="form-control first_price_purchase" aria-label="Small" style="width: 50px"
+                                <input type="text" class="form-control first_price_purchase" aria-label="Small"
+                                       style="width: 50px"
                                        value="{{ kardex.remaining_price|floatformat:2 }}" id="first_price_purchase"
-                                       aria-describedby="inputGroup-sizing-sm" readonly ps="{{ kardex.product_store.id }}">
+                                       aria-describedby="inputGroup-sizing-sm" readonly
+                                       ps="{{ kardex.product_store.id }}">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text" id="inputGroup-sizing-sm">
                                         <button type="button" class="btn btn-sm p-0 m-0 edit-first-price">
