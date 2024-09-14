@@ -175,6 +175,19 @@
                     let _tr_serial = currentRow.next('tr.product-serial[product="' + productID + '"]');
                     let _number_serial = tr.find('td.item-product span.serial').text();
                     if (_tr_serial.find('td.item-serial').length > 0) {
+                        let serialExists = false;
+                        $('tbody#details-serial-' + productID + ' td.item-serial input.serial').each(function () {
+                            let _input = $(this).val();
+                            if (_input === _number_serial) {
+                                toastr.warning('Serie ya agregada');
+                                $('#custom-search-product').val('');
+                                serialExists = true;
+                                return false; // Corta el bucle interno
+                            }
+                        })
+                        if (serialExists) {
+                            return false;
+                        }
                         let _quantity_detail = parseInt(currentRow.find('td.item-quantity input.input-quantity').val());
                         let _new_stock = _quantity_detail + 1
                         currentRow.find('td.item-quantity input.input-quantity').val(_new_stock.toFixed(2))
@@ -230,6 +243,7 @@
                         );
                     }
                     $('#collapse-' + productID).collapse('show');
+                    $('#custom-search-product').val('');
                 }
             });
         }
