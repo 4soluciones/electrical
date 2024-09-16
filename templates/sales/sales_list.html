@@ -271,6 +271,24 @@
             padding-right: 4em;
             padding-top: -4em;" id="loading-bill"></div>
 
+    <div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title roboto-condensed-regular font-weight-bold text-center" id="imageModalLabel"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <img id="modalImage" class="img-fluid" src="" alt="No-img">
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <style>
         div.dataTables_wrapper div#product-data-grid_filter {
             width: 100%;
@@ -878,7 +896,8 @@
                             if ($print === 'T') {
                                 window.open("/sales/print_ticket_order_sales/" + response.id_sales + "/" + '1' + "/", '_blank');
                             } else if ($print === 'A4') {
-                                window.location.href = "/sales/print_order_bill/" + response.id_sales + "/" + response.check_print_series + "/"                            }
+                                window.location.href = "/sales/print_order_bill/" + response.id_sales + "/" + response.check_print_series + "/"
+                            }
                         }
                         clearForm();
                         setTimeout(() => {
@@ -1253,8 +1272,7 @@
                 td_prices.find('div.row button').each(function () {
                     $(this).attr('disabled', true);
                 });
-            }
-            else {
+            } else {
                 addOrderDetail(unit_id, product_id, quantity, price, name_unit, unescape(name_product), store_id, quantity_minim, serial, product_serial);
             }
             //quantity_input.val('');
@@ -2065,6 +2083,23 @@
                 }
             });
         }
+
+        $(document).on('click', '.open-image-modal', function (e) {
+            var productPk = $(this).attr('pk');
+            $.ajax({
+                url: '/sales/get_product_photo/',
+                method: 'GET',
+                data: {'pk': productPk},
+                success: function (data) {
+                    $('#modalImage').attr('src', data.image_url);
+                    $('#imageModalLabel').text(data.product_name);
+                    $('#imageModal').modal('show');
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error al obtener los datos: ", error);
+                }
+            });
+        });
 
 
     </script>

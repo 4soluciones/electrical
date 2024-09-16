@@ -1,3 +1,4 @@
+{% load static %}
 {% if product_dict %}
     <div class="card roboto-condensed-regular">
         <div class="card-body p-0">
@@ -16,15 +17,26 @@
                     {% for product in product_dict %}
                         <tr class="text-center m-0 p-0" product="{{ product.id }}" type_search="{{ type_search }}">
                             <td class="align-middle item-product text-left">
-                                {{ product.name|upper }}<br>
-                                Marca: {{ product.product_brand.name|upper }}<br>
-                                Cod. Barras: {{ product.barcode|default_if_none:'-' }}<br>
-                                {% if type_search == 'S' %}
-                                    <input type="hidden" class="serial-id"
-                                           value="{{ product.productstore_set.all.last.productserial_set.all.last.id }}">
-                                    <span class="text-danger font-weight-bold">Serial:</span>
-                                    <span class="text-danger font-weight-bold serial">{{ product.productstore_set.all.last.productserial_set.all.last.serial_number }}</span>
-                                {% endif %}
+                                <div class="row">
+                                    <div class="col-sm-9 pr-2 pl-2">
+                                        {{ product.name|upper }}<br>
+                                        Marca: {{ product.product_brand.name|upper }}<br>
+                                        Cod. Barras: {{ product.barcode|default_if_none:'-' }}<br>
+                                        {% if type_search == 'S' %}
+                                            <input type="hidden" class="serial-id"
+                                                   value="{{ product.productstore_set.all.last.productserial_set.all.last.id }}">
+                                            <span class="text-danger font-weight-bold">Serial:</span>
+                                            <span class="text-danger font-weight-bold serial">{{ product.productstore_set.all.last.productserial_set.all.last.serial_number }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-sm-3 d-flex justify-content-center align-self-center pl-0 photo-product">
+                                        <label class="open-edit-file border rounded-lg m-0 p-0 mt-0"
+                                               style="cursor: pointer">
+                                            <img id="blah" class="img-thumbnail open-image-modal" width="200px" height="200px" pk="{{ product.id }}"
+                                                 src="{% if product.photo != 'pic_folder/None/no-img.jpg' %}{{ product.photo.url }}{% else %}{% static 'assets/empty_image.jpg' %}{% endif %}">
+                                        </label>
+                                    </div>
+                                </div>
                             </td>
                             <td class="p-0 td-table-stock">
                                 <table class="table table-sm text-uppercase small table-stock-headquarters m-0">
@@ -132,6 +144,7 @@
         </button>
     </div>
 {% endif %}
+
 
 <script>
 

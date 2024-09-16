@@ -1,10 +1,11 @@
+{% load static %}
 <div class="card-group">
 
     <div class="card bg-light">
 
         <div class="card-body">
             <form id="product-form" action="" method="POST">
-            {% csrf_token %}
+                {% csrf_token %}
                 <div class="row pb-3">
                     <div class="col-sm-12 col-md-12 col-lg-12">
                         <div class="row">
@@ -22,82 +23,80 @@
 
                 <div class="row pb-3">
 
-                    <div class="col-sm-12 col-md-12 col-lg-12">
-                        <div class="row">
-                            <div class="col-sm-4 col-md-4 col-lg-4 pr-0 text-left">
+                    <div class="col-sm-8 col-md-8 col-lg-8">
+                        <div class="row pb-3">
+                            <div class="col-sm-6 col-md-6 col-lg-6 pr-0 text-left">
                                 <label for="code_id" class="col-form-label">Codigo del Producto :</label>
                             </div>
-                            <div class="col-sm-2 col-md-2 col-lg-2 pl-0 text-left">
+                            <div class="col-sm-4 col-md-4 col-lg-4 pl-0 text-left">
                                 <input type="text" id="code_id" name="code" class="form-control">
                             </div>
-                            <div class="col-sm-2 col-md-2 col-lg-2 text-right">
-                                <label for="product_type" class="col-form-label">Tipo :</label>
-                            </div>
-                            <div class="col-sm-4 col-md-4 col-lg-4 pl-0 text-left">
-                                <select class="form-control form-control-sm" id="product_type" name="product_type" required>
-                                    <option disabled selected value=""> Seleccione</option>
-                                    <option value="P"> Producto</option>
-                                    <option value="S"> Servicio</option>
-                                </select>
-                            </div>
                         </div>
-                    </div>
 
-                </div>
-
-
-                <div class="row pb-3">
-
-                    <div class="col-sm-6 col-md-6 col-lg-6">
-                        <div class="row">
-                            <div class="col-sm-8 col-md-8 col-lg-8 text-left">
+                        <div class="row pb-3">
+                            <div class="col-sm-6 col-md-6 col-lg-6 text-left">
                                 <label for="stock_min_id" class="col-form-label">Stock Min :</label>
                             </div>
                             <div class="col-sm-4 col-md-4 col-lg-4 pl-0 text-left">
                                 <input type="text" id="stock_min_id" name="stock-min" class="form-control">
                             </div>
-
                         </div>
-                    </div>
-                    <div class="col-sm-6 col-md-6 col-lg-6">
-                        <div class="row">
-                            <div class="col-sm-4 col-md-4 col-lg-4 text-right">
-                                <label for="family_product_id" class="col-form-label">Familia :</label>
-                            </div>
-                            <div class="col-sm-8 col-md-8 col-lg-8 pl-0 text-left">
-                                <select class="form-control" id="family_product_id" name="family-product" required>
-                                    <option disabled selected value=""> Seleccione</option>
-                                    {% for family in families %}
-                                        <option value="{{ family.id }}">{{ family.name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-
-                        </div>
-                    </div>
-
-                </div>
-
-                <div class="row pb-4 border-bottom">
-
-                    <div class="col-sm-6 col-md-6 col-lg-6">
-                        <div class="row">
-                            <div class="col-sm-8 col-md-8 col-lg-8 text-left">
+                        <div class="row pb-4">
+                            <div class="col-sm-6 col-md-6 col-lg-6 text-left">
                                 <label for="stock_max_id" class="col-form-label">Stock Max :</label>
                             </div>
                             <div class="col-sm-4 col-md-4 col-lg-4 pl-0 text-left">
                                 <input type="text" id="stock_max_id" name="stock-max" class="form-control">
                             </div>
                         </div>
+                        <div class="row pb-3">
+                            <div class="col-sm-6 col-md-6 col-lg-6 text-left">
+                                <label for="product_type" class="col-form-label">Tipo :</label>
+                            </div>
+                            <div class="col-sm-4 col-md-4 col-lg-4 pl-0 text-left">
+                                <select class="form-control form-control-sm" id="product_type"
+                                        name="product_type"
+                                        required>
+                                    <option disabled selected value=""> Seleccione</option>
+                                    <option value="P"> Producto</option>
+                                    <option value="S"> Servicio</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row pb-3">
+                            <div class="col-sm-6 col-md-6 col-lg-6 text-left">
+                                <label for="family_product_id" class="col-form-label">Familia :</label>
+                            </div>
+                            <div class="col-sm-4 col-md-4 col-lg-4 pl-0 text-left">
+                                <select class="form-control form-control-sm" id="family_product_id"
+                                        name="family-product" required>
+                                    <option disabled selected value=""> Seleccione</option>
+                                    {% for family in families %}
+                                        <option value="{{ family.id }}">{{ family.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-sm-6 col-md-6 col-lg-6">
+                    <div class="col-lg-4 d-flex justify-content-center align-self-center">
+                        <label class="open-edit-file border rounded-lg m-0 p-0 mt-0" style="cursor: pointer">
+                            <img id="blah" class="img-thumbnail" width="200px" height="200px"
+                                 src="{% static 'assets/empty_image.jpg' %}">
+                        </label>
+                    </div>
+
+                </div>
+
+                <div class="row pb-3">
+                    <div class="col-sm-8 col-md-8 col-lg-8">
                         <div class="row">
-                            <div class="col-sm-4 col-md-4 col-lg-4 text-right">
+                            <div class="col-sm-6 col-md-6 col-lg-6 text-left">
                                 <label for="brand_new_id" class="col-form-label">Marca :</label>
                             </div>
 
-                            <div class="col-sm-8 col-md-8 col-lg-8 pl-0 text-left">
-                                <select class="form-control" id="brand_new_id" name="brand-product" required>
+                            <div class="col-sm-4 col-md-4 col-lg-4 pl-0 text-left">
+                                <select class="form-control form-control-sm" id="brand_new_id" name="brand-product"
+                                        required>
                                     <option disabled selected value=""> Seleccione</option>
                                     {% for brand in brands %}
                                         <option value="{{ brand.id }}">{{ brand.name }}</option>
@@ -106,8 +105,23 @@
                             </div>
                         </div>
                     </div>
-
+                    <div class="col-lg-4">
+                        <div class="form-group m-0 w-100">
+                            <div class="input-group w-100">
+                                <div class="custom-file w-100">
+                                    <input type="file" class="form-control"
+                                           id="exampleInputEditFile"
+                                           name="exampleInputFile"
+                                           onchange="readURL(this);">
+                                    <label class="custom-file-label" for="exampleInputEditFile">
+                                       Subir Imagen
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
 
                 <div class="row pb-4 border-bottom">
 
@@ -129,7 +143,7 @@
                             <div class="col">
                                 <label for="id_quantity_minimum">Cantidad Minima del tipo de Unidad</label>
                                 <input type="text" id="id_quantity_minimum" name="quantity_minimum"
-                                class="form-control form-control-sm decimal" required>
+                                       class="form-control form-control-sm decimal" required>
                             </div>
                             <div class="col">
                                 <label for="id_price_sale">Precio</label>
@@ -195,6 +209,20 @@
         theme: 'bootstrap4',
     });
 
+    function readURL(input) {
+        let url = input.value;
+        let ext = url.substring(url.lastIndexOf('.') + 1).toLowerCase();
+        if (input.files && input.files[0] && (ext == "gif" || ext == "png" || ext == "jpeg" || ext == "jpg")) {
+            let reader = new FileReader();
+
+            reader.onload = function (e) {
+                $('#blah').attr('src', e.target.result);
+            }
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            $('#blah').attr('src', '{% static 'assets/empty_image.jpg' %}');
+        }
+    }
 
     $('#product-form').submit(function (event) {
 

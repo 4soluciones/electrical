@@ -5351,6 +5351,11 @@ def save_product_detail(request):
             return response
 
         try:
+            _photo = request.FILES['exampleInputFile']
+        except Exception as e:
+            _photo = 'assets/empty_image.jpg'
+
+        try:
             product_family_obj = ProductFamily.objects.get(id=family_product_id)
             product_brand_obj = ProductBrand.objects.get(id=brand_product_id)
 
@@ -5360,7 +5365,8 @@ def save_product_detail(request):
                 stock_min=stock_min,
                 stock_max=stock_max,
                 product_family=product_family_obj,
-                product_brand=product_brand_obj
+                product_brand=product_brand_obj,
+                photo=_photo
             )
             product_obj.save()
 
@@ -6500,3 +6506,15 @@ def modal_serial(request):
                 'success': False,
                 'message': 'El Producto no cuenta con Stock en Series. Revisar el Producto'
             }, status=HTTPStatus.OK)
+
+
+def get_product_photo(request):
+    if request.method == 'GET':
+        pk = request.GET.get('pk')
+        try:
+            product = Product.objects.get(pk=pk)
+            image_url = product.photo.url if product.photo else '/static/assets/empty_image.jpg'
+            product_name = product.name
+            return JsonResponse({'image_url': image_url, 'product_name': product_name})
+        except Product.DoesNotExist:
+            return JsonResponse({'error': 'Producto no encontrado'}, status=404)

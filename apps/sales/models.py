@@ -112,7 +112,7 @@ class Product(models.Model):
     stock_max = models.IntegerField('Stock Maximo', default=0)
     product_family = models.ForeignKey('ProductFamily', on_delete=models.CASCADE)
     product_brand = models.ForeignKey('ProductBrand', on_delete=models.CASCADE)
-    photo = models.ImageField(upload_to='product/', default='pic_folder/None/no-img.jpg', blank=True)
+    photo = models.ImageField(upload_to='product/', default='assets/empty.jpg', blank=True)
     photo_thumbnail = ImageSpecField([Adjust(contrast=1.2, sharpness=1.1), ResizeToFill(
         100, 100)], source='photo', format='JPEG', options={'quality': 90})
     barcode = models.CharField('Codigo de barras', max_length=45, null=True, blank=True)

@@ -215,4 +215,7 @@ urlpatterns = [
     # SELL SERIAL
     path('modal_serial/', login_required(modal_serial), name='modal_serial'),
 
+    # PRODUCT PHOTO
+    path('get_product_photo/', login_required(get_product_photo), name='get_product_photo'),
+
 ]
