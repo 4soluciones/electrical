@@ -5172,7 +5172,7 @@ def cancel_order(request):
                                                              subsidiary_store__category='V')
 
                 product_serial_set = ProductSerial.objects.filter(order_detail=d,
-                                                                  roduct_store=product_store_obj)
+                                                                  product_store=product_store_obj)
                 if product_serial_set.exists():
                     product_serial_obj = product_serial_set.last()
                     product_serial_obj.order_detail = None
