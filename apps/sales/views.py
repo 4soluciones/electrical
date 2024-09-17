@@ -5130,7 +5130,7 @@ def cancel_order(request):
                                                                      subsidiary_store__category='V')
 
                         product_serial_set = ProductSerial.objects.filter(order_detail=d,
-                                                                          roduct_store=product_store_obj)
+                                                                          product_store=product_store_obj)
                         if product_serial_set.exists():
                             product_serial_obj = product_serial_set.last()
                             product_serial_obj.order_detail = None
@@ -5190,10 +5190,10 @@ def cancel_order(request):
 
         if start_date == end_date:
             orders = Order.objects.filter(create_at__date=start_date, subsidiary=subsidiary_obj,
-                                          type='V', status__in=['P', 'A'])
+                                          type='V', status__in=['P', 'A']).order_by('id')
         else:
             orders = Order.objects.filter(create_at__date__range=[start_date, end_date], subsidiary=subsidiary_obj,
-                                          type='V', status__in=['P', 'A'])
+                                          type='V', status__in=['P', 'A']).order_by('id')
 
         if orders:
             has_rows = True
