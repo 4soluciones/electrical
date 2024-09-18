@@ -483,14 +483,14 @@ def send_bill_nubefact(order_id, serie_, is_demo=False):
             "codigo": "001",  # codigo del producto opcional
             "codigo_producto_sunat": "10000000",  # codigo del producto excel-sunat
             "descripcion": d.product.name,
-            "cantidad": float(round(d.quantity_sold, 2)),
-            "valor_unitario": float(round((base_amount / d.quantity_sold), 3)),  # valor unitario sin IGV
-            "precio_unitario": float(round(d.price_unit, 3)),
+            "cantidad": float(round(d.quantity_sold, 4)),
+            "valor_unitario": float(round((base_amount / d.quantity_sold), 4)),  # valor unitario sin IGV
+            "precio_unitario": float(round(d.price_unit, 4)),
             "descuento": "",
-            "subtotal": float(round(base_amount, 3)),  # resultado del valor unitario por la cantidad menos el descuento
+            "subtotal": float(round(base_amount, 4)),  # resultado del valor unitario por la cantidad menos el descuento
             "tipo_de_igv": 1,  # operacion onerosa
-            "igv": float(round(igv, 3)),
-            "total": float(round(base_total, 3)),
+            "igv": float(round(igv, 4)),
+            "total": float(round(base_total, 4)),
             "anticipo_regularizacion": 'false',
             "anticipo_documento_serie": "",
             "anticipo_documento_numero": "",
@@ -641,13 +641,13 @@ def send_receipt_nubefact(order_id, serie_, is_demo=False):
             "codigo_producto_sunat": "10000000",  # codigo del producto excel-sunat
             "descripcion": d.product.name,
             "cantidad": float(round(d.quantity_sold, 3)),
-            "valor_unitario": float(round((base_amount / d.quantity_sold), 2)),  # valor unitario sin IGV
-            "precio_unitario": float(round(d.price_unit, 2)),
+            "valor_unitario": float(round((base_amount / d.quantity_sold), 4)),  # valor unitario sin IGV
+            "precio_unitario": float(round(d.price_unit, 4)),
             "descuento": "",
-            "subtotal": float(round(base_amount, 2)),  # resultado del valor unitario por la cantidad menos el descuento
+            "subtotal": float(round(base_amount, 4)),  # resultado del valor unitario por la cantidad menos el descuento
             "tipo_de_igv": 1,  # operacion onerosa
-            "igv": float(round(igv, 2)),
-            "total": float(round(base_total, 2)),
+            "igv": float(round(igv, 4)),
+            "total": float(round(base_total, 4)),
             "anticipo_regularizacion": 'false',
             "anticipo_documento_serie": "",
             "anticipo_documento_numero": "",
