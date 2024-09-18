@@ -495,7 +495,7 @@ class OrderDetail(models.Model):
     quantity_sold = models.DecimalField('Cantidad vendida', max_digits=10, decimal_places=3, default=0)
     quantity_purchased = models.DecimalField('Cantidad comprada', max_digits=10, decimal_places=2, default=0)
     quantity_requested = models.DecimalField('Cantidad solicitada', max_digits=10, decimal_places=2, default=0)
-    price_unit = models.DecimalField('Precio unitario', max_digits=10, decimal_places=2, default=0)
+    price_unit = models.DecimalField('Precio unitario', max_digits=10, decimal_places=4, default=0)
     unit = models.ForeignKey('Unit', on_delete=models.CASCADE)
     commentary = models.CharField(max_length=200, null=True, blank=True)
     status = models.CharField('Estado', max_length=1, choices=STATUS_CHOICES, default='P', )
