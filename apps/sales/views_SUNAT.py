@@ -562,7 +562,7 @@ def send_bill_nubefact(order_id, serie_, is_demo=False):
         "Authorization": authorization,
         "Content-Type": 'application/json'
     }
-    print(params)
+    # print(params)
     response = requests.post(url, json=params, headers=headers)
 
     if response.status_code == 200:
