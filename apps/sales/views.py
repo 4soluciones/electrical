@@ -6513,7 +6513,7 @@ def get_product_photo(request):
         pk = request.GET.get('pk')
         try:
             product = Product.objects.get(pk=pk)
-            image_url = product.photo.url if product.photo else '/static/assets/empty_image.jpg'
+            image_url = product.photo.url if product.photo else '/mediafiles/product/empty_image.jpg'
             product_name = product.name
             return JsonResponse({'image_url': image_url, 'product_name': product_name})
         except Product.DoesNotExist:
