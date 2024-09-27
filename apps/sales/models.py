@@ -563,7 +563,7 @@ class OrderDetail(models.Model):
 
 class TransactionPayment(models.Model):
     TYPE_CHOICES = (
-        ('E', 'Efectivo'), ('D', 'Deposito'), ('C', 'Credito'), ('Y', 'Yape'), ('L', 'Letra'), ('EC', 'En Cartera'), ('OP', 'Open pay'))
+        ('E', 'Efectivo'), ('D', 'Deposito'), ('C', 'Credito'), ('Y', 'Yape'), ('L', 'Letra'), ('EC', 'En Cartera'))
     id = models.AutoField(primary_key=True)
     payment = models.DecimalField('Pago', max_digits=10, decimal_places=2, default=0)
     type = models.CharField('Tipo de pago', max_length=2, choices=TYPE_CHOICES, default='E', )
