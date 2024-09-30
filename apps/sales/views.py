@@ -5109,6 +5109,7 @@ def cancel_order(request):
         if type_bill == 'F' or type_bill == 'B':
             r = send_cancel_bill_nubefact(order_id)
             enlace = r.get('enlace')
+            # enlace = 't'
             sunat_ticket_numero = r.get('sunat_ticket_numero')
             aceptada_por_sunat = r.get('aceptada_por_sunat')
 
@@ -5132,10 +5133,10 @@ def cancel_order(request):
                         product_serial_set = ProductSerial.objects.filter(order_detail=d,
                                                                           product_store=product_store_obj)
                         if product_serial_set.exists():
-                            product_serial_obj = product_serial_set.last()
-                            product_serial_obj.order_detail = None
-                            product_serial_obj.status = 'C'
-                            product_serial_obj.save()
+                            for ps in product_serial_set:
+                                ps.order_detail = None
+                                ps.status = 'C'
+                                ps.save()
 
                         kardex_input(product_store_id=product_store_obj.id, price_unit=_price_unit,
                                      quantity_purchased=_quantity_sold,
@@ -5174,10 +5175,10 @@ def cancel_order(request):
                 product_serial_set = ProductSerial.objects.filter(order_detail=d,
                                                                   product_store=product_store_obj)
                 if product_serial_set.exists():
-                    product_serial_obj = product_serial_set.last()
-                    product_serial_obj.order_detail = None
-                    product_serial_obj.status = 'C'
-                    product_serial_obj.save()
+                    for ps in product_serial_set:
+                        ps.order_detail = None
+                        ps.status = 'C'
+                        ps.save()
 
                 kardex_input(product_store_id=product_store_obj.id, price_unit=_price_unit,
                              quantity_purchased=_quantity_sold,
