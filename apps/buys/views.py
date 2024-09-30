@@ -2167,7 +2167,8 @@ def check_purchase(request):
         type_bill = request.GET.get('type_bill', '')
         correlative = request.GET.get('correlative', '')
 
-        purchase_set = Purchase.objects.filter(supplier__id=int(supplier), type_bill=type_bill, bill_number=correlative)
+        purchase_set = Purchase.objects.filter(supplier__id=int(supplier), status__in=['S', 'A'],
+                                               type_bill=type_bill, bill_number=correlative)
         if purchase_set.exists():
             return JsonResponse({
                 'success': True,
