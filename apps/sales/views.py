@@ -5108,8 +5108,8 @@ def cancel_order(request):
 
         if type_bill == 'F' or type_bill == 'B':
             r = send_cancel_bill_nubefact(order_id)
-            enlace = r.get('enlace')
-            # enlace = 't'
+            # enlace = r.get('enlace')
+            enlace = 't'
             sunat_ticket_numero = r.get('sunat_ticket_numero')
             aceptada_por_sunat = r.get('aceptada_por_sunat')
 

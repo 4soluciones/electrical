@@ -138,6 +138,7 @@
                         contentType: 'application/json;charset=UTF-8',
                         headers: {"X-CSRFToken": '{{ csrf_token }}'},
                         success: function (response, textStatus, xhr) {
+                            console.log("sss")
                             if (xhr.status === 200) {
                                 toastr.success(response.message, '¡ORDEN ACTUALIZADA CORRECTAMENTE!');
                                 $('#sales-grid-list').html(response.grid);
@@ -145,6 +146,7 @@
                             }
                         },
                         fail: function (response) {
+                            console.log("error")
                             toastr.error(jqXhr.responseJSON.error, '¡Inconcebible!');
                         }
                     });
