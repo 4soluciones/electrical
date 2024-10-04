@@ -1,0 +1,132 @@
+<div class="col-sm-12 p-0">
+    <div class="card">
+        <div class="card-body text-center font-weight-bolder pb-1">
+            <h3 class="roboto-condensed-regular text-primary font-weight-bold">{{ purchase_detail_obj.product.name|upper }}</h3>
+        </div>
+    </div>
+</div>
+<div class="col-sm-12 p-0">
+    <div class="card">
+        <div class="card-body text-left font-weight-bolder pb-1">
+            <h5 class="roboto-condensed-regular font-weight-bold">COMPRA</h5>
+        </div>
+    </div>
+</div>
+
+<div class="card roboto-condensed-regular">
+    <div class="card-body m-0 p-1">
+        <div class="table-responsive dataTables_wrapper m-0 p-0">
+            <table id="product-data-grid" class="table table-bordered table-hover table-primary">
+                <thead>
+                <tr class="text-center text-white text-uppercase bg-info">
+                    <th class="th-sm font-weight-normal" style="width: 60%;">Proveedor</th>
+                    <th class="th-sm font-weight-normal" style="width: 10%;">Numero de Comprobante</th>
+                    <th class="th-sm font-weight-normal" style="width: 10%;">Fecha de Compra</th>
+                    <th class="th-sm font-weight-normal" style="width: 10%;">Total</th>
+                    <th class="th-sm font-weight-normal" style="width: 10%;">Usuario</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr class="font-weight-bold">
+                    <td class="text-center">{{ purchase_detail_obj.purchase.supplier.name }}</td>
+                    <td class="text-center">{{ purchase_detail_obj.purchase.bill_number|upper }}</td>
+                    <td class="text-center">{{ purchase_detail_obj.purchase.purchase_date|date:'d-m-Y' }}</td>
+                    <td class="text-center">{{ purchase_detail_obj.purchase.total_import }}</td>
+                    <td class="text-center">{{ purchase_detail_obj.purchase.user }}</td>
+                </tr>
+                <tr>
+                    <td colspan="5">
+                        <table class="table table-success align-content-center table-bordered  table-details">
+                            <thead>
+                            <tr class="text-center bg-success text-white" style="height: 5px">
+                                <td class="text-center p-0">Marca</td>
+                                <td class="text-center p-0">Cantidad</td>
+                                <td class="text-center p-0">Unidad</td>
+                                <td class="text-center p-0">Precio</td>
+                                <td class="text-center p-0">Total</td>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr class="table-primary">
+                                <td class="text-center">{{ purchase_detail_obj.product.product_brand.name }}</td>
+                                <td class="text-center">{{ purchase_detail_obj.quantity }}</td>
+                                <td class="text-center">{{ purchase_detail_obj.unit.name }}</td>
+                                <td class="text-center">{{ purchase_detail_obj.price_unit|floatformat:2 }}</td>
+                                <td class="text-center">{{ purchase_detail_obj.multiplicate|floatformat:2 }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<div class="col-sm-12 p-0">
+    <div class="card">
+        <div class="card-body text-left font-weight-bolder pb-1">
+            <h5 class="roboto-condensed-regular font-weight-bold">VENTA</h5>
+        </div>
+    </div>
+</div>
+
+
+<div class="card roboto-condensed-regular">
+    <div class="card-body m-0 p-1">
+        <div class="table-responsive dataTables_wrapper m-0 p-0">
+            <table id="product-data-grid" class="table table-bordered table-hover table-warning">
+                <thead>
+                <tr class="text-center text-white text-uppercase bg-secondary">
+                    <th class="th-sm font-weight-normal" style="width: 60%;">Cliente</th>
+                    <th class="th-sm font-weight-normal" style="width: 10%;">Numero de Comprobante</th>
+                    <th class="th-sm font-weight-normal" style="width: 10%;">Fecha de Venta</th>
+                    <th class="th-sm font-weight-normal" style="width: 10%;">Total Venta</th>
+                    <th class="th-sm font-weight-normal" style="width: 10%;">Usuario</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr class="font-weight-bold">
+                    <td class="text-center">{{ order_detail_obj.order.client.names }}</td>
+                    <td class="text-center">
+                        {% if order_detail_obj.order.orderbill %}
+                            {{ order_detail_obj.order.orderbill.serial }} - {{ order_detail_obj.order.orderbill.n_receipt }}
+                        {% else %}
+                            {{ order_detail_obj.order.subsidiary.serial }} - {{ order_detail_obj.order.correlative_sale }}
+                        {% endif %}
+                    </td>
+                    <td class="text-center">{{ order_detail_obj.order.create_at|date:'d-m-Y' }}</td>
+                    <td class="text-center">{{ order_detail_obj.order.total }}</td>
+                    <td class="text-center">{{ order_detail_obj.order.user }}</td>
+                </tr>
+                <tr>
+                    <td colspan="5">
+                        <table class="table table-success align-content-center table-bordered">
+                            <thead>
+                            <tr class="text-center bg-success text-white" style="height: 5px">
+                                <td class="text-center p-0">Marca</td>
+                                <td class="text-center p-0">Cantidad</td>
+                                <td class="text-center p-0">Unidad</td>
+                                <td class="text-center p-0">Precio</td>
+                                <td class="text-center p-0">Total</td>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr class="table-secondary">
+                                <td class="text-center">{{ order_detail_obj.product.product_brand.name }}</td>
+                                <td class="text-center">{{ order_detail_obj.quantity_sold|floatformat:2 }}</td>
+                                <td class="text-center">{{ order_detail_obj.unit.name }}</td>
+                                <td class="text-center">{{ order_detail_obj.price_unit|floatformat:2 }}</td>
+                                <td class="text-center">{{ order_detail_obj.multiply|floatformat:2 }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

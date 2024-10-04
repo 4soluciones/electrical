@@ -6519,3 +6519,32 @@ def get_product_photo(request):
             return JsonResponse({'image_url': image_url, 'product_name': product_name})
         except Product.DoesNotExist:
             return JsonResponse({'error': 'Producto no encontrado'}, status=404)
+
+
+def search_sell_by_serial(request):
+    if request.method == 'GET':
+        my_date = datetime.now()
+        formatdate = my_date.strftime("%Y-%m-%d")
+        return render(request, 'sales/search_sell_serial.html', {'formatdate': formatdate, })
+    elif request.method == 'POST':
+        serial = str(request.POST.get('serial'))
+        user_id = request.user.id
+        user_obj = User.objects.get(id=user_id)
+        product_serial_set = ProductSerial.objects.filter(serial_number=serial)
+        if product_serial_set.exists():
+            product_serial_obj = product_serial_set.last()
+            order_detail_obj = product_serial_obj.order_detail
+            purchase_detail_obj = product_serial_obj.purchase_detail
+            tpl = loader.get_template('sales/search_sell_serial_grid.html')
+            context = ({
+                'order_detail_obj': order_detail_obj,
+                'purchase_detail_obj': purchase_detail_obj
+            })
+            return JsonResponse({
+                'grid': tpl.render(context, request),
+            }, status=HTTPStatus.OK)
+        else:
+            data = {'error': "EL PRODUCTO NO TIENE SERIES"}
+            response = JsonResponse(data)
+            response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+            return response

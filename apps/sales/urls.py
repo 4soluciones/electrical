@@ -218,4 +218,7 @@ urlpatterns = [
     # PRODUCT PHOTO
     path('get_product_photo/', login_required(get_product_photo), name='get_product_photo'),
 
+    # SEARCH SELL
+    path('search_sell_by_serial/', login_required(search_sell_by_serial), name='search_sell_by_serial'),
+
 ]
