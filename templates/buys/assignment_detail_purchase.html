@@ -139,17 +139,18 @@
                     <thead>
                     <tr class="text-white text-center bg-info">
                         {#                        <th class="align-middle">Código</th>#}
-                        <th class="align-middle" style="width: 35%">Producto</th>
+                        <th class="align-middle" style="width: 25%">Producto</th>
                         {#                        <th class="align-middle">Marca</th>#}
                         <th class="align-middle" style="width: 10%">Cantidad</th>
                         <th class="align-middle" style="width: 5%">Unidad</th>
-                        <th class="align-middle" style="width: 10%">Valor Unit.</th>
+                        <th class="align-middle" style="width: 10%; background-color: #7ea0ef">Valor Unit.<br>(Sn IGV)</th>
+                        <th class="align-middle" style="width: 10%">Price Unit.<br>(Con IGV)</th>
                         <th class="align-middle" style="width: 5%">%Dto.1</th>
                         <th class="align-middle" style="width: 5%">%Dto.2</th>
                         <th class="align-middle" style="width: 5%">%Dto.3</th>
                         <th class="align-middle" style="width: 5%">%Dto.4</th>
                         <th class="align-middle" style="width: 10%">Importe</th>
-                        <th class="align-middle" style="width: 10%">Val. Unit. Dto. (IGV)</th>
+                        <th class="align-middle" style="width: 10%">Val. Unit. Dto.</th>
                         {#                        {% if not purchase.check_dollar %}#}
                         {#                            <th>Val. Unit. Dto. (IGV) + FLETE</th>#}
                         {#                        {% endif %}#}
@@ -170,6 +171,12 @@
                                 {#                                <td class="text-center">{{ p.product_brand }}</td>#}
                                 <td class="item-quantity text-center font-weight-bold" style="font-size: 18px; background-color: #cde8ec">{{ p.quantity|safe|floatformat:0 }}</td>
                                 <td class="item-unit text-center" pu="{{ p.unit_id }}">{{ p.unit_name }}</td>
+                                <td class="value-price text-right">
+                                    <div class="input-icon">
+                                        <i class="change-money">S/</i>
+                                        {{ p.value_unit|safe }}
+                                    </div>
+                                </td>
                                 <td class="item-price text-right" price_unit="{{ p.price_unit|safe }}">
                                     <div class="input-icon">
                                         <i class="change-money">S/</i>
@@ -334,7 +341,7 @@
                             "Product": $(this).attr('product'),
                             "Quantity": $(this).find("td.item-quantity").text(),
                             "Unit": $(this).find("td.item-unit").attr('pu'),
-                            "Price": $(this).find("td.item-price").attr('price_unit'),
+                            "PriceUnit": $(this).find("td.item-price").attr('price_unit'),
                             "PriceUnitDiscount": $(this).find("td.item-price-unit-discount").attr('price_unit_d'),
                             "PriceUnitDiscountPlusFreight": Number($(this).find("td.item-price-unit-discount-plus-freight").attr('price_unit_plus_freight')),
                             "PriceUnitIgvMoneyChange": Number($(this).find("td.item-price-unit-igv-change").attr('price_unit_igv_change')),

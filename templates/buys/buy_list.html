@@ -835,6 +835,8 @@
                 '<option value="0"> Seleccione</option>'+ textOption + '</td>' +*/
                 '<td class="align-middle unit">' +
                 '<input type="text" class="form-control text-center text-uppercase unit-product" readonly>' + '</td>' +
+                '<td class="item-value-price text-right align-middle">' + '<div class="input-icon">' +
+                '<input type="text" class="form-control text-right text-uppercase value-unit-product" placeholder="0.00">' + '<i class="change-money">' + _val_money + '</i>' + '</div>' + '</td>' +
                 '<td class="item-price text-right align-middle" price-unit-with-discount="">' + '<div class="input-icon">' +
                 '<input type="text" class="form-control text-right text-uppercase price-unit-product" placeholder="0.00">' + '<i class="change-money">' + _val_money + '</i>' + '</div>' + '</td>' +
                 '<td class="item-discount1 text-right align-middle">' +
@@ -895,6 +897,32 @@
             calculate_total(_tr)
             sum_table()
         });
+
+        $(document).on('keyup', '.value-unit-product', function () {
+
+            let _tr = $(this).parent('div').parent('td').parent('tr')
+            let _value_unit = $(this).val();
+            let _quantity = Number(_tr.find('td.item-quantity div.input-group input.quantity-product').val())
+            let _price_unit = _tr.find('td.item-price div.input-icon input.price-unit-product');
+            let _total = Number(_tr.find('td.total-row div.input-icon input.total-detail').val());
+
+            if (_value_unit !== '') {
+                let _p_unit = parseFloat(_value_unit) * 1.18
+                _price_unit.val(_p_unit.toFixed(4));
+                /*console.log("_quantity", _quantity)
+                console.log("_price_unit", _price_unit)
+                console.log("_total", _total)*/
+                if (_quantity !== 0 && _price_unit.val() !== 0) {
+                    _total = _quantity * _price_unit.val()
+                    _tr.find('td.item-total div.input-icon input.total-detail').val(Number(_total).toFixed(2));
+                }
+                calculate_total(_tr)
+                sum_table()
+            } else {
+                _price_unit.val('');
+            }
+        });
+
         $(document).on('keyup', '.price-unit-product', function () {
 
             let _tr = $(this).parent('div').parent('td').parent('tr')
@@ -907,6 +935,9 @@
             {#console.log("_total", _total)#}
 
             if (_quantity !== 0 && _price_unit !== 0) {
+                let value_unit = _tr.find('td.item-value-price div.input-icon input.value-unit-product');
+                let _v_unit = parseFloat(_price_unit) / 1.18
+                value_unit.val(_v_unit.toFixed(4))
                 _total = _quantity * _price_unit
                 _tr.find('td.item-total div.input-icon input.total-detail').val(Number(_total).toFixed(2));
             }
@@ -949,7 +980,8 @@
                 d4p = d3p - [(d3p * $d4_val) / 100]
 
                 _tr.find('td.item-price').attr('price-unit-with-discount', d4p.toFixed(2))
-                {#console.log('en el if', d4p)#}
+                _tr.find('td.total-row input.total-detail').val(d4.toFixed(2))
+                //console.log('en el if', d4p)
             } else {
                 d1 = amount - [(amount * $d1_val) / 100]
                 d2 = d1 - [(d1 * $d2_val) / 100]
@@ -962,7 +994,7 @@
                 d4p = d3p - [(d3p * $d4_val) / 100]
 
                 _tr.find('td.item-price').attr('price-unit-with-discount', d4p.toFixed(2))
-                {#console.log('fuera', d4p)#}
+                //console.log('fuera', d4p)
 
                 _tr.find('td.total-row input.total-detail').val(d4.toFixed(2))
             }
@@ -1227,6 +1259,7 @@
             return _flag_serial
 
         }
+
 
     </script>
 

@@ -205,24 +205,21 @@ def save_detail_purchase_store(request):
         try:
             with transaction.atomic():
                 for detail in data_purchase['Details']:
-                    price_unit_with_discount_plus_freight = 0
-                    price_unit_igv_money_change = 0
-                    price_unit_igv_money_change_plus_freight = 0
                     price_unit_real = 0
 
                     quantity = decimal.Decimal((detail['Quantity']).replace(",", "."))
-                    price = decimal.Decimal((detail['Price']).replace(",", "."))
+                    price = decimal.Decimal((detail['PriceUnit']).replace(",", "."))
                     price_unit_with_discount = decimal.Decimal((detail['PriceUnitDiscount']).replace(",", "."))
 
-                    if detail['PriceUnitDiscountPlusFreight'] is not None:
-                        price_unit_with_discount_plus_freight = decimal.Decimal(detail['PriceUnitDiscountPlusFreight'])
+                    # if detail['PriceUnitDiscountPlusFreight'] is not None: price_unit_with_discount_plus_freight =
+                    # decimal.Decimal(detail['PriceUnitDiscountPlusFreight'])
 
                     if detail['PriceUnitIgvMoneyChange'] is not None:
                         price_unit_igv_money_change = decimal.Decimal(detail['PriceUnitIgvMoneyChange'])
 
-                    if detail['PriceUnitIgvMoneyChangePlusFreight'] is not None:
-                        price_unit_igv_money_change_plus_freight = decimal.Decimal(
-                            detail['PriceUnitIgvMoneyChangePlusFreight'])
+                    # if detail['PriceUnitIgvMoneyChangePlusFreight'] is not None:
+                    #     price_unit_igv_money_change_plus_freight = decimal.Decimal(
+                    #         detail['PriceUnitIgvMoneyChangePlusFreight'])
 
                     product_id = int(detail['Product'])
                     product_obj = Product.objects.get(id=product_id)
@@ -234,10 +231,10 @@ def save_detail_purchase_store(request):
                     product_detail_obj = ProductDetail.objects.get(product__id=product_id, unit=unit_obj)
 
                     if check_dollar:
-                        price_unit_real = price_unit_igv_money_change_plus_freight
+                        # price_unit_real = price_unit_igv_money_change_plus_freight
                         product_detail_obj.price_purchase_dollar = price_unit_with_discount
                     elif check_soles:
-                        price_unit_real = price_unit_with_discount_plus_freight
+                        price_unit_real = price
 
                     if checked:
                         product_detail_obj.price_purchase = decimal.Decimal(price_unit_real)
@@ -506,7 +503,8 @@ def get_detail_purchase_store(request):
                     'quantity': d.quantity,
                     'unit_id': d.unit.id,
                     'unit_name': d.unit.name,
-                    'price_unit': round(float(d.price_unit), 2),
+                    'value_unit': round(decimal.Decimal(d.price_unit / decimal.Decimal(1.18)), 4),
+                    'price_unit': round(decimal.Decimal(d.price_unit), 4),
                     'price_unit_discount': round(float(d.price_unit_discount), 2),
                     'price_unit_discount_with_igv': round(decimal.Decimal(d.price_unit_discount_with_igv()), 2),
                     'discount_one': round(float(d.discount_one), 2),

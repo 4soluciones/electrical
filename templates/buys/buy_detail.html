@@ -6,11 +6,12 @@
         <tr class="text-center text-white" style="background: #1a77c8">
             <th scope="col" class="align-middle font-weight-normal" style="width: 3%;">Nº</th>
             <th scope="col" class="align-middle font-weight-normal" style="width: 7%;">Codigo de barras</th>
-            <th scope="col" class="align-middle font-weight-normal" style="width: 31%;">Descripción de Artículo</th>
+            <th scope="col" class="align-middle font-weight-normal" style="width: 27%;">Descripción de Artículo</th>
             {#            <th scope="col" class="align-middle font-weight-normal" style="width: 8%;">Marca</th>#}
             <th scope="col" class="align-middle font-weight-normal" style="width: 10%;">Cantidad</th>
-            <th scope="col" class="align-middle font-weight-normal" style="width: 7%;">Unidad Medida</th>
-            <th scope="col" class="align-middle font-weight-normal" style="width: 6%;">Valor Unitario</th>
+            <th scope="col" class="align-middle font-weight-normal" style="width: 8%;">Unidad Medida</th>
+            <th scope="col" class="align-middle font-weight-normal" style="width: 8%; background-color: #7ea0ef">Valor Unit. (Sin IGV)</th>
+            <th scope="col" class="align-middle font-weight-normal" style="width: 7%;">Prec. Unit. (Con IGV)</th>
             <th scope="col" class="align-middle font-weight-normal" style="width: 5%;">%Dto.1</th>
             <th scope="col" class="align-middle font-weight-normal" style="width: 5%;">%Dto.2</th>
             <th scope="col" class="align-middle font-weight-normal" style="width: 5%;">%Dto.3</th>
@@ -59,6 +60,13 @@
                 {#                            <option value="{{ u.id }}">{{ u.name }}</option>#}
                 {#                    {% endfor %}#}
                 {#                </select>#}
+            </td>
+            <td class="item-value-price text-right align-middle">
+                <div class="input-icon">
+                    <input type="text" class="form-control text-right text-uppercase value-unit-product"
+                           placeholder="0.00">
+                    <i class="change-money">S/</i>
+                </div>
             </td>
             <td class="item-price text-right align-middle" price-unit-with-discount="">
                 <div class="input-icon">
