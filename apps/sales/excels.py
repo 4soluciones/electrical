@@ -18,7 +18,8 @@ def export_all_products(request, start_date=None, end_date=None):
         'CI': 'Cuadre de Inventario',
     }
 
-    for p in Product.objects.filter(is_enabled=True).exclude(id__in=[71, 145, 146]):
+    for p in Product.objects.filter(is_enabled=True).exclude(id__in=[71, 145, 146]).order_by('id'):
+    # for p in Product.objects.filter(id=386):
         product = p.name
         product_store_set = ProductStore.objects.filter(product=p.id, subsidiary_store__id=1)
         if product_store_set.exists():
