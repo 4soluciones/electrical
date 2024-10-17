@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db.models.functions import Coalesce
 from django.shortcuts import render
 from django.views.generic import TemplateView, View, CreateView, UpdateView
@@ -23,7 +24,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models.fields.files import ImageFieldFile
 from django.template import loader
 from datetime import datetime, date
-from django.db import DatabaseError, IntegrityError
+from django.db import DatabaseError, IntegrityError, transaction
 from django.core import serializers
 from apps.sales.views_SUNAT import send_bill_nubefact, send_receipt_nubefact, query_dni, query_api_facturacioncloud, \
     query_api_free_ruc, query_api_peru, send_cancel_bill_nubefact, query_apis_net_dni_ruc
@@ -1027,352 +1028,359 @@ def create_order_detail(request):
     type_doc = ''
     product_obj = None
     order_sale_obj = None
-    if request.method == 'GET':
-        sale_request = request.GET.get('sales', '')
-        data_sale = json.loads(sale_request)
-        check_print_series = data_sale["CheckPrintSeries"]
-        type_payment = data_sale["type_payment"]
-        cash_finality = None
-        has_quotation_order = ''
-        issue_date = str(data_sale["issueDate"])
-        _date = utc_to_local(datetime.now())
-        if type_payment == 'E':
-            cash_finality = data_sale["cash"]
-        elif type_payment == 'D':
-            cash_finality = data_sale["cash_deposit"]
-        cod_operation = str(data_sale["cod_operation"])
+    try:
+        if request.method == 'GET':
+            sale_request = request.GET.get('sales', '')
+            data_sale = json.loads(sale_request)
+            check_print_series = data_sale["CheckPrintSeries"]
+            type_payment = data_sale["type_payment"]
+            cash_finality = None
+            has_quotation_order = ''
+            issue_date = str(data_sale["issueDate"])
+            _date = utc_to_local(datetime.now())
+            if type_payment == 'E':
+                cash_finality = data_sale["cash"]
+            elif type_payment == 'D':
+                cash_finality = data_sale["cash_deposit"]
+            cod_operation = str(data_sale["cod_operation"])
 
-        client_address = str(data_sale["Address"])
-        client_id = str(data_sale["Client"])
-        client_obj = Client.objects.get(pk=int(client_id))
-        client_address_set = ClientAddress.objects.filter(client=client_obj)
-        if client_address_set.exists():
-            client_address_obj = client_address_set.last()
-            client_address_obj.address = client_address
-            client_address_obj.save()
-        else:
-            client_address_obj = ClientAddress(
-                client=client_obj,
-                address=client_address
-            )
-            client_address_obj.save()
+            client_address = str(data_sale["Address"])
+            client_id = str(data_sale["Client"])
+            client_obj = Client.objects.get(pk=int(client_id))
+            client_address_set = ClientAddress.objects.filter(client=client_obj)
+            if client_address_set.exists():
+                client_address_obj = client_address_set.last()
+                client_address_obj.address = client_address
+                client_address_obj.save()
+            else:
+                client_address_obj = ClientAddress(
+                    client=client_obj,
+                    address=client_address
+                )
+                client_address_obj.save()
 
-        sale_total = decimal.Decimal(data_sale["SaleTotal"])
-        user_id = request.user.id
-        user_subsidiary_obj = User.objects.get(id=user_id)
-        subsidiary_obj = get_subsidiary_by_user(user_subsidiary_obj)
-        subsidiary_store_sales_obj = SubsidiaryStore.objects.get(
-            subsidiary=subsidiary_obj, category='V')
-        serie = str(data_sale["Serie"])
+            sale_total = decimal.Decimal(data_sale["SaleTotal"])
+            user_id = request.user.id
+            user_subsidiary_obj = User.objects.get(id=user_id)
+            subsidiary_obj = get_subsidiary_by_user(user_subsidiary_obj)
+            subsidiary_store_sales_obj = SubsidiaryStore.objects.get(
+                subsidiary=subsidiary_obj, category='V')
+            serie = str(data_sale["Serie"])
 
-        user = int(data_sale["userID"])
-        user_obj = User.objects.get(id=user)
+            user = int(data_sale["userID"])
+            user_obj = User.objects.get(id=user)
 
-        _type = 'T'
+            _type = 'T'
 
-        if data_sale["Type"] == 'B' or data_sale["Type"] == 'F':
-            _type = 'E'
+            if data_sale["Type"] == 'B' or data_sale["Type"] == 'F':
+                _type = 'E'
 
-        '_type = str(data_sale["Type"])'
+            '_type = str(data_sale["Type"])'
 
-        _bill_type = str(data_sale["BillType"])
-        order_type = str(data_sale["order_type"])
-        order_sale_quotation = None
-        order_sale_quotation_obj = None
-        if int(data_sale["order_sale_quotation"]) > 0:
-            order_sale_quotation = int(data_sale["order_sale_quotation"])
-            order_sale_quotation_obj = Order.objects.get(id=order_sale_quotation)
+            _bill_type = str(data_sale["BillType"])
+            order_type = str(data_sale["order_type"])
+            order_sale_quotation = None
+            order_sale_quotation_obj = None
+            if int(data_sale["order_sale_quotation"]) > 0:
+                order_sale_quotation = int(data_sale["order_sale_quotation"])
+                order_sale_quotation_obj = Order.objects.get(id=order_sale_quotation)
+            msg_sunat = ''
+            sunat_pdf = ''
+            condition_days = data_sale["condition_days"]
 
-        msg_sunat = ''
-        sunat_pdf = ''
+            if order_type == 'T' and order_sale_quotation is None:
+                has_quotation_order = 'S'
+            elif order_type == 'V' and order_sale_quotation is not None:
+                has_quotation_order = 'C'
+                order_sale_quotation_obj.has_quotation_order = 'C'
+                _type = 'E'
 
-        # validity_date = data_sale["validity_date"]
-        # date_completion = data_sale["date_completion"]
-        # place_delivery = data_sale["place_delivery"]
-        # type_quotation = data_sale["type_quotation"]
-        # type_name_quotation = data_sale["name_type_quotation"]
-        # observation = data_sale["observation"]
-        condition_days = data_sale["condition_days"]
+            with transaction.atomic():
 
-        if order_type == 'T' and order_sale_quotation is None:
-            has_quotation_order = 'S'
-        elif order_type == 'V' and order_sale_quotation is not None:
-            has_quotation_order = 'C'
-            order_sale_quotation_obj.has_quotation_order = 'C'
-            _type = 'E'
-
-        new_order_sale = {
-            'type': order_type,
-            'client': client_obj,
-            'user': user_obj,
-            'total': sale_total,
-            'distribution_mobil': None,
-            'subsidiary_store': subsidiary_store_sales_obj,
-            'truck': None,
-            'create_at': _date,
-            'correlative_sale': get_correlative_order(subsidiary_obj, order_type),
-            'subsidiary': subsidiary_obj,
-            # 'validity_date': validity_date,
-            # 'date_completion': date_completion,
-            # 'place_delivery': place_delivery,
-            # 'type_quotation': type_quotation,
-            # 'type_name_quotation': type_name_quotation,
-            # 'observation': observation,
-            'way_to_pay_type': type_payment,
-            'has_quotation_order': has_quotation_order,
-            'order_sale_quotation': order_sale_quotation_obj,
-            'pay_condition': condition_days,
-            'issue_date': issue_date
-        }
-        order_sale_obj = Order.objects.create(**new_order_sale)
-        order_sale_obj.save()
-
-        if order_sale_quotation_obj is not None:
-            order_sale_quotation_obj.order_sale_quotation = order_sale_obj
-            order_sale_quotation_obj.save()
-
-        order_detail_obj = None
-
-        type_doc = order_sale_obj.type
-        for detail in data_sale['Details']:
-            quantity = decimal.Decimal(detail['Quantity'])
-            price = decimal.Decimal(detail['Price'])
-            total = decimal.Decimal(detail['DetailTotal'])
-            product_id = int(detail['Product'])
-            product_obj = Product.objects.get(id=product_id)
-            unit_id = int(detail['Unit'])
-            unit_obj = Unit.objects.get(id=unit_id)
-            commentary = str(detail['_commentary'])
-
-            order_detail_obj = OrderDetail(
-                order=order_sale_obj,
-                product=product_obj,
-                quantity_sold=quantity,
-                price_unit=price,
-                unit=unit_obj,
-                commentary=commentary,
-                status='V'
-            )
-            order_detail_obj.save()
-
-            if order_type == 'V' and unit_obj.name != 'ZZ':
-                if detail['Serials'] != '':
-                    for serial in detail['Serials']:
-                        product_serial_obj = ProductSerial.objects.get(serial_number=serial['Serial'])
-                        product_serial_obj.order_detail = order_detail_obj
-                        product_serial_obj.status = 'V'
-                        product_serial_obj.save()
-
-                store_product_id = int(detail['Store'])
-                product_store_obj = ProductStore.objects.get(id=store_product_id)
-                quantity_minimum_unit = calculate_minimum_unit(quantity, unit_obj, product_obj)
-                kardex_ouput(product_store_obj.id, quantity_minimum_unit, order_detail_obj=order_detail_obj)
-
-        if order_type == 'V':
-            if type_payment != 'C' and _type != 'E':
-                new_loan_payments = {
-                    'quantity': 0,
-                    'price': sale_total,
-                    'create_at': _date,
-                    'type': 'V',
-                    'operation_date': _date,
-                    'order_detail': order_detail_obj,
-                    'product': product_obj,
-                }
-                new_loan_payment_obj = LoanPayment.objects.create(**new_loan_payments)
-                new_loan_payment_obj.save()
-
-                new_transaction_payment = {
-                    'payment': sale_total,
-                    'type': type_payment,
-                    'operation_code': cod_operation,
-                    'loan_payment': new_loan_payment_obj,
-                }
-                new_transaction_payment_obj = TransactionPayment.objects.create(**new_transaction_payment)
-                new_transaction_payment_obj.save()
-                cash_finality_obj = Cash.objects.get(id=int(cash_finality))
-                new_cash_flow = {
-                    'transaction_date': _date,
-                    'created_at': _date,
-                    'description': 'TICKET: ' + str(order_sale_obj.subsidiary.serial) + '-' + str(
-                        order_sale_obj.correlative_sale).zfill(6),
-                    'type': type_payment,
-                    'total': sale_total,
-                    'operation_code': cod_operation,
-                    'cash': cash_finality_obj,
-                    'order': order_sale_obj,
+                new_order_sale = {
+                    'type': order_type,
+                    'client': client_obj,
                     'user': user_obj,
-                    'document_type_attached': 'T'
+                    'total': sale_total,
+                    'distribution_mobil': None,
+                    'subsidiary_store': subsidiary_store_sales_obj,
+                    'truck': None,
+                    'create_at': _date,
+                    'correlative_sale': get_correlative_order(subsidiary_obj, order_type),
+                    'subsidiary': subsidiary_obj,
+                    'way_to_pay_type': type_payment,
+                    'has_quotation_order': has_quotation_order,
+                    'order_sale_quotation': order_sale_quotation_obj,
+                    'pay_condition': condition_days,
+                    'issue_date': issue_date
                 }
-                new_cash_flow_obj = CashFlow.objects.create(**new_cash_flow)
-                new_cash_flow_obj.save()
+                order_sale_obj = Order.objects.create(**new_order_sale)
+                order_sale_obj.save()
 
-            if _type == 'E':
-                if type_payment == 'C':
-                    for c in data_sale['credit']:
-                        PaymentFees.objects.create(date=c['date'], order=order_sale_obj,
-                                                   amount=decimal.Decimal(c['amount']))
+                if order_sale_quotation_obj is not None:
+                    order_sale_quotation_obj.order_sale_quotation = order_sale_obj
+                    order_sale_quotation_obj.save()
 
-                if _bill_type == 'F':
-                    r = send_bill_nubefact(order_sale_obj.id, subsidiary_obj.serial, True)
-                    msg_sunat = r.get('sunat_description')
-                    sunat_pdf = r.get('enlace_del_pdf')
-                    codigo_hash = r.get('codigo_hash')
-                    if codigo_hash:
-                        order_bill_obj = OrderBill(order=order_sale_obj,
-                                                   serial=r.get('serie'),
-                                                   type=r.get('tipo_de_comprobante'),
-                                                   sunat_status=r.get('aceptada_por_sunat'),
-                                                   sunat_description=r.get('sunat_description'),
-                                                   user=user_obj,
-                                                   sunat_enlace_pdf=r.get('enlace_del_pdf'),
-                                                   code_qr=r.get('cadena_para_codigo_qr'),
-                                                   code_hash=r.get('codigo_hash'),
-                                                   n_receipt=r.get('numero'),
-                                                   status='E',
-                                                   created_at=order_sale_obj.create_at,
-                                                   )
-                        order_bill_obj.save()
-                        order_sale_obj.voucher_type = _bill_type
-                        order_sale_obj.save()
-                        if type_payment != 'C':
-                            new_loan_payments = {
-                                'quantity': 0,
-                                'price': sale_total,
-                                'create_at': _date,
-                                'type': 'V',
-                                'operation_date': _date,
-                                'order_detail': order_detail_obj,
-                                'product': product_obj,
-                            }
-                            new_loan_payment_obj = LoanPayment.objects.create(**new_loan_payments)
-                            new_loan_payment_obj.save()
+                order_detail_obj = None
 
-                            new_transaction_payment = {
-                                'payment': sale_total,
-                                'type': type_payment,
-                                'operation_code': cod_operation,
-                                'loan_payment': new_loan_payment_obj,
-                            }
-                            new_transaction_payment_obj = TransactionPayment.objects.create(**new_transaction_payment)
-                            new_transaction_payment_obj.save()
-                            cash_finality_obj = Cash.objects.get(id=int(cash_finality))
-                            new_cash_flow = {
-                                'transaction_date': _date,
-                                'created_at': _date,
-                                'description': 'FACTURA: ' + str(
-                                    order_bill_obj.serial) + '-' + str(order_bill_obj.n_receipt).zfill(6),
-                                'type': type_payment,
-                                'total': sale_total,
-                                'operation_code': cod_operation,
-                                'cash': cash_finality_obj,
-                                'order': order_sale_obj,
-                                'user': user_obj,
-                                'document_type_attached': _type
-                            }
-                            new_cash_flow_obj = CashFlow.objects.create(**new_cash_flow)
-                            new_cash_flow_obj.save()
+                type_doc = order_sale_obj.type
+                for detail in data_sale['Details']:
+                    quantity = decimal.Decimal(detail['Quantity'])
+                    price = decimal.Decimal(detail['Price'])
+                    total = decimal.Decimal(detail['DetailTotal'])
+                    product_id = int(detail['Product'])
+                    product_obj = Product.objects.get(id=product_id)
+                    unit_id = int(detail['Unit'])
+                    unit_obj = Unit.objects.get(id=unit_id)
+                    commentary = str(detail['_commentary'])
 
-                    else:
-                        objects_to_delete = OrderDetail.objects.filter(order=order_sale_obj)
-                        objects_to_delete.delete()
-                        order_sale_obj.delete()
-                        if r.get('errors'):
-                            data = {'error': str(r.get('errors'))}
-                        elif r.get('error'):
-                            data = {'error': str(r.get('error'))}
-                        response = JsonResponse(data)
-                        response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
-                        return response
+                    order_detail_obj = OrderDetail(
+                        order=order_sale_obj,
+                        product=product_obj,
+                        quantity_sold=quantity,
+                        price_unit=price,
+                        unit=unit_obj,
+                        commentary=commentary,
+                        status='V'
+                    )
+                    order_detail_obj.save()
 
-                elif _bill_type == 'B':
-                    r = send_receipt_nubefact(order_sale_obj.id, subsidiary_obj.serial, True)
-                    msg_sunat = r.get('sunat_description')
-                    sunat_pdf = r.get('enlace_del_pdf')
-                    codigo_hash = r.get('codigo_hash')
+                    if order_type == 'V' and unit_obj.name != 'ZZ':
+                        if detail['Serials'] != '':
+                            for serial in detail['Serials']:
+                                product_serial_set = ProductSerial.objects.filter(serial_number=serial['Serial'])
+                                if product_serial_set.exists():
+                                    product_serial_obj = product_serial_set.last()
+                                    product_serial_obj.order_detail = order_detail_obj
+                                    product_serial_obj.status = 'V'
+                                    product_serial_obj.save()
+                                else:
+                                    raise ValidationError(
+                                        f"El número de serie {serial['Serial']} no existe, Actualice la Pagina y vuelva a intentar")
 
-                    if codigo_hash:
-                        order_bill_obj = OrderBill(order=order_sale_obj,
-                                                   serial=r.get('serie'),
-                                                   type=r.get('tipo_de_comprobante'),
-                                                   sunat_status=r.get('aceptada_por_sunat'),
-                                                   sunat_description=r.get('sunat_description'),
-                                                   user=user_obj,
-                                                   sunat_enlace_pdf=r.get('enlace_del_pdf'),
-                                                   code_qr=r.get('cadena_para_codigo_qr'),
-                                                   code_hash=r.get('codigo_hash'),
-                                                   n_receipt=r.get('numero'),
-                                                   status='E',
-                                                   created_at=order_sale_obj.create_at,
-                                                   )
-                        order_bill_obj.save()
-                        order_sale_obj.voucher_type = _bill_type
-                        order_sale_obj.save()
-                        if type_payment != 'C':
-                            new_loan_payments = {
-                                'quantity': 0,
-                                'price': sale_total,
-                                'create_at': _date,
-                                'type': 'V',
-                                'operation_date': _date,
-                                'order_detail': order_detail_obj,
-                                'product': product_obj,
-                            }
-                            new_loan_payment_obj = LoanPayment.objects.create(**new_loan_payments)
-                            new_loan_payment_obj.save()
+                        if order_detail_obj is None:
+                            raise ValidationError(
+                                "Error al crear el detalle de la orden. Operación cancelada. Actualice")
 
-                            new_transaction_payment = {
-                                'payment': sale_total,
-                                'type': type_payment,
-                                'operation_code': cod_operation,
-                                'loan_payment': new_loan_payment_obj,
-                            }
-                            new_transaction_payment_obj = TransactionPayment.objects.create(**new_transaction_payment)
-                            new_transaction_payment_obj.save()
-                            cash_finality_obj = Cash.objects.get(id=int(cash_finality))
-                            new_cash_flow = {
-                                'transaction_date': _date,
-                                'created_at': _date,
-                                'description': 'BOLETA: ' + str(
-                                    order_bill_obj.serial) + '-' + str(order_bill_obj.n_receipt).zfill(6),
-                                'type': type_payment,
-                                'total': sale_total,
-                                'operation_code': cod_operation,
-                                'cash': cash_finality_obj,
-                                'order': order_sale_obj,
-                                'user': user_obj,
-                                'document_type_attached': _type
-                            }
-                            new_cash_flow_obj = CashFlow.objects.create(**new_cash_flow)
-                            new_cash_flow_obj.save()
+                        store_product_id = int(detail['Store'])
+                        product_store_obj = ProductStore.objects.get(id=store_product_id)
+                        quantity_minimum_unit = calculate_minimum_unit(quantity, unit_obj, product_obj)
+                        kardex_ouput(product_store_obj.id, quantity_minimum_unit, order_detail_obj=order_detail_obj)
 
-                    else:
-                        objects_to_delete = OrderDetail.objects.filter(order=order_sale_obj)
-                        objects_to_delete.delete()
-                        order_sale_obj.delete()
+                if order_type == 'V':
+                    if type_payment != 'C' and _type != 'E':
+                        new_loan_payments = {
+                            'quantity': 0,
+                            'price': sale_total,
+                            'create_at': _date,
+                            'type': 'V',
+                            'operation_date': _date,
+                            'order_detail': order_detail_obj,
+                            'product': product_obj,
+                        }
+                        new_loan_payment_obj = LoanPayment.objects.create(**new_loan_payments)
+                        new_loan_payment_obj.save()
 
-                        if r.get('errors'):
-                            data = {'error': str(r.get('errors'))}
-                        elif r.get('error'):
-                            data = {'error': str(r.get('error'))}
-                        response = JsonResponse(data)
-                        response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
-                        return response
-                return JsonResponse({
-                    'message': 'Comprobante realizado con exito.',
-                    'msg_sunat': msg_sunat,
-                    'sunat_pdf': sunat_pdf,
-                    'id_sales': order_sale_obj.id,
-                    'type_doc': type_doc,
-                    'check_print_series': check_print_series
-                    # 'grid': tpl.render(context),
-                }, status=HTTPStatus.OK)
+                        new_transaction_payment = {
+                            'payment': sale_total,
+                            'type': type_payment,
+                            'operation_code': cod_operation,
+                            'loan_payment': new_loan_payment_obj,
+                        }
+                        new_transaction_payment_obj = TransactionPayment.objects.create(**new_transaction_payment)
+                        new_transaction_payment_obj.save()
+                        cash_finality_obj = Cash.objects.get(id=int(cash_finality))
+                        new_cash_flow = {
+                            'transaction_date': _date,
+                            'created_at': _date,
+                            'description': 'TICKET: ' + str(order_sale_obj.subsidiary.serial) + '-' + str(
+                                order_sale_obj.correlative_sale).zfill(6),
+                            'type': type_payment,
+                            'total': sale_total,
+                            'operation_code': cod_operation,
+                            'cash': cash_finality_obj,
+                            'order': order_sale_obj,
+                            'user': user_obj,
+                            'document_type_attached': 'T'
+                        }
+                        new_cash_flow_obj = CashFlow.objects.create(**new_cash_flow)
+                        new_cash_flow_obj.save()
 
-    return JsonResponse({
-        'id_sales': order_sale_obj.id,
-        'type_doc': type_doc,
-        'message': 'Venta Generada Correctamente',
-    }, status=HTTPStatus.OK)
+                    if _type == 'E':
+                        if type_payment == 'C':
+                            for c in data_sale['credit']:
+                                PaymentFees.objects.create(date=c['date'], order=order_sale_obj,
+                                                           amount=decimal.Decimal(c['amount']))
+
+                        if _bill_type == 'F':
+                            r = send_bill_nubefact(order_sale_obj.id, subsidiary_obj.serial, True)
+                            msg_sunat = r.get('sunat_description')
+                            sunat_pdf = r.get('enlace_del_pdf')
+                            codigo_hash = r.get('codigo_hash')
+                            if codigo_hash:
+                                order_bill_obj = OrderBill(order=order_sale_obj,
+                                                           serial=r.get('serie'),
+                                                           type=r.get('tipo_de_comprobante'),
+                                                           sunat_status=r.get('aceptada_por_sunat'),
+                                                           sunat_description=r.get('sunat_description'),
+                                                           user=user_obj,
+                                                           sunat_enlace_pdf=r.get('enlace_del_pdf'),
+                                                           code_qr=r.get('cadena_para_codigo_qr'),
+                                                           code_hash=r.get('codigo_hash'),
+                                                           n_receipt=r.get('numero'),
+                                                           status='E',
+                                                           created_at=order_sale_obj.create_at,
+                                                           )
+                                order_bill_obj.save()
+                                order_sale_obj.voucher_type = _bill_type
+                                order_sale_obj.save()
+                                if type_payment != 'C':
+                                    new_loan_payments = {
+                                        'quantity': 0,
+                                        'price': sale_total,
+                                        'create_at': _date,
+                                        'type': 'V',
+                                        'operation_date': _date,
+                                        'order_detail': order_detail_obj,
+                                        'product': product_obj,
+                                    }
+                                    new_loan_payment_obj = LoanPayment.objects.create(**new_loan_payments)
+                                    new_loan_payment_obj.save()
+
+                                    new_transaction_payment = {
+                                        'payment': sale_total,
+                                        'type': type_payment,
+                                        'operation_code': cod_operation,
+                                        'loan_payment': new_loan_payment_obj,
+                                    }
+                                    new_transaction_payment_obj = TransactionPayment.objects.create(
+                                        **new_transaction_payment)
+                                    new_transaction_payment_obj.save()
+                                    cash_finality_obj = Cash.objects.get(id=int(cash_finality))
+                                    new_cash_flow = {
+                                        'transaction_date': _date,
+                                        'created_at': _date,
+                                        'description': 'FACTURA: ' + str(
+                                            order_bill_obj.serial) + '-' + str(order_bill_obj.n_receipt).zfill(6),
+                                        'type': type_payment,
+                                        'total': sale_total,
+                                        'operation_code': cod_operation,
+                                        'cash': cash_finality_obj,
+                                        'order': order_sale_obj,
+                                        'user': user_obj,
+                                        'document_type_attached': _type
+                                    }
+                                    new_cash_flow_obj = CashFlow.objects.create(**new_cash_flow)
+                                    new_cash_flow_obj.save()
+
+                            else:
+                                objects_to_delete = OrderDetail.objects.filter(order=order_sale_obj)
+                                objects_to_delete.delete()
+                                order_sale_obj.delete()
+                                if r.get('errors'):
+                                    data = {'error': str(r.get('errors'))}
+                                elif r.get('error'):
+                                    data = {'error': str(r.get('error'))}
+                                response = JsonResponse(data)
+                                response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+                                return response
+
+                        elif _bill_type == 'B':
+                            r = send_receipt_nubefact(order_sale_obj.id, subsidiary_obj.serial, True)
+                            msg_sunat = r.get('sunat_description')
+                            sunat_pdf = r.get('enlace_del_pdf')
+                            codigo_hash = r.get('codigo_hash')
+
+                            if codigo_hash:
+                                order_bill_obj = OrderBill(order=order_sale_obj,
+                                                           serial=r.get('serie'),
+                                                           type=r.get('tipo_de_comprobante'),
+                                                           sunat_status=r.get('aceptada_por_sunat'),
+                                                           sunat_description=r.get('sunat_description'),
+                                                           user=user_obj,
+                                                           sunat_enlace_pdf=r.get('enlace_del_pdf'),
+                                                           code_qr=r.get('cadena_para_codigo_qr'),
+                                                           code_hash=r.get('codigo_hash'),
+                                                           n_receipt=r.get('numero'),
+                                                           status='E',
+                                                           created_at=order_sale_obj.create_at,
+                                                           )
+                                order_bill_obj.save()
+                                order_sale_obj.voucher_type = _bill_type
+                                order_sale_obj.save()
+                                if type_payment != 'C':
+                                    new_loan_payments = {
+                                        'quantity': 0,
+                                        'price': sale_total,
+                                        'create_at': _date,
+                                        'type': 'V',
+                                        'operation_date': _date,
+                                        'order_detail': order_detail_obj,
+                                        'product': product_obj,
+                                    }
+                                    new_loan_payment_obj = LoanPayment.objects.create(**new_loan_payments)
+                                    new_loan_payment_obj.save()
+
+                                    new_transaction_payment = {
+                                        'payment': sale_total,
+                                        'type': type_payment,
+                                        'operation_code': cod_operation,
+                                        'loan_payment': new_loan_payment_obj,
+                                    }
+                                    new_transaction_payment_obj = TransactionPayment.objects.create(
+                                        **new_transaction_payment)
+                                    new_transaction_payment_obj.save()
+                                    cash_finality_obj = Cash.objects.get(id=int(cash_finality))
+                                    new_cash_flow = {
+                                        'transaction_date': _date,
+                                        'created_at': _date,
+                                        'description': 'BOLETA: ' + str(
+                                            order_bill_obj.serial) + '-' + str(order_bill_obj.n_receipt).zfill(6),
+                                        'type': type_payment,
+                                        'total': sale_total,
+                                        'operation_code': cod_operation,
+                                        'cash': cash_finality_obj,
+                                        'order': order_sale_obj,
+                                        'user': user_obj,
+                                        'document_type_attached': _type
+                                    }
+                                    new_cash_flow_obj = CashFlow.objects.create(**new_cash_flow)
+                                    new_cash_flow_obj.save()
+                            else:
+                                objects_to_delete = OrderDetail.objects.filter(order=order_sale_obj)
+                                objects_to_delete.delete()
+                                order_sale_obj.delete()
+
+                                if r.get('errors'):
+                                    data = {'error': str(r.get('errors'))}
+                                elif r.get('error'):
+                                    data = {'error': str(r.get('error'))}
+                                response = JsonResponse(data)
+                                response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+                                return response
+                        # return JsonResponse({
+                        #     'message': 'Comprobante realizado con exito.' if msg_sunat else 'Venta Generada Correctamente',
+                        #     'msg_sunat': msg_sunat,
+                        #     'sunat_pdf': sunat_pdf,
+                        #     'id_sales': order_sale_obj.id,
+                        #     'type_doc': type_doc,
+                        #     'check_print_series': check_print_series,
+                        # }, status=HTTPStatus.OK)
+            return JsonResponse({
+                'message': 'Comprobante realizado con exito.' if msg_sunat else 'Venta Generada Correctamente',
+                'msg_sunat': msg_sunat,
+                'sunat_pdf': sunat_pdf,
+                'id_sales': order_sale_obj.id,
+                'type_doc': type_doc,
+                'check_print_series': check_print_series,
+            }, status=HTTPStatus.OK)
+    except ValidationError as e:
+        # Manejo de errores de validación
+        return JsonResponse({'error': str(e)}, status=HTTPStatus.BAD_REQUEST)
+
+    except Exception as e:
+        # Manejo general de excepciones
+        return JsonResponse({'error': f"Ocurrió un error: {str(e)}"}, status=HTTPStatus.INTERNAL_SERVER_ERROR)
 
 
 def delete_and_increment(order_obj):
@@ -5354,7 +5362,7 @@ def save_product_detail(request):
         try:
             _photo = request.FILES['exampleInputFile']
         except Exception as e:
-            _photo = 'assets/empty_image.jpg'
+            _photo = 'pic_folder/None/no-img.jpg'
 
         try:
             product_family_obj = ProductFamily.objects.get(id=family_product_id)
