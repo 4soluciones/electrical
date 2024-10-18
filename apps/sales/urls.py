@@ -221,4 +221,6 @@ urlpatterns = [
     # SEARCH SELL
     path('search_sell_by_serial/', login_required(search_sell_by_serial), name='search_sell_by_serial'),
 
+    # REPORT BRAND BY SALE
+    path('report_sales_by_brand/', login_required(report_sales_by_brand), name='report_sales_by_brand'),
 ]

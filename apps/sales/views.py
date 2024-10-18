@@ -6556,3 +6556,83 @@ def search_sell_by_serial(request):
             response = JsonResponse(data)
             response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
             return response
+
+
+def report_sales_by_brand(request):
+    if request.method == 'GET':
+        my_date = datetime.now()
+        formatdate = my_date.strftime("%Y-%m-%d")
+        brand_set = ProductBrand.objects.all().order_by('name')
+        return render(request, 'sales/report_sales_by_brand.html', {
+            'formatdate': formatdate, 'brand_set': brand_set})
+    elif request.method == 'POST':
+        start_date = str(request.POST.get('start-date'))
+        end_date = str(request.POST.get('end-date'))
+        brand_id = int(request.POST.get('brand'))
+        brand_obj = ProductBrand.objects.get(id=brand_id)
+        order_set = Order.objects.filter(
+            create_at__date__range=[start_date, end_date]).select_related('client', 'user',
+                                                                          'orderbill').prefetch_related(
+            Prefetch(
+                'orderdetail_set', queryset=OrderDetail.objects.select_related('product', 'unit',
+                                                                               'product__product_brand')
+            )
+        ).order_by('create_at')
+
+        order_dict = []
+        if order_set.exists():
+
+            for o in order_set:
+                _order_detail = o.orderdetail_set.filter(product__product_brand__id=brand_id)
+                if _order_detail:
+                    serial_number = str(o.subsidiary.serial) + '-' + str(o.correlative_sale)
+                    order_bill_obj = False
+                    if hasattr(o, 'orderbill'):
+                        order_bill_obj = True
+                        serial_number = str(o.orderbill.serial) + '-' + str(o.orderbill.n_receipt)
+
+                    order = {
+                        'id': o.id,
+                        'client': o.client,
+                        'user': o.user,
+                        'serial_number': serial_number,
+                        'total': 0,
+                        'create_at': o.create_at,
+                        'order_detail_set': [],
+                        'order_bill': order_bill_obj,
+                        'type': o.get_type_display(),
+                        'status': o.status,
+                        'way_to_pay': o.way_to_pay_type,
+                        'details': _order_detail.count(),
+                    }
+
+                    for d in _order_detail:
+                        order_detail = {
+                            'id': d.id,
+                            'product': d.product.name,
+                            'unit': d.unit.name,
+                            'quantity_sold': d.quantity_sold,
+                            'price_unit': d.price_unit,
+                            'multiply': d.multiply,
+                            'comentary': d.commentary.upper()
+                        }
+
+                        order.get('order_detail_set').append(order_detail)
+                    order['total'] = decimal.Decimal(o.sum_total_details()).quantize(decimal.Decimal('0.0'),
+                                                                                     rounding=decimal.ROUND_HALF_EVEN)
+                    order_dict.append(order)
+            # print(order_dict)
+            tpl = loader.get_template('sales/report_sales_by_brand_grid.html')
+
+            context = ({
+                'order_dict': order_dict,
+                'brand_obj': brand_obj,
+            })
+            return JsonResponse({
+                'grid': tpl.render(context, request),
+            }, status=HTTPStatus.OK)
+        else:
+            data = {'error': "LA MARCA NO CUENTA CON VENTAS EN EL RANGO SELECCIONADO"}
+            response = JsonResponse(data)
+            response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+            return response
