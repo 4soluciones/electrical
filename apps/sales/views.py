@@ -2066,9 +2066,9 @@ def get_sales_all_subsidiaries(request):
         end_date = str(request.POST.get('end-date'))
 
         if start_date == end_date:
-            orders = orders.filter(create_at__date=start_date).exclude(type='E')
+            orders = orders.filter(create_at__date=start_date, type='V')
         else:
-            orders = orders.filter(create_at__date__range=[start_date, end_date]).exclude(type='E')
+            orders = orders.filter(create_at__date__range=[start_date, end_date], type='V')
         if orders:
             return JsonResponse({
                 'grid': get_dict_order_queries(orders, start_date, end_date, is_pdf=False, is_unit=False),
@@ -6570,8 +6570,8 @@ def report_sales_by_brand(request):
         end_date = str(request.POST.get('end-date'))
         brand_id = int(request.POST.get('brand'))
         brand_obj = ProductBrand.objects.get(id=brand_id)
-        order_set = Order.objects.filter(
-            create_at__date__range=[start_date, end_date]).select_related('client', 'user',
+        order_set = Order.objects.filter(type='V',
+                                         create_at__date__range=[start_date, end_date]).select_related('client', 'user',
                                                                           'orderbill').prefetch_related(
             Prefetch(
                 'orderdetail_set', queryset=OrderDetail.objects.select_related('product', 'unit',
@@ -6585,9 +6585,9 @@ def report_sales_by_brand(request):
         sum_quantity = 0
         if order_set.exists():
             for o in order_set:
-                _order_detail = o.orderdetail_set.filter(product__product_brand__id=brand_id,
-                                                         product__productstore__productserial__isnull=True)
+                _order_detail = o.orderdetail_set.filter(product__product_brand__id=brand_id)
                 if _order_detail:
+                    flag_serial = False
                     serial_number = str(o.subsidiary.serial) + '-' + str(o.correlative_sale)
                     order_bill_obj = False
                     if hasattr(o, 'orderbill'):
@@ -6610,6 +6610,8 @@ def report_sales_by_brand(request):
                     }
 
                     for d in _order_detail:
+                        if d.product.productstore_set.last().productserial_set.all():
+                            flag_serial = True
                         order_detail = {
                             'id': d.id,
                             'product': d.product.name,
@@ -6617,7 +6619,8 @@ def report_sales_by_brand(request):
                             'quantity_sold': d.quantity_sold,
                             'price_unit': d.price_unit,
                             'multiply': d.multiply,
-                            'comentary': d.commentary.upper()
+                            'comentary': d.commentary.upper(),
+                            'flag_serial': flag_serial
                         }
                         if o.status != 'A':
                             sum_quantity += d.quantity_sold

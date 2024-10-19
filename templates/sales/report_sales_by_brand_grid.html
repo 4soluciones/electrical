@@ -2,7 +2,7 @@
     <div class="card roboto-condensed-regular">
         <div class="card-body m-0 p-1">
             <div class="table-responsive dataTables_wrapper m-0 p-0">
-                <table id="product-data-grid" class="table table-bordered table-hover table-primary">
+                <table id="product-data-grid" class="table table-bordered table-hover">
                     <thead>
                     <tr class="text-center text-white text-uppercase bg-info">
                         <th class="th-sm font-weight-normal align-middle" rowspan="2" style="width: 10%;">Nª de
@@ -68,20 +68,22 @@
                                         {% endif %}
 
                                     </td>
-                                    <td class="align-middle text-right text-primary text-center">{{ d.quantity_sold|floatformat }}</td>
-                                    <td class="align-middle text-center">{{ d.unit }}</td>
-                                    <td class="align-middle text-center">{{ d.product|upper }}</td>
-                                    <td class="align-middle text-right text-success">{{ d.price_unit|floatformat:2 }}</td>
-                                    <td class="align-middle text-right text-success">{{ d.multiply|floatformat:2 }}</td>
+                                    <td class="align-middle text-right text-primary text-center" {% if d.flag_serial %}style="background-color: #a2eb82" {% endif %}>
+                                        {{ d.quantity_sold|floatformat }}
+                                    </td>
+                                    <td class="align-middle text-center" {% if d.flag_serial %}style="background-color: #a2eb82" {% endif %}>{{ d.unit }}</td>
+                                    <td class="align-middle text-center" {% if d.flag_serial %}style="background-color: #a2eb82" {% endif %}>{{ d.product|upper }}</td>
+                                    <td class="align-middle text-right text-success" {% if d.flag_serial %}style="background-color: #a2eb82" {% endif %}>{{ d.price_unit|floatformat:2 }}</td>
+                                    <td class="align-middle text-right text-success" {% if d.flag_serial %}style="background-color: #a2eb82" {% endif %}>{{ d.multiply|floatformat:2 }}</td>
                                     </tr>
                                 {% else %}
                                     <tr class="text-center"
                                         {% if o.status == 'A' %}style="background-color: #ecb0b0" {% endif %}>
-                                        <td class="align-middle text-right text-primary text-center">{{ d.quantity_sold|floatformat }}</td>
-                                        <td class="align-middle text-center">{{ d.unit }}</td>
-                                        <td class="align-middle text-center">{{ d.product|upper }}</td>
-                                        <td class="align-middle text-right text-success">{{ d.price_unit|floatformat:2 }}</td>
-                                        <td class="align-middle text-right text-success">{{ d.multiply|floatformat:2 }}</td>
+                                        <td class="align-middle text-right text-primary text-center" {% if d.flag_serial %}style="background-color: #a2eb82" {% endif %}>{{ d.quantity_sold|floatformat }}</td>
+                                        <td class="align-middle text-center" {% if d.flag_serial %}style="background-color: #a2eb82" {% endif %}>{{ d.unit }}</td>
+                                        <td class="align-middle text-center" {% if d.flag_serial %}style="background-color: #a2eb82" {% endif %}>{{ d.product|upper }}</td>
+                                        <td class="align-middle text-right text-success" {% if d.flag_serial %}style="background-color: #a2eb82" {% endif %}>{{ d.price_unit|floatformat:2 }}</td>
+                                        <td class="align-middle text-right text-success" {% if d.flag_serial %}style="background-color: #a2eb82" {% endif %}>{{ d.multiply|floatformat:2 }}</td>
                                     </tr>
                                 {% endif %}
                             {% endfor %}
