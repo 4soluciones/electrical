@@ -6619,7 +6619,8 @@ def report_sales_by_brand(request):
                             'multiply': d.multiply,
                             'comentary': d.commentary.upper()
                         }
-                        sum_quantity += d.quantity_sold
+                        if o.status != 'A':
+                            sum_quantity += d.quantity_sold
                         order.get('order_detail_set').append(order_detail)
                     order['total'] = decimal.Decimal(o.sum_total_details()).quantize(decimal.Decimal('0.0'),
                                                                                      rounding=decimal.ROUND_HALF_EVEN)
