@@ -6579,11 +6579,14 @@ def report_sales_by_brand(request):
             )
         ).order_by('create_at')
 
-        order_dict = []
-        if order_set.exists():
+        # produc_set = OrderDetail.objects.filter(product__productstore__productserial__isnull=False)
 
+        order_dict = []
+        sum_quantity = 0
+        if order_set.exists():
             for o in order_set:
-                _order_detail = o.orderdetail_set.filter(product__product_brand__id=brand_id)
+                _order_detail = o.orderdetail_set.filter(product__product_brand__id=brand_id,
+                                                         product__productstore__productserial__isnull=True)
                 if _order_detail:
                     serial_number = str(o.subsidiary.serial) + '-' + str(o.correlative_sale)
                     order_bill_obj = False
@@ -6616,7 +6619,7 @@ def report_sales_by_brand(request):
                             'multiply': d.multiply,
                             'comentary': d.commentary.upper()
                         }
-
+                        sum_quantity += d.quantity_sold
                         order.get('order_detail_set').append(order_detail)
                     order['total'] = decimal.Decimal(o.sum_total_details()).quantize(decimal.Decimal('0.0'),
                                                                                      rounding=decimal.ROUND_HALF_EVEN)
@@ -6627,6 +6630,7 @@ def report_sales_by_brand(request):
             context = ({
                 'order_dict': order_dict,
                 'brand_obj': brand_obj,
+                'sum_quantity': str(round(sum_quantity, 0)),
             })
             return JsonResponse({
                 'grid': tpl.render(context, request),
