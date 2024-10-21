@@ -223,4 +223,8 @@ urlpatterns = [
 
     # REPORT BRAND BY SALE
     path('report_sales_by_brand/', login_required(report_sales_by_brand), name='report_sales_by_brand'),
+
+    # FUNCTION RECALCULATE
+    path('recalculate/', login_required(recalculate), name='recalculate'),
+
 ]

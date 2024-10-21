@@ -6474,6 +6474,7 @@ def calculate_square_quantity(request):
                 k.save()
 
             kardex_initial.remaining_price = decimal.Decimal(new_price_purchase)
+            kardex_initial.remaining_price_total = decimal.Decimal(new_price_purchase) * decimal.Decimal(kardex_initial.remaining_quantity)
             kardex_initial.save()
 
         last_inventory = Kardex.objects.filter(id__lt=OuterRef("pk"), product_store__id=ps_id).order_by(
@@ -6572,7 +6573,7 @@ def report_sales_by_brand(request):
         brand_obj = ProductBrand.objects.get(id=brand_id)
         order_set = Order.objects.filter(type='V',
                                          create_at__date__range=[start_date, end_date]).select_related('client', 'user',
-                                                                          'orderbill').prefetch_related(
+                                                                                                       'orderbill').prefetch_related(
             Prefetch(
                 'orderdetail_set', queryset=OrderDetail.objects.select_related('product', 'unit',
                                                                                'product__product_brand')
@@ -6644,3 +6645,25 @@ def report_sales_by_brand(request):
             response = JsonResponse(data)
             response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
             return response
+
+
+def recalculate(request):
+    if request.method == 'GET':
+        kardex_set = Kardex.objects.filter(product_store__id=400)
+        for k in kardex_set:
+            if k.operation == 'E':
+                if k.purchase_detail:
+                    k.price_unit = k.purchase_detail.price_unit
+                    k.price_total = decimal.Decimal(k.quantity) * decimal.Decimal(k.purchase_detail.price_unit)
+                    k.save()
+                else:
+                    k.price_unit = k.order_detail.price_unit
+                    k.price_total = decimal.Decimal(k.quantity) * decimal.Decimal(k.order_detail.price_unit)
+                    k.save()
+            elif k.operation == 'S':
+                k.price_unit = k.order_detail.price_unit
+                k.price_total = decimal.Decimal(k.quantity) * decimal.Decimal(k.order_detail.price_unit)
+                k.save()
+        return JsonResponse({
+            'success': True,
+        }, status=HTTPStatus.OK)

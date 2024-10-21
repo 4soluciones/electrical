@@ -199,7 +199,7 @@
                             <div class="input-group input-group-sm mb-3">
                                 <input type="text" class="form-control first_price_purchase" aria-label="Small"
                                        style="width: 50px"
-                                       value="{{ kardex.remaining_price|floatformat:2 }}" id="first_price_purchase"
+                                       value="{{ kardex.remaining_price|floatformat:3 }}" id="first_price_purchase"
                                        aria-describedby="inputGroup-sizing-sm" readonly
                                        ps="{{ kardex.product_store.id }}">
                                 <div class="input-group-prepend">
@@ -211,10 +211,10 @@
                                 </div>
                             </div>
                         {% else %}
-                            {{ kardex.remaining_price|floatformat:2 }}
+                            {{ kardex.remaining_price|floatformat:3 }}
                         {% endif %}
                     </td>
-                    <td class="align-middle text-danger text-right">{{ kardex.remaining_price_total|floatformat:2 }}</td>
+                    <td class="align-middle text-danger text-right">{{ kardex.remaining_price_total|floatformat:3 }}</td>
 
                 </tr>
             {% endfor %}
