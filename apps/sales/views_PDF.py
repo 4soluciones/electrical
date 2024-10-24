@@ -1255,29 +1255,30 @@ def print_order_bill(request, pk=None, check=None):
         detail_credit.append(
             ('MODALIDAD DE PAGO', 'CUOTAS ', 'FECHA',
              'IMPORTE'))
-        for c in order_obj.paymentfees_set.all():
-            amount = c.amount
-            cnt = cnt + 1
-            detail_credit.append(
-                ('CREDITO POR PAGAR', 'CUOTA ' + str(cnt), str(c.date.strftime('%d-%m-%Y')),
-                 str(round(amount, 2))))
-        credit_list = Table(detail_credit,
-                            colWidths=[_bts * 60 / 100,
-                                       _bts * 10 / 100,
-                                       _bts * 20 / 100,
-                                       _bts * 10 / 100])
-        style_credit = [
-            ('ALIGNMENT', (0, 0), (2, -1), 'CENTER'),
-            ('ALIGNMENT', (3, 0), (-1, -1), 'RIGHT'),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('SPAN', (0, 1), (0, -1)),
-            ('FONTNAME', (0, 0), (-1, -1), 'Square'),
-            ('GRID', (0, 0), (-1, -1), 0.3, colors.darkgray),
-            ('FONTSIZE', (0, 0), (-1, -1), 10),
-            ('BACKGROUND', (0, 0), (-1, 0), colors.darkgray),  # four column
-            # ('BACKGROUND', (4, 0), (4, -1), colors.blue),  # four column
-        ]
-        credit_list.setStyle(TableStyle(style_credit))
+        if order_obj.paymentfees_set.all():
+            for c in order_obj.paymentfees_set.all():
+                amount = c.amount
+                cnt = cnt + 1
+                detail_credit.append(
+                    ('CREDITO POR PAGAR', 'CUOTA ' + str(cnt), str(c.date.strftime('%d-%m-%Y')),
+                     str(round(amount, 2))))
+            credit_list = Table(detail_credit,
+                                colWidths=[_bts * 60 / 100,
+                                           _bts * 10 / 100,
+                                           _bts * 20 / 100,
+                                           _bts * 10 / 100])
+            style_credit = [
+                ('ALIGNMENT', (0, 0), (2, -1), 'CENTER'),
+                ('ALIGNMENT', (3, 0), (-1, -1), 'RIGHT'),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('SPAN', (0, 1), (0, -1)),
+                ('FONTNAME', (0, 0), (-1, -1), 'Square'),
+                ('GRID', (0, 0), (-1, -1), 0.3, colors.darkgray),
+                ('FONTSIZE', (0, 0), (-1, -1), 10),
+                ('BACKGROUND', (0, 0), (-1, 0), colors.darkgray),  # four column
+                # ('BACKGROUND', (4, 0), (4, -1), colors.blue),  # four column
+            ]
+            credit_list.setStyle(TableStyle(style_credit))
     tbl2_col2 = [
         ['Fecha Emision: ', Paragraph(order_obj.create_at.strftime("%d-%m-%Y"), styles['Left_Square'])],
         ['Vendedor: ', Paragraph(order_obj.user.username.upper(), styles['Left_Square'])],
