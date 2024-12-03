@@ -5120,8 +5120,8 @@ def cancel_order(request):
             # enlace = 't'
             sunat_ticket_numero = r.get('sunat_ticket_numero')
             aceptada_por_sunat = r.get('aceptada_por_sunat')
-
-            if enlace:
+            code = r.get('codigo')
+            if enlace or code:
                 for d in order_obj.orderdetail_set.all():
                     _product_id = d.product.id
                     product_obj = Product.objects.get(id=int(_product_id))
