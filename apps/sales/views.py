@@ -534,7 +534,9 @@ def new_client(request):
             client_obj.phone = phone
             client_obj.email = email
             client_obj.save()
-            district = District.objects.get(id=id_district)
+            district_obj = None
+            if request.POST.get('id_district', '') != '0':
+                district_obj = District.objects.get(id=id_district)
             document_type = DocumentType.objects.get(id=document_type_id)
 
             client_address_set = ClientAddress.objects.filter(client_id=client_id)
@@ -542,14 +544,14 @@ def new_client(request):
                 client_address_obj = client_address_set.first()
 
                 client_address_obj.address = address
-                client_address_obj.district = district
+                client_address_obj.district = district_obj
                 client_address_obj.reference = reference
                 client_address_obj.save()
             else:
                 data_client_address = {
                     'client': client_obj,
                     'address': address,
-                    'district': district,
+                    'district': district_obj,
                     'reference': reference,
                 }
                 client_address = ClientAddress.objects.create(**data_client_address)
@@ -2608,9 +2610,30 @@ def get_dict_orders(client_obj=None, start_date=None, end_date=None):
 
             total_repay_loan_v = total_repay_loan(order_detail_set=order_detail_set)
             difference = o.total - total_repay_loan_v
+
+            type_bill = 'TICKET'
+            serial = o.subsidiary.serial
+            correlative_sale = o.correlative_sale
+            order_bill_set = OrderBill.objects.filter(order=o.id)
+
+            if order_bill_set.exists():
+                order_bill_obj = order_bill_set.first()
+
+                if order_bill_obj.type == '1':
+                    type_bill = 'FACTURA'
+                    serial = order_bill_obj.serial
+                    correlative_sale = order_bill_obj.n_receipt
+                elif order_bill_obj.type == '2':
+                    type_bill = 'BOLETA'
+                    serial = order_bill_obj.serial
+                    correlative_sale = order_bill_obj.n_receipt
+
             new = {
                 'id': o.id,
                 'type': o.get_type_display(),
+                'type_bill': type_bill,
+                'serial': serial,
+                'correlative_sale': correlative_sale,
                 'client': o.client.names,
                 'date': o.create_at,
                 'order_detail_set': [],

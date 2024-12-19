@@ -19,7 +19,7 @@
                         <th scope="col">Direccion</th>
                         <th scope="col">Distrito</th>
                         <th scope="col">Asociados</th>
-                        <th scope="col">Referencia</th>
+{#                        <th scope="col">Referencia</th>#}
                         <th scope="col">Email</th>
                         <th scope="col">Acción</th>
                     </tr>
@@ -41,7 +41,7 @@
 
 
                             </td>
-                            <td>{{ client.clientaddress_set.first.reference|default:"-" }}</td>
+{#                            <td>{{ client.clientaddress_set.first.reference|default:"-" }}</td>#}
                             <td>{{ client.email|default:"-" }}</td>
                             <td>
                                 <button type="button" class="btn btn-block btn-secondary client-edit" pk="{{ client.id }}">Editar</button>

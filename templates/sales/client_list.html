@@ -1,11 +1,11 @@
 {% extends 'home.html' %}
 
 {% block title %}
-    coronasoft.dev | Clientes
+    Clientes
 {% endblock title %}
 
 {% block body %}
-    <div class="container-fluid">
+    <div class="container-fluid roboto-condensed-regular">
 
         <a class="btn btn-outline-info mb-3 mt-3" data-toggle="modal"
            data-target="#modal-option">
@@ -309,8 +309,6 @@
 
                         }
 
-
-
                         $('#modal_client').modal('show');
                     }
                 },
@@ -320,7 +318,7 @@
             });
         });
 
-$(document).on('click', '.client-new-associate', function () {
+        $(document).on('click', '.client-new-associate', function () {
 
             $('#cl_names').empty();
 

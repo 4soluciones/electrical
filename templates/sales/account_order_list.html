@@ -1,16 +1,16 @@
 <div class="card-header text-center text-uppercase bg-light font-weight-bold">
-    <h2> {{ client_obj }} </h2>
+    <h2 class="roboto-condensed-regular"> {{ client_obj }} </h2>
 </div>
 
 <input type="hidden" id="start_date" name="start_date" value="{{ start_date }}">
 <input type="hidden" id="end_date" name="end_date" value="{{ end_date }}">
 
-<div class="" id="grid-dictionary" style="overflow:scroll;width: 100%;height: 45em">
+<div class="roboto-condensed-regular" id="grid-dictionary" style="overflow:scroll;width: 100%;height: 45em">
     <table class="table table-sm table-bordered" id="table-dictionary" style="border-collapse: collapse;">
         <thead>
         <tr class="text-white small text-uppercase text-center">
             <td class="bg-primary">ID</td>
-            <td class="bg-primary">TIPO</td>
+            <td class="bg-primary">TIPO - Nº</td>
             <td class="bg-primary">FECHA</td>
 
             <td class="bg-info" colspan="5">DETALLES DE ORDEN</td>
@@ -33,13 +33,14 @@
                 <td class="align-middle text-center" {% if o.c_status == 'A' %} style="background-color: #ea6969" {% endif %}>
                     {% if o.type == 'VENTA' %}
                         {% if o.c_status == 'A' %}
-                            <span class="text-dark font-weight-bolder">{{ o.status }}</span>
+                            <span class="text-dark">{{ o.status }}</span>
                         {% else %}
-                            <span class="text-success font-weight-bolder">{{ o.type }}</span>
+                            <span class="text-success">{{ o.type }}</span>
                         {% endif %}
                     {% else %}
                         <span class="text-dark font-weight-bolder">{{ o.type }}</span>
-                    {% endif %}
+                    {% endif %}<br>
+                    <span class="font-weight-bold">{{ o.serial }} - {{ o.correlative_sale }}</span>
                 </td>
 
                 <td class="align-middle text-center">{{ o.date|date:"d-m-y" }}</td>
