@@ -658,11 +658,23 @@
             $('#details').find("tr[i=" + $id + "]").remove();
             counterStrike();
         }
-
-        function deleteItem2(btn) {
-            btn.parentNode.parentNode.remove();
+        $(document).on('click', '.delete-detail', function (e) {
+            let product = $(this).closest('td').parent('tr').attr('product');
+            if (product){
+                $('#details-table').find("tr[product=" + product + "]").remove();
+            }
+            else{
+                $(this).closest('td').parent('tr').next('tr.product-serial').remove();
+                $(this).closest('td').parent('tr').remove();
+            }
             counterStrike2();
-        }
+        });
+        /*function deleteItem2(btn) {
+            //btn.parentNode.parentNode.remove();
+            let product = btn.closest('td').parent('tr').attr('product')
+            $('#details-table').find("tr[product=" + product + "]").remove();
+            counterStrike2();
+        }*/
 
         // reasigna numero de fila a los detalles
         function counterStrike() {
@@ -759,20 +771,23 @@
             let _unit_id = $(this).attr('unit_id');
             let _barcode = $(this).attr('barcode');
             let _product_name = $(this).text();
-            let _tr = $(this).parent('div.dropdown-menu').parent('td').parent('tr')
-            let _td = $(this).parent('div.dropdown-menu').parent('td')
-            let _select = _td.find('select.unit-product')
-            let _brand_product = $(this).attr('brand')
-            let _unit_product = $(this).attr('unit_name')
+            let _tr = $(this).parent('div.dropdown-menu').parent('td').parent('tr');
+            let _next_tr = _tr.next('tr')
+            let _td = $(this).parent('div.dropdown-menu').parent('td');
+            let _select = _td.find('select.unit-product');
+            let _brand_product = $(this).attr('brand');
+            let _unit_product = $(this).attr('unit_name');
             //$('.product-table').val(_product_name)
 
             _tr.attr('product', _product_id)
+            _next_tr.attr('product', _product_id)
             _td.find('input.product-table').val(_product_name)
             _tr.find('td.brand input.brand-product').val(_brand_product)
             _tr.find('td.unit input.unit-product').val(_unit_product)
             _tr.find('td.item-code-bar input.code-bar').val(_barcode)
 
             _tr.attr('unit_id', _unit_id)
+            _next_tr.attr('unit_id', _unit_id)
 
             {#get_units_by_product(_product_id, _tr)#}
 
@@ -852,9 +867,9 @@
                 /*'<td class="item-check text-center align-middle">' +
                 '<div class="form-check">' + '<input class="form-check-input position-static check-kardex" type="checkbox" value="" checked> ' + '</div>' +
                 '</td>' +*/
-                '<td class="align-middle"> ' + '<button type="button" onclick="deleteItem2(this)" class="btn btn-danger delete-detail"><i class="fa fa-trash"></i></button>' + '</td>' +
+                '<td class="align-middle"> ' + '<button type="button" class="btn btn-danger delete-detail"><i class="fa fa-trash"></i></button>' + '</td>' +
                 '</tr>' +
-                ' <tr class="product-serial">' + '</tr>'
+                '<tr class="product-serial"product="" unit_id="">' + '</tr>'
             );
             counterStrike2()
         });

@@ -81,7 +81,8 @@
                                         <tr product="{{ product.id }}" productname="{{ product.name }}"
                                             unit="{{ obj.unit.id }}" unitname="{{ obj.unit.name }}"
                                             product_brand="{{ product.product_brand.name }}"
-                                            quantity_minum="{{ obj.quantity_minimum|safe }}">
+                                            quantity_minum="{{ obj.quantity_minimum|safe }}"
+                                            price_purchase="{{ obj.price_purchase|safe }}">
                                             {% if perms.admin %}
                                                 <td class="align-middle text-center font-weight-bold quantity-sales-price small">
                                                     S/ {{ obj.price_purchase|safe }} <span

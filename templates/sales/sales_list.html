@@ -1196,7 +1196,7 @@
             let product_serial = _tr_product.find('td.td-table-stock table.table-stock-headquarters tbody tr').attr('product_serial');
 
             let price = parseFloat($(this).attr('ip'));
-            {#let purchase_price =#}
+            let purchase_price = parseFloat(tr.attr('price_purchase'));
             let unit_id = tr.attr('unit');
             let name_unit = tr.attr('unitname');
             let product_id = tr.attr('product');
@@ -1256,7 +1256,7 @@
                     _flag_stock = await check_stock(quantity, product_id)
                 }
                 if (_flag_stock === true) {
-                    addOrderDetail(unit_id, product_id, quantity, price, name_unit, unescape(name_product), store_id, quantity_minim, serial, product_serial);
+                    addOrderDetail(unit_id, product_id, quantity, price, name_unit, unescape(name_product), store_id, quantity_minim, serial, product_serial, purchase_price);
                     tr.parent('tbody').parents('table.table-prices').parent('td').parent('tr').find('td.td-table-stock table.table-stock-headquarters tbody tr.my-subsidiary[store_="V"] td.item-stock button.btn-stock').text(stock - quantity * quantity_minim);
                 } else {
                     toastr.warning('STOCK INSUFICIENTE EN ALMACEN');
@@ -1321,7 +1321,7 @@
             counterStrike();
         }
 
-        function addOrderDetail(a, b, c, d, e, f, g, h, serial, _product_serial) {
+        function addOrderDetail(a, b, c, d, e, f, g, h, serial, _product_serial, price_purchase) {
 
             let _unit_id = a
             let _product_id = b
@@ -1333,7 +1333,7 @@
             let _product_store = g
             let _quantity_minim = parseFloat(h)
             $('#sales-details').append(
-                '<tr detail_id="' + 'NaN' + '" product="' + _product_id + '" store_p="' + _product_store + '" pu="' + _unit_id + '" class="text-uppercase small text-center product" style="font-size: 14px;">' +
+                '<tr detail_id="' + 'NaN' + '" product="' + _product_id + '" store_p="' + _product_store + '" pu="' + _unit_id + '" price_p="'+ price_purchase +'" class="text-uppercase small text-center product" style="font-size: 14px;">' +
                 '<td class="align-middle">' + '</td>' +
                 '<td class="align-middle text-left item-product">' + '<input type="text" class="form-control form-control-sm input-product-name" value="' + _product_name + '">' + '</td>' +
                 '<td class="align-middle item-quantity">' + '<input type="number" class="form-control form-control-sm text-right input-quantity" disabled value="' + _quantity.toFixed(2) + '">' + '</td>' +
@@ -1547,8 +1547,13 @@
             let val = Number($(this).val());
             let row = $(this).parent('td.item-price').parent('tr');
             let quantity = Number(row.find('td.item-quantity input.input-quantity').val());
+            let price_purchase = Number(row.attr('price_p'))
             {#console.log('quantity',quantity)#}
             {#console.log('val',val)#}
+            /*if (val < price_purchase){
+                toastr.error('El precio de venta no puede ser menor al precio de compra', '¡Error de escritura!');
+                $(this).val('')
+            }*/
             if (isNaN(val)) {
                 $(this).val('')
             } else {
