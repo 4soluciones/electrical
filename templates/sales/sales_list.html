@@ -1541,19 +1541,24 @@
                 }
             });
         }
-
+        $(document).on('blur', '#sales-details tr td.item-price input.input-price', function (e) {
+            let val = Number($(this).val());
+            let row = $(this).parent('td.item-price').parent('tr');
+            let price_purchase = Number(row.attr('price_p'));
+            if (val < price_purchase){
+                toastr.error('El precio de venta no puede ser menor al precio de compra', '¡Error de escritura!');
+                $(this).val('');
+                $(this).focus();
+                calculateTotal();
+            }
+        });
 
         $(document).on('keyup', '#sales-details tr td.item-price input.input-price', function (e) {
             let val = Number($(this).val());
             let row = $(this).parent('td.item-price').parent('tr');
             let quantity = Number(row.find('td.item-quantity input.input-quantity').val());
-            let price_purchase = Number(row.attr('price_p'))
             {#console.log('quantity',quantity)#}
             {#console.log('val',val)#}
-            /*if (val < price_purchase){
-                toastr.error('El precio de venta no puede ser menor al precio de compra', '¡Error de escritura!');
-                $(this).val('')
-            }*/
             if (isNaN(val)) {
                 $(this).val('')
             } else {
