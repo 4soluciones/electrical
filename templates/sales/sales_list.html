@@ -1196,7 +1196,7 @@
             let product_serial = _tr_product.find('td.td-table-stock table.table-stock-headquarters tbody tr').attr('product_serial');
 
             let price = parseFloat($(this).attr('ip'));
-            let purchase_price =
+            {#let purchase_price =#}
             let unit_id = tr.attr('unit');
             let name_unit = tr.attr('unitname');
             let product_id = tr.attr('product');
