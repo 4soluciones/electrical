@@ -1196,6 +1196,7 @@
             let product_serial = _tr_product.find('td.td-table-stock table.table-stock-headquarters tbody tr').attr('product_serial');
 
             let price = parseFloat($(this).attr('ip'));
+            let purchase_price =
             let unit_id = tr.attr('unit');
             let name_unit = tr.attr('unitname');
             let product_id = tr.attr('product');
@@ -1263,7 +1264,7 @@
 
             } else if (product_serial === 'true') {
                 if ($("#sales-details tr[product=" + product_id + "][pu=" + unit_id + "]").length) {
-                    let $msg = 'EL PRODUCTO CON ESTE TIPO DE UNIDAD YA SE ENCUENTRA EN EL REGISTRO.';
+                    let $msg = 'EL PRODUCTO CON EL TIPO DE UNIDAD YA SE ENCUENTRA EN EL REGISTRO.';
                     toastr.warning($msg, 'Mensaje');
                     return false;
                 }
