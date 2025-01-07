@@ -1,6 +1,6 @@
 {% load app_filters %}
 {% if products %}
-        <table id="product-data-grid" class="table table-sm table-bordered m-0" cellspacing="0"
+        <table id="product-data-grid" class="table table-sm table-bordered m-0 roboto-condensed-regular" cellspacing="0"
                width="100%">
             <thead>
             <tr class="text-center text-uppercase">
@@ -79,8 +79,7 @@
                                class="btn-sm btn-outline-warning btn-update-price-purchase"
                                data-toggle="modal"
                                data-target="#modal-change-price-purchase"
-                               pk="{{ product.id }}"><i
-                                    class="fas fa-edit"></i></a>
+                               pk="{{ product.id }}"><i class="fas fa-edit fa-xs"></i></a><br>
                             <span style="font-size: 10px">{{ product_detail.update_at|date:"d/m/y" }}</span>
                         </td>
 
