@@ -1542,8 +1542,15 @@ def update_state_annular_purchase(request):
             response = JsonResponse(data)
             response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
             return response
-        purchase_obj.status = 'N'
-        purchase_obj.save()
+        else:
+            if purchase_obj.purchasedetail_set.all():
+                for detail in purchase_obj.purchasedetail_set.all():
+                    product_serial_set = ProductSerial.objects.filter(purchase_detail=detail)
+                    if product_serial_set.exists():
+                        product_serial_set.delete()
+
+            purchase_obj.status = 'N'
+            purchase_obj.save()
     return JsonResponse({
         'message': 'COMPRA ANULADA CORRECTAMENTE',
 

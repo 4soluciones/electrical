@@ -213,7 +213,7 @@ class ProductSerial(models.Model):
     status = models.CharField('Estado', max_length=1, choices=STATUS_CHOICES, default='C')
     product_store = models.ForeignKey('ProductStore', on_delete=models.CASCADE, null=True, blank=True)
     serial_number = models.CharField('Numero de Serie', max_length=100, null=True, blank=True)
-    purchase_detail = models.ForeignKey('buys.PurchaseDetail', on_delete=models.CASCADE, null=True, blank=True)
+    purchase_detail = models.ForeignKey('buys.PurchaseDetail', on_delete=models.SET_NULL, null=True, blank=True)
     order_detail = models.ForeignKey('sales.OrderDetail', on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
