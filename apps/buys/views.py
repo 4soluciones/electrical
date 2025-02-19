@@ -482,7 +482,7 @@ def get_detail_purchase_store(request):
                 'total_quantity_details': p.total_quantity_details(),
                 'purchase_detail_set': []
             }
-            freight_calculate = float(p.total_freight / p.total_quantity_details())
+            # freight_calculate = float(p.total_freight / p.total_quantity_details())
 
             for d in p.purchasedetail_set.all():
 
@@ -492,7 +492,7 @@ def get_detail_purchase_store(request):
                     price_unit_real = round(float(d.price_unit_discount_with_igv()), 2)
 
                 price_unit_discount_with_igv_money_change = round(float(price_unit_real) * float(type_change), 2)
-                price_unit_discount_with_igv_money_change_freight = price_unit_discount_with_igv_money_change + freight_calculate
+                # price_unit_discount_with_igv_money_change_freight = price_unit_discount_with_igv_money_change + freight_calculate
 
                 details = {
                     'id': d.id,
@@ -514,9 +514,9 @@ def get_detail_purchase_store(request):
                     'total_detail': d.total_detail,
                     'check_kardex': d.check_kardex,
                     'multiplicate': round(float(d.multiplicate()), 2),
-                    'price_unit_discount_plus_freight': round(price_unit_real + freight_calculate, 2),
+                    # 'price_unit_discount_plus_freight': round(price_unit_real + freight_calculate, 2),
                     'price_unit_discount_with_igv_money_change': price_unit_discount_with_igv_money_change,
-                    'price_unit_discount_with_igv_money_change_freight': price_unit_discount_with_igv_money_change_freight,
+                    # 'price_unit_discount_with_igv_money_change_freight': price_unit_discount_with_igv_money_change_freight,
                     'serials': []
                 }
                 for s in d.productserial_set.all().order_by('id'):
