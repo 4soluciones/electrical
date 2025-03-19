@@ -1,344 +1,488 @@
 {% load app_filters %}
-<div class="card p-0 roboto-condensed-regular" style="border-color: #0b62a4">
-    <div class="card-header text-center" style="background: #0b62a4">
-        <div class="row align-self-center">
-            <div class="col-sm-7 text-white align-self-center">
-                <h4 class="text-white font-weight-bold mt-1 mb-1 roboto-condensed-regular" style="font-size: 30px">
-                    MÓDULO DE VENTAS
-                </h4>
-            </div>
-            <div class="col-sm-5 text-white align-self-center border border-white">
-                <div class="row p-2">
-                    <div class="col-sm-6 col-md-6 col-lg-6 pl-4">
-                        <div class="row save-order">
-                            <button type="button" id="btn-voucher-order"
-                                    class="btn btn-success btn-sm text-uppercase text-center mt-1 col-sm-12 col-md-12 col-lg-12"
-                                    data-toggle="modal"
-                                    data-target="#modal-voucher"><i
-                                    class="fas fa-check-circle"></i> Guardar
+{% load static %}
+
+<form id="order-form" action="{% url 'sales:save_order' %}" method="POST">
+    {% csrf_token %}
+    <div class="card p-0 roboto-condensed-regular" style="border-color: #0b62a4">
+        <div class="card-header text-center" style="background: #0b62a4">
+            <div class="row align-self-center">
+                <div class="col-sm-7 text-white align-self-center">
+                    <h4 class="text-white font-weight-bold mt-1 mb-1 roboto-condensed-regular" style="font-size: 30px">
+                        MÓDULO DE VENTAS
+                    </h4>
+                </div>
+                <div class="col-sm-5 text-white align-self-center border border-white">
+                    <div class="row p-2">
+                        <div class="col-sm-6 col-md-6 col-lg-6 pl-4">
+                            <div class="row save-order">
+                                <button type="submit" id="save-order"
+                                        class="btn btn-primary btn-sm btn-block mt-1 text-uppercase text-center">
+                                    <i class="fas fa-save"></i> Guardar
+                                </button>
+                                {#                            <button type="button" id="btn-voucher-order"#}
+                                {#                                    class="btn btn-success btn-sm text-uppercase text-center mt-1 col-sm-12 col-md-12 col-lg-12"#}
+                                {#                                    data-toggle="modal"#}
+                                {#                                    data-target="#modal-voucher"><i#}
+                                {#                                    class="fas fa-check-circle"></i> Guardar#}
+                                {#                            </button>#}
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-6 col-lg-6 pr-2">
+                            <button type="button"
+                                    class="btn btn-warning btn-sm text-uppercase text-center mt-1 col-sm-12 col-md-12 col-lg-12"
+                                    id="btn-new-form"><i class="far fa-check-circle"></i> Nuevo
                             </button>
                         </div>
-                    </div>
-                    <div class="col-sm-6 col-md-6 col-lg-6 pr-2">
-                        <button type="button"
-                                class="btn btn-warning btn-sm text-uppercase text-center mt-1 col-sm-12 col-md-12 col-lg-12"
-                                id="btn-new-form"><i class="far fa-check-circle"></i> Nuevo
-                        </button>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="card-body p-2">
-        <div class="row mb-0">
-            <div class="col-sm-9">
-                <fieldset class="border bg-light p-2" style="font-size: 12px">
-                    <legend class="w-auto mb-0 text-black-50 text-uppercase" style="font-size: 12px">
-                        BÚSQUEDA DE PRODUCTOS
-                    </legend>
-                    <div class="row mb-2">
-                        <div class="col-sm-3 col-md-3 col-lg-3">
-                            <label for="type_search" class="mb-0 font-weight-bold">&nbsp;</label>
-                            <select id="type_search" name="type-search"
-                                    class="form-control text-center font-weight-bold border-dark"
-                                    style="background-color: #c6efc9">
-                                <option selected value="P">Producto</option>
-                                <option value="B">Cod. de Barras</option>
-                                <option value="S">Serie</option>
-                            </select>
+        <div class="card-body p-2">
+            <div class="row mb-0">
+                <div class="col-sm-9">
+                    <fieldset class="border bg-light p-2" style="font-size: 12px">
+                        <legend class="w-auto mb-0 text-black-50 text-uppercase" style="font-size: 12px">
+                            BÚSQUEDA DE PRODUCTOS
+                        </legend>
+                        <div class="row mb-2">
+                            <div class="col-sm-3 col-md-3 col-lg-3">
+                                {#                            <label for="type_search" class="mb-0 font-weight-bold">&nbsp;</label>#}
+                                <select id="type_search" name="type-search" aria-label=""
+                                        class="form-control text-center font-weight-bold border-dark"
+                                        style="background-color: #c6efc9">
+                                    <option selected value="P">Producto</option>
+                                    <option value="B">Cod. de Barras</option>
+                                    <option value="S">Serie</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-9 pl-0 pr-4">
+                                {#                            <label for="user_id" class="mb-0 font-weight-bold">&nbsp;</label>#}
+                                <input type="text" id="custom-search-product" aria-label=""
+                                       class="form-control text-uppercase border-dark" style="background-color: #c6efc9"
+                                       placeholder="Ingrese un texto..." autocomplete="off">
+                            </div>
                         </div>
-                        <div class="col-sm-9 pl-0 pr-4">
-                            <label for="user_id" class="mb-0 font-weight-bold">&nbsp;</label>
-                            <input type="text" id="custom-search-product" aria-label=""
-                                   class="form-control text-uppercase border-dark" style="background-color: #c6efc9"
-                                   placeholder="Ingrese un texto..." autocomplete="off">
-                        </div>
-                    </div>
-                </fieldset>
-            </div>
-            <div class="col-sm-3 pl-0" style="font-size: 12px">
-                <fieldset class="border bg-light p-2">
-                    <legend class="w-auto mb-0 text-black-50 text-uppercase" style="font-size: 12px">
-                        Seleccione Usuario:
-                    </legend>
-                    <label for="user_id" class="mb-2 font-weight-bold">Usuario:</label>
-                    <select id="user_id" name="user"
-                            class="form-control"
-                            aria-selected="Text input with radio button">
-                        <option selected value="0">Seleccione...</option>
-                        {% for u in users %}
-                            <option value="{{ u.id }}">{{ u|upper }}</option>
-                        {% endfor %}
-                    </select>
-                </fieldset>
-            </div>
-        </div>
-        <fieldset class="border bg-light p-2">
-            <legend class="w-auto mb-0 text-black-50 text-uppercase" style="font-size: 12px">
-                Información Cliente
-            </legend>
-            <div class="card-body pt-0 pb-0 ">
-                <table class="table table-sm text-uppercase small align-right"
-                       style="width: 100%">
-                    <tr class="align-right">
-                        <th class="border-top-0 align-middle text-left p-0"
-                            style="width: 5%">
-                            <input type="radio"
-                                   aria-label="Radio button for following text input"
-                                   id="radio1" name="radio">
-                        </th>
-                        <th class="border-top-0 align-middle text-left p-0"
-                            style="width: 10%; font-size: 10px">Numero Documento:
-                        </th>
-                        <th class="border-top-0 custom-control-inline text-left"
-                            style="width: 100%">
-                            <select id="document_type_sender" name="document_type_sender"
-                                    class="form-control form-control-sm"
-                                    style="font-size: .8375rem;">
+                    </fieldset>
+                </div>
+                <div class="col-sm-3 pl-0" style="font-size: 12px">
+                    <fieldset class="border bg-light p-2">
+                        <legend class="w-auto mb-0 text-black-50 text-uppercase" style="font-size: 12px">
+                            Seleccione Usuario:
+                        </legend>
+                        <div class="row m-1">
+                            {#                    <label for="user_id" class="mb-2 font-weight-bold">Usuario:</label>#}
+                            <select id="user_id" name="user"
+                                    class="form-control" aria-label=""
+                                    aria-selected="Text input with radio button">
                                 <option selected value="0">Seleccione...</option>
-                                {% for type in document_types %}
-                                    {% if type.id == '01' %}
-                                        <option value="{{ type.id }}">DNI</option>
-                                    {% elif type.id == '06' %}
-                                        <option value="{{ type.id }}">RUC</option>
-                                    {% elif type.id == '00' %}
-                                        <option value="{{ type.id }}">OTRO</option>
-                                    {% endif %}
+                                {% for u in users %}
+                                    <option value="{{ u.id }}">{{ u|upper }}</option>
                                 {% endfor %}
                             </select>
-                            <input type="hidden"
-                                   class="form-control form-control-sm text-uppercase"
-                                   id="id-client-sender"
-                                   name="id-client-sender"
-                                   placeholder="">
 
-                        </th>
-                        <th class="border-top-0 align-middle text-right p-0" style="width: 30%">
-                            <input type="text"
-                                   class="form-control form-control-sm text-uppercase"
-                                   id="id-nro-document-sender"
-                                   name="nro-document-sender"
-                                   placeholder="" style="width: 100%">
-                        </th>
-                        <th class="border-top-0 align-middle text-right p-0" style="width: 30%">
-
-                            <button type="button" class="btn btn-sm btn-outline-info"
-                                    data-toggle="modal"
-                                    data-target="#modalClient" style="width: 90%">
-                                <i class="fas fa-user-plus"></i> &nbsp;NUEVO CLIENTE
-                            </button>
-
-                        </th>
-                    </tr>
-                    <tr>
-                        <th class="border-top-0 align-middle text-left p-0">
-                            <input type="radio"
-                                   aria-label="Radio button for following text input"
-                                   id="radio2" name="radio" checked="checked">
-                        </th>
-                        <th class="border-top-0 align-middle text-left p-0"
-                            style="font-size: 10px">
-                            Nombres/Razón Social:
-                        </th>
-                        <td class="border-top-0 text-left" colspan="3">
-                            <input type="text"
-                                   class="form-control text-uppercase client-table dropdown-toggle"
-                                   data-toggle="dropdown" aria-expanded="false"
-                                   placeholder="Ingrese cliente y presione enter...">
-                            <div class="dropdown-menu"></div>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-            <div class="form-row pl-1 pr-3">
-                <div class="form-group col-md-5 text-uppercase small">
-                    <label class="mb-2 text-center font-weight-bold" style="font-size: 10px">Cliente
-                        - Nombres/Razón social:</label>
-                    <input type="text" class="form-control form-control-sm text-uppercase"
-                           id="id_sender"
-                           name="sender" readonly
-                           placeholder="">
-                </div>
-                <div class="form-group col-md-7 text-uppercase small">
-                    <label class="mb-2 text-center font-weight-bold" style="font-size:10px">
-                        Dirección:</label>
-                    <input type="text" class="form-control form-control-sm text-uppercase"
-                           id="id_address"
-                           name="name_address"
-                           placeholder="">
+                        </div>
+                    </fieldset>
                 </div>
             </div>
-        </fieldset>
-
-        <fieldset class="border bg-light p-2">
-            <legend class="w-auto mb-0 text-black-50 text-uppercase" style="font-size: 12px">
-                Modalidad de Pago:
-            </legend>
-            <div class="form-row mt-1 ml-0 mr-2">
-                <div class="col-md-2 text-uppercase small pl-1 pr-0">
-                    <label for="transaction_payment_type" class="mb-0">Pago</label>
-                    <select id="transaction_payment_type" class="form-control form-control-sm">
-                        <option value="0">Seleccione</option>
-                        {% for item in choices_payments %}
-                            <option value="{{ item.0 }}">{{ item.1 }}</option>
-                        {% endfor %}
-                    </select>
+            <fieldset class="border bg-light p-2">
+                <input type="hidden" id="client_id" name="client-id">
+                <legend class="w-auto mb-0 text-black-50" style="font-size: 12px">
+                    <span class="text-uppercase">Información Cliente</span> (Seleccione Búsqueda)
+                </legend>
+                <div class="row mt-0 mb-2 ml-1">
+                    <div class="form-check col-sm-3">
+                        <input type="radio" class="form-check-input check-search" id="checkSearchDoc"
+                               name="check-search"
+                               value="document" checked>
+                        <label class="form-check-label font-italic" for="checkSearchDoc">Por Documento (Búsqueda
+                            Reniec)</label>
+                    </div>
+                    <div class="form-check col-sm-3 text-right">
+                        <input type="radio" class="form-check-input check-search" id="checkSearchName"
+                               name="check-search"
+                               value="name">
+                        <label class="form-check-label font-italic" for="checkSearchName">Por Nombre</label>
+                    </div>
                 </div>
-                <div class="col-md-7 text-uppercase small pl-0 pr-0">
-                    <div class="row col-sm-12 m-0 p-0" id="cash" style="display: none">
-                        <div class="col-sm-6 pl-1 pr-0">
-                            <label for="id_cash" class="mb-0">Caja destino</label>
-                            <select id="id_cash" name="id_cash_efectivo"
-                                    class="form-control form-control-sm text-uppercase"
-                                    aria-selected="Text input with radio button">
-                                {% for c in choices_account %}
-                                    <option value="{{ c.id }}"
-                                    >{{ c.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-sm-6 pl-1 pr-1">
-                            <label for="id_date" class="mb-0">Fecha</label>
-                            <input type="date"
-                                   id="id_date"
-                                   name="id_date"
-                                   readonly
-                                   class="form-control form-control-sm">
+                <div class="row mt-0 ml-0 mr-2 for-document">
+                    <div class="col-md-1 text-uppercase small pl-1 pr-1">
+                        <label class="mb-1 text-center" for="document_type_client" style="font-size: 10px">Tipo
+                            doc.</label>
+                        <select id="document_type_client" name="document_type_client"
+                                class="form-control form-control-sm"
+                                style="font-size: .8375rem;">
+                            {% for type in document_types %}
+                                {% if type.id == '01' %}
+                                    <option value="{{ type.id }}">DNI</option>
+                                {% elif type.id == '06' %}
+                                    <option value="{{ type.id }}">RUC</option>
+                                {% elif type.id == '00' %}
+                                    <option value="{{ type.id }}">OTRO</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2 pl-0 pr-0 small text-uppercase">
+                        <label class="mb-1 text-center" for="document_number_client" style="font-size: 10px">Nº
+                            documento</label>
+                        <input type="text"
+                               class="form-control form-control-sm text-uppercase"
+                               id="document_number_client" autocomplete="off"
+                               name="document-number-client">
+                    </div>
+                    <div class="col-md-4 text-uppercase small pl-1 pr-1">
+                        <label class="mb-1 text-center" for="client_name" style="font-size: 10px">Cliente -
+                            Nombres/Razón social:</label>
+                        <input type="text" class="form-control form-control-sm text-uppercase"
+                               id="client_name"
+                               name="client-name" readonly
+                               placeholder="">
+                    </div>
+                    <div class="col-md-5 text-uppercase small pl-1 pr-0">
+                        <label class="mb-1 text-center" for="client_address" style="font-size:10px">
+                            Dirección:</label>
+                        <input type="text" class="form-control form-control-sm text-uppercase"
+                               id="client_address" autocomplete="off"
+                               name="client-address"
+                               placeholder="">
+                    </div>
+                </div>
+                <div class="row mt-0 ml-0 mr-2 for-name d-none">
+                    <div class="col-md-5 text-uppercase small pl-1 pr-0">
+                        <label class="mb-1 text-center" for="client_name" style="font-size: 10px">Cliente -
+                            Nombres/Razón social:</label>
+                        <div id="autocomplete-client" class="autocomplete">
+                            <input class="form-control form-control-sm autocomplete-input"
+                                   type="text" aria-label="..."
+                                   id="person-names"
+                                   name="person-names"
+                                   maxlength="200"
+                                   autocomplete="off"
+                                   value=""
+                                   placeholder="Buscar Cliente..."/>
+                            <ul class="autocomplete-result-list"></ul>
                         </div>
                     </div>
-                    <div class="row col-sm-12 m-0 p-0" id="deposit" style="display: none">
-                        <div class="col-sm-6 pl-1 pr-0">
-                            <label for="id_cash_deposit" class="mb-0">Deposito a cuenta</label>
-                            <select id="id_cash_deposit" name="id_cash_deposit"
-                                    class="form-control form-control-sm text-uppercase"
-                                    aria-selected="Text input with radio button">
-                                {% for c in choices_account_bank %}
-                                    <option value="{{ c.id }}"
-                                    >{{ c.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-sm-6 pl-1 pr-0">
-                            <label for="code-operation" class="mb-0">Codigo operacion</label>
-                            <input type="text" class="form-control form-control-sm" id="code-operation"
-                                   placeholder="">
-                        </div>
+                    <div class="col-md-7 text-uppercase small pl-1 pr-0">
+                        <label class="mb-1 text-center" for="person_address" style="font-size: 10px"> Dirección:</label>
+                        <input type="text" class="form-control form-control-sm text-uppercase"
+                               id="person_address"
+                               name="person-address" readonly>
                     </div>
-                    <div class="row col-sm-12 m-0 p-0" id="credit" style="display: none">
-                        <div class="col-sm-3 pl-1 pr-0">
-                            <label for="pay_condition" class="mb-0 text-uppercase">Condición de
-                                pago</label>
-                            <div class="input-group input-group-sm">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text">A</span>
-                                </div>
-                                <input type="number" class="form-control text-center" id="condition_days"
-                                       name="condition_days"
-                                       aria-label="Amount (to the nearest dollar)">
-                                <div class="input-group-append">
-                                    <span class="input-group-text">Días</span>
+                </div>
+                {#            <div class="card-body p-1 ">#}
+                {#                <table class="table table-sm text-uppercase small align-right"#}
+                {#                       style="width: 100%">#}
+                {#                    <tr class="align-right">#}
+                {#                        <th class="border-top-0 align-middle text-left p-0"#}
+                {#                            style="width: 2%">#}
+                {#                            <input type="radio"#}
+                {#                                   aria-label="Radio button for following text input"#}
+                {#                                   id="radio1" name="radio">#}
+                {#                        </th>#}
+                {#                        <th class="border-top-0 align-middle text-left p-0"#}
+                {#                            style="width: 8%; font-size: 10px">Nº Documento:#}
+                {#                        </th>#}
+                {#                        <th class="border-top-0 text-left"#}
+                {#                            style="width: 30%">#}
+                {#                            <select id="document_type_sender" name="document_type_sender"#}
+                {#                                    class="form-control form-control-sm"#}
+                {#                                    style="font-size: .8375rem;">#}
+                {#                                <option selected value="0">Seleccione...</option>#}
+                {#                                {% for type in document_types %}#}
+                {#                                    {% if type.id == '01' %}#}
+                {#                                        <option value="{{ type.id }}">DNI</option>#}
+                {#                                    {% elif type.id == '06' %}#}
+                {#                                        <option value="{{ type.id }}">RUC</option>#}
+                {#                                    {% elif type.id == '00' %}#}
+                {#                                        <option value="{{ type.id }}">OTRO</option>#}
+                {#                                    {% endif %}#}
+                {#                                {% endfor %}#}
+                {#                            </select>#}
+                {#                            <input type="hidden"#}
+                {#                                   class="form-control form-control-sm text-uppercase"#}
+                {#                                   id="id-client-sender"#}
+                {#                                   name="id-client-sender"#}
+                {#                                   placeholder="">#}
+                {##}
+                {#                        </th>#}
+                {#                        <th class="border-top-0 align-middle text-right p-0" style="width: 30%">#}
+                {#                            <input type="text"#}
+                {#                                   class="form-control form-control-sm text-uppercase"#}
+                {#                                   id="id-nro-document-sender"#}
+                {#                                   name="nro-document-sender"#}
+                {#                                   placeholder="" style="width: 100%">#}
+                {#                        </th>#}
+                {#                        <th class="border-top-0 align-middle text-right" style="width: 30%">#}
+                {##}
+                {#                            <button type="button" class="btn btn-sm btn-outline-info btn-block"#}
+                {#                                    data-toggle="modal"#}
+                {#                                    data-target="#modalClient">#}
+                {#                                <i class="fas fa-user-plus"></i> &nbsp;NUEVO CLIENTE#}
+                {#                            </button>#}
+                {##}
+                {#                        </th>#}
+                {#                    </tr>#}
+                {#                    <tr>#}
+                {#                        <th class="border-top-0 align-middle text-left p-0">#}
+                {#                            <input type="radio"#}
+                {#                                   aria-label="Radio button for following text input"#}
+                {#                                   id="radio2" name="radio" checked="checked">#}
+                {#                        </th>#}
+                {#                        <th class="border-top-0 align-middle text-left p-0"#}
+                {#                            style="font-size: 10px">#}
+                {#                            Nombres/Razón Social:#}
+                {#                        </th>#}
+                {#                        <td class="border-top-0 text-left" colspan="3">#}
+                {#                            <input type="text"#}
+                {#                                   class="form-control text-uppercase client-table dropdown-toggle"#}
+                {#                                   data-toggle="dropdown" aria-expanded="false"#}
+                {#                                   placeholder="Ingrese cliente y presione enter...">#}
+                {#                            <div class="dropdown-menu"></div>#}
+                {#                        </td>#}
+                {#                    </tr>#}
+                {#                </table>#}
+                {#            </div>#}
+                {#            <div class="form-row pl-1 pr-3">#}
+                {#                <div class="form-group col-md-5 text-uppercase small">#}
+                {#                    <label class="mb-2 text-center font-weight-bold" style="font-size: 10px">Cliente#}
+                {#                        - Nombres/Razón social:</label>#}
+                {#                    <input type="text" class="form-control form-control-sm text-uppercase"#}
+                {#                           id="id_sender"#}
+                {#                           name="sender" readonly#}
+                {#                           placeholder="">#}
+                {#                </div>#}
+                {#                <div class="form-group col-md-7 text-uppercase small">#}
+                {#                    <label class="mb-2 text-center font-weight-bold" style="font-size:10px">#}
+                {#                        Dirección:</label>#}
+                {#                    <input type="text" class="form-control form-control-sm text-uppercase"#}
+                {#                           id="id_address"#}
+                {#                           name="name_address"#}
+                {#                           placeholder="">#}
+                {#                </div>#}
+                {#            </div>#}
+            </fieldset>
+            <fieldset class="border p-2 bg-light">
+                <legend class="w-auto mb-0 text-black-50 text-uppercase" style="font-size: 12px">Información
+                    principal
+                </legend>
+                <div class="form-row mt-1 ml-0 mr-2">
+                    <div class="col-md-2 text-uppercase small pl-1 pr-1">
+                        <label for="type_bill_document" class="mb-0">Tipo de Documento</label>
+                        <select id="type_bill_document" name="type_bill_document"
+                                class="form-control form-control-sm"
+                                aria-selected="Text input with radio button">
+                            <option selected disabled value="0">Seleccione</option>
+                            <option value="1">FACTURA</option>
+                            <option value="2">BOLETA</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1 text-uppercase small pl-1 pr-0">
+                        <label for="id_serial" class="mb-0">Serie</label>
+                        <input type="text" class="form-control form-control-sm text-right"
+                               id="id_serial" readonly placeholder="-"
+                               name="serial">
+                    </div>
+                    <div class="col-md-2 text-uppercase small pl-1 pr-1">
+                        <label for="correlative" class="mb-0">Correlativo</label>
+                        <input type="text" class="form-control form-control-sm text-right"
+                               id="correlative" readonly placeholder="-"
+                               name="correlative" autocomplete="off">
+                    </div>
+
+                    <div class="col-md-2 text-uppercase small pl-1 pr-1">
+                        <label for="issue_date" class="mb-0">Fecha de emisión</label>
+                        <input type="date" class="form-control form-control-sm" id="issue_date" name="issue_date" readonly
+                               value="{{ date }}">
+                    </div>
+                    <div class="col-md-3 text-uppercase small pl-1 pr-0">
+                        <label for="format_pdf" class="mb-0">Formato de PDF</label>
+                        <select id="format_pdf" name="format-pdf"
+                                class="form-control form-control-sm">
+                            <option selected value="A4">TAMAÑO A4</option>
+                            <option value="T">TAMAÑO TICKET</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 text-uppercase small pl-1 pr-0">
+                        <label for="print_series" class="mb-0">Imprimir Series</label>
+                        <select id="print_series" name="print-series"
+                                class="form-control form-control-sm">
+                            <option value="True">SI</option>
+                            <option selected value="False">NO</option>
+                        </select>
+                    </div>
+                </div>
+
+            </fieldset>
+            <fieldset class="border bg-light p-2">
+                <legend class="w-auto mb-0 text-black-50 text-uppercase" style="font-size: 12px">
+                    Modalidad de Pago:
+                </legend>
+                <div class="form-row mt-1 ml-0 mr-2">
+                    <div class="col-md-2 text-uppercase small pl-1 pr-0">
+                        <label for="transaction_payment_type" class="mb-0">Pago</label>
+                        <select id="transaction_payment_type" name="transaction_payment_type"
+                                class="form-control form-control-sm">
+                            <option value="0">Seleccione</option>
+                            {% for item in choices_payments %}
+                                <option value="{{ item.0 }}">{{ item.1 }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-10 text-uppercase small pl-0 pr-0">
+                        <div class="row col-sm-12 m-0 p-0" id="cash" style="display: none">
+                            <div class="col-sm-6 pl-1 pr-0">
+                                <label for="id_cash" class="mb-0">Caja destino</label>
+                                <select id="id_cash" name="cash_box"
+                                        class="form-control form-control-sm text-uppercase"
+                                        aria-selected="Text input with radio button">
+                                    {% for c in choices_account %}
+                                        <option value="{{ c.id }}"
+                                        >{{ c.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-sm-6 pl-1 pr-1">
+                                <label for="id_date" class="mb-0">Fecha</label>
+                                <input type="date"
+                                       id="id_date"
+                                       name="id_date"
+                                       readonly
+                                       class="form-control form-control-sm">
+                            </div>
+                        </div>
+                        <div class="row col-sm-12 m-0 p-0" id="deposit" style="display: none">
+                            <div class="col-sm-6 pl-1 pr-0">
+                                <label for="id_cash_deposit" class="mb-0">Deposito a cuenta</label>
+                                <select id="id_cash_deposit" name="id_cash_deposit"
+                                        class="form-control form-control-sm text-uppercase"
+                                        aria-selected="Text input with radio button">
+                                    {% for c in choices_account_bank %}
+                                        <option value="{{ c.id }}"
+                                        >{{ c.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-sm-6 pl-1 pr-0">
+                                <label for="code-operation" class="mb-0">Codigo operacion</label>
+                                <input type="text" class="form-control form-control-sm"
+                                       id="code-operation" name="code-operation"
+                                       autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="row col-sm-12 m-0 p-0" id="credit" style="display: none">
+                            <div class="col-sm-3 pl-1 pr-0">
+                                <label for="pay_condition" class="mb-0 text-uppercase">Condición de
+                                    pago</label>
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">A</span>
+                                    </div>
+                                    <input type="number" class="form-control text-center" id="condition_days"
+                                           name="condition_days"
+                                           aria-label="Amount (to the nearest dollar)">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">Días</span>
+                                    </div>
                                 </div>
                             </div>
-                            {#                                        <label for="pay_condition" class="mb-0">Condicion de pago</label>#}
-                            {#                                        <input type="text" class="form-control form-control-sm text-uppercase"#}
-                            {#                                               id="pay_condition"#}
-                            {#                                               name="pay_condition">#}
-                        </div>
-                        <div class="col-sm-2 pl-1 pr-0 text-center">
-                            <label for="btn-add-detail" class="mb-0 text-center text-white"> Boton de Pago </label>
-                            <button id="btn-add-detail" class="btn btn-sm btn-secondary"
-                                    type="button"
-                                    onclick="AddDetailsCredit()">
-                                Agregar
-                            </button>
-                        </div>
-                        <div class="col-sm-7 pl-1 pr-0">
-                            <input type="hidden" class="form-control form-control-sm text-right"
-                                   id="amount-credit-total" name="amount-credit-total" value="0.00"
-                                   readonly>
-                            <div class="card-body mt-3 p-0">
-                                <table class="bg-light table-sm " id="id-table-credit"
-                                       style="width: 100%;">
-                                    <tbody id="credit_details"></tbody>
-                                </table>
+                            <div class="col-sm-2 pl-1 pr-0 text-center">
+                                <label for="btn-add-detail" class="mb-0 text-center text-white"> Boton de Pago </label>
+                                <button id="btn-add-detail" class="btn btn-sm btn-secondary"
+                                        type="button"
+                                        onclick="AddDetailsCredit()">
+                                    Agregar
+                                </button>
+                            </div>
+                            <div class="col-sm-7 pl-1 pr-0">
+                                <input type="hidden" class="form-control form-control-sm text-right"
+                                       id="amount-credit-total" name="amount-credit-total" value="0.00"
+                                       readonly>
+                                <div class="card-body mt-3 p-0">
+                                    <table class="bg-light table-sm " id="id-table-credit"
+                                           style="width: 100%;">
+                                        <tbody id="credit_details"></tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
+                    {#                <div class="col-md-1 text-uppercase small pl-1 pr-1">#}
+                    {#                    <label for="id_serie" class="mb-0">Serie</label>#}
+                    {#                    <select id="id_serie" name="id_serie"#}
+                    {#                            class="form-control form-control-sm"#}
+                    {#                            aria-selected="Text input with radio button">#}
+                    {#                        <option selected value="0">Seleccione...</option>#}
+                    {#                        {% for serie in series %}#}
+                    {#                            {% if serie.serial %}#}
+                    {#                                <option selected value="{{ serie.id }}">{{ serie.serial|zfill:4 }}</option>#}
+                    {#                            {% endif %}#}
+                    {#                        {% endfor %}#}
+                    {#                    </select>#}
+                    {#                </div>#}
+                    {#                <div class="col-md-2 text-uppercase small pl-0 pr-0">#}
+                    {#                    <label for="issue_date" class="mb-0">Fecha de Emision</label>#}
+                    {#                    <input type="date" class="form-control form-control-sm" id="issue_date"#}
+                    {#                           value="{{ date }}">#}
+                    {#                </div>#}
                 </div>
-                <div class="col-md-1 text-uppercase small pl-1 pr-1">
-                    <label for="id_serie" class="mb-0">Serie</label>
-                    <select id="id_serie" name="id_serie"
-                            class="form-control form-control-sm"
-                            aria-selected="Text input with radio button">
-                        <option selected value="0">Seleccione...</option>
-                        {% for serie in series %}
-                            {% if serie.serial %}
-                                <option selected value="{{ serie.id }}">{{ serie.serial|zfill:4 }}</option>
-                            {% endif %}
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-2 text-uppercase small pl-0 pr-0">
-                    <label for="issue_date" class="mb-0">Fecha de Emision</label>
-                    <input type="date" class="form-control form-control-sm" id="issue_date"
-                           value="{{ date }}">
-                </div>
-            </div>
-        </fieldset>
+            </fieldset>
 
-        {#        <div class="form-row mt-1 ml-0 mr-2" id="form_quotation" style="display: none">#}
-        {#            <div class="col-md-2 text-uppercase small pl-1 pr-0">#}
-        {#                <label for="id_validity_date" class="mb-0">Valido hasta:</label>#}
-        {#                <input type="date" class="form-control form-control-sm" id="id_validity_date"#}
-        {#                       value="{{ date }}">#}
-        {#            </div>#}
-        {#            <div class="col-md-2 text-uppercase small pl-1 pr-0">#}
-        {#                <label for="id_date_completion" class="mb-0">Tiempo entrega dias</label>#}
-        {#                <input type="number" class="form-control form-control-sm"#}
-        {#                       id="id_date_completion"#}
-        {#                       name="date_completion"#}
-        {#                       placeholder="0">#}
-        {#            </div>#}
-        {#            <div class="col-md-8 text-uppercase small pl-1 pr-1">#}
-        {#                <label for="id_place_delivery" class="mb-0">Lugar de entrega</label>#}
-        {#                <input type="text" class="form-control form-control-sm text-uppercase"#}
-        {#                       id="id_place_delivery"#}
-        {#                       name="place_delivery"#}
-        {#                       placeholder="">#}
-        {#            </div>#}
-        {##}
-        {#        </div>#}
-        {##}
-        {#        <div class="form-row mt-1 ml-0 mr-2" id="form_quotation_row2" style="display: none">#}
-        {#            <div class="col-md-2 text-uppercase small pl-1 pr-0">#}
-        {#                <label for="id_type_quotation" class="mb-0">Tipo de Cotización</label>#}
-        {#                <select id="id_type_quotation" name="type_quotation"#}
-        {#                        class="form-control form-control-sm"#}
-        {#                        aria-selected="Text input with radio button">#}
-        {#                    <option selected value="0">Seleccione...</option>#}
-        {#                    <option value="P">PROYECTO</option>#}
-        {#                    <option value="O">OBRA</option>#}
-        {#                </select>#}
-        {#            </div>#}
-        {#            <div class="col-md-2 text-uppercase small pl-1 pr-1">#}
-        {#                <label for="id_name_type_quotation" class="mb-0">Nombre de Proyecto / Obra</label>#}
-        {#                <input type="text" class="form-control form-control-sm text-uppercase"#}
-        {#                       id="id_name_type_quotation"#}
-        {#                       name="name_type_quotation"#}
-        {#                       placeholder="">#}
-        {#            </div>#}
-        {#            <div class="col-md-8 text-uppercase small pl-1 pr-1">#}
-        {#                <label for="id_observation" class="mb-0">Observación</label>#}
-        {#                <input type="text" class="form-control form-control-sm text-uppercase"#}
-        {#                       id="id_observation"#}
-        {#                       name="observation" value="PRECIO SUJETO A VARIACIÓN POR EL MERCADO"#}
-        {#                       placeholder="">#}
-        {#            </div>#}
-        {#        </div>#}
+            {#        <div class="form-row mt-1 ml-0 mr-2" id="form_quotation" style="display: none">#}
+            {#            <div class="col-md-2 text-uppercase small pl-1 pr-0">#}
+            {#                <label for="id_validity_date" class="mb-0">Valido hasta:</label>#}
+            {#                <input type="date" class="form-control form-control-sm" id="id_validity_date"#}
+            {#                       value="{{ date }}">#}
+            {#            </div>#}
+            {#            <div class="col-md-2 text-uppercase small pl-1 pr-0">#}
+            {#                <label for="id_date_completion" class="mb-0">Tiempo entrega dias</label>#}
+            {#                <input type="number" class="form-control form-control-sm"#}
+            {#                       id="id_date_completion"#}
+            {#                       name="date_completion"#}
+            {#                       placeholder="0">#}
+            {#            </div>#}
+            {#            <div class="col-md-8 text-uppercase small pl-1 pr-1">#}
+            {#                <label for="id_place_delivery" class="mb-0">Lugar de entrega</label>#}
+            {#                <input type="text" class="form-control form-control-sm text-uppercase"#}
+            {#                       id="id_place_delivery"#}
+            {#                       name="place_delivery"#}
+            {#                       placeholder="">#}
+            {#            </div>#}
+            {##}
+            {#        </div>#}
+            {##}
+            {#        <div class="form-row mt-1 ml-0 mr-2" id="form_quotation_row2" style="display: none">#}
+            {#            <div class="col-md-2 text-uppercase small pl-1 pr-0">#}
+            {#                <label for="id_type_quotation" class="mb-0">Tipo de Cotización</label>#}
+            {#                <select id="id_type_quotation" name="type_quotation"#}
+            {#                        class="form-control form-control-sm"#}
+            {#                        aria-selected="Text input with radio button">#}
+            {#                    <option selected value="0">Seleccione...</option>#}
+            {#                    <option value="P">PROYECTO</option>#}
+            {#                    <option value="O">OBRA</option>#}
+            {#                </select>#}
+            {#            </div>#}
+            {#            <div class="col-md-2 text-uppercase small pl-1 pr-1">#}
+            {#                <label for="id_name_type_quotation" class="mb-0">Nombre de Proyecto / Obra</label>#}
+            {#                <input type="text" class="form-control form-control-sm text-uppercase"#}
+            {#                       id="id_name_type_quotation"#}
+            {#                       name="name_type_quotation"#}
+            {#                       placeholder="">#}
+            {#            </div>#}
+            {#            <div class="col-md-8 text-uppercase small pl-1 pr-1">#}
+            {#                <label for="id_observation" class="mb-0">Observación</label>#}
+            {#                <input type="text" class="form-control form-control-sm text-uppercase"#}
+            {#                       id="id_observation"#}
+            {#                       name="observation" value="PRECIO SUJETO A VARIACIÓN POR EL MERCADO"#}
+            {#                       placeholder="">#}
+            {#            </div>#}
+            {#        </div>#}
+
+        </div>
+
+        {% include "sales/sales_detail.html" %}
 
     </div>
+</form>
 
-    {% include "sales/sales_detail.html" %}
-
-</div>

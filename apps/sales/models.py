@@ -366,7 +366,7 @@ class Order(models.Model):
     client = models.ForeignKey('Client', verbose_name='Cliente',
                                on_delete=models.SET_NULL, null=True, blank=True)
     user = models.ForeignKey(User, verbose_name='Usuario', on_delete=models.CASCADE)
-    requirement = models.ManyToManyField('Requirement', related_name='requirements', blank=True)
+    # requirement = models.ManyToManyField('Requirement', related_name='requirements', blank=True)
     operation_code = models.CharField(
         verbose_name='Codigo de operación', max_length=45, null=True, blank=True)
     status = models.CharField('Estado', max_length=1, choices=STATUS_CHOICES, default='P', )
@@ -394,6 +394,7 @@ class Order(models.Model):
     voucher_type = models.CharField('Tipo de comprobante', max_length=2, choices=VOUCHER_CHOICES, default='T')
     pay_condition = models.CharField('Payment Condition', max_length=50, null=True, blank=True)
     issue_date = models.DateField('Fecha de emision', null=True, blank=True)
+    correlative = models.CharField('Correlativo', max_length=10, null=True, blank=True)
 
     def __str__(self):
         return str(self.pk) + " / " + str(self.type) + " / "

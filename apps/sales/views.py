@@ -1034,6 +1034,7 @@ def create_order_detail(request):
         if request.method == 'GET':
             sale_request = request.GET.get('sales', '')
             data_sale = json.loads(sale_request)
+
             check_print_series = data_sale["CheckPrintSeries"]
             type_payment = data_sale["type_payment"]
             cash_finality = None
@@ -1215,7 +1216,7 @@ def create_order_detail(request):
                                                            amount=decimal.Decimal(c['amount']))
 
                         if _bill_type == 'F':
-                            r = send_bill_nubefact(order_sale_obj.id, subsidiary_obj.serial, True)
+                            r = send_bill_nubefact(order_sale_obj.id, subsidiary_obj.serial)
                             msg_sunat = r.get('sunat_description')
                             sunat_pdf = r.get('enlace_del_pdf')
                             codigo_hash = r.get('codigo_hash')
@@ -1288,7 +1289,7 @@ def create_order_detail(request):
                                 return response
 
                         elif _bill_type == 'B':
-                            r = send_receipt_nubefact(order_sale_obj.id, subsidiary_obj.serial, True)
+                            r = send_receipt_nubefact(order_sale_obj.id, subsidiary_obj.serial)
                             msg_sunat = r.get('sunat_description')
                             sunat_pdf = r.get('enlace_del_pdf')
                             codigo_hash = r.get('codigo_hash')
@@ -2607,7 +2608,7 @@ def get_dict_orders(client_obj=None, start_date=None, end_date=None):
 
         if o.orderdetail_set.count() > 0:
             order_detail_set = o.orderdetail_set.all()
-
+            order_bill_obj = ''
             total_repay_loan_v = total_repay_loan(order_detail_set=order_detail_set)
             difference = o.total - total_repay_loan_v
 
@@ -2630,6 +2631,7 @@ def get_dict_orders(client_obj=None, start_date=None, end_date=None):
 
             new = {
                 'id': o.id,
+                'order_bill': order_bill_obj,
                 'type': o.get_type_display(),
                 'type_bill': type_bill,
                 'serial': serial,
@@ -6690,3 +6692,305 @@ def recalculate(request):
         return JsonResponse({
             'success': True,
         }, status=HTTPStatus.OK)
+
+
+def get_client_search(request):
+    if request.method == 'GET':
+        search = request.GET.get('search')
+        client = []
+        if search:
+            client_set = Client.objects.filter(names__icontains=search)
+            for c in client_set:
+                client_address_set = c.clientaddress_set.all()
+                if client_address_set.exists():
+                    address_dict = [{
+                        'id': cd.id,
+                        'address': cd.address,
+                        'district': cd.district.description if cd.district else '-',
+                        'reference': cd.reference
+                    } for cd in client_address_set]
+                else:
+                    address_dict = []
+
+                client.append({
+                    'id': c.id,
+                    'names': c.names,
+                    'number_document': c.clienttype_set.last().document_number,
+                    'typeDocument': c.clienttype_set.last().document_type.short_description,
+                    'address': address_dict,
+                    'last_address': c.clientaddress_set.last().address if c.clientaddress_set.last() else '-'
+                })
+
+        return JsonResponse({
+            'status': True,
+            'client': client
+        })
+
+
+def get_correlative_by_type(request):
+    if request.method == 'GET':
+        new_n_receipt = ''
+        type_bill_document = request.GET.get('type_bill_document')
+        subsidiary_obj = Subsidiary.objects.get(id=1)
+        serial = subsidiary_obj.serial
+        if type_bill_document == '1':
+            new_serial = 'F' + serial
+        else:
+            new_serial = 'B' + serial
+
+        order_bill_set = OrderBill.objects.filter(serial=new_serial, type=type_bill_document)
+        if order_bill_set:
+            n_receipt = order_bill_set.last().n_receipt
+            new_n_receipt = n_receipt + 1
+
+        return JsonResponse({
+            'status': True,
+            'correlative': str(new_n_receipt).zfill(6),
+            'serial': str(new_serial)
+        })
+
+
+@csrf_exempt
+def save_order(request):
+    if request.method == 'POST':
+        user_id = request.user.id
+        user_subsidiary_obj = User.objects.get(id=user_id)
+        subsidiary_obj = get_subsidiary_by_user(user_subsidiary_obj)
+        # subsidiary_store_sales_obj = SubsidiaryStore.objects.get(
+        #     subsidiary=subsidiary_obj, category='V')
+        print_series = request.POST.get('print-series', '')
+        _type_payment = request.POST.get('transaction_payment_type', '')
+        _client_id = request.POST.get('client-id', '')
+        _issue_date = request.POST.get('date', '')
+        cash_finality = None
+        if _type_payment == 'E':
+            cash_finality = request.POST.get('cash_box', '')
+        elif _type_payment == 'D':
+            cash_finality = request.POST.get('id_cash_deposit', '')
+
+        client_address = request.POST.get('client-address', '')
+        client_id = request.POST.get('client-id', '')
+
+        client_obj = Client.objects.get(pk=int(client_id))
+        client_address_set = ClientAddress.objects.filter(client=client_obj)
+        if client_address_set.exists():
+            client_address_obj = client_address_set.last()
+            client_address_obj.address = client_address
+            client_address_obj.save()
+        else:
+            client_address_obj = ClientAddress(
+                client=client_obj,
+                address=client_address
+            )
+            client_address_obj.save()
+
+        _sum_total = request.POST.get('sum-total', '')
+
+        serial = request.POST.get('serial', '')
+        issue_date = request.POST.get('issue_date', '')
+        format_pdf = request.POST.get('format-pdf', '')
+
+        user = request.POST.get('user', '')
+        user_obj = User.objects.get(id=user)
+
+        _condition_days = request.POST.get('condition_days', '')
+
+        subsidiary_store_sales_obj = SubsidiaryStore.objects.get(subsidiary=subsidiary_obj, category='V')
+
+        _correlative = request.POST.get('correlative', '')
+        _type_bill_document = request.POST.get('type_bill_document', '')
+
+        detail = json.loads(request.POST.get('detail', ''))
+        credit = json.loads(request.POST.get('credit', ''))
+        _date = utc_to_local(datetime.now())
+
+        voucher_type = 'B'
+        if _type_bill_document == '1':
+            voucher_type = 'F'
+
+        order_obj = Order(
+            type='V',
+            client=client_obj,
+            user=user_obj,
+            total=decimal.Decimal(_sum_total),
+            status='C',
+            subsidiary_store=subsidiary_store_sales_obj,
+            correlative_sale=get_correlative_order(subsidiary_obj, 'V'),
+            subsidiary=subsidiary_obj,
+            create_at=_date,
+            correlative=_correlative,
+            way_to_pay_type=_type_payment,
+            voucher_type=voucher_type,
+            pay_condition=_condition_days,
+            issue_date=issue_date
+        )
+        order_obj.save()
+
+        for detail in detail:
+            quantity = decimal.Decimal(detail['quantity'])
+            price = decimal.Decimal(detail['price'])
+            total = decimal.Decimal(detail['detailTotal'])
+            product_id = int(detail['product'])
+            product_obj = Product.objects.get(id=product_id)
+            unit_id = int(detail['unit'])
+            unit_obj = Unit.objects.get(id=unit_id)
+            commentary = str(detail['commentary'])
+            # store_product_id = int(detail['store'])
+            # product_store_obj = ProductStore.objects.get(id=store_product_id)
+            # quantity_minimum_unit = calculate_minimum_unit(quantity, unit_obj, product_obj)
+
+            order_detail_obj = OrderDetail(
+                order=order_obj,
+                product=product_obj,
+                quantity_sold=quantity,
+                price_unit=price,
+                unit=unit_obj,
+                commentary=commentary,
+                status='V',
+            )
+            order_detail_obj.save()
+
+            if unit_obj.name != 'ZZ':
+                if detail['serials'] != '':
+                    for serial in detail['serials']:
+                        product_serial_set = ProductSerial.objects.filter(serial_number=serial['Serial'])
+                        if product_serial_set.exists():
+                            product_serial_obj = product_serial_set.last()
+                            product_serial_obj.order_detail = order_detail_obj
+                            product_serial_obj.status = 'V'
+                            product_serial_obj.save()
+                        else:
+                            raise ValidationError(
+                                f"El número de serie {serial['Serial']} no existe, Actualice la Pagina y vuelva a intentar")
+
+                if order_detail_obj is None:
+                    raise ValidationError(
+                        "Error al crear el detalle de la orden. Operación cancelada. Actualice")
+
+                store_product_id = int(detail['store'])
+                product_store_obj = ProductStore.objects.get(id=store_product_id)
+                quantity_minimum_unit = calculate_minimum_unit(quantity, unit_obj, product_obj)
+                kardex_ouput(product_store_obj.id, quantity_minimum_unit, order_detail_obj=order_detail_obj)
+
+        code_operation = '-'
+        if _type_payment in ['E', 'D']:
+            cash_id = request.POST.get('cash_id' if _type_payment == 'E' else 'id_cash_deposit', '')
+            cash_obj = Cash.objects.get(id=int(cash_id))
+
+            if _type_payment == 'D':
+                code_operation = request.POST.get('code-operation', '')
+
+            loan_payment_obj = LoanPayment(
+                pay=decimal.Decimal(_sum_total),
+                order=order_obj,
+                create_at=_date,
+                type='V',
+                operation_date=_date
+            )
+            loan_payment_obj.save()
+
+            transaction_payment_obj = TransactionPayment(
+                payment=decimal.Decimal(_sum_total),
+                type=_type_payment,
+                operation_code=code_operation,
+                loan_payment=loan_payment_obj
+            )
+            transaction_payment_obj.save()
+
+            cash_flow_obj = CashFlow(
+                transaction_date=_date,
+                description=f"{order_obj.subsidiary.serial}-{str(order_obj.correlative).zfill(6)}",
+                document_type_attached='T',
+                type=_type_payment,
+                total=_sum_total,
+                operation_code=code_operation,
+                order=order_obj,
+                user=user_obj,
+                cash=cash_obj
+            )
+            cash_flow_obj.save()
+
+        elif _type_payment == 'C':
+            for c in credit:
+                PaymentFees.objects.create(date=c['date'], order=order_obj,
+                                           amount=decimal.Decimal(c['amount']))
+        msg_sunat = None
+        sunat_pdf = None
+        if voucher_type == 'F':
+            r = send_bill_nubefact(order_obj.id, subsidiary_obj.serial)
+            codigo_hash = r.get('codigo_hash')
+            msg_sunat = r.get('sunat_description')
+            sunat_pdf = r.get('enlace_del_pdf')
+            # codigo_hash = True
+            if codigo_hash:
+                order_bill_obj = OrderBill(order=order_obj,
+                                           serial=r.get('serie'),
+                                           type=r.get('tipo_de_comprobante'),
+                                           sunat_status=r.get('aceptada_por_sunat'),
+                                           sunat_description=r.get('sunat_description'),
+                                           user=user_obj,
+                                           sunat_enlace_pdf=r.get('enlace_del_pdf'),
+                                           code_qr=r.get('cadena_para_codigo_qr'),
+                                           code_hash=r.get('codigo_hash'),
+                                           n_receipt=r.get('numero'),
+                                           status='E',
+                                           created_at=order_obj.create_at,
+                                           )
+                order_bill_obj.save()
+
+            else:
+                objects_to_delete = OrderDetail.objects.filter(order=order_obj)
+                objects_to_delete.delete()
+                order_obj.delete()
+                if r.get('errors'):
+                    data = {'error': str(r.get('errors'))}
+                elif r.get('error'):
+                    data = {'error': str(r.get('error'))}
+                response = JsonResponse(data)
+                response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+                return response
+
+        elif voucher_type == 'B':
+            r = send_receipt_nubefact(order_obj.id, subsidiary_obj.serial)
+            codigo_hash = r.get('codigo_hash')
+            msg_sunat = r.get('sunat_description')
+            sunat_pdf = r.get('enlace_del_pdf')
+            # codigo_hash = True
+            if codigo_hash:
+                order_bill_obj = OrderBill(order=order_obj,
+                                           serial=r.get('serie'),
+                                           type=r.get('tipo_de_comprobante'),
+                                           sunat_status=r.get('aceptada_por_sunat'),
+                                           sunat_description=r.get('sunat_description'),
+                                           user=user_obj,
+                                           sunat_enlace_pdf=r.get('enlace_del_pdf'),
+                                           code_qr=r.get('cadena_para_codigo_qr'),
+                                           code_hash=r.get('codigo_hash'),
+                                           n_receipt=r.get('numero'),
+                                           status='E',
+                                           created_at=order_obj.create_at,
+                                           )
+                order_bill_obj.save()
+            else:
+                objects_to_delete = OrderDetail.objects.filter(order=order_obj)
+                objects_to_delete.delete()
+                order_obj.delete()
+
+                if r.get('errors'):
+                    data = {'error': str(r.get('errors'))}
+                elif r.get('error'):
+                    data = {'error': str(r.get('error'))}
+                response = JsonResponse(data)
+                response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+                return response
+        return JsonResponse({
+            'message': 'Venta Generada Correctamente',
+            'id_sales': order_obj.id,
+            'type_doc': order_obj.type,
+            'voucher_type': order_obj.voucher_type,
+            'format_pdf': format_pdf,
+            'check_print_series': print_series,
+            'msg_sunat': msg_sunat,
+            'sunat_pdf': sunat_pdf,
+        }, status=HTTPStatus.OK)
+    return JsonResponse({'message': 'Error de peticion.'}, status=HTTPStatus.BAD_REQUEST)

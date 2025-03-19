@@ -425,7 +425,7 @@ def send_cancel_bill_nubefact(order_id):
     return context
 
 
-def send_bill_nubefact(order_id, serie_, is_demo=False):
+def send_bill_nubefact(order_id, serie_):
     global total_perceptron, total_with_perceptron
     order_obj = Order.objects.get(id=int(order_id))
 
@@ -435,8 +435,8 @@ def send_bill_nubefact(order_id, serie_, is_demo=False):
     client_obj = order_obj.client
     client_first_address = client_obj.clientaddress_set.first()
     client_document = client_obj.clienttype_set.filter(document_type_id='06').first()
-    # client_department = Dep/artment.objects.get(id=client_first_address.district[:2])
-    register_date = order_obj.issue_date
+    # client_department = Department.objects.get(id=client_first_address.district[:2])
+    register_date = order_obj.create_at
     formatdate = register_date.strftime("%d-%m-%Y")
 
     items = []
@@ -588,7 +588,7 @@ def send_bill_nubefact(order_id, serie_, is_demo=False):
     return context
 
 
-def send_receipt_nubefact(order_id, serie_, is_demo=False):
+def send_receipt_nubefact(order_id, serie_):
     order_obj = Order.objects.get(id=int(order_id))
     # truck_obj = order_obj.truck
     # truck_id = truck_obj.id

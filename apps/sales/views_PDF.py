@@ -1,5 +1,5 @@
 from reportlab.lib.pagesizes import letter, landscape, A4, A5, C7
-from .models import Product, Client, Order, OrderBill, SubsidiaryStore
+from .models import Product, Client, Order, OrderBill, SubsidiaryStore, ProductStore, ProductSerial
 from .views import get_context_kardex_glp, get_dict_orders
 import io
 import pdfkit
@@ -39,16 +39,19 @@ PAGE_WIDTH = defaultPageSize[0]
 styles = getSampleStyleSheet()
 styles.add(ParagraphStyle(name='Right', alignment=TA_RIGHT, leading=8, fontName='Square', fontSize=8))
 styles.add(ParagraphStyle(name='Justify', alignment=TA_JUSTIFY, leading=8, fontName='Square', fontSize=8))
+styles.add(ParagraphStyle(name='detail_narrow', alignment=TA_LEFT, leading=8, fontName='Square', fontSize=7))
 styles.add(ParagraphStyle(name='Justify-Dotcirful', alignment=TA_JUSTIFY, leading=12, fontName='Dotcirful-Regular',
                           fontSize=10))
 styles.add(ParagraphStyle(name='Center_Newgot_1', alignment=TA_CENTER, leading=11, fontName='Newgot', fontSize=9))
 styles.add(ParagraphStyle(name='Left-text', alignment=TA_LEFT, leading=8, fontName='Square', fontSize=8))
 styles.add(ParagraphStyle(name='Center-text', alignment=TA_CENTER, leading=8, fontName='Square', fontSize=7))
 styles.add(ParagraphStyle(name='Center_Newgot', alignment=TA_CENTER, leading=11, fontName='Newgot', fontSize=11))
+styles.add(ParagraphStyle(name='Justify_Square_detail', alignment=TA_JUSTIFY, leading=10, fontName='Square', fontSize=8))
 styles.add(ParagraphStyle(name='Justify_Square', alignment=TA_JUSTIFY, leading=10, fontName='Square', fontSize=10))
 styles.add(
     ParagraphStyle(name='Justify-Dotcirful-table', alignment=TA_JUSTIFY, leading=12, fontName='Dotcirful-Regular',
                    fontSize=7))
+styles.add(ParagraphStyle(name='Left_Square_detail', alignment=TA_LEFT, leading=10, fontName='Square', fontSize=8))
 styles.add(ParagraphStyle(name='Left_Square', alignment=TA_LEFT, leading=10, fontName='Square', fontSize=10))
 styles.add(ParagraphStyle(name='Right_Newgot', alignment=TA_RIGHT, leading=12, fontName='Newgot', fontSize=12))
 styles.add(ParagraphStyle(name='Justify_Bold', alignment=TA_JUSTIFY, leading=8, fontName='Square-Bold', fontSize=8))
@@ -67,7 +70,10 @@ styles.add(ParagraphStyle(name='Center_Bold_title', alignment=TA_CENTER,
                           leading=14, fontName='Square-Bold', fontSize=14, spaceBefore=8, spaceAfter=8))
 styles.add(ParagraphStyle(name='Center_Bold', alignment=TA_CENTER,
                           leading=10, fontName='Square-Bold', fontSize=10, spaceBefore=8, spaceAfter=8))
+styles.add(ParagraphStyle(name='Center_title_narrow', alignment=TA_CENTER,
+                          leading=10, fontName='Narrow-b', fontSize=10, spaceBefore=8, spaceAfter=8))
 styles.add(ParagraphStyle(name='Center2', alignment=TA_CENTER, leading=8, fontName='Ticketing', fontSize=8))
+styles.add(ParagraphStyle(name='Center_footer_narrow', alignment=TA_CENTER, leading=8, fontName='Narrow-b', fontSize=4))
 
 styles.add(ParagraphStyle(name='Center3', alignment=TA_JUSTIFY, leading=8, fontName='Ticketing', fontSize=7))
 styles.add(
@@ -96,6 +102,7 @@ pdfmetrics.registerFont(TTFont('Kg-Primary-Dots', 'KgPrimaryDots-Pl0E.ttf'))
 pdfmetrics.registerFont(TTFont('Dot-line', 'Dotline-LA7g.ttf'))
 pdfmetrics.registerFont(TTFont('Dot-line-Light', 'DotlineLight-XXeo.ttf'))
 pdfmetrics.registerFont(TTFont('Jd-Lcd-Rounded', 'JdLcdRoundedRegular-vXwE.ttf'))
+pdfmetrics.registerFont(TTFont('Narrow-b', 'ARIALNB.TTF'))
 
 logo = "apps/sales/static/assets/logo png blanco y negro 1.png"
 
@@ -411,21 +418,14 @@ def qr_code(table):
 
 def print_ticket_order_sales(request, pk=None, t=None):  # Ticket
 
-    _wt = 3.14 * inch - 8 * 0.05 * inch
+    _wt = 3.14 * inch - 4.5 * 0.05 * inch
 
     order_obj = Order.objects.get(pk=pk)
     client_id = order_obj.client.id
     client_obj = Client.objects.get(id=client_id)
-    info_name = ""
-    info_document = ""
-    client_document = ""
-    client_name = ""
     client_address = ""
-
     subsidiary_obj = Subsidiary.objects.get(id=order_obj.subsidiary.id)
-
     tbh_business_name = 'T VISION SAFE E.I.R.L.'
-
     tbh_business_address = subsidiary_obj.address
     tbh_ruc = subsidiary_obj.ruc
 
@@ -455,7 +455,7 @@ def print_ticket_order_sales(request, pk=None, t=None):  # Ticket
     if client_type == '06':
         info_address = client_obj.clientaddress_set.last().address.upper()
         client_address = info_address
-    line = '-------------------------------------------------------'
+    line = '---------------------------------------------------------'
 
     I = Image(logo)
     I.drawHeight = 3.35 * inch / 2.9
@@ -498,7 +498,7 @@ def print_ticket_order_sales(request, pk=None, t=None):  # Ticket
             [('RUC ', client_document)] +
             [('RAZÓN SOCIAL: ', p0)] +
             [('DIRECCIÓN: ', p1)] +
-            [('ATENDIDO POR: ', order_obj.user.username.upper() + " ")] +
+            [('ATENDIDO POR: ', order_obj.user.worker_set.last().employee.simple_name().upper() + " ")] +
             [('FECHA: ', _format_date + '  HORA: ' + _format_time)] +
             [('TIPO DE PAGO: ', order_obj.get_way_to_pay_type_display().upper())],
             colWidths=colwiths_table)
@@ -507,7 +507,7 @@ def print_ticket_order_sales(request, pk=None, t=None):  # Ticket
         ana_c1 = Table(
             [('CLIENTE: N DOC ', client_document)] +
             [('SR(A): ', p0)] +
-            [('ATENDIDO POR: ', order_obj.user.username.upper() + " ")] +
+            [('ATENDIDO POR: ', order_obj.user.worker_set.last().employee.simple_name().upper() + " ")] +
             [('FECHA: ', _format_date + '  HORA: ' + _format_time)] +
             [('TIPO DE PAGO: ', order_obj.get_way_to_pay_type_display().upper())],
             colWidths=colwiths_table)
@@ -540,31 +540,57 @@ def print_ticket_order_sales(request, pk=None, t=None):  # Ticket
         [('SEDE:', order_obj.id, 'FECHA:', str(_format_date))],
         colWidths=colwiths_table)
     ana_c2.setStyle(TableStyle(style_table))
-    # -------
+
     my_style_table_detail = [
         ('FONTNAME', (0, 0), (-1, -1), 'Square'),
-        # ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
-        ('FONTSIZE', (0, 0), (-1, -1), 8),
+        # ('GRID', (0, 0), (-1, -1), 0.1, colors.lightgrey),
+        ('FONTSIZE', (0, 0), (-1, -1), 7),
         ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
-        ('LEFTPADDING', (0, 0), (0, -1), 0.5),  # first column
+        ('LEFTPADDING', (0, 0), (0, -1), 1),  # first column
         ('ALIGNMENT', (1, 0), (1, -1), 'CENTER'),  # second column
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),  # first column
         ('ALIGNMENT', (2, 0), (2, -1), 'CENTER'),  # SECOND column
-        ('ALIGNMENT', (3, 0), (3, -1), 'RIGHT'),  # third column
-        ('ALIGNMENT', (4, 0), (4, -1), 'RIGHT'),  # four column
-        ('RIGHTPADDING', (4, 0), (4, -1), 0.1),  # first column
-        # ('BACKGROUND', (4, 0), (4, -1), colors.blue),  # four column
-        ('RIGHTPADDING', (3, 0), (3, -1), 0.5),  # four column
+        ('ALIGNMENT', (1, 0), (3, -1), 'RIGHT'),  # third column
+        ('ALIGNMENT', (2, 0), (4, -1), 'RIGHT'),  # four column
+        ('RIGHTPADDING', (2, 0), (3, -1), 0.3),  # four column
+        # ('BACKGROUND', (2, 0), (4, -1), colors.blue),  # four column
+        # ('RIGHTPADDING', (1, 0), (3, -1), 2),  # four column
     ]
+
+    my_style_head_detail = [
+        ('FONTNAME', (0, 0), (-1, -1), 'Newgot'),
+        # ('GRID', (0, 0), (-1, -1), 0.1, colors.lightgrey),
+        ('FONTSIZE', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), -1),
+        ('LEFTPADDING', (0, 0), (0, -1), 1),  # first column
+        ('ALIGNMENT', (1, 0), (1, -1), 'CENTER'),  # second column
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),  # first column
+        ('ALIGNMENT', (2, 0), (2, -1), 'CENTER'),  # SECOND column
+        ('ALIGNMENT', (1, 0), (3, -1), 'RIGHT'),  # third column
+        ('ALIGNMENT', (2, 0), (4, -1), 'RIGHT'),  # four column
+        ('RIGHTPADDING', (2, 0), (3, -1), 0.3),  # four column
+        # ('BACKGROUND', (2, 0), (4, -1), colors.blue),  # four column
+    ]
+
+    table_head_detail = Table([('[ CANT. ] DESCRIPCIÓN', 'V/U', 'TOTAL')],
+                              colWidths=[_wt * 70 / 100, _wt * 15 / 100, _wt * 15 / 100])
+    table_head_detail.setStyle(TableStyle(my_style_head_detail))
+
     _rows = []
     sub_total = 0
     total = 0
     igv_total = 0
     _sum_total_multiply = 0
-    for d in order_obj.orderdetail_set.all():
-        P0 = Paragraph(d.commentary.upper(), styles["Justify"])
-        _rows.append((P0, str(decimal.Decimal(round(d.quantity_sold, 0))), d.unit.name, str(d.price_unit),
-                      str(decimal.Decimal(round(d.quantity_sold * d.price_unit, 2)))))
+    for d in order_obj.orderdetail_set.all().order_by('unit'):
+        quantity = f"[{decimal.Decimal(round(d.quantity_sold, 0))}]"
+        unit = 'NIU' if d.unit.name == 'UND' else d.unit.name
+        serial_numbers = d.productserial_set.values_list('serial_number', flat=True)
+        serials_text = ", ".join(map(str, serial_numbers))
+        commentary_text = d.commentary.upper()
+        serials_html = f"<br/><font size='5'><b>{serials_text}</b></font>" if serial_numbers else ""
+        P0 = Paragraph(f"{quantity} {unit} {commentary_text} {serials_html}", styles["detail_narrow"])
+
+        base_price_unit = round(d.price_unit, 6) / decimal.Decimal(1.1800)
         base_total = d.quantity_sold * d.price_unit
         base_amount = base_total / decimal.Decimal(1.1800)
         igv = base_total - base_amount
@@ -572,42 +598,45 @@ def print_ticket_order_sales(request, pk=None, t=None):  # Ticket
         total = total + base_total
         igv_total = igv_total + igv
         _sum_total_multiply += d.multiply()
+        _rows.append((P0, str(round(base_price_unit, 2)), str(decimal.Decimal(round(d.quantity_sold * base_price_unit, 2)))))
     ana_c_detail = Table(_rows,
-                         colWidths=[_wt * 50 / 100, _wt * 10 / 100, _wt * 10 / 100, _wt * 15 / 100, _wt * 15 / 100])
+                         colWidths=[_wt * 70 / 100, _wt * 15 / 100, _wt * 15 / 100])
     ana_c_detail.setStyle(TableStyle(my_style_table_detail))
 
     my_style_table5 = [
-        ('FONTNAME', (0, 0), (-1, -1), 'Square-Bold'),  # all columns
-        ('FONTSIZE', (0, 0), (-1, -1), 10),  # all columns
-        ('BOTTOMPADDING', (0, 0), (-1, -1), -6),  # all columns
+        ('FONTNAME', (0, 0), (-1, -1), 'Narrow-b'),  # all columns
+        ('ALIGNMENT', (1, 0), (2, -1), 'RIGHT'),  # four column
+        ('RIGHTPADDING', (1, 0), (2, -1), 0.1),  # four column
+        # ('GRID', (0, 0), (-1, -1), 0.5, colors.red),
+        ('FONTSIZE', (0, 0), (-1, -1), 8),  # all columns
+        ('BOTTOMPADDING', (0, 0), (-1, -1), -4),  # all columns
         ('LEFTPADDING', (0, 0), (0, -1), 0.5),  # first column
+        # ('BACKGROUND', (1, 0), (2, -1), colors.blue),
     ]
-    total = decimal.Decimal(_sum_total_multiply).quantize(decimal.Decimal('0.0'), rounding=decimal.ROUND_HALF_EVEN)
+    total = decimal.Decimal(_sum_total_multiply).quantize(decimal.Decimal('0.00'), rounding=decimal.ROUND_HALF_EVEN)
     base = round(total / decimal.Decimal(1.18), 2)
     igv = total - base
     if t == 0:
         ana_c8 = Table(
             # [('OP. NO GRAVADA', '', 'S/', str(base))] +
             # [('I.G.V.  (18.00)', '', 'S/', str(igv))] +
-            [('TOTAL', '', 'S/', str(total))],
-            colWidths=[_wt * 60 / 100, _wt * 10 / 100, _wt * 10 / 100, _wt * 20 / 100]
+            [('TOTAL',  'S/', str(total))],
+            colWidths=[_wt * 70 / 100, _wt * 10 / 100, _wt * 20 / 100]
         )
     else:
         if order_obj.orderbill.type == '1':
             ana_c8 = Table(
-
-                [('OP. NO GRAVADA', '', 'S/', str(base))] +
-                [('I.G.V.  (18.00)', '', 'S/', str(igv))] +
-                [('TOTAL', '', 'S/', str(total))],
-                colWidths=[_wt * 60 / 100, _wt * 10 / 100, _wt * 10 / 100, _wt * 20 / 100]
-
+                [('GRAVADA', 'S/', str(base))] +
+                [('I.G.V.  18.00 %', 'S/', str(igv))] +
+                [('TOTAL',  'S/', str(total))],
+                colWidths=[_wt * 70 / 100, _wt * 10 / 100, _wt * 20 / 100]
             )
         else:
             ana_c8 = Table(
-                # [('OP. NO GRAVADA', '', 'S/', str(base))] +
-                # [('I.G.V.  (18.00)', '', 'S/', str(igv))] +
-                [('TOTAL', '', 'S/', str(total))],
-                colWidths=[_wt * 60 / 100, _wt * 10 / 100, _wt * 10 / 100, _wt * 20 / 100]
+                [('GRAVADA', 'S/', str(base))] +
+                [('I.G.V.  (18.00)', 'S/', str(igv))] +
+                [('TOTAL', 'S/', str(total))],
+                colWidths=[_wt * 70 / 100, _wt * 10 / 100, _wt * 20 / 100]
             )
     ana_c8.setStyle(TableStyle(my_style_table5))
     footer = 'SON: ' + numero_a_moneda(order_obj.total)
@@ -630,27 +659,28 @@ def print_ticket_order_sales(request, pk=None, t=None):  # Ticket
     # _dictionary.append(Paragraph(tbh_business_name.replace("\n", "<br />"), styles["Center_Bold_title"]))
     # _dictionary.append(Paragraph(tbh_business_address.replace("\n", "<br />"), styles["Center-text"]))
     _dictionary.append(Paragraph(line, styles["Center2"]))
-    _dictionary.append(Spacer(-10, -10))
-    _dictionary.append(Paragraph(tbn_document, styles["Center_Bold"]))
+    _dictionary.append(Spacer(-5, -5))
+    _dictionary.append(Paragraph(tbn_document, styles["Center_title_narrow"]))
     _dictionary.append(Spacer(-10, -10))
     if t == 0:
         _dictionary.append(Spacer(-5, -5))
         _dictionary.append(
             Paragraph(str(order_obj.subsidiary_store.subsidiary.serial) + ' - ' + str(
                 str(order_obj.correlative_sale).zfill(10)),
-                      styles["Center_Bold"]))
+                      styles["Center_title_narrow"]))
     else:
         _dictionary.append(Spacer(-5, -5))
         _dictionary.append(
             Paragraph(str(order_obj.orderbill.serial) + ' - ' + str(order_obj.orderbill.n_receipt),
-                      styles["Center_Bold"]))
+                      styles["Center_title_narrow"]))
     _dictionary.append(Spacer(-5, -5))
     _dictionary.append(ana_c1)
     _dictionary.append(Paragraph(line, styles["Center2"]))
     _dictionary.append(Spacer(-1, -1))
-    _dictionary.append(Paragraph('DETALLE DE PRODUCTOS', styles["Center_Regular"]))
+    # _dictionary.append(Paragraph('DETALLE DE PRODUCTOS', styles["Center_Regular"]))
+    _dictionary.append(table_head_detail)
     _dictionary.append(Spacer(-1, -1))
-    _dictionary.append(Paragraph(line, styles["Center2"]))
+    # _dictionary.append(Paragraph(line, styles["Center2"]))
     _dictionary.append(ana_c_detail)  # "ana_c2"
     _dictionary.append(Spacer(-1, -1))
     _dictionary.append(Paragraph(line, styles["Center2"]))
@@ -674,7 +704,7 @@ def print_ticket_order_sales(request, pk=None, t=None):  # Ticket
     _dictionary.append(Spacer(-1, -1))
     _dictionary.append(Paragraph(
         "www.4soluciones.net",
-        styles["Center2"]))
+        styles["Center_footer_narrow"]))
     buff = io.BytesIO()
 
     ml = 0.05 * inch
@@ -1310,16 +1340,17 @@ def print_order_bill(request, pk=None, check=None):
         ('GRID', (0, 0), (-1, -1), 1, colors.darkgray),  # all columns
         ('BACKGROUND', (0, 0), (-1, -1), colors.darkgray),  # all columns
         ('TEXTCOLOR', (0, 0), (-1, -1), colors.white),
-        ('FONTSIZE', (0, 0), (-1, -1), 12),  # all columns
+        ('FONTSIZE', (0, 0), (-1, -1), 10),  # all columns
         ('LEFTPADDING', (0, 0), (0, -1), 10),  # first column
         ('BOTTOMPADDING', (0, 0), (-1, -1), 5),  # all columns
         ('RIGHTPADDING', (1, 0), (1, -1), 10),  # second column
         ('ALIGNMENT', (0, 0), (-1, -1), 'CENTER'),  # all column
         # ('ALIGNMENT', (3, 0), (3, -1), 'LEFT'),
         ('ALIGNMENT', (4, 0), (5, 0), 'RIGHT'),
+        ('ALIGNMENT', (6, 0), (6, -1), 'RIGHT'),
     ]
-    width_table = [_bts * 8 / 100, _bts * 8 / 100, _bts * 12 / 100, _bts * 46 / 100, _bts * 12 / 100, _bts * 14 / 100]
-    header_detail = Table([('Cant.', 'Unidad', 'Código', 'Descripción', 'Precio U.', 'Total')], colWidths=width_table)
+    width_table = [_bts * 5 / 100, _bts * 7 / 100, _bts * 15 / 100, _bts * 40 / 100, _bts * 10 / 100, _bts * 11 / 100, _bts * 12 / 100]
+    header_detail = Table([('CANT.', 'UM', 'CÓDIGO', 'DESCRIPCIÓN', 'V/U.', 'P/U.', 'IMPORTE')], colWidths=width_table)
     header_detail.setStyle(TableStyle(style_table_header_detail))
 
     # -------------------DETAIL---------------------#
@@ -1327,11 +1358,12 @@ def print_order_bill(request, pk=None, check=None):
         ('FONTNAME', (0, 0), (-1, -1), 'Square'),
         ('GRID', (0, 0), (-1, -1), 0.3, colors.darkgray),
         # ('GRID', (2, 0), (2, -1), 0.0, colors.darkgray),
-        ('FONTSIZE', (0, 0), (-1, -1), 12),
-        ('FONTSIZE', (2, 0), (2, -1), 10),
+        ('FONTSIZE', (0, 0), (-1, -1), 8),
+        ('FONTSIZE', (2, 0), (2, -1), 8),
         ('LEFTPADDING', (0, 0), (0, -1), 10),  # first column
         ('ALIGNMENT', (0, 0), (-1, -1), 'CENTER'),  # all column
         ('ALIGNMENT', (2, 0), (2, -1), 'LEFT'),  # three column
+        ('ALIGNMENT', (6, 0), (6, -1), 'RIGHT'),  # three column
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),  # first column
         ('ALIGNMENT', (4, 0), (5, -1), 'RIGHT'),  # first column
         ('RIGHTPADDING', (3, 0), (3, -1), 10),  # first column
@@ -1345,23 +1377,23 @@ def print_order_bill(request, pk=None, check=None):
     serials_rows = []
     count = 0
     _total = 0
-    for detail in order_obj.orderdetail_set.all():
+    for detail in order_obj.orderdetail_set.all().order_by('unit'):
         count = count + 1
-        _product = Paragraph(str(detail.commentary), styles["Justify_Square"])
-        _product_plus_brand = Paragraph(str(detail.commentary.upper()), styles["Justify_Square"])
+        _product = Paragraph(str(detail.commentary.upper()), styles["Justify_Square_detail"])
         detail_rows.append((
             # str(count),
-            str(decimal.Decimal(round(detail.quantity_sold, 2))),
-            Paragraph(str(detail.unit.description), styles["Justify_Square"]),
-            detail.product.code,
-            _product_plus_brand,
-            str(detail.price_unit),
+            str(decimal.Decimal(round(detail.quantity_sold, 0))),
+            Paragraph(str(detail.unit.description), styles["Left_Square_detail"]),
+            Paragraph(str(detail.product.code), styles["Left_Square_detail"]),
+            _product,
+            str(round(detail.price_unit / decimal.Decimal(1.1800), 3)),
+            str(round(detail.price_unit, 3)),
             str(round(detail.quantity_sold * detail.price_unit, 2))
         ))
 
         _total = _total + detail.quantity_sold * detail.price_unit
     detail_body = Table(detail_rows,
-                        colWidths=[_bts * 8 / 100, _bts * 8 / 100, _bts * 15 / 100, _bts * 43 / 100, _bts * 12 / 100, _bts * 14 / 100])
+                        colWidths=[_bts * 5 / 100, _bts * 7 / 100, _bts * 15 / 100, _bts * 40 / 100, _bts * 10 / 100, _bts * 11 / 100, _bts * 12 / 100])
     detail_body.setStyle(TableStyle(style_table_detail))
 
     _text = 'DESCUENTO'
@@ -1436,14 +1468,14 @@ def print_order_bill(request, pk=None, check=None):
         [Paragraph(str(retention),
                    styles["Justify_Newgot"])]
     ]
-    total_col_1 = Table(total_col1, colWidths=[_bts * 63 / 100])
+    total_col_1 = Table(total_col1, colWidths=[_bts * 66 / 100])
     style_table_col1 = [
         ('RIGHTPADDING', (0, 0), (-1, -1), 20),
         ('ALIGNMENT', (0, 0), (-1, -1), 'LEFT'),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
         ('TOPPADDING', (0, 0), (-1, -1), 0),
-        ('LEFTPADDING', (0, 0), (-1, -1), -5),
+        ('LEFTPADDING', (0, 0), (-1, -1), -6),
         # ('GRID', (0, 0), (-1, -1), 0.5, colors.blue),
     ]
     total_col_1.setStyle(TableStyle(style_table_col1))
@@ -1453,12 +1485,12 @@ def print_order_bill(request, pk=None, check=None):
          Paragraph(money + ' ' + str(round(valor_venta, 2)), styles["Right_Newgot"])],
         [Paragraph(_text, styles["Justify_Newgot"]),
          Paragraph(money + ' ' + str(round(_discount, 2)), styles["Right_Newgot"])],
-        [Paragraph('I.G.V.(18.00 %)', styles["Justify_Newgot"]),
+        [Paragraph('I.G.V. 18.00 %', styles["Justify_Newgot"]),
          Paragraph(money + ' ' + str(round(igv, 2)), styles["Right_Newgot"])],
         [Paragraph('TOTAL', styles["Justify_Newgot"]),
          Paragraph(money + ' ' + str(round(valor_venta + igv, 2)), styles["Right_Newgot"])],
     ]
-    total_col_2 = Table(total_col2, colWidths=[_bts * 19 / 100, _bts * 14 / 100])
+    total_col_2 = Table(total_col2, colWidths=[_bts * 20 / 100, _bts * 14 / 100])
 
     style_table_col2 = [
         ('RIGHTPADDING', (0, 0), (-1, -1), 5),

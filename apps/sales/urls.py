@@ -227,4 +227,11 @@ urlpatterns = [
     # FUNCTION RECALCULATE
     path('recalculate/', login_required(recalculate), name='recalculate'),
 
+    # SEARCH CLIENT
+    path('get_client_search/', login_required(get_client_search), name='get_client_search'),
+
+    path('get_correlative_by_type/', login_required(get_correlative_by_type), name='get_correlative_by_type'),
+
+    path('save_order/', login_required(save_order), name='save_order'),
+
 ]

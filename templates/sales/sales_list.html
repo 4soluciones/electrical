@@ -33,104 +33,109 @@
             {% include "sales/sales_grid_tab1.html" %}
         </div>
 
-    </div><!-- card-group -->
+
+    </div>
+
+
+
+    <!-- card-group -->
     <!-- Modal -->
     {#    <div class="modal fade bd-example-modal-xl" id="add-modal" tabindex="-1" role="dialog"#}
     {#         aria-labelledby="exampleModalLabel" aria-hidden="true"></div>#}
 
-    <div class="modal fade" id="modal-voucher" tabindex="-1" role="dialog" aria-labelledby="ModalHelpTitle"
-         aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered roboto-condensed-regular" role="document">
-            <div class="modal-content">
-                <div class="modal-header" style="background: #0b55a4">
-                    <h6 class="modal-title  text-white">TIPOS DE COMPROBANTES</h6>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-
-                    <div class="row col-sm-12 p-0 m-0 menu-sales">
-
-                        <div class="col-sm-6">
-
-                            <div class="card m-0" style="border-color: #0f478a">
-
-                                <div class="card-header text-center" style="background: #0f478a">
-                                    <label class="card-title m-0 text-white"> FORMATO TICKETS</label>
-                                </div>
-
-                                <div class="card-body">
-                                    <div class="row col-sm-12 p-0 m-0">
+{#    <div class="modal fade" id="modal-voucher" tabindex="-1" role="dialog" aria-labelledby="ModalHelpTitle"#}
+{#         aria-hidden="true">#}
+{#        <div class="modal-dialog modal-lg modal-dialog-centered roboto-condensed-regular" role="document">#}
+{#            <div class="modal-content">#}
+{#                <div class="modal-header" style="background: #0b55a4">#}
+{#                    <h6 class="modal-title  text-white">TIPOS DE COMPROBANTES</h6>#}
+{#                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">#}
+{#                        <span aria-hidden="true">&times;</span>#}
+{#                    </button>#}
+{#                </div>#}
+{#                <div class="modal-body">#}
+{##}
+{#                    <div class="row col-sm-12 p-0 m-0 menu-sales">#}
+{##}
+{#                        <div class="col-sm-6">#}
+{##}
+{#                            <div class="card m-0" style="border-color: #0f478a">#}
+{##}
+{#                                <div class="card-header text-center" style="background: #0f478a">#}
+{#                                    <label class="card-title m-0 text-white"> FORMATO TICKETS</label>#}
+{#                                </div>#}
+{##}
+{#                                <div class="card-body">#}
+{#                                    <div class="row col-sm-12 p-0 m-0">#}
 {#                                        <div class="col-sm-4">#}
 {#                                            <button type="button" id="save-order" onclick="create_voucher('T', 'T')"#}
 {#                                                    class="btn btn-sm btn-outline-success">#}
 {#                                                <i class="fas fa-ticket-alt"></i> TICKET INTERNO#}
 {#                                            </button>#}
 {#                                        </div>#}
-                                        <div class="col-sm-6">
-                                            <button type="button" id="btn-invoice-ticket"
-                                                    onclick="create_voucher('F', 'T')"
-                                                    class="btn btn-sm btn-outline-success">
-                                                <i class="fas fa-ticket-alt"></i> FACTURA FORMATO TICKET
-                                            </button>
-                                        </div>
-                                        <div class="col-sm-6">
-                                            <button type="button" id="btn-bill-ticket"
-                                                    onclick="create_voucher('B', 'T')"
-                                                    class="btn btn-sm btn-outline-success">
-                                                <i class="fas fa-ticket-alt"></i> BOLETA FORMATO TICKET
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-                        <div class="col-sm-6">
-                            <div class="card m-0" style="border-color: #0f478a">
-                                <div class="card-header text-center" style="background: #0f478a">
-                                    <label class="card-title m-0 text-white"> FORMATO A4</label>
-                                </div>
-                                <div class="card-body pt-2">
-                                    <div class="row col-sm-12">
-                                        <div class="col-sm-12 text-center">
-                                            <div class="form-check mb-2">
-                                                <input class="form-check-input check-print-series" type="checkbox"
-                                                       value=""
-                                                       id="check_print_series">
-                                                <label class="form-check-label font-weight-bold text-danger"
-                                                       for="check_print_series">
-                                                    IMPRIMIR SERIES
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row col-sm-12 p-0 m-0">
-
-                                        <div class="col-sm-6">
-                                            <button type="button" id="btn-invoice-a4"
-                                                    onclick="create_voucher('F', 'A4')"
-                                                    class="btn btn-sm btn-outline-secondary btn-block">
-                                                <i class="fas fa-file-invoice"></i> FACTURA FORMATO A4
-                                            </button>
-                                        </div>
-
-                                        <div class="col-sm-6">
-                                            <button type="button" id="btn-bill-a4" onclick="create_voucher('B', 'A4')"
-                                                    class="btn btn-sm btn-outline-secondary btn-block">
-                                                <i class="fas fa-file-invoice"></i> BOLETA <br>FORMATO A4
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+{#                                        <div class="col-sm-6">#}
+{#                                            <button type="button" id="btn-invoice-ticket"#}
+{#                                                    onclick="create_voucher('F', 'T')"#}
+{#                                                    class="btn btn-sm btn-outline-success">#}
+{#                                                <i class="fas fa-ticket-alt"></i> FACTURA FORMATO TICKET#}
+{#                                            </button>#}
+{#                                        </div>#}
+{#                                        <div class="col-sm-6">#}
+{#                                            <button type="button" id="btn-bill-ticket"#}
+{#                                                    onclick="create_voucher('B', 'T')"#}
+{#                                                    class="btn btn-sm btn-outline-success">#}
+{#                                                <i class="fas fa-ticket-alt"></i> BOLETA FORMATO TICKET#}
+{#                                            </button>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
+{##}
+{#                        </div>#}
+{#                        <div class="col-sm-6">#}
+{#                            <div class="card m-0" style="border-color: #0f478a">#}
+{#                                <div class="card-header text-center" style="background: #0f478a">#}
+{#                                    <label class="card-title m-0 text-white"> FORMATO A4</label>#}
+{#                                </div>#}
+{#                                <div class="card-body pt-2">#}
+{#                                    <div class="row col-sm-12">#}
+{#                                        <div class="col-sm-12 text-center">#}
+{#                                            <div class="form-check mb-2">#}
+{#                                                <input class="form-check-input check-print-series" type="checkbox"#}
+{#                                                       value=""#}
+{#                                                       id="check_print_series">#}
+{#                                                <label class="form-check-label font-weight-bold text-danger"#}
+{#                                                       for="check_print_series">#}
+{#                                                    IMPRIMIR SERIES#}
+{#                                                </label>#}
+{#                                            </div>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                    <div class="row col-sm-12 p-0 m-0">#}
+{##}
+{#                                        <div class="col-sm-6">#}
+{#                                            <button type="button" id="btn-invoice-a4"#}
+{#                                                    onclick="create_voucher('F', 'A4')"#}
+{#                                                    class="btn btn-sm btn-outline-secondary btn-block">#}
+{#                                                <i class="fas fa-file-invoice"></i> FACTURA FORMATO A4#}
+{#                                            </button>#}
+{#                                        </div>#}
+{##}
+{#                                        <div class="col-sm-6">#}
+{#                                            <button type="button" id="btn-bill-a4" onclick="create_voucher('B', 'A4')"#}
+{#                                                    class="btn btn-sm btn-outline-secondary btn-block">#}
+{#                                                <i class="fas fa-file-invoice"></i> BOLETA <br>FORMATO A4#}
+{#                                            </button>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
 
     <!----------------------- Modal Client----------------------------->
     <div class="modal fade" id="modalClient" data-backdrop="static" data-keyboard="false" tabindex="-1"
@@ -249,27 +254,27 @@
     <div class="mr-3 ml-0" style="
             display: none;
             position: absolute;
-            top: 57px;
-            left: 956px;
+            top: 231px;
+            left: 888px;
             background: #e9ecef;
-            opacity: 0.5;
-            width: 100%;
+            opacity: 0.8;
+            width: 52.6%;
             {#height: 46em;#}
             !important;bottom: 560px;
-            padding-right: 65em;
-            padding-top: 2em;" id="loading-666"></div>
+            padding-right: 0em;
+            padding-top: 0em;" id="loading-666"></div>
     <div class="mr-3 ml-0" style="
             display: none;
             position: absolute;
-            top: 212px;
-            left: 711px;
-            background: #c6114d;
-            opacity: 1001;
-            width: 26.1%;
-            {#height: 46em;#}
+            top: 69px;
+            left: 880px;
+            background: #e9ecef;
+            opacity: 0.8;
+            width: 53.4%;
+            height: 100%;
             {#!important;bottom: 560px;#}
-            padding-right: 4em;
-            padding-top: -4em;" id="loading-bill"></div>
+            padding-right: 0em;
+            padding-top: 11em;" id="loading-bill"></div>
 
     <div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel"
          aria-hidden="true">
@@ -287,34 +292,37 @@
             </div>
         </div>
     </div>
+    <div class="loader-container col-auto text-center">
+        <div class="spinner-border border-0 d-none" id="loading-bill" role="status" style="width: auto; height: auto">
+            <img class="animation__shake img-circle" src="{% static 'img/LOGO.png' %}" alt="Logo"
+                 height="40"
+                 width="40">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
 
-
-    <style>
-        div.dataTables_wrapper div#product-data-grid_filter {
-            width: 100%;
-            float: none;
-            text-align: center;
-        }
-
-        div.dataTables_wrapper div#product-data-grid_filter label input[type='Search'] {
-            width: 300px;
-        }
-    </style>
+{#    <style>#}
+{#        div.dataTables_wrapper div#product-data-grid_filter {#}
+{#            width: 100%;#}
+{#            float: none;#}
+{#            text-align: center;#}
+{#        }#}
+{##}
+{#        div.dataTables_wrapper div#product-data-grid_filter label input[type='Search'] {#}
+{#            width: 300px;#}
+{#        }#}
+{#    </style>#}
 {% endblock body %}
 
 {% block extrajs %}
 
     <script type="text/javascript">
-        $('#sum-total').val('0.00');
 
-        setTimeout(() => {
-            $(".quicksearch").focus();
-        }, 500);
         loader = '<div class="container">' +
             '<div class="row">' +
             '<div class="col-md-12">' +
             '<div class="loader">' +
-            '<p><strong>Cargando Reniec/Sunat...</strong></p>' +
+            '<strong class="roboto-condensed-regular" style="font-size: 12px"> Buscando...</strong>' +
             '<div class="loader-inner"></div>' +
             '<div class="loader-inner"></div>' +
             '<div class="loader-inner"></div>' +
@@ -327,14 +335,106 @@
             '<div class="row">' +
             '<div class="col-md-12">' +
             '<div class="loader">' +
-            '<p>Cargando Comprobante...</p>' +
-            '<div class="loader-inner"></div>' +
-            '<div class="loader-inner"></div>' +
-            '<div class="loader-inner"></div>' +
+            '<strong class="roboto-condensed-regular" style="font-size: 12px"> Cargando Comprobante...</strong>' +
+            '<div class="spinner-grow" role="status">' +
+            '</div>' +
             '</div>' +
             '</div>' +
             '</div>' +
             '</div>';
+
+        document.querySelectorAll('.check-search').forEach(radio => {
+            radio.addEventListener('change', function () {
+                if (this.checked) {
+                    if (this.value === 'document') {
+                        console.log('Acción para búsqueda por documento');
+                        $('.row.for-document').removeClass('d-none');
+                        $('.row.for-name').addClass('d-none');
+                        $('#client_name').val('');
+                        $('#client_address').val('');
+                        $('#document_number_client').val('').focus();
+                        $('#client_id').val('');
+                    } else if (this.value === 'name') {
+                        console.log('Acción para búsqueda por nombre');
+                        $('.row.for-name').removeClass('d-none');
+                        $('.row.for-document').addClass('d-none');
+                        $('#person_address').val('');
+                        $('#person-names').val('').focus();
+                        $('#client_id').val('');
+                    }
+                }
+            });
+        });
+
+        new Autocomplete('#autocomplete-client', {
+            search: input => {
+                const url = `/sales/get_client_search/?search=${encodeURI(input.toUpperCase())}`
+
+                return new Promise(resolve => {
+                    if (input.length < 3) {
+                        //$('#person-number').val('')
+                        //$('#order-number').val('')
+                        return resolve([])
+                    }
+                    fetch(url)
+                        .then(response => response.json())
+                        .then(data => {
+                            resolve(data.client)
+                        })
+                })
+            },
+            renderResult: (result, props) => {
+                let group = ''
+                if (result.index % 3 === 0) {
+                    group = '<li class="group">Group</li>'
+                }
+                return `
+                ${group}
+                <li ${props}>
+                 <div class="h6" style="font-family: roboto_condensed_regular">
+                    ${result.names}
+                 </div>
+                 <div class="wiki-snippet text-black">
+                    ${result.typeDocument}: ${result.number_document}
+                  </div>
+                </li>
+                `
+            },
+
+            getResultValue: result => result.names,
+            onSubmit: result => {
+                if (result) {
+                    let client_id = result.id;
+                    $('#client_id').val(client_id);
+                    $('#client_name').val(result.names);
+                    $('#person_address').val(result.last_address);
+
+                } else {
+                    toastr.warning('Seleccione un cliente valido', 'Error de llenado');
+                    return false;
+                }
+
+            }
+        });
+
+
+        $('#btn-voucher-order').on('click', function (e) {
+
+            /*let document_sender = $('#id-nro-document-sender');
+            if ((document_sender.val() === '') && ($('#id_sender').val() === '') && ($('#id-client-sender').val()) === '') {
+                toastr.warning('¡Elija un cliente porfavor!', 'Mensaje');
+                document_sender.focus();
+                return false;
+            }*/
+
+        });
+
+
+        $('#sum-total').val('0.00');
+
+        /*setTimeout(() => {
+            $(".quicksearch").focus();
+        }, 500);*/
 
         $("#id-nro-document-sender").attr('maxlength', 8);
         sessionStorage.setItem('document', '01')
@@ -351,15 +451,15 @@
         // console.log(perms)
 
         sessionStorage.setItem('BillType', 'V');
-        if ($("#radio2").is(':checked')) {
+        /*if ($("#radio2").is(':checked')) {
             $("#document_type_sender").attr('disabled', 'disabled');
             $("#id_client_name").removeAttr('disabled');
             $("#document_type_sender").find('option[value]').removeAttr('selected');
             $("#document_type_sender").find('option[value="0"]').attr('selected', 'selected');
             $("#id-nro-document-sender").attr('readonly', true);
             $("#document_type_sender").trigger('change');
-        }
-        ;
+        }*/
+
         $('#transaction_payment_type').change(function () {
             let type = $('#transaction_payment_type').val();
             if (type === 'E') {
@@ -380,10 +480,9 @@
                 $('#cash').css('display', 'none');
                 $('#deposit').css('display', 'none');
             }
-
-
         });
-        $(document).on('change', '#id-type-order', function () {
+
+        /*$(document).on('change', '#id-type-order', function () {
             let type = $('#id-type-order').val();
             if (type === 'T') {
                 $('#search_quotation').css('display', '');
@@ -394,12 +493,12 @@
                 $('#form_quotation').css('display', 'none');
                 $('#form_quotation_row2').css('display', 'none');
             }
-        });
+        });*/
         $(document).on('click', '#btn-new-form', function () {
             location.reload();
         });
 
-        function SearchQuotation() {
+        /*function SearchQuotation() {
             let correlative = $('#id-search-quotation').val();
             $('#id-search-quotation').val('');
             $.ajax({
@@ -450,9 +549,9 @@
                     toastr.error("error");
                 }
             });
-        }
+        }*/
 
-        function showModalView(ruta, pk) {
+        /*function showModalView(ruta, pk) {
             if (($('#id_client option:selected').val() == '0') && ($('#id_client_name option:selected').val() == '0')) {
                 toastr.warning('¡Elija un cliente porfavor!', 'Mensaje!');
                 $('#id_client').focus();
@@ -477,10 +576,9 @@
                     toastr.error("error");
                 }
             });
+        }*/
 
-        }
-
-        $(document).on('change', '#document_type_sender', function () {
+        /*$(document).on('change', '#document_type_sender', function () {
             let _val = $(this).val();
             if (_val === '01') {
                 $("#id-nro-document-sender").attr('maxlength', 8);
@@ -505,9 +603,9 @@
                 $('#id-address-line').css('display', 'none');
                 $('#id_address').val('')
             }
-        });
+        });*/
 
-        $(document).on('change', '#id_client_name', function (e) {
+        /*$(document).on('change', '#id_client_name', function (e) {
 
             {#$('#id_client_name').trigger('change.select2');#}
 
@@ -534,25 +632,26 @@
                 {#$("#document_type_sender").trigger('change');#}
                 $('#id-nro-document-sender').val(client_document);
             }
-        });
+        });*/
 
-
-        $('#id-nro-document-sender').keypress(function (e) {
-
+        $('#document_number_client').keypress(function (e) {
+            let document_number = $('#document_number_client');
+            $('#client_name').val('');
             if (e.keyCode === 13) {
                 e.preventDefault()
                 $(this).trigger("enterKey");
-                let _document_number = $('#id-nro-document-sender').val();
-                if ((sessionStorage.getItem('document') === '01') && (_document_number.length !== 8)) {
+                console.log(sessionStorage.getItem('document'))
+                let _document_number = document_number.val();
+                if ((sessionStorage.getItem('client-document') === '01') && (_document_number.length !== 8)) {
                     toastr.warning('¡Favor de completar los caracteres requeridos: 8 caracteres para DNI', 'Error de Datos');
                     return false;
                 } else {
-                    if ((sessionStorage.getItem('document') === '06') && (_document_number.length !== 11)) {
+                    if ((sessionStorage.getItem('client-document') === '06') && (_document_number.length !== 11)) {
                         toastr.warning('¡Favor de completar los caracteres requeridos: 11 caracteres para RUC!', 'Error de Datos');
                         return false;
                     }
                 }
-                if ($('#document_type_sender').val() === '0') {
+                if (document_number.val() === '0') {
                     toastr.warning('¡Favor seleecionar un tipo de documento!', 'Error de Datos');
                     return false;
                 }
@@ -565,17 +664,17 @@
                     dataType: 'json', // for response
                     type: 'GET',
                     data: {
-                        'nro_document': $('#id-nro-document-sender').val(),
-                        'type': $('#document_type_sender').val()
+                        'nro_document': document_number.val(),
+                        'type': $('#document_type_client').val()
                     },
                     contentType: 'application/json;charset=UTF-8',
                     headers: {"X-CSRFToken": '{{ csrf_token }}'},
                     success: function (response, textStatus, xhr) {
                         if (xhr.status === 200) {
                             toastr.success(response.message, '¡Bien hecho!');
-                            $("#id_sender").val(response.result);
-                            $("#id-client-sender").val(response.pk);
-                            $("#id_address").val(response.address);
+                            $("#client_name").val(response.result);
+                            $("#client_id").val(response.pk);
+                            $("#client_address").val(response.address);
                             $('#loading-666').hide();
                         }
                     },
@@ -595,7 +694,8 @@
                 return false;
             }
         });
-        $('#id_client, #id_client_name').on('select2:select', function (e) {
+
+        /*$('#id_client, #id_client_name').on('select2:select', function (e) {
             $('#id_table_client').empty()
             let data = e.params.data;
             let search = data['id'];
@@ -615,7 +715,7 @@
                 }
             });
 
-        });
+        });*/
 
         // sales_grid_tab1 - verifica si tiene filas
         function hasRowDetails() {
@@ -637,7 +737,7 @@
         }
 
 
-        function add_client_advancement($product, $_unit, $value) {
+        /*function add_client_advancement($product, $_unit, $value) {
 
             if ($value === 0) {
                 let _quantity = 0;
@@ -662,9 +762,9 @@
                     })
                 }
             }
-        }
+        }*/
 
-        function distribution_value(_product, _unit) {
+        /*function distribution_value(_product, _unit) {
             let param = 0;
             $('table#id-table-detail-order tbody#sales-details tr').each(function () {
                 if ($(this).attr('product') == _product && $(this).attr('pu') == _unit) {
@@ -677,7 +777,7 @@
                     })
                 }
             })
-        }
+        }*/
 
         function counterStrike() {
             var index = 1;
@@ -748,7 +848,7 @@
             }
         }
 
-        function createSales($type_doc, $print) {
+        /*function createSales($type_doc, $print) {
 
             if ($('#id-type-order').val() === '0' || $('#id-type-order').val() === '') {
                 toastr.warning('Seleccione el tipo de orden que desea realizar');
@@ -871,7 +971,7 @@
 
             $(".menu-sales").addClass('d-none');
 
-            console.log(sales)
+            //console.log(sales)
             $.ajax({
                 url: '/sales/create_order_detail/',
                 async: true,
@@ -899,7 +999,6 @@
                                 window.location.href = "/sales/print_order_bill/" + response.id_sales + "/" + response.check_print_series + "/"
                             }
                         }
-                        clearForm();
                         setTimeout(() => {
                             location.reload();
                         }, 1000);
@@ -916,9 +1015,138 @@
                 }
             });
 
-        }
+        }*/
 
-        function clearForm() {
+        $('#order-form').submit(function (e) {
+
+            e.preventDefault();
+
+            let _transaction_payment_type = $('#transaction_payment_type');
+
+            if ($('#user_id').val() === '0') {
+                toastr.warning('SELECCIONE EL USUARIO', 'Mensaje');
+                return false;
+            }
+
+            if ($('#client_id').val() === '') {
+                toastr.warning('SELECCIONE UN CLIENTE O BUSQUELO POR NUMERO DE DOCUMENTO', 'Error de Llenado');
+                return false;
+            }
+            if ($('#type_bill_document').val() === null) {
+                toastr.warning('Seleccionee el Tipo de Documento a Emitir', 'Error de Llenado');
+                return false;
+            }
+            if (_transaction_payment_type.val() === '0') {
+                toastr.warning('SELECIONE EL TIPO DE PAGO', 'Mensaje');
+                return false;
+            }
+            /*if (_transaction_payment_type.val() === 'E') {
+                if ($('#id_date').val() === '') {
+                    toastr.error('No puede realizar ventas sin aperturar la caja', 'Mensaje');
+                    return false;
+                }
+            }*/
+            if (_transaction_payment_type.val() === 'C') {
+                if (hasRowDetailsCredits() === false) {
+                    toastr.warning('Registre las cuotas de pago y la condición de pago', 'Mensaje');
+                    return false
+                }
+            }
+            if (hasRowDetails() === false) {
+                toastr.warning('¡SELECIONE LOS PRODUCTOS!', 'Mensaje');
+                return false;
+            }
+
+            let detailOrder = []
+            let creditDict = []
+
+            $("#sales-details tr.product").each(function () {
+                let _quantity = $(this).find("td.item-quantity input.input-quantity").val();
+                if (_quantity === '' || _quantity <= 0) {
+                    toastr.warning('INGRESE UN VALOR VALIDO PARA LA CANTIDAD');
+                    return false
+                }
+                let _price = $(this).find("td.item-price input.input-price").val();
+                if (_price === '' || _quantity <= 0) {
+                    toastr.warning('INGRESE UN VALOR VALIDO PARA EL PRECIO');
+                    return false
+                }
+                let productID = $(this).attr('product')
+                let detailObj = {
+                    product: $(this).attr('product'),
+                    unit: $(this).find("td.item-unit").attr('pu'),
+                    quantity: parseFloat($(this).find("td.item-quantity input.input-quantity").val()).toFixed(2),
+                    price: parseFloat($(this).find("td.item-price input.input-price").val()).toFixed(4),
+                    commentary: $(this).find("td.item-product input.input-product-name").val(),
+                    detailTotal: parseFloat($(this).find("td.item-total input.input-total-detail").val()).toFixed(2),
+                    store: $(this).attr("store_p"),
+                    serials: []
+                };
+                $(this).next('tr.product-serial').find(`tbody#details-serial-${productID} tr`).each(function () {
+                    let serialObj = {
+                        "Serial": $(this).find('td.item-serial input.serial').val()
+                    }
+                    detailObj.serials.push(serialObj);
+                });
+                detailOrder.push(detailObj);
+            });
+            $("#credit_details tr").each(function () {
+                let creditObj = {
+                    date: $(this).find("td.item-date-credit input.input-date").val(),
+                    amount: $(this).find("td.item-amount-credit input.input-amount").val(),
+                };
+                creditDict.push(creditObj);
+            });
+
+            let data = new FormData($('#order-form').get(0));
+            data.append('detail', JSON.stringify(detailOrder));
+            data.append('credit', JSON.stringify(creditDict));
+            //console.log(detailOrder)
+            //console.log(creditDict)
+            //$('#save-order').prop('disabled', true)
+            $('#loading-bill').html(loader2).show();
+            $.ajax({
+                url: '/sales/save_order/',
+                async: true,
+                dataType: 'json', // for response
+                type: 'POST',
+                cache: false,
+                processData: false,
+                data: data,
+                contentType: false,
+                headers: {
+                    "X-CSRFToken": '{{ csrf_token }}'
+                },
+                success: function (response, textStatus, xhr) {
+                    if (xhr.status === 200) {
+                        if (response.msg_sunat !== undefined) {
+                            toastr.success(response.message + response.msg_sunat, '¡Mensaje!');
+                        } else {
+                            toastr.success(response.message, '¡Mensaje!');
+                        }
+                        if (response.voucher_type === 'T' && response.format_pdf === 'T') {
+                            window.open("/sales/print_ticket_order_sales/" + response.id_sales + "/" + '0' + "/", '_blank');
+                        } else if (response.voucher_type === 'F' || response.voucher_type === 'B') {
+                            if (response.format_pdf === 'T') {
+                                window.open("/sales/print_ticket_order_sales/" + response.id_sales + "/" + '1' + "/", '_blank');
+                            } else if (response.format_pdf === 'A4') {
+                                window.location.href = "/sales/print_order_bill/" + response.id_sales + "/" + response.check_print_series + "/"
+                            }
+                        }
+                        $('#loading-bill').hide();
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    }
+                },
+                error: function (jqXhr, textStatus, xhr) {
+                    toastr.error(jqXhr.responseJSON.error, '¡ERROR!');
+                    $('#loading-bill').hide();
+                }
+            });
+        });
+
+        /*function clearForm() {
 
             $('#client-name').val('');
             $('#id-client-sender').val('');
@@ -932,9 +1160,8 @@
             $("#id_distribution").val('');
             $("#id-nro-document-sender").attr('maxlength', 8);
             sessionStorage.setItem('document', '01')
-        }
+        }*/
 
-        {#le facture#}
 
         $(".invoice").click(function () {
 
@@ -1046,7 +1273,7 @@
         });
 
 
-        $("#radio1,#radio2").click(function () {
+        /*$("#radio1,#radio2").click(function () {
             if ($("#radio1").is(':checked')) {
                 $("#id_client_name").attr('disabled', 'disabled');
                 $("#document_type_sender").removeAttr('disabled');
@@ -1075,9 +1302,9 @@
                 $(".client-table").attr('placeholder', 'INGRESE CLIENTE Y PRESIONE ENTER...')
                 $(".client-table").removeAttr('disabled');
             }
-        });
+        });*/
 
-        function Client_Advancement($product, $quantity) {
+        /*function Client_Advancement($product, $quantity) {
             let a = false;
             $('table.table-client-advancement tbody#details-client-advancement tr').each(function () {
 
@@ -1092,32 +1319,33 @@
                 }
             })
             return a;
-        }
+        }*/
 
-        function Difference(Valor1, Valor2) {
+        /*function Difference(Valor1, Valor2) {
             let S = parseFloat(Valor1 - Valor2);
             return S;
-        };
-        $('#tbl-sales-distribution-grid tbody.sales-distribution-detail tr td').each(function () {
+        }*/
+
+        /*$('#tbl-sales-distribution-grid tbody.sales-distribution-detail tr td').each(function () {
             let _str = $(this).text();
             _str = _str.replace(',', '.');
             $(this).text(_str);
-        });
+        });*/
 
 
-        if ($("#type").length) {
+        /*if ($("#type").length) {
             if ($("#type").val() == 'E') {
                 $("#save-order").hide()
             } else {
             }
-        }
+        }*/
 
-        function printPdf($url) {
+        /*function printPdf($url) {
             let link = document.createElement('a');
             link.href = $url;
             link.download = 'file.pdf';
             link.dispatchEvent(new MouseEvent('click'));
-        }
+        }*/
 
         $("#id_cash").change(function () {
 
@@ -1153,7 +1381,7 @@
                 });
             }
         });
-        $('#id_address').keypress(function (e) {
+        /*$('#id_address').keypress(function (e) {
 
             if (e.keyCode === 13) {
                 e.preventDefault()
@@ -1185,7 +1413,7 @@
                 });
                 return false;
             }
-        });
+        });*/
 
 
         $(document).on('click', 'table#product-data-grid tbody tr td table.table-prices tbody tr td.prices-list div button', async function () {
@@ -1336,10 +1564,10 @@
                 '<tr detail_id="' + 'NaN' + '" product="' + _product_id + '" store_p="' + _product_store + '" pu="' + _unit_id + '" price_p="'+ price_purchase +'" class="text-uppercase small text-center product" style="font-size: 14px;">' +
                 '<td class="align-middle">' + '</td>' +
                 '<td class="align-middle text-left item-product">' + '<input type="text" class="form-control form-control-sm input-product-name" value="' + _product_name + '">' + '</td>' +
-                '<td class="align-middle item-quantity">' + '<input type="number" class="form-control form-control-sm text-right input-quantity" disabled value="' + _quantity.toFixed(2) + '">' + '</td>' +
+                '<td class="align-middle item-quantity">' + '<input type="text" class="form-control form-control-sm text-right input-quantity" disabled value="' + _quantity.toFixed(2) + '">' + '</td>' +
                 '<td class="align-middle item-unit" pu="' + _unit_id + '" unit_min="' + _quantity_minim + '">' + _unit + '</td>' +
-                '<td class="align-middle item-price">' + '<input type="number" class="form-control form-control-sm text-right input-price" value="' + _price.toFixed(2) + '">' + '</td>' +
-                '<td class="align-middle item-total">' + '<input type="number" class="form-control form-control-sm text-right input-total-detail" value="' + _total.toFixed(2) + '">' + '</td>' +
+                '<td class="align-middle item-price">' + '<input type="text" class="form-control form-control-sm text-right input-price" value="' + _price.toFixed(2) + '">' + '</td>' +
+                '<td class="align-middle item-total">' + '<input type="text" class="form-control form-control-sm text-right input-total-detail" value="' + _total.toFixed(2) + '">' + '</td>' +
                 '<td>' + '<button type="button" onclick="deleteItem(' + _product_id + ',' + _unit_id + ',' + _product_serial + ',' + _product_store + ')" class="btn btn-danger btn-sm">' +
                 '<i class="fa fa-trash"></i></button>' + '</td>' +
                 '</tr>' +
@@ -1380,10 +1608,10 @@
                 '<tr detail_id="' + 'NaN' + '" product="' + _product_id + '" store_p="' + _product_store + '" pu="' + _unit_id + '" class="text-uppercase small text-center product" style="font-size: 14px;">' +
                 '<td class="align-middle">' + '</td>' +
                 '<td class="align-middle text-left item-product">' + '<input type="text" class="form-control form-control-sm input-product-name" value="' + _product_name + '">' + '</td>' +
-                '<td class="align-middle item-quantity">' + '<input type="number" class="form-control form-control-sm text-right input-quantity" disabled value="' + _quantity.toFixed(2) + '">' + '</td>' +
+                '<td class="align-middle item-quantity">' + '<input type="text" class="form-control form-control-sm text-right input-quantity" disabled value="' + _quantity.toFixed(2) + '">' + '</td>' +
                 '<td class="align-middle item-unit" pu="' + _unit_id + '" unit_min="' + _quantity_minim + '">' + _unit + '</td>' +
-                '<td class="align-middle item-price">' + '<input type="number" class="form-control form-control-sm text-right input-price" value="' + _price.toFixed(2) + '">' + '</td>' +
-                '<td class="align-middle item-total">' + '<input type="number" class="form-control form-control-sm text-right input-total-detail" value="' + _total.toFixed(2) + '">' + '</td>' +
+                '<td class="align-middle item-price">' + '<input type="text" class="form-control form-control-sm text-right input-price" value="' + _price.toFixed(2) + '">' + '</td>' +
+                '<td class="align-middle item-total">' + '<input type="text" class="form-control form-control-sm text-right input-total-detail" value="' + _total.toFixed(2) + '">' + '</td>' +
                 '<td>' + '<button type="button" onclick="deleteItem(' + _product_id + ',' + _unit_id + ',' + _product_serial + ',' + _product_store + ')" class="btn btn-danger btn-sm">' +
                 '<i class="fa fa-trash"></i></button>' + '</td>' +
                 '</tr>' +
@@ -1434,7 +1662,7 @@
             });
         }
 
-        $('#id-family').change(function () {
+        /*$('#id-family').change(function () {
             let _search = $(this).val();
             $('#product_list_sales').empty();
             if (_search === '0') {
@@ -1455,7 +1683,7 @@
                     },
                 });
             }
-        });
+        });*/
         $(document).on('keypress', '#custom-search-product', function (e) {
 
             let type_search = $('#type_search').val()
@@ -1545,13 +1773,28 @@
             let val = Number($(this).val());
             let row = $(this).parent('td.item-price').parent('tr');
             let price_purchase = Number(row.attr('price_p'));
-            if (val < price_purchase){
+            let product_id = row.attr('product');
+            validatePrice(val, price_purchase, product_id)
+            //$(this).val('');
+            //$(this).focus();
+            /*if (val < price_purchase){
                 toastr.error('El precio de venta no puede ser menor al precio de compra', '¡Error de escritura!');
                 $(this).val('');
                 $(this).focus();
                 calculateTotal();
-            }
+            }*/
         });
+
+        function validatePrice(val, price_purchase, product_id) {
+            let rows = $('#sales-details').find("tr[product=" + product_id + "]");
+            if (val < price_purchase){
+                toastr.error('El precio de venta no puede ser menor al precio de compra', '¡Error de escritura!');
+                let _input = rows.find('td.item-price input.input-price');
+                _input.val('');
+                //_input.focus();
+                calculateTotal();
+            }
+        }
 
         $(document).on('keyup', '#sales-details tr td.item-price input.input-price', function (e) {
             let val = Number($(this).val());
@@ -1595,12 +1838,16 @@
             {#console.log('price_unit', price_unit)#}
             row.find('td.item-price input.input-price').val((price_unit).toFixed(2))
             calculateTotal();
-
+            let price_sale = Number(row.find('td.item-price input.input-price').val());
+            let price_purchase = Number(row.attr('price_p'));
+            let product_id = row.attr('product');
+            validatePrice(price_sale, price_purchase, product_id)
         });
 
 
         $(document).on('change', '#document_type_client', async function () {
             let _val = $(this).val();
+            console.log(_val)
             if (_val === '01') {
                 $("#document_number_client").attr('maxlength', 8);
                 sessionStorage.setItem('client-document', '01')
@@ -1627,9 +1874,9 @@
             }
         });
 
-        $('#id_district').select2({
+        /*$('#id_district').select2({
             theme: 'bootstrap4',
-        });
+        });*/
 
         $("#document_number_client").attr('maxlength', 8);
         sessionStorage.setItem('client-document', '01')
@@ -1723,7 +1970,7 @@
             });
         });
 
-        $(document).on('click', '#btn-update-order', function (e) {
+        /*$(document).on('click', '#btn-update-order', function (e) {
 
             if ($('#id-type-order').val() === 'T') {
                 if ($('#id_date_completion').val() === '' || $('#id_place_delivery').val() === '' || $('#id_type_quotation').val() === '0' || $('#id_name_type_quotation').val() === '' || $('#id_observation').val() === '') {
@@ -1819,7 +2066,7 @@
                 }
             });
 
-        });
+        });*/
 
         $(document).on('focusin', '.client-table', function (e) {
             $(this).parent('td').find('div.dropdown-menu').css({
@@ -2110,6 +2357,23 @@
                     console.error("Error al obtener los datos: ", error);
                 }
             });
+        });
+
+        $(document).on('change', '#type_bill_document', function (e) {
+            let type_bill_document = $(this).val();
+            $.ajax({
+                url: '/sales/get_correlative_by_type/',
+                method: 'GET',
+                data: {'type_bill_document': type_bill_document},
+                success: function (data) {
+                    $('#correlative').val(data.correlative)
+                    $('#id_serial').val(data.serial)
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error al obtener los datos: ", error);
+                }
+            });
+
         });
 
 

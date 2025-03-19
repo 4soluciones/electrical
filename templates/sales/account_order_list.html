@@ -40,7 +40,34 @@
                     {% else %}
                         <span class="text-dark font-weight-bolder">{{ o.type }}</span>
                     {% endif %}<br>
-                    <span class="font-weight-bold">{{ o.serial }} - {{ o.correlative_sale }}</span>
+                    <span class="font-weight-bold">{{ o.serial }} - {{ o.correlative_sale }}</span><br>
+                    {% if o.status != 'A' %}
+                        {% if o.order_bill %}
+                            <div class="btn-group" role="group" aria-label="Basic example">
+                                <a class="btn btn-secondary btn-sm ml-0 my-0" data-toggle="tooltip"
+                                   data-placement="left" title="Con Serial"
+                                   href="{% url 'sales:print_order_bill' o.id 'true' %}"
+                                   target="print">
+                                    <span class="fas fa-file-invoice fa-xs"></span></a>
+                                <a class="btn btn-primary btn-sm ml-0 my-0" data-toggle="tooltip" data-placement="top"
+                                   title="Sin Serial"
+                                   href="{% url 'sales:print_order_bill' o.id 'false' %}"
+                                   target="print">
+                                    <span class="fas fa-file-invoice fa-xs"></span></a>
+                            </div>
+                            <a class="btn btn-green btn-sm"
+                               href="{% url 'sales:print_ticket_order_sales'  o.id 1 %}"
+                               target="print">
+                                <span class="fa fa-print fa-xs"></span></a>
+                        {% else %}
+                            <a class="btn btn-blue btn-sm"
+                               href="{% url 'sales:print_ticket_order_sales' o.id 0 %}"
+                               target="print">
+                                <span class="fa fa-print fa-xs"></span></a>
+                        {% endif %}
+                    {% else %}
+                        <span class="font-weight-bold">ANULADA</span>
+                    {% endif %}
                 </td>
 
                 <td class="align-middle text-center">{{ o.date|date:"d-m-y" }}</td>
