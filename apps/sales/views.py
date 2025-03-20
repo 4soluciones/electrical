@@ -6813,7 +6813,7 @@ def save_order(request):
             client=client_obj,
             user=user_obj,
             total=decimal.Decimal(_sum_total),
-            status='C',
+            status='P',
             subsidiary_store=subsidiary_store_sales_obj,
             correlative_sale=get_correlative_order(subsidiary_obj, 'V'),
             subsidiary=subsidiary_obj,
