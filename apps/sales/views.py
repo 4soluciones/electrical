@@ -6874,14 +6874,14 @@ def save_order(request):
 
         code_operation = '-'
         if _type_payment in ['E', 'D']:
-            cash_id = request.POST.get('cash_id' if _type_payment == 'E' else 'id_cash_deposit', '')
+            cash_id = request.POST.get('cash_box' if _type_payment == 'E' else 'id_cash_deposit', '')
             cash_obj = Cash.objects.get(id=int(cash_id))
 
             if _type_payment == 'D':
                 code_operation = request.POST.get('code-operation', '')
 
             loan_payment_obj = LoanPayment(
-                pay=decimal.Decimal(_sum_total),
+                price=decimal.Decimal(_sum_total),
                 order=order_obj,
                 create_at=_date,
                 type='V',
