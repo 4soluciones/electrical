@@ -40,7 +40,7 @@ urlpatterns = [
          name='toogle_status_product_detail'),
 
     path('get_rate_product/', get_rate_product, name='get_rate_product'),
-    path('create_order_detail/', create_order_detail, name='create_order_detail'),
+    # path('create_order_detail/', create_order_detail, name='create_order_detail'),
     path('query_dni/', query_dni, name='query_dni'),
 
     path('generate_invoice/', generate_invoice, name='generate_invoice'),
