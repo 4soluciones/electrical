@@ -464,12 +464,13 @@ def send_bill_nubefact(order_id, serie_):
         payment = 'Contado'
 
     for d in details:
-        base_total = d.quantity_sold * d.price_unit  # 5 * 20 = 100
+        base_total = d.quantity_sold * round(d.price_unit, 6)  # 5 * 20 = 100
         base_amount = base_total / decimal.Decimal(1.1800)  # 100 / 1.18 = 84.75
-        igv = base_total - base_amount  # 100 - 84.75 = 15.25
-        sub_total = sub_total + base_amount
-        total = total + base_total
-        igv_total = igv_total + igv
+        igv = round(base_total - base_amount, 6)  # 100 - 84.75 = 15.25
+        sub_total = round(sub_total + base_amount, 6)
+        total = round(total + base_total, 6)
+        igv_total = round(igv_total + igv, 6)
+
         total_perceptron = (total * 2) / 100
         total_with_perceptron = total + total_perceptron
         _unit = 'NIU'
@@ -484,13 +485,13 @@ def send_bill_nubefact(order_id, serie_):
             "codigo_producto_sunat": "10000000",  # codigo del producto excel-sunat
             "descripcion": d.product.name,
             "cantidad": float(round(d.quantity_sold, 4)),
-            "valor_unitario": float(round((base_amount / d.quantity_sold), 4)),  # valor unitario sin IGV
-            "precio_unitario": float(round(d.price_unit, 4)),
+            "valor_unitario": float(round((base_amount / d.quantity_sold), 6)),  # valor unitario sin IGV
+            "precio_unitario": float(round(d.price_unit, 6)),
             "descuento": "",
-            "subtotal": float(round(base_amount, 4)),  # resultado del valor unitario por la cantidad menos el descuento
+            "subtotal": float(round(base_amount, 6)),  # resultado del valor unitario por la cantidad menos el descuento
             "tipo_de_igv": 1,  # operacion onerosa
-            "igv": float(round(igv, 4)),
-            "total": float(round(base_total, 4)),
+            "igv": float(round(igv, 6)),
+            "total": float(round(base_total, 6)),
             "anticipo_regularizacion": 'false',
             "anticipo_documento_serie": "",
             "anticipo_documento_numero": "",
@@ -624,12 +625,12 @@ def send_receipt_nubefact(order_id, serie_):
     igv_total = 0
 
     for d in details:
-        base_total = d.quantity_sold * d.price_unit  # 5 * 20 = 100
+        base_total = d.quantity_sold * round(d.price_unit, 6)  # 5 * 20 = 100
         base_amount = base_total / decimal.Decimal(1.1800)  # 100 / 1.18 = 84.75
-        igv = base_total - base_amount  # 100 - 84.75 = 15.25
-        sub_total = sub_total + base_amount
-        total = total + base_total
-        igv_total = igv_total + igv
+        igv = round(base_total - base_amount, 6)  # 100 - 84.75 = 15.25
+        sub_total = round(sub_total + base_amount, 6)
+        total = round(total + base_total, 6)
+        igv_total = round(igv_total + igv, 6)
         _unit = 'NIU'
         if d.unit.name == 'ZZ':
             _unit = 'ZZ'
@@ -640,14 +641,14 @@ def send_receipt_nubefact(order_id, serie_):
             "codigo": "001",  # codigo del producto opcional
             "codigo_producto_sunat": "10000000",  # codigo del producto excel-sunat
             "descripcion": d.product.name,
-            "cantidad": float(round(d.quantity_sold, 3)),
-            "valor_unitario": float(round((base_amount / d.quantity_sold), 4)),  # valor unitario sin IGV
-            "precio_unitario": float(round(d.price_unit, 4)),
+            "cantidad": float(round(d.quantity_sold, 4)),
+            "valor_unitario": float(round((base_amount / d.quantity_sold), 6)),  # valor unitario sin IGV
+            "precio_unitario": float(round(d.price_unit, 6)),
             "descuento": "",
-            "subtotal": float(round(base_amount, 4)),  # resultado del valor unitario por la cantidad menos el descuento
+            "subtotal": float(round(base_amount, 6)),  # resultado del valor unitario por la cantidad menos el descuento
             "tipo_de_igv": 1,  # operacion onerosa
-            "igv": float(round(igv, 4)),
-            "total": float(round(base_total, 4)),
+            "igv": float(round(igv, 6)),
+            "total": float(round(base_total, 6)),
             "anticipo_regularizacion": 'false',
             "anticipo_documento_serie": "",
             "anticipo_documento_numero": "",
@@ -676,13 +677,13 @@ def send_receipt_nubefact(order_id, serie_):
         "descuento_global": "",
         "total_descuento": "",
         "total_anticipo": "",
-        "total_gravada": float(round(sub_total, 2)),
+        "total_gravada": float(sub_total),
         "total_inafecta": "",
         "total_exonerada": "",
-        "total_igv": float(round(igv_total, 2)),
+        "total_igv": float(igv_total),
         "total_gratuita": "",
         "total_otros_cargos": "",
-        "total": float(round(total, 2)),
+        "total": float(total),
         "percepcion_tipo": "",
         "percepcion_base_imponible": "",
         "total_percepcion": "",

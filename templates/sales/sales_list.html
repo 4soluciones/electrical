@@ -1835,13 +1835,13 @@
             let val = Number($(this).val());
             {#console.log('total', val)#}
             let row = $(this).parent('td.item-total').parent('tr');
-            let quantity = Number(row.find('td.item-quantity input.input-quantity').val());
-            let price = Number(row.find('td.item-price input.input-price').val());
+            let quantity = Number(row.find('td.item-quantity input.input-quantity').val()).toFixed(6);
+            let price = Number(row.find('td.item-price input.input-price').val()).toFixed(6);
             {#console.log('quantity', quantity)#}
 
             let price_unit = val / quantity
             {#console.log('price_unit', price_unit)#}
-            row.find('td.item-price input.input-price').val((price_unit).toFixed(2))
+            row.find('td.item-price input.input-price').val((price_unit).toFixed(6))
             calculateTotal();
             let price_sale = Number(row.find('td.item-price input.input-price').val());
             let price_purchase = Number(row.attr('price_p'));
