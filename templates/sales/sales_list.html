@@ -318,6 +318,15 @@
 
     <script type="text/javascript">
 
+        $(document).ready(function() {
+            // Prevenir el envío del formulario al presionar "Enter"
+            $('#order-form input').on('keypress', function(e) {
+                if (e.which === 13) { // 13 es el código de la tecla "Enter"
+                    e.preventDefault();
+                }
+            });
+        });
+
         loader = '<div class="container">' +
             '<div class="row">' +
             '<div class="col-md-12">' +
