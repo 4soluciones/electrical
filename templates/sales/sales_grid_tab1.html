@@ -160,6 +160,7 @@
                                    maxlength="200"
                                    autocomplete="off"
                                    value=""
+                                   onkeydown="if(event.key === 'Enter') event.preventDefault();"
                                    placeholder="Buscar Cliente..."/>
                             <ul class="autocomplete-result-list"></ul>
                         </div>
