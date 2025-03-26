@@ -318,14 +318,14 @@
 
     <script type="text/javascript">
 
-        /*$(document).ready(function() {
+        $(document).ready(function() {
             // Prevenir el envío del formulario al presionar "Enter"
             $('#order-form input').on('keypress', function(e) {
                 if (e.which === 13) { // 13 es el código de la tecla "Enter"
                     e.preventDefault();
                 }
             });
-        });*/
+        });
 
         loader = '<div class="container">' +
             '<div class="row">' +
@@ -1083,7 +1083,7 @@
                     quantity: parseFloat($(this).find("td.item-quantity input.input-quantity").val()).toFixed(2),
                     price: parseFloat($(this).find("td.item-price input.input-price").val()).toFixed(6),
                     commentary: $(this).find("td.item-product input.input-product-name").val(),
-                    detailTotal: parseFloat($(this).find("td.item-total input.input-total-detail").val()).toFixed(6),
+                    detailTotal: parseFloat($(this).find("td.item-total input.input-total-detail").val()).toFixed(2),
                     store: $(this).attr("store_p"),
                     serials: []
                 };
@@ -1582,7 +1582,9 @@
             counterStrike();
         }
 
+
         function addOrderDetailSerial(a, b, c, d, e, f, g, h, serial, _product_serial) {
+
             let _unit_id = a
             let _product_id = b
             let _quantity = parseFloat(c)
@@ -1628,6 +1630,7 @@
                 '<div class="card-header p-0" id="heading-' + _product_id + '">' +
                 '<h5 class="mb-0 text-center">' +
                 '<button class="btn btn-link collapsed text-dark roboto-condensed-regular font-weight-bold p-0"' +
+                'type="button"' +
                 'data-toggle="collapse" style="font-size: 11px"' +
                 'data-target="#collapse-' + _product_id + '" aria-expanded="false" aria-controls="collapse-' + _product_id + '">' +
                 'Seriales<i class="fas fa-sort-down"></i>' +
