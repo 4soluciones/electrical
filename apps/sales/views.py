@@ -4462,6 +4462,18 @@ def get_product_by_criteria(request):
 
 def get_product_list(criteria=None, value=None, brand=None):
     product_set = None
+
+    # Subqueries para obtener la última fecha de compra y cantidad comprada
+    last_purchase_date = PurchaseDetail.objects.filter(
+        product=OuterRef('id')
+    ).order_by('-purchase__purchase_date').values('purchase__purchase_date')[:1]
+
+    last_purchase_quantity = PurchaseDetail.objects.filter(
+        product=OuterRef('id')
+    ).order_by('-purchase__purchase_date').values('quantity')[:1]
+
+    last_kardex = Kardex.objects.filter(product_store=OuterRef('id')).order_by('-id')[:1]
+
     if criteria == 'all':
         product_set = Product.objects.all()
 
@@ -4469,14 +4481,17 @@ def get_product_list(criteria=None, value=None, brand=None):
         product_set = Product.objects.filter(name__icontains=value)
 
     elif brand is not None:
-        last_kardex = Kardex.objects.filter(product_store=OuterRef('id')).order_by('-id')[:1]
         product_set = Product.objects.filter(product_brand_id=brand, is_enabled=True).select_related(
-            'product_family', 'product_brand').prefetch_related(
+            'product_family', 'product_brand'
+        ).annotate(
+            last_purchase_date=Subquery(last_purchase_date),
+            last_purchase_quantity=Subquery(last_purchase_quantity)
+        ).prefetch_related(
             Prefetch(
                 'productstore_set',
-                queryset=ProductStore.objects.select_related('subsidiary_store__subsidiary').exclude(
-                    subsidiary_store__subsidiary=3)
-                    .annotate(
+                queryset=ProductStore.objects.select_related('subsidiary_store__subsidiary')
+                .exclude(subsidiary_store__subsidiary=3)
+                .annotate(
                     last_remaining_quantity=Subquery(last_kardex.values('remaining_quantity'))
                 )
             ),
@@ -4486,25 +4501,25 @@ def get_product_list(criteria=None, value=None, brand=None):
         ).order_by('id')
 
     elif criteria == 'name_contains':
-
-        last_kardex = Kardex.objects.filter(product_store=OuterRef('id')).order_by('-id')[:1]
         array_value = value.split()
         product_query = Product.objects
         full_query = None
-        for i in range(0, len(array_value)):
-            q = Q(name__icontains=array_value[i]) | Q(product_brand__name__icontains=array_value[i])
-            if full_query is None:
-                full_query = q
-            else:
-                full_query = full_query & q
+
+        for term in array_value:
+            q = Q(name__icontains=term) | Q(product_brand__name__icontains=term)
+            full_query = q if full_query is None else full_query & q
 
         product_set = product_query.filter(full_query, is_enabled=True).select_related(
-            'product_family', 'product_brand').prefetch_related(
+            'product_family', 'product_brand'
+        ).annotate(
+            last_purchase_date=Subquery(last_purchase_date),
+            last_purchase_quantity=Subquery(last_purchase_quantity)
+        ).prefetch_related(
             Prefetch(
                 'productstore_set',
-                queryset=ProductStore.objects.select_related('subsidiary_store__subsidiary').exclude(
-                    subsidiary_store__subsidiary=3)
-                    .annotate(
+                queryset=ProductStore.objects.select_related('subsidiary_store__subsidiary')
+                .exclude(subsidiary_store__subsidiary=3)
+                .annotate(
                     last_remaining_quantity=Subquery(last_kardex.values('remaining_quantity'))
                 )
             ),
@@ -4514,7 +4529,10 @@ def get_product_list(criteria=None, value=None, brand=None):
         ).order_by('id')
 
     elif criteria == 'barcode':
-        product_set = Product.objects.filter(productdetail__code=value)
+        product_set = Product.objects.filter(productdetail__code=value).annotate(
+            last_purchase_date=Subquery(last_purchase_date),
+            last_purchase_quantity=Subquery(last_purchase_quantity)
+        )
 
     return product_set
 
