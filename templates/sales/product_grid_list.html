@@ -16,7 +16,9 @@
                 <th>ID</th>
                 <th class="th-sm">Código</th>
                 <th class="th-sm">Código de Barras</th>
-                <th class="th-sm" style="width: 30%">Nombre del Producto</th>
+                <th class="th-sm" style="width: 20%">Nombre del Producto</th>
+                <th class="th-sm" style="width: 5%; font-size: 10px">Fecha<br>Ult. Compra</th>
+                <th class="th-sm" style="width: 5%; font-size: 10px">Cantidad<br>Ult. Compra</th>
                 <th class="th-sm text-center">Marca</th>
                 <th class="th-sm text-center">Familia</th>
                 <th class="th-sm" style="width: 5%">Unidad</th>
@@ -49,6 +51,8 @@
                         {% endif %}
                     </td>
                     <td class="align-middle text-left" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ product.name|upper }}</td>
+                    <td class="align-middle text-center" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ product.last_purchase_date|date:"d/m/y" }}</td>
+                    <td class="align-middle text-center" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ product.last_purchase_quantity|default:"-"|safe }}</td>
                     <td class="align-middle" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ product.product_brand.name|upper }}</td>
                     <td class="align-middle" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ product.product_family.name|upper }}</td>
                     {% if product.productdetail_set.all.count > 0 %}

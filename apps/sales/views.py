@@ -34,7 +34,7 @@ from django.db.models import Min, Sum, Max, Q, Prefetch, Subquery, OuterRef, Val
 from electrical import settings
 import os
 from django.db.models import F
-from ..buys.models import PurchaseDetail
+from ..buys.models import PurchaseDetail, Purchase
 
 
 class Home(TemplateView):
@@ -6435,18 +6435,35 @@ def get_all_products(request):
         # product_set = None
         last_kardex = Kardex.objects.filter(product_store=OuterRef('id')).order_by('-id')[:1]
 
+        last_purchase_date = PurchaseDetail.objects.filter(
+            product=OuterRef('id')
+        ).order_by('-purchase__purchase_date').values('purchase__purchase_date')[:1]
+
+        last_purchase_quantity = PurchaseDetail.objects.filter(
+            product=OuterRef('id')
+        ).order_by('-purchase__purchase_date').values('quantity')[:1]
+
         product_set = Product.objects.filter(is_enabled=True).select_related(
-            'product_family', 'product_brand').prefetch_related(
+            'product_family', 'product_brand'
+        ).annotate(
+            last_purchase_date=Subquery(last_purchase_date),
+            last_purchase_quantity=Subquery(last_purchase_quantity)
+        ).prefetch_related(
             Prefetch(
                 'productstore_set',
-                queryset=ProductStore.objects.select_related('subsidiary_store__subsidiary').exclude(
-                    subsidiary_store__subsidiary=3)
+                queryset=ProductStore.objects.select_related('subsidiary_store__subsidiary')
+                    .exclude(subsidiary_store__subsidiary=3)
                     .annotate(
-                    last_remaining_quantity=Subquery(last_kardex.values('remaining_quantity'))
+                    last_remaining_quantity=Subquery(
+                        Kardex.objects.filter(product_store=OuterRef('id'))
+                            .order_by('-id')
+                            .values('remaining_quantity')[:1]
+                    )
                 )
             ),
             Prefetch(
-                'productdetail_set', queryset=ProductDetail.objects.select_related('unit')
+                'productdetail_set',
+                queryset=ProductDetail.objects.select_related('unit')
             ),
         ).order_by('id')
 
