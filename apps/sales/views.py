@@ -4465,11 +4465,13 @@ def get_product_list(criteria=None, value=None, brand=None):
 
     # Subqueries para obtener la última fecha de compra y cantidad comprada
     last_purchase_date = PurchaseDetail.objects.filter(
-        product=OuterRef('id')
+        product=OuterRef('id'),
+        purchase__status='A'
     ).order_by('-purchase__purchase_date').values('purchase__purchase_date')[:1]
 
     last_purchase_quantity = PurchaseDetail.objects.filter(
-        product=OuterRef('id')
+        product=OuterRef('id'),
+        purchase__status='A'
     ).order_by('-purchase__purchase_date').values('quantity')[:1]
 
     last_kardex = Kardex.objects.filter(product_store=OuterRef('id')).order_by('-id')[:1]
@@ -6454,11 +6456,13 @@ def get_all_products(request):
         last_kardex = Kardex.objects.filter(product_store=OuterRef('id')).order_by('-id')[:1]
 
         last_purchase_date = PurchaseDetail.objects.filter(
-            product=OuterRef('id')
+            product=OuterRef('id'),
+            purchase__status='A'
         ).order_by('-purchase__purchase_date').values('purchase__purchase_date')[:1]
 
         last_purchase_quantity = PurchaseDetail.objects.filter(
-            product=OuterRef('id')
+            product=OuterRef('id'),
+            purchase__status='A'
         ).order_by('-purchase__purchase_date').values('quantity')[:1]
 
         product_set = Product.objects.filter(is_enabled=True).select_related(
