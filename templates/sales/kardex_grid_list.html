@@ -89,7 +89,7 @@
                         {% elif kardex.purchase_detail.id %}
                             <span class="text-secondary">
 {#                                COMPRA[PD]:{{ kardex.purchase_detail.id }}#}
-                                COMPRA<br>{{ kardex.purchase_detail.purchase.bill_number }}
+                                COMPRA<br>{{ kardex.purchase_detail.purchase.bill_number|upper }}
                             </span>
                             {#                {% elif kardex.manufacture_detail.id %}#}
                             {#                    <span class="text-primary">PRODUCCION[MD]:{{ kardex.manufacture_detail.id }}</span>#}

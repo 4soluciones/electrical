@@ -79,6 +79,10 @@
                         <i class="fas fa-file-excel"></i> Kardex Total
                     </button>
 
+                    <button type="button" class="btn-sm btn-outline-success my-1 mr-2 ml-2" id="report-excel-by-date">
+                        <i class="fas fa-file-excel"></i> Kardex por Fecha
+                    </button>
+
                 </form>
             </div>
             <div class="card-body">
@@ -233,6 +237,45 @@
                                         <label for="product_id" class="col-form-label">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
                                         <button type="button" class="btn-sm btn-success btn-block"
                                                 id="excel">
+                                            <i class="fas fa-file-excel"></i> Generar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {#MODAL DE KARDEX POR FECHA EXCEL#}
+    <div class="modal fade" id="modal-report-excel-by-date" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered roboto-condensed-regular">
+            <div class="modal-content">
+                <div class="modal-header text-center">
+                    <h5 class="modal-title roboto-condensed-regular font-weight-bold" id="exampleModalLabel1">KARDEX
+                        POR FECHA:</h5>
+                    <button type="button" class="close ml-0" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="report-excel-by-date">
+                    <div class="card-group">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <div class="row pb-1">
+                                    <div class="col-sm-6 col-md-6 col-lg-6">
+                                        <label for="date" class="col-form-label">Fecha:</label>
+                                        <input type="date" class="form-control form-control-sm" id="date"
+                                               value="{{ date }}">
+                                    </div>
+                                    <div class="col-sm-6 col-md-6 col-lg-6">
+                                        <label for="excel" class="col-form-label">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                                        <button type="button" class="btn-sm btn-success btn-block"
+                                                id="excel-total">
                                             <i class="fas fa-file-excel"></i> Generar
                                         </button>
                                     </div>
@@ -650,6 +693,14 @@
             window.location.href = `/sales/export_all_products/${startDate}/${endDate}/`;
         });
 
+        $(document).on('click', '#report-excel-by-date', function () {
+            $('#modal-report-excel-by-date').modal('show');
+        });
+
+        document.getElementById('excel-total').addEventListener('click', function () {
+            const date = document.getElementById('date').value;
+            window.location.href = `/sales/report_kardex_by_date/${date}/`;
+        });
 
         /*$(document).on('click', '#btn-search', function (e) {
            var search = $("#search").attr('pk');

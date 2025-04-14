@@ -215,3 +215,92 @@ def get_unique_sheet_name(sheet_name, workbook):
         sheet_name = f"{original_name[:29]}-{counter}"  # Deja espacio para el sufijo numérico
         counter += 1
     return sheet_name
+
+
+def report_kardex_by_date(request, date=None):
+    print(date)
+    report_data = []
+    for idx, p in enumerate(Product.objects.filter(is_enabled=True).order_by('id'), start=1):
+        product_store_set = ProductStore.objects.filter(product=p.id, subsidiary_store__id=1)
+        if product_store_set.exists():
+            product_store = product_store_set.last()
+
+            kardex = Kardex.objects.filter(
+                product_store=product_store,
+                create_at__date__lte=date
+            ).order_by('-create_at').values(
+                'remaining_quantity',
+                'remaining_price',
+                'remaining_price_total'
+            ).first()
+
+            if kardex:
+                report_data.append({
+                    'N°': idx,
+                    'Producto': p.name,
+                    'Cantidad Restante': float(kardex['remaining_quantity']),
+                    'Precio Restante con IGV': float(kardex['remaining_price']),
+                    'Precio Total Restante con IGV': float(kardex['remaining_price_total']),
+                    'Precio Restante sin IGV': float(kardex['remaining_price']) / 1.18,
+                    'Precio Total Restante sin IGV': float(kardex['remaining_price_total']) / 1.18
+                })
+            else:
+                report_data.append({
+                    'N°': idx,
+                    'Producto': p.name,
+                    'Cantidad Restante': 0.0,
+                    'Precio Restante con IGV': 0.0,
+                    'Precio Total Restante con IGV': 0.0,
+                    'Precio Restante sin IGV': 0.0,
+                    'Precio Total Restante sin IGV': 0.0
+                })
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = f'attachment; filename=Resumen_Kardex_{date}.xlsx'
+
+    df = pd.DataFrame(report_data)
+
+    with pd.ExcelWriter(response, engine='xlsxwriter') as writer:
+        df.to_excel(writer, sheet_name='Kardex', index=False)
+        workbook = writer.book
+        worksheet = writer.sheets['Kardex']
+
+        # Formatos
+        header_format = workbook.add_format({
+            'bold': True,
+            'align': 'center',
+            'bg_color': '#DCE6F1',
+            'border': 1,
+            'font_name': 'Arial',
+            'font_size': 10
+        })
+
+        text_format = workbook.add_format({
+            'font_name': 'Arial',
+            'font_size': 9,
+            'border': 1,
+            'align': 'left'
+        })
+
+        numeric_format = workbook.add_format({
+            'num_format': '_-* #,##0.00_-;-* #,##0.00_-;_-* "-"??_-;_-@_-',
+            'align': 'right',
+            'font_name': 'Arial',
+            'font_size': 9,
+            'border': 1
+        })
+
+        # Escribir encabezados con formato
+        for col_num, column_name in enumerate(df.columns):
+            worksheet.write(0, col_num, column_name, header_format)
+
+        # Ajustar anchos de columna
+        worksheet.set_column('A:A', 8, workbook.add_format({'align': 'right', 'font_size': 8, 'font_name': 'Arial', }))     # N°
+        worksheet.set_column('B:B', 73, text_format)     # Producto
+        worksheet.set_column('C:C', 17, numeric_format)  # Cantidad Restante
+        worksheet.set_column('D:D', 23, numeric_format)  # Precio Restante con IGV
+        worksheet.set_column('E:E', 28, numeric_format)  # Precio Total Restante con IGV
+        worksheet.set_column('F:F', 22, numeric_format)  # Precio Restante sin IGV
+        worksheet.set_column('G:G', 28, numeric_format)  # Precio Total Restante sin IGV
+
+    return response
