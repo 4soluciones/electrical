@@ -6837,15 +6837,12 @@ def save_order(request):
         subsidiary_store_sales_obj = SubsidiaryStore.objects.get(subsidiary=subsidiary_obj, category='V')
 
         _correlative = request.POST.get('correlative', '')
-        _type_bill_document = request.POST.get('type_bill_document', '')
+        # _type_bill_document = request.POST.get('type_bill_document', '')
+        voucher_type = request.POST.get('type_bill_document', '')
 
         detail = json.loads(request.POST.get('detail', ''))
         credit = json.loads(request.POST.get('credit', ''))
         _date = utc_to_local(datetime.now())
-
-        voucher_type = 'B'
-        if _type_bill_document == '1':
-            voucher_type = 'F'
 
         order_obj = Order(
             type='V',

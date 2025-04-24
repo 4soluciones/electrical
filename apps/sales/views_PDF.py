@@ -439,7 +439,7 @@ def print_ticket_order_sales(request, pk=None, t=None):  # Ticket
 
     if t == 0:
         if order_obj.type == 'T':
-            tbn_document = 'COTIZACION'
+            tbn_document = 'COTIZACIÓN'
         else:
             tbn_document = 'TICKET'
     else:
@@ -589,8 +589,9 @@ def print_ticket_order_sales(request, pk=None, t=None):  # Ticket
         commentary_text = d.commentary.upper()
         serials_html = f"<br/><font size='5'><b>{serials_text}</b></font>" if serial_numbers else ""
         P0 = Paragraph(f"{quantity} {unit} {commentary_text} {serials_html}", styles["detail_narrow"])
-
-        base_price_unit = round(d.price_unit, 6) / decimal.Decimal(1.1800)
+        base_price_unit = round(d.price_unit, 6)
+        if order_obj.voucher_type != 'T':
+            base_price_unit = round(d.price_unit, 6) / decimal.Decimal(1.1800)
         base_total = d.quantity_sold * d.price_unit
         base_amount = base_total / decimal.Decimal(1.1800)
         igv = base_total - base_amount
