@@ -870,3 +870,35 @@ class PaymentFees(models.Model):
 
     def __str__(self):
         return str(self.id)
+
+
+class CreditNote(models.Model):
+    STATUS_CHOICES = (('E', 'EMITIDA'), ('P', 'PENDIENTE'), ('A', 'ANULADA'),)
+    id = models.AutoField(primary_key=True)
+    nro_document = models.CharField('Numero de documento', max_length=200, null=True, blank=True)
+    issue_date = models.DateField('Fecha de Emision', null=True, blank=True)
+    purchase = models.ForeignKey('buys.Purchase', on_delete=models.SET_NULL, null=True, blank=True)
+    order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True, blank=True)
+    motive = models.TextField('Motive', blank=True, null=True)
+    status = models.CharField('Tipo de moneda', max_length=1, choices=STATUS_CHOICES, default='P')
+
+    def __str__(self):
+        return str(self.nro_document)
+
+
+class CreditNoteDetail(models.Model):
+    id = models.AutoField(primary_key=True)
+    code = models.CharField('Codigo', max_length=50, null=True, blank=True)
+    description = models.CharField('Description', max_length=200, null=True, blank=True)
+    quantity = models.DecimalField('Cantidad', max_digits=10, decimal_places=2, default=0)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, blank=True)
+    unit = models.ForeignKey(Unit, on_delete=models.CASCADE, null=True, blank=True)
+    price_unit = models.DecimalField('Precio unitario', max_digits=30, decimal_places=6, default=0)
+    credit_note = models.ForeignKey(CreditNote, on_delete=models.CASCADE, null=True, blank=True)
+    total = models.DecimalField('Total', max_digits=30, decimal_places=6, default=0)
+
+    def __str__(self):
+        return str(self.id)
+
+    def multiply(self):
+        return self.quantity * self.price_unit
