@@ -624,6 +624,7 @@ class Kardex(models.Model):
     advance_detail = models.ForeignKey('comercial.ClientAdvancementDetail', on_delete=models.SET_NULL, null=True,
                                        blank=True)
     inventory = models.ForeignKey('Inventory', on_delete=models.SET_NULL, null=True, blank=True)
+    credit_note_detail = models.ForeignKey('sales.CreditNoteDetail', on_delete=models.SET_NULL, null=True, blank=True)
 
     def conversion_mml_g(self):
         response = 0
