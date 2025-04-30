@@ -6772,12 +6772,16 @@ def get_correlative_by_type(request):
         type_bill_document = request.GET.get('type_bill_document')
         subsidiary_obj = Subsidiary.objects.get(id=1)
         serial = subsidiary_obj.serial
-        if type_bill_document == '1':
+        type_document = 'T'
+        new_serial = ''
+        if type_bill_document == 'F':
             new_serial = 'F' + serial
-        else:
+            type_document = '1'
+        elif type_bill_document == 'B':
             new_serial = 'B' + serial
+            type_document = '2'
 
-        order_bill_set = OrderBill.objects.filter(serial=new_serial, type=type_bill_document)
+        order_bill_set = OrderBill.objects.filter(serial=new_serial, type=type_document)
         if order_bill_set:
             n_receipt = order_bill_set.last().n_receipt
             new_n_receipt = n_receipt + 1
