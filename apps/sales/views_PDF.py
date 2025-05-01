@@ -667,7 +667,7 @@ def print_ticket_order_sales(request, pk=None, t=None):  # Ticket
         _dictionary.append(Spacer(-5, -5))
         _dictionary.append(
             Paragraph(str(order_obj.subsidiary_store.subsidiary.serial) + ' - ' + str(
-                str(order_obj.correlative_sale).zfill(10)),
+                str(order_obj.correlative).zfill(6)),
                       styles["Center_title_narrow"]))
     else:
         _dictionary.append(Spacer(-5, -5))

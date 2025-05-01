@@ -1,5 +1,5 @@
 from django.core.exceptions import ValidationError
-from django.db.models.functions import Coalesce
+from django.db.models.functions import Coalesce, Cast
 from django.shortcuts import render
 from django.views.generic import TemplateView, View, CreateView, UpdateView
 from django.views.decorators.csrf import csrf_exempt
@@ -33,7 +33,7 @@ from apps.sales.number_to_letters import numero_a_letras, numero_a_moneda
 from django.db.models import Min, Sum, Max, Q, Prefetch, Subquery, OuterRef, Value
 from electrical import settings
 import os
-from django.db.models import F
+from django.db.models import F, IntegerField
 from ..buys.models import PurchaseDetail, Purchase
 
 
@@ -6767,30 +6767,46 @@ def get_client_search(request):
 
 
 def get_correlative_by_type(request):
-    if request.method == 'GET':
-        new_n_receipt = ''
-        type_bill_document = request.GET.get('type_bill_document')
-        subsidiary_obj = Subsidiary.objects.get(id=1)
-        serial = subsidiary_obj.serial
-        type_document = 'T'
-        new_serial = ''
-        if type_bill_document == 'F':
-            new_serial = 'F' + serial
-            type_document = '1'
-        elif type_bill_document == 'B':
-            new_serial = 'B' + serial
-            type_document = '2'
+    if request.method != 'GET':
+        return JsonResponse({'status': False, 'message': 'Método no permitido'}, status=405)
 
-        order_bill_set = OrderBill.objects.filter(serial=new_serial, type=type_document)
-        if order_bill_set:
-            n_receipt = order_bill_set.last().n_receipt
-            new_n_receipt = n_receipt + 1
+    type_bill_document = request.GET.get('type_bill_document')
+    subsidiary = Subsidiary.objects.get(id=1)
+    serial_suffix = subsidiary.serial
 
-        return JsonResponse({
-            'status': True,
-            'correlative': str(new_n_receipt).zfill(6),
-            'serial': str(new_serial)
-        })
+    document_type_map = {
+        'F': ('F' + serial_suffix, '1'),
+        'B': ('B' + serial_suffix, '2'),
+    }
+
+    new_serial, doc_type = document_type_map.get(type_bill_document, ('T001', 'T'))
+
+    if type_bill_document in document_type_map:
+        last_receipt = (
+            OrderBill.objects
+            .filter(serial=new_serial, type=doc_type)
+            .order_by('n_receipt')
+            .last()
+        )
+        new_n_receipt = (last_receipt.n_receipt + 1) if last_receipt else 1
+    else:
+        max_correlative = Order.objects.filter(
+            subsidiary=subsidiary,
+            type='V',
+            voucher_type=type_bill_document
+        ).annotate(
+            correlative_int=Cast('correlative', IntegerField())
+        ).aggregate(
+            r=Coalesce(Max('correlative_int'), 0)
+        )['r']
+
+        new_n_receipt = max_correlative + 1
+
+    return JsonResponse({
+        'status': True,
+        'correlative': str(new_n_receipt).zfill(6),
+        'serial': new_serial
+    })
 
 
 @csrf_exempt
