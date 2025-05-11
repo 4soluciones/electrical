@@ -7,6 +7,7 @@ from django.forms.models import model_to_dict
 from django.http import JsonResponse, HttpResponse
 from http import HTTPStatus
 
+from .api_FACT import send_bill_4_fact, send_receipt_4_fact
 from .format_dates import validate
 from .models import *
 from .forms import *
@@ -6973,27 +6974,51 @@ def save_order(request):
         msg_sunat = None
         sunat_pdf = None
         if voucher_type == 'F':
-            r = send_bill_nubefact(order_obj.id, subsidiary_obj.serial)
-            codigo_hash = r.get('codigo_hash')
-            msg_sunat = r.get('sunat_description')
-            sunat_pdf = r.get('enlace_del_pdf')
-            # codigo_hash = True
-            if codigo_hash:
+            # r = send_bill_nubefact(order_obj.id, subsidiary_obj.serial)
+            # codigo_hash = r.get('codigo_hash')
+            # msg_sunat = r.get('sunat_description')
+            # sunat_pdf = r.get('enlace_del_pdf')
+            # # codigo_hash = True
+            # if codigo_hash:
+            #     order_bill_obj = OrderBill(order=order_obj,
+            #                                serial=r.get('serie'),
+            #                                type=r.get('tipo_de_comprobante'),
+            #                                sunat_status=r.get('aceptada_por_sunat'),
+            #                                sunat_description=r.get('sunat_description'),
+            #                                user=user_obj,
+            #                                sunat_enlace_pdf=r.get('enlace_del_pdf'),
+            #                                code_qr=r.get('cadena_para_codigo_qr'),
+            #                                code_hash=r.get('codigo_hash'),
+            #                                n_receipt=r.get('numero'),
+            #                                status='E',
+            #                                created_at=order_obj.create_at,
+            #                                )
+            #     order_bill_obj.save()
+            #
+            # else:
+            #     objects_to_delete = OrderDetail.objects.filter(order=order_obj)
+            #     objects_to_delete.delete()
+            #     order_obj.delete()
+            #     if r.get('errors'):
+            #         data = {'error': str(r.get('errors'))}
+            #     elif r.get('error'):
+            #         data = {'error': str(r.get('error'))}
+            #     response = JsonResponse(data)
+            #     response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+            #     return response
+            r = send_bill_4_fact(order_obj.id)
+            if r.get('success'):
                 order_bill_obj = OrderBill(order=order_obj,
                                            serial=r.get('serie'),
                                            type=r.get('tipo_de_comprobante'),
-                                           sunat_status=r.get('aceptada_por_sunat'),
-                                           sunat_description=r.get('sunat_description'),
                                            user=user_obj,
-                                           sunat_enlace_pdf=r.get('enlace_del_pdf'),
-                                           code_qr=r.get('cadena_para_codigo_qr'),
-                                           code_hash=r.get('codigo_hash'),
                                            n_receipt=r.get('numero'),
                                            status='E',
                                            created_at=order_obj.create_at,
+                                           invoice_id=r.get('operationId'),
                                            )
                 order_bill_obj.save()
-
+                sunat_pdf = True
             else:
                 objects_to_delete = OrderDetail.objects.filter(order=order_obj)
                 objects_to_delete.delete()
@@ -7007,31 +7032,55 @@ def save_order(request):
                 return response
 
         elif voucher_type == 'B':
-            r = send_receipt_nubefact(order_obj.id, subsidiary_obj.serial)
-            codigo_hash = r.get('codigo_hash')
-            msg_sunat = r.get('sunat_description')
-            sunat_pdf = r.get('enlace_del_pdf')
-            # codigo_hash = True
-            if codigo_hash:
+            # r = send_receipt_nubefact(order_obj.id, subsidiary_obj.serial)
+            # codigo_hash = r.get('codigo_hash')
+            # msg_sunat = r.get('sunat_description')
+            # sunat_pdf = r.get('enlace_del_pdf')
+            # # codigo_hash = True
+            # if codigo_hash:
+            #     order_bill_obj = OrderBill(order=order_obj,
+            #                                serial=r.get('serie'),
+            #                                type=r.get('tipo_de_comprobante'),
+            #                                sunat_status=r.get('aceptada_por_sunat'),
+            #                                sunat_description=r.get('sunat_description'),
+            #                                user=user_obj,
+            #                                sunat_enlace_pdf=r.get('enlace_del_pdf'),
+            #                                code_qr=r.get('cadena_para_codigo_qr'),
+            #                                code_hash=r.get('codigo_hash'),
+            #                                n_receipt=r.get('numero'),
+            #                                status='E',
+            #                                created_at=order_obj.create_at,
+            #                                )
+            #     order_bill_obj.save()
+            # else:
+            #     objects_to_delete = OrderDetail.objects.filter(order=order_obj)
+            #     objects_to_delete.delete()
+            #     order_obj.delete()
+            #
+            #     if r.get('errors'):
+            #         data = {'error': str(r.get('errors'))}
+            #     elif r.get('error'):
+            #         data = {'error': str(r.get('error'))}
+            #     response = JsonResponse(data)
+            #     response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+            #     return response
+            r = send_receipt_4_fact(order_obj.id)
+            if r.get('success'):
                 order_bill_obj = OrderBill(order=order_obj,
                                            serial=r.get('serie'),
                                            type=r.get('tipo_de_comprobante'),
-                                           sunat_status=r.get('aceptada_por_sunat'),
-                                           sunat_description=r.get('sunat_description'),
                                            user=user_obj,
-                                           sunat_enlace_pdf=r.get('enlace_del_pdf'),
-                                           code_qr=r.get('cadena_para_codigo_qr'),
-                                           code_hash=r.get('codigo_hash'),
                                            n_receipt=r.get('numero'),
                                            status='E',
                                            created_at=order_obj.create_at,
+                                           invoice_id=r.get('operationId'),
                                            )
                 order_bill_obj.save()
+                sunat_pdf = True
             else:
                 objects_to_delete = OrderDetail.objects.filter(order=order_obj)
                 objects_to_delete.delete()
                 order_obj.delete()
-
                 if r.get('errors'):
                     data = {'error': str(r.get('errors'))}
                 elif r.get('error'):
@@ -7039,6 +7088,7 @@ def save_order(request):
                 response = JsonResponse(data)
                 response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
                 return response
+
         return JsonResponse({
             'message': 'Venta Generada Correctamente',
             'id_sales': order_obj.id,

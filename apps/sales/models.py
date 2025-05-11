@@ -662,7 +662,7 @@ class OrderBill(models.Model):
     code_qr = models.CharField('Codigo QR', max_length=500, null=True, blank=True)
     code_hash = models.CharField('Codigo Hash', max_length=500, null=True, blank=True)
     status = models.CharField('Estado', max_length=1, choices=STATUS_CHOICES)
-    is_demo = models.CharField('Demo', max_length=1, choices=IS_DEMO_CHOICES, null=True, blank=True)
+    invoice_id = models.IntegerField(default=0)
 
     def __str__(self):
         return str(self.order.id)

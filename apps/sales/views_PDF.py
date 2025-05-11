@@ -1202,10 +1202,10 @@ def print_order_bill(request, pk=None, check=None):
     type_bill = 'None'
     # if services_sets.exists():
     #     services_obj = services_sets.last()
-    datatable = 'https://4soluciones.pse.pe/20603890214'
+    datatable = 'https://www.tuf4ct.com/cpe'
     if order_bill_set.exists():
         order_bill_obj = order_bill_set.last()
-        datatable = order_bill_obj.code_qr
+        # datatable = order_bill_obj.code_qr
         type_bill = order_bill_obj.get_type_display().upper()
     tbl1_col__3 = [
         [Paragraph('RUC 20603890214', styles["Center_Newgot_title"])],
