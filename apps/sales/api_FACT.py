@@ -9,8 +9,8 @@ from datetime import datetime, date
 from ..comercial.models import Guide
 from ..hrm.views import get_subsidiary_by_user
 
-# GRAPHQL_URL = "https://ng.tuf4ctur4.net.pe/graphql"
-GRAPHQL_URL = "http://192.168.1.80:9050/graphql"
+GRAPHQL_URL = "https://ng.tuf4ctur4.net.pe/graphql"
+# GRAPHQL_URL = "http://192.168.1.80:9050/graphql"
 
 tokens = {
     "20603890214": "gAAAAABoH8-CRbROAwEiA2258mrFryXlS5o3TJRtcW6fo1VAWt9I1zdUmB3Nun7eZLTc5TBGakxrd1ekG_ldmxhPqEoh_J2OTg==",
@@ -449,7 +449,7 @@ def send_credit_note_fact(pk, details, motive):
             }}
         }}
         """
-    print(graphql_query)
+    # print(graphql_query)
 
     token = tokens.get("20603890214", "ID no encontrado")
 
@@ -468,8 +468,8 @@ def send_credit_note_fact(pk, details, motive):
 
         if success:
             operation_id = result.get("data", {}).get("registerCreditNote", {}).get("operationId")
-            # enlace_pdf = f'https://ng.tuf4ctur4.net.pe/operations/print_credit_note/{operation_id}/'
-            enlace_pdf = f'http://192.168.1.80:9050/operations/print_credit_note/{operation_id}/'
+            enlace_pdf = f'https://ng.tuf4ctur4.net.pe/operations/print_credit_note/{operation_id}/'
+            # enlace_pdf = f'http://192.168.1.80:9050/operations/print_credit_note/{operation_id}/'
             note_total = total_invoice
             return {
                 "success": success,
