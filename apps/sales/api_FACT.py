@@ -492,3 +492,63 @@ def send_credit_note_fact(pk, details, motive):
         return {"error": f"Error en la solicitud: {str(e)}"}
     except ValueError:
         return {"error": "La respuesta no es un JSON válido"}
+
+
+def annul_invoice(order_id):
+    order_bill_obj = OrderBill.objects.get(order_id=int(order_id))
+    correlative = order_bill_obj.n_receipt
+    serial = order_bill_obj.serial
+
+    variables = {
+        "correlative": correlative,
+        "serial": serial
+    }
+
+    mutation = """
+    mutation AnnulInvoice($correlative: Int!, $serial: String!) {
+        annulInvoice(correlative: $correlative, serial: $serial) {
+            message
+            success
+        }
+    }
+    """
+
+    token = tokens.get("20603890214", "ID no encontrado")
+
+    HEADERS = {
+        "Content-Type": "application/json",
+        "token": token
+    }
+
+    # print("Enviando mutación GraphQL:")
+    # print("Query:", mutation)
+    # print("Variables:", variables)
+    # print("Headers:", HEADERS)
+
+    try:
+        response = requests.post(
+            GRAPHQL_URL,
+            json={"query": mutation, "variables": variables},
+            headers=HEADERS
+        )
+        response.raise_for_status()
+
+        result = response.json()
+
+        data = result.get("data", {}).get("annulInvoice")
+
+        if data and data.get("success"):
+            return {
+                "success": True,
+                "message": data.get("message"),
+            }
+        else:
+            return {
+                "success": False,
+                "message": data.get("message") if data else "No se obtuvo respuesta del servidor.",
+            }
+
+    except requests.exceptions.RequestException as e:
+        return {"success": False, "message": f"Error en la solicitud: {str(e)}"}
+    except ValueError:
+        return {"success": False, "message": "La respuesta no es un JSON válido"}

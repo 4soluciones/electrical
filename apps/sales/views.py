@@ -7,7 +7,7 @@ from django.forms.models import model_to_dict
 from django.http import JsonResponse, HttpResponse
 from http import HTTPStatus
 
-from .api_FACT import send_bill_4_fact, send_receipt_4_fact, send_credit_note_fact
+from .api_FACT import send_bill_4_fact, send_receipt_4_fact, send_credit_note_fact, annul_invoice
 from .format_dates import validate
 from .models import *
 from .forms import *
@@ -5143,13 +5143,13 @@ def cancel_order(request):
                 type_bill = 'B'
 
         if type_bill == 'F' or type_bill == 'B':
-            r = send_cancel_bill_nubefact(order_id)
-            enlace = r.get('enlace')
-            # enlace = 't'
-            sunat_ticket_numero = r.get('sunat_ticket_numero')
-            aceptada_por_sunat = r.get('aceptada_por_sunat')
-            code = r.get('codigo')
-            if enlace or code:
+            # r = send_cancel_bill_nubefact(order_id)
+            # enlace = r.get('enlace')
+            # code = r.get('codigo')
+            # if enlace or code:
+            r = annul_invoice(order_id)
+            success = r.get('success')
+            if success:
                 for d in order_obj.orderdetail_set.all():
                     _product_id = d.product.id
                     product_obj = Product.objects.get(id=int(_product_id))
