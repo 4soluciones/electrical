@@ -235,4 +235,7 @@ urlpatterns = [
 
     path('save_order/', login_required(save_order), name='save_order'),
 
+    path('modal_credit_note/', login_required(modal_credit_note), name='modal_credit_note'),
+    path('save_credit_note/', login_required(save_credit_note), name='save_credit_note'),
+
 ]

@@ -7,7 +7,7 @@ from django.forms.models import model_to_dict
 from django.http import JsonResponse, HttpResponse
 from http import HTTPStatus
 
-from .api_FACT import send_bill_4_fact, send_receipt_4_fact
+from .api_FACT import send_bill_4_fact, send_receipt_4_fact, send_credit_note_fact
 from .format_dates import validate
 from .models import *
 from .forms import *
@@ -408,6 +408,7 @@ def get_list_kardex(request):
                 'order_detail__order',
                 'loan_payment',
                 'guide_detail__guide__guide_motive',
+                'credit_note_detail__credit_note'
             ).order_by('id')
 
         t = loader.get_template('sales/kardex_grid_list.html')
@@ -1655,6 +1656,50 @@ def kardex_ouput(
     product_store.save()
 
 
+def kardex_input_credit_note(
+        product_store_id,
+        quantity_return,
+        credit_note_detail_obj=None,
+):
+    product_store = ProductStore.objects.get(pk=int(product_store_id))
+
+    old_stock = product_store.stock
+    last_kardex = Kardex.objects.filter(product_store_id=product_store.id).order_by('id').last()
+    last_remaining_quantity = last_kardex.remaining_quantity
+
+    if old_stock < 0 or last_remaining_quantity < 0:
+        data = {'error': 'stock en negativa'}
+        response = JsonResponse(data)
+        response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+        return response
+
+    new_stock = old_stock + decimal.Decimal(quantity_return)
+    new_quantity = decimal.Decimal(quantity_return)
+    old_price_unit = last_kardex.remaining_price
+
+    new_price_total = old_price_unit * new_quantity
+
+    new_remaining_quantity = last_remaining_quantity + new_quantity
+    new_remaining_price = old_price_unit
+    new_remaining_price_total = new_remaining_quantity * new_remaining_price
+    new_kardex = {
+        'operation': 'E',
+        'quantity': new_quantity,
+        'price_unit': old_price_unit,
+        'price_total': new_price_total,
+        'remaining_quantity': new_remaining_quantity,
+        'remaining_price': new_remaining_price,
+        'remaining_price_total': new_remaining_price_total,
+        'product_store': product_store,
+        'credit_note_detail': credit_note_detail_obj
+    }
+    kardex = Kardex.objects.create(**new_kardex)
+    kardex.save()
+
+    product_store.stock = new_stock
+    product_store.save()
+
+
 def generate_invoice(request):
     if request.method == 'GET':
         id_order = request.GET.get('order', '')
@@ -1696,14 +1741,9 @@ def get_sales_by_subsidiary_store(request):
                 orders = orders.filter(create_at__date__range=[start_date, end_date], type='V',
                                        status__in=['P', 'A']).order_by('id')
             if orders:
-                if by_units == 'NO-UNIT':
-                    return JsonResponse({
-                        'grid': get_dict_order_queries(orders, start_date, end_date, is_pdf=False, is_unit=False),
-                    }, status=HTTPStatus.OK)
-                elif by_units == 'UNIT':
-                    return JsonResponse({
-                        'grid': get_dict_order_by_units(orders, is_pdf=False, is_unit=True),
-                    }, status=HTTPStatus.OK)
+                return JsonResponse({
+                    'grid': get_dict_order_queries(orders, start_date, end_date, is_pdf=False, is_unit=False),
+                }, status=HTTPStatus.OK)
             else:
                 data = {'error': "No hay operaciones registradas"}
                 response = JsonResponse(data)
@@ -1759,6 +1799,17 @@ def get_dict_order_queries(order_set, start_date, end_date, is_pdf=False, is_uni
                 serial_bill = order_bill_obj.serial
                 correlative_bill = order_bill_obj.n_receipt
 
+        note_serial = None
+        note_number = None
+        note_pdf = None
+
+        credit_note_set = CreditNote.objects.filter(order=o)
+        if credit_note_set.exists():
+            credit_note_obj = credit_note_set.first()
+            note_serial = credit_note_obj.serial
+            note_number = credit_note_obj.correlative
+            note_pdf = credit_note_obj.note_enlace_pdf
+
         order = {
             'id': o.id,
             # 'status': o.get_status_display(),
@@ -1779,6 +1830,9 @@ def get_dict_order_queries(order_set, start_date, end_date, is_pdf=False, is_uni
             'cash_id': cash_id,
             'way_to_pay': o.way_to_pay_type,
             'details': _order_detail.count(),
+            'note_serial': note_serial,
+            'note_number': note_number,
+            'note_pdf': note_pdf,
         }
 
         for d in _order_detail:
@@ -1889,78 +1943,6 @@ def get_dict_order_queries(order_set, start_date, end_date, is_pdf=False, is_uni
                                                                  rounding=decimal.ROUND_HALF_EVEN),
         'total_credit': decimal.Decimal(total_credit).quantize(decimal.Decimal('0.00'),
                                                                rounding=decimal.ROUND_HALF_EVEN)
-    })
-    return tpl.render(context)
-
-
-def get_dict_order_by_units(order_set, is_pdf=False, is_unit=True):
-    dictionary = []
-    sum_10kg = 0
-    sum_5kg = 0
-    sum_45kg = 0
-    sum = 0
-
-    for o in order_set:
-        _order_detail = o.orderdetail_set.all()
-        ball_5kg = get_quantity_ball_5kg(_order_detail)
-        ball_10kg = get_quantity_ball_10kg(_order_detail)
-        ball_45kg = get_quantity_ball_45kg(_order_detail)
-
-        s10 = ball_10kg.get('g') + ball_10kg.get('gbc') + ball_10kg.get('bg')
-        s5 = ball_5kg.get('g') + ball_5kg.get('gbc') + ball_5kg.get('bg')
-        s45 = ball_45kg.get('g') + ball_45kg.get('gbc') + ball_45kg.get('bg')
-
-        sum_10kg = sum_10kg + s10
-        sum_5kg = sum_5kg + s5
-        sum_45kg = sum_45kg + s45
-
-        product_dict = [
-            {'pk': 1, 'name': 'BALON DE 10 KG', 'b': ball_10kg.get('b'), 'g': ball_10kg.get('g'),
-             'gbc': ball_10kg.get('gbc'), 'bg': ball_10kg.get('bg'), 'sum': s10},
-            {'pk': 2, 'name': 'BALON DE 5KG', 'b': ball_5kg.get('b'), 'g': ball_5kg.get('g'),
-             'gbc': ball_5kg.get('gbc'), 'bg': ball_5kg.get('bg'), 'sum': s5},
-            {'pk': 3, 'name': 'BALON DE 45 KG', 'b': ball_45kg.get('b'), 'g': ball_45kg.get('g'),
-             'gbc': ball_45kg.get('gbc'), 'bg': ball_45kg.get('bg'), 'sum': s45},
-        ]
-        order = {
-            'id': o.id,
-            'status': o.get_status_display(),
-            'client': o.client,
-            'user': o.user,
-            'total': o.total,
-            'subsidiary': o.subsidiary.name,
-            'create_at': o.create_at,
-            'serial': o.subsidiary.serial,
-            'correlative_sale': o.correlative_sale,
-            'order_detail_set': [],
-            'product_dict': product_dict,
-            'type': o.get_type_display(),
-            'details': _order_detail.count()
-        }
-        sum = sum + o.total
-
-        for d in _order_detail:
-            order_detail = {
-                'id': d.id,
-                'product': d.product.name,
-                'unit': d.unit.name,
-                'quantity_sold': d.quantity_sold,
-                'price_unit': d.price_unit,
-                'multiply': d.multiply,
-            }
-            order.get('order_detail_set').append(order_detail)
-
-        dictionary.append(order)
-
-    tpl = loader.get_template('sales/order_sales_grid_list.html')
-    context = ({
-        'dictionary': dictionary,
-        'sum': sum,
-        'sum_10kg': sum_10kg,
-        'sum_5kg': sum_5kg,
-        'sum_45kg': sum_45kg,
-        'is_unit': is_unit,
-        'is_pdf': is_pdf,
     })
     return tpl.render(context)
 
@@ -7100,3 +7082,166 @@ def save_order(request):
             'sunat_pdf': sunat_pdf,
         }, status=HTTPStatus.OK)
     return JsonResponse({'message': 'Error de peticion.'}, status=HTTPStatus.BAD_REQUEST)
+
+
+def modal_credit_note(request):
+    if request.method == 'GET':
+        pk = request.GET.get('pk', '')
+        if pk:
+            my_date = datetime.now()
+            date_now = my_date.strftime("%Y-%m-%d")
+            order_obj = Order.objects.get(id=int(pk))
+            order_bill_obj = OrderBill.objects.get(order=int(pk))
+            details = []
+            details_all = order_obj.orderdetail_set.all()
+            # inputs = details_all.filter(operation='E').values('product_id').annotate(total_entrada=Sum('quantity'))
+            # outputs = details_all.filter(operation='S').values('product_id').annotate(total_salida=Sum('quantity'))
+            # input_dict = {e['product_id']: e['total_entrada'] for e in inputs}
+            # output_dict = {e['product_id']: e['total_salida'] for e in outputs}
+            for d in order_obj.orderdetail_set.all():
+                product_id = d.product.id
+                # quantity_sold = output_dict.get(product_id, 0)
+                # quantity_returned = input_dict.get(product_id, 0)
+                # quantity_pending = quantity_sold - quantity_returned
+                item = {
+                    'id': d.id,
+                    # 'operation': d.operation,
+                    'quantity': d.quantity_sold,
+                    # 'quantity_pending': str(quantity_pending),
+                    # 'quantity_niu': d.quantity_niu,
+                    # 'quantity_remaining': d.quantity_remaining,
+                    'price': d.price_unit,
+                    'unit': d.unit,
+                    'product_id': d.product.id,
+                    'product_name': d.product.name,
+                    # 'product_code': d.product.code,
+                    # 'product_width': d.product.width,
+                    # 'product_length': d.product.length,
+                    # 'product_height': d.product.height,
+                    # 'amount': d.amount()
+                }
+                details.append(item)
+
+            tpl = loader.get_template('sales/modal_credit_note.html')
+            context = ({
+                'date_now': date_now,
+                'order_obj': order_obj,
+                'order_bill_obj': order_bill_obj,
+                'details': details,
+            })
+            dict_obj = model_to_dict(order_obj)
+            serialized_obj = json.dumps(dict_obj, cls=DjangoJSONEncoder)
+            serialized_detail_set = [{
+                'detailID': detail.id,
+                'productID': detail.product.id,
+                'productName': detail.product.name,
+                # 'productCode': detail.product.code,
+                'price': float(detail.price_unit),
+                'quantitySold': float(detail.quantity_sold),
+                # 'quantityNiu': detail.quantity_niu,
+                # 'unit': detail.unit,
+                'isCreditNote': False,
+                'quantityReturned': 0,
+                'newSubtotal': 0,
+            } for detail in order_obj.orderdetail_set.all()]
+            return JsonResponse({
+                'grid': tpl.render(context, request),
+                'serialized_obj': serialized_obj,
+                'serialized_detail_set': serialized_detail_set,
+                'orderTotal': order_obj.total,
+            }, status=HTTPStatus.OK, content_type="application/json")
+        else:
+            return JsonResponse({
+                'success': False,
+                'message': 'Orden desconocida',
+            }, status=HTTPStatus.OK)
+
+
+@csrf_exempt
+def save_credit_note(request):
+    if request.method == 'POST':
+        order = request.POST.get('id-order', '')
+        motive = request.POST.get('motive-credit-note', '')
+        issue_date = request.POST.get('issue_date', '')
+        motive_text = request.POST.get('motive_text')
+        order_obj = Order.objects.get(id=order)
+        order_bill_set = OrderBill.objects.filter(order=order_obj)
+        user_id = request.user.id
+        user_obj = User.objects.get(id=user_id)
+        subsidiary_obj = get_subsidiary_by_user(user_obj)
+        if order_bill_set.exists():
+            order_obj = Order.objects.get(id=int(order))
+            details = request.POST.get('details', '')
+            details_data = json.loads(details)
+            # nc = credit_note_by_parts(order, details_data)
+            nc = send_credit_note_fact(order, details_data, motive)
+            if nc.get('success'):
+                message = nc.get('message')
+                serial = nc.get('serial')
+                correlative = nc.get('correlative')
+                enlace_del_pdf = nc.get('enlace_del_pdf')
+                note_total = nc.get('note_total')
+                note_description = nc.get('note_description')
+
+                credit_note_obj = CreditNote.objects.create(
+                    serial=serial,
+                    correlative=correlative,
+                    issue_date=issue_date,
+                    order=order_obj,
+                    motive=motive_text,
+                    status='E',
+                    note_description=note_description,
+                    note_enlace_pdf=enlace_del_pdf,
+                    note_total=note_total,
+                )
+
+                for d in details_data:
+                    if d['quantityReturned']:
+
+                        detail_id = d['detailID']
+                        quantity_returned = decimal.Decimal(d['quantityReturned'])
+                        product_id = int(d['productID'])
+                        unit = str(d['unit'])
+                        unit_obj = Unit.objects.get(name=unit)
+                        price = decimal.Decimal(d['price'])
+
+                        product_obj = Product.objects.get(id=product_id)
+                        credit_detail_obj = CreditNoteDetail(
+                            code=product_obj.code,
+                            description=product_obj.name,
+                            quantity=quantity_returned,
+                            product=product_obj,
+                            unit=unit_obj,
+                            price_unit=price,
+                            credit_note=credit_note_obj,
+                            total=quantity_returned * price,
+
+                        )
+                        credit_detail_obj.save()
+                        subsidiary_store_set_obj = SubsidiaryStore.objects.get(subsidiary=subsidiary_obj, category='V')
+                        product_store_obj = ProductStore.objects.get(subsidiary_store=subsidiary_store_set_obj,
+                                                                     product=product_obj)
+                        kardex_input_credit_note(product_store_id=product_store_obj.id,
+                                                 quantity_return=quantity_returned,
+                                                 credit_note_detail_obj=credit_detail_obj)
+                        detail_obj = OrderDetail.objects.get(id=detail_id)
+                        product_serial_set = ProductSerial.objects.filter(order_detail=detail_obj,
+                                                                          product_store=product_store_obj)
+                        if product_serial_set.exists():
+                            for ps in product_serial_set:
+                                ps.order_detail = None
+                                ps.status = 'C'
+                                ps.save()
+
+                return JsonResponse({
+                    'success': True,
+                    'enlace': nc.get('enlace_del_pdf'),
+                    'message': 'Nota de credito generada',
+                    'message_sunat': message,
+                }, status=HTTPStatus.OK)
+        else:
+            return JsonResponse({
+                'success': False,
+                'number': order_obj.number,
+                'message': 'Orden sin comprobante electronico',
+            }, status=HTTPStatus.OK)

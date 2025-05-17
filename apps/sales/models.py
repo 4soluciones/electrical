@@ -876,15 +876,24 @@ class PaymentFees(models.Model):
 class CreditNote(models.Model):
     STATUS_CHOICES = (('E', 'EMITIDA'), ('P', 'PENDIENTE'), ('A', 'ANULADA'),)
     id = models.AutoField(primary_key=True)
-    nro_document = models.CharField('Numero de documento', max_length=200, null=True, blank=True)
+    serial = models.CharField('Numero de documento', max_length=200, null=True, blank=True)
+    correlative = models.IntegerField('Numero de Comprobante', default=0)
     issue_date = models.DateField('Fecha de Emision', null=True, blank=True)
     purchase = models.ForeignKey('buys.Purchase', on_delete=models.SET_NULL, null=True, blank=True)
     order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True, blank=True)
     motive = models.TextField('Motive', blank=True, null=True)
     status = models.CharField('Tipo de moneda', max_length=1, choices=STATUS_CHOICES, default='P')
+    note_description = models.CharField('Sunat descripcion', max_length=500, null=True, blank=True)
+    note_enlace_pdf = models.CharField('Sunat Enlace Pdf', max_length=500, null=True, blank=True)
+    note_qr = models.CharField('Codigo QR', max_length=500, null=True, blank=True)
+    note_hash = models.CharField('Codigo Hash', max_length=500, null=True, blank=True)
+    note_total = models.DecimalField('Total Nota Credito', max_digits=30, decimal_places=6, default=0)
 
     def __str__(self):
-        return str(self.nro_document)
+        return str(self.serial)
+
+    def get_credit_document(self):
+        return f'{self.serial}-{self.correlative}'
 
 
 class CreditNoteDetail(models.Model):

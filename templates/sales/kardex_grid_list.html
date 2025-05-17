@@ -78,23 +78,10 @@
                         {{ kardex.product_store.id }}
                     </td>
                     <td class="align-middle text-primary text-center small font-weight-bolder">
-                        {% if kardex.programming_invoice %}
-                            <span class="text-danger">PI:{{ kardex.programming_invoice.id }}</span><br>
-                            Proc. :<br>
-                            {{ kardex.programming_invoice.requirement_buys.subsidiary.name }}<br>
-                            {{ kardex.programming_invoice.kardex_set.first.product_store.subsidiary_store.name }}<br>
-
-                        {% elif kardex.requirement_detail.id %}
-                            <span class="text-primary">RD:{{ kardex.requirement_detail.id }}</span>
-                        {% elif kardex.purchase_detail.id %}
+                        {% if kardex.purchase_detail.id %}
                             <span class="text-secondary">
-{#                                COMPRA[PD]:{{ kardex.purchase_detail.id }}#}
                                 COMPRA<br>{{ kardex.purchase_detail.purchase.bill_number|upper }}
                             </span>
-                            {#                {% elif kardex.manufacture_detail.id %}#}
-                            {#                    <span class="text-primary">PRODUCCION[MD]:{{ kardex.manufacture_detail.id }}</span>#}
-                            {#                {% elif kardex.manufacture_recipe.id %}#}
-                            {#                    <span class="text-primary">RECETA[MR]:{{ kardex.manufacture_recipe.id }}</span>#}
                         {% elif kardex.order_detail.id %}
                             {% if kardex.operation == 'E' and kardex.order_detail.order.status == 'A' %}
                                 <span class="text-danger" od="{{ kardex.order_detail.id }}">
@@ -105,32 +92,10 @@
                                     VENTA<br>{{ kardex.order_detail.order.get_document }}
                                 </span>
                             {% endif %}
-
-                            {#                {% elif kardex.distribution_detail.id %}#}
-                            {#                    <span class="text-primary">DISTRIBUCION[DD]:{{ kardex.distribution_detail.id }}</span><br>#}
-                            {#                    <span class="text-primary">PLACA: {{ kardex.distribution_detail.distribution_mobil.truck.license_plate }}</span>#}
-                            {#                {% elif kardex.loan_payment.id %}#}
-                            {#                    <span class="text-danger">RETORNO[LP]:{{ kardex.loan_payment.id }}</span>#}
-                            {#                {% elif kardex.ball_change.id %}#}
-                            {#                    <span class="text-primary">CAMBIO[LP]:{{ kardex.ball_change.id }}</span>#}
-                        {% elif kardex.guide_detail.id %}
-                            <span class="text-warning">GUIA[GD]:{{ kardex.guide_detail.id }}</span><br>
-                            {% if kardex.guide_detail.guide.programming is None %}
-                                {% if kardex.guide_detail.guide.guide_motive.type == 'E' %}
-                                    NOTA DE ENTRADA:<br>[{{ kardex.guide_detail.guide.get_serial }}-
-                                    {{ kardex.guide_detail.guide.code }}]
-                                {% elif kardex.guide_detail.guide.guide_motive.type == 'S' %}
-                                    NOTA DE SALIDA:<br>[{{ kardex.guide_detail.guide.get_serial }}-
-                                    {{ kardex.guide_detail.guide.code }}]
-                                {% endif %}
-
-                            {% else %}
-                                {#                        PROGRAMACION[P]:{{ kardex.guide_detail.guide.programming.id }}#}
-                                <span class="text-warning">PLACA: {{ kardex.guide_detail.guide.programming.truck.license_plate }}</span>
-                            {% endif %}
-                            {#                {% elif kardex.advance_detail.id %}#}
-                            {#                    <span class="text-primary">ADELANTO[AD]:{{ kardex.advance_detail.id }}</span><br>#}
-                            {#                    <span class="text-primary">CLIENTE: {{ kardex.advance_detail.client_advancement.client.names }}</span>#}
+                        {% elif kardex.credit_note_detail.id %}
+                            <span class="text-danger" cd="{{ kardex.credit_note_detail.id }}">
+                                NOTA DE CRÉDITO<br>{{ kardex.credit_note_detail.credit_note.get_credit_document }}
+                            </span>
                         {% endif %}
 
                     </td>

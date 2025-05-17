@@ -1,0 +1,259 @@
+{% load static %}
+{% load operations %}
+<style>
+    .bg-transparent {
+        background-color: #6f42c166 !important;
+        border: 1px solid #6f42c1;
+    }
+</style>
+
+<div class="modal-dialog modal-xl pt-3 roboto-condensed-regular" style="max-width: 1320px; margin: 0 auto" role="document">
+    <div class="modal-content">
+        <form id="formCredit" method="POST" enctype="multipart/form-data"
+              action="{% url 'sales:save_credit_note' %}">
+            <div class="modal-header">
+                <h5 class="modal-title roboto-condensed-regular font-weight-bold" id="creditNoteModalLabel">GENERAR NOTA DE CRÉDITO</h5>
+                <input type="hidden" class="form-control" id="id-order" name="id-order"
+                       value="{{ order_obj.id }}" required>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            {% csrf_token %}
+            <div class="modal-body bg-light text-uppercase m-2 border" id="creditNote">
+                <div class="mr-3 ml-0" style="
+                        display: none;
+                        position: absolute;
+                        top: 3px;
+                        left: 0;
+                        background: var(--white);
+                        opacity: 0.8;
+                        width: 100%;
+                        !important: ;
+                        bottom: -52px;
+                        padding-right: 7em;
+                        padding-left: 42em;
+                        padding-top: 22em;
+                        z-index: 2000;
+                        right: 0;" id="container-loading">
+                    <div class="spinner-border border-0" role="status" style="width: auto; height: auto">
+                        <img class="animation__shake img-circle" src="{% static 'assets/logo png blanco y negro 1.png' %}" alt="Logo"
+                             height="80"
+                             width="80">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
+                <div class="row mb-3">
+
+                    <label for="review-credit-note-invoice-number"
+                           class="col-sm-2 col-form-label">{{ order_obj.get_voucher_type_display }} ELECTRÓNICA:</label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control"
+                               id="review-credit-note-invoice-number-name bg-transparent" readonly
+                               value="{{ order_bill_obj.serial }}-{{ order_bill_obj.n_receipt }}" maxlength="50">
+                    </div>
+
+                    <label for="review-credit-note-date-document" class="col-sm-2 col-form-label">Fecha Emisión:</label>
+                    <div class="col-sm-4">
+                        <input type="date" readonly class="form-control" id="review-credit-note-date-document"
+                               value="{{ order_obj.issue_date|date:'Y-m-d' }}">
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <label for="review-credit-note-invoice-date" class="col-sm-2 col-form-label">Fecha Nota de
+                        Credito:</label>
+                    <div class="col-sm-4">
+                        <input type="date" class="form-control" name="issue_date"
+                               id="review-credit-note-invoice-date"
+                               value="{{ date_now }}">
+                    </div>
+
+                    <label for="review-credit-note-date" class="col-sm-2 col-form-label">Fecha Validez:</label>
+                    <div class="col-sm-4">
+                        <input type="date" class="form-control" id="review-credit-note-date"
+                               value="{{ date_now }}">
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="static-review-purchase-supplier-name" class="col-sm-2 col-form-label">Cliente:</label>
+                    <div class="col-sm-4">
+                        <input type="text" readonly class="form-control"
+                               id="static-review-purchase-supplier-name"
+                               value="{{ order_obj.client.names }}">
+                    </div>
+                    <label for="motive" class="col-sm-2 col-form-label">Motivo:</label>
+                     <div class="col-sm-4">
+                        <select class="form-control text-uppercase" id="motive" name="motive-credit-note">
+                            <option value="01" selected>Anulación de la operación</option>
+                            <option value="02">Anulación por error en el RUC</option>
+                            <option value="03">Corrección por error en la descripción</option>
+                            <option value="04">Descuento global</option>
+                            <option value="05">Descuento por ítem</option>
+                            <option value="06">Devolución total</option>
+                            <option value="07">Devolución por ítem</option>
+                            <option value="08">Bonificación</option>
+                            <option value="09">Disminución en el valor</option>
+                            <option value="10">Otros Conceptos</option>
+                            <option value="11">Ajustes de operaciones de exportación</option>
+                            <option value="12">Ajustes afectos al IVAP</option>
+                            <option value="13">Corrección o modificación del monto neto</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered table-credit-note-detail"
+                           id="table-detail-guide">
+                        <thead>
+                        <tr class="font-weight-bold">
+                            <td>CODIGO</td>
+                            <td>PRODUCTO</td>
+                            <td>UNIDAD</td>
+                            <td>PRECIO</td>
+                            <td>CANT. <br>VENDIDA</td>
+                            <td style="background-color: #f6d6d6">CANT. <br>A DEVOLVER</td>
+                            <td style="background-color: #f6d6d6">SUBTOTAL<br> NOTA CREDITO</td>
+                            <td>SUBTOTAL <br>VENTA</td>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for d in order_obj.orderdetail_set.all %}
+                            <tr pk="{{ d.id }}" product_id="{{ d.product.id }}">
+                                <td class="align-middle">{{ d.product.code }}</td>
+                                <td class="align-middle">
+                                    {{ d.product.name }}<br>
+                                    <span style="font-size: 11px">
+                                        {% for s in d.productserial_set.all %}
+                                            {{ s.serial_number }}{% if not forloop.last %}, {% endif %}
+                                        {% endfor %}
+                                    </span>
+                                </td>
+                                <td class="align-middle item-unit">{{ d.unit }}</td>
+                                <td class="align-middle price">{{ d.price_unit|replace_round }}</td>
+                                <td class="align-middle item-quantity-sold">
+                                    <input type="text"
+                                           class="form-control bg-success-light1 text-right quantity-sold"
+                                           value="{{ d.quantity_sold|replace_round }}" readonly/>
+                                </td>
+                                <td class="align-middle item-quantity-returned" style="background-color: #f6d6d6">
+                                    <input type="text"
+                                           class="form-control text-right quantity-returned-credit"
+                                           detail-id="{{ d.id }}"
+                                           max-value="{{ d.quantity_sold|safe }}" value=""/>
+                                </td>
+                                <td class="align-middle" style="background-color: #f6d6d6">
+                                    <input type="text"
+                                           class="form-control bg-success-light1 text-right new-subtotal"
+                                           value="0" readonly/>
+                                </td>
+                                <td class="align-middle">
+                                    <input type="text"
+                                           class="form-control bg-success-light1 text-right old-subtotal"
+                                           value="{{ d.multiply|round_fourth }}" readonly/>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                        <tfoot>
+                        <tr>
+                            <td class="small align-bottom" colspan="5"></td>
+                            <td class="text-right align-middle font-weight-bold">BASE IMPONIBLE:</td>
+                            <td><input type="text" class="form-control bg-success-light1 text-right new-base"
+                                       style="background-color: #f6d6d6"
+                                       value="0.0000" readonly/></td>
+                            <td><input type="text" class="form-control bg-success-light1 text-right old-base"
+                                       value="" readonly/></td>
+                        </tr>
+
+                        <tr>
+                            <td class="small align-bottom" colspan="5">
+                                {#                                T.C.: {{ order_obj.change|safe }}</td>#}
+                            <td class="text-right align-middle font-weight-bold">IGV TOTAL:</td>
+                            <td><input type="text" class="form-control bg-success-light1 text-right new-igv"
+                                       style="background-color: #f6d6d6"
+                                       value="0.0000" readonly/></td>
+                            <td><input type="text" class="form-control bg-success-light1 text-right old-igv"
+                                       value="" readonly/></td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="5"></td>
+                            <td class="text-right align-middle font-weight-bold">TOTAL:</td>
+                            <td><input type="text" class="form-control bg-success-light1 text-right new-total"
+                                       style="background-color: #f6d6d6"
+                                       name="new-total"
+                                       value="0.0000" readonly/></td>
+                            <td><input type="text" class="form-control bg-success-light1 text-right old-total"
+                                       value="{{ order_obj.total|safe }}" readonly/></td>
+                        </tr>
+
+                        </tfoot>
+
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-warning" data-dismiss="modal">Cerrar</button>
+                <button type="submit" class="btn btn-success" id="sendCreditNote">Generar Nota de Credito
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<script>
+
+    $('#formCredit').submit(function (event) {
+        let r = confirm('¿ESTA SEGURO DE REGISTRAR LA NOTA DE CREDITO?');
+        if (r === true) {
+            event.preventDefault();
+            let data = new FormData($('#formCredit').get(0));
+            let motiveText = $('#motive option:selected').text();
+            let detailsArray = [];
+            $('#table-detail-guide tbody tr').each(function () {
+                let DetailCredit = {
+                    detailID: $(this).attr('pk'),
+                    productID: $(this).attr('product_id'),
+                    quantitySold: $(this).find('td.item-quantity-sold input.quantity-sold').val(),
+                    quantityReturned: $(this).find('td.item-quantity-returned input.quantity-returned-credit').val(),
+                    unit: $(this).find('td.item-unit').text(),
+                    price: $(this).find('td.price').text(),
+                }
+                detailsArray.push(DetailCredit);
+            });
+            data.append('details', JSON.stringify(detailsArray));
+            data.append('motive_text', motiveText);
+            $('#container-loading').css('display', 'block');
+            //console.log(data)
+            console.log(detailsArray)
+            $.ajax({
+                url: $(this).attr('action'),
+                type: $(this).attr('method'),
+                data: data,
+                cache: false,
+                processData: false,
+                contentType: false,
+                headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                success: function (response) {
+                    if (response.success) {
+                        window.open(response.enlace, '_blank');
+                        $('#container-loading').css('display', 'none');
+                        toastr.success(response.message);
+                        $('#modal-credit-note').modal('hide');
+                    } else {
+                        toastr.error('Corriga el sgt error o contacte con sistemas: ' + response.message, '¡Error de envio de Nota de credito!');
+                    }
+                },
+                error: function (response) {
+                    toastr.error('Corriga el sgt error o contacte con sistemas: ' + response.message, '¡Error de envio de Nota de credito!');
+                }
+            });
+        } else {
+            return false;
+        }
+    });
+
+</script>
+

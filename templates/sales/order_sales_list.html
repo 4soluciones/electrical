@@ -62,6 +62,10 @@
         <div id="sales-grid-list"></div>
 
     </div>
+
+    <div class="modal fade" id="modal-credit-note" data-backdrop="static" data-keyboard="false" tabindex="-1"
+         aria-labelledby="staticBackdropLabel" aria-hidden="true"></div>
+
 {% endblock body %}
 
 {% block extrajs %}
@@ -135,7 +139,6 @@
                         contentType: 'application/json;charset=UTF-8',
                         headers: {"X-CSRFToken": '{{ csrf_token }}'},
                         success: function (response, textStatus, xhr) {
-                            console.log("sss")
                             if (xhr.status === 200) {
                                 toastr.success(response.message, '¡ORDEN ACTUALIZADA CORRECTAMENTE!');
                                 $('#sales-grid-list').html(response.grid);
@@ -154,12 +157,121 @@
             }, 50);
         });
 
+        $(document).on('click', '.btn-credit-note', function () {
+
+            let pk = $(this).attr("pk")
+            $.ajax({
+                url: '/sales/modal_credit_note/',
+                async: true,
+                dataType: 'json', // for response
+                type: 'GET',
+                data: {
+                    'pk': pk,
+                    'start-date': $('#id-start-date').val(),
+                    'end-date': $('#id-end-date').val()
+                },
+                contentType: 'application/json;charset=UTF-8',
+                headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                success: function (response, textStatus, xhr) {
+                    $('#modal-credit-note').empty().html(response.grid).modal('show');
+                    orderObj = JSON.parse(response.serialized_obj);
+                    orderObj["details"] = response.serialized_detail_set;
+                    orderObj["newTotal"] = 0;
+                    orderObj["newIgv"] = 0;
+                    orderObj["newBase"] = 0;
+                    let base = 0;
+                    let igv = 0;
+                    let total = 0;
+                    if (orderObj["is_igv"]) {  // with igv
+                        total = Number(response.orderTotal);
+                        base = total / 1.18;
+                        igv = total - base;
+                    } else {  // without igv
+                        base = Number(response.orderTotal);
+                        igv = base * 0.18;
+                        total = base + igv;
+                    }
+                    $(`table#table-detail-guide tfoot tr td input.old-igv`).val(igv.toFixed(6));
+                    $(`table#table-detail-guide tfoot tr td input.old-base`).val(base.toFixed(6));
+                    $(`table#table-detail-guide tfoot tr td input.old-total`).val(total.toFixed(6));
+                },
+                fail: function (response) {
+                    console.log("error")
+                    toastr.error(jqXhr.responseJSON.error, '¡Inconcebible!');
+                }
+            });
+        });
+
+        $(document).on('input', '.quantity-returned-credit', function () {
+
+            if (Number($(this).val()) > Number($(this).attr('max-value'))) {
+                alert('Verifique cantidad a devolver');
+                $(this).val("")
+            } else {
+                let pk = $(this).attr('detail-id');
+                let tr = $(`table#table-detail-guide tbody tr[pk=${pk}]`);
+                let findDetailObj = orderObj.details.find((d) => {
+                    return d.detailID === parseInt(pk)
+                });
+                let price = Number(findDetailObj["price"]);
+                let quantityReturned = Number($(this).val());
+                let subtotal = Number(price * quantityReturned).toFixed(6);
+                findDetailObj["quantityReturned"] = Number(quantityReturned);
+                findDetailObj["newSubtotal"] = Number(subtotal);
+                findDetailObj["isCreditNote"] = (quantityReturned > 0);
+                tr.find(`td input.new-subtotal`).val(subtotal);
+            }
+            calculateNewTotalCredit()
+        });
+
+        function calculateNewTotalCredit() {
+
+            const res = orderObj.details.reduce((acc, item) => {
+                return acc += Number(item.newSubtotal);
+            }, 0);
+
+            let base = 0;
+            let igv = 0;
+            let total = 0;
+            if (orderObj["is_igv"]) {  // with igv
+                total = Number(res);
+                base = total / 1.18;
+                igv = total - base;
+            } else {  // without igv
+                base = Number(res);
+                igv = base * 0.18;
+                total = base + igv;
+            }
+
+            $(`table#table-detail-guide tfoot tr td input.new-base`).val(base.toFixed(6));
+            $(`table#table-detail-guide tfoot tr td input.new-igv`).val(igv.toFixed(6));
+            $(`table#table-detail-guide tfoot tr td input.new-total`).val(total.toFixed(6));
+
+        }
+
+
         $('#btn-switch').click(function () {
             $('.hide-column').remove()
             $('#table-dictionary').bootstrapTable('refresh');
             // $('.hide-column').css('width', '4%')
 
         });
+
+
+        function forceDownload(url, filename) {
+            fetch(url)
+                .then(response => response.blob())
+                .then(blob => {
+                    const link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = filename || 'archivo.pdf';
+                    link.click();
+                    window.URL.revokeObjectURL(link.href); // Limpieza
+                })
+                .catch(error => {
+                    console.error('Error al descargar:', error);
+                });
+        }
 
 
     </script>
