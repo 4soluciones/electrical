@@ -182,7 +182,10 @@
                     let base = 0;
                     let igv = 0;
                     let total = 0;
-                    if (orderObj["is_igv"]) {  // with igv
+                    total = Number(response.orderTotal);
+                    base = total / 1.18;
+                    igv = total - base;
+                    /*if (orderObj["voucher_type"] === 'F') {  // with igv
                         total = Number(response.orderTotal);
                         base = total / 1.18;
                         igv = total - base;
@@ -190,7 +193,7 @@
                         base = Number(response.orderTotal);
                         igv = base * 0.18;
                         total = base + igv;
-                    }
+                    }*/
                     $(`table#table-detail-guide tfoot tr td input.old-igv`).val(igv.toFixed(6));
                     $(`table#table-detail-guide tfoot tr td input.old-base`).val(base.toFixed(6));
                     $(`table#table-detail-guide tfoot tr td input.old-total`).val(total.toFixed(6));
@@ -233,7 +236,10 @@
             let base = 0;
             let igv = 0;
             let total = 0;
-            if (orderObj["is_igv"]) {  // with igv
+            total = Number(res);
+            base = total / 1.18;
+            igv = total - base;
+            /*if (orderObj["is_igv"]) {  // with igv
                 total = Number(res);
                 base = total / 1.18;
                 igv = total - base;
@@ -241,7 +247,7 @@
                 base = Number(res);
                 igv = base * 0.18;
                 total = base + igv;
-            }
+            }*/
 
             $(`table#table-detail-guide tfoot tr td input.new-base`).val(base.toFixed(6));
             $(`table#table-detail-guide tfoot tr td input.new-igv`).val(igv.toFixed(6));
