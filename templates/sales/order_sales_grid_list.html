@@ -95,24 +95,55 @@
                         {% endif %}
                     </td>
                     <td class="align-middle text-center text-success noExl" rowspan="{{ p.details }}" {% if p.status == 'A' %}style="background-color: #ee8888 !important;"  {% endif %} {% if p.way_to_pay == 'D' %} style="background-color: #a3f396 !important;" {% elif p.way_to_pay == 'C' %} style="background-color: #b1d2e9 !important;" {% endif %}>
+{#                        {% if p.status != 'A' %}#}
+{#                            {% if p.note_serial %}#}
+{#                                <span class="font-weight-bold text-danger">NOTA DE CREDITO</span> <br>#}
+{#                                <a href="javascript:void(0);"#}
+{#                                   onclick="forceDownload('{{ p.note_pdf }}', '{{ p.note_serial }}-{{ p.note_number }}.pdf')"#}
+{#                                   class="btn btn-sm" style="background-color: #b7b786">#}
+{#                                    <i class="icon-trash"></i>#}
+{#                                    {{ p.note_serial }}-{{ p.note_number }}#}
+{#                                </a>#}
+{#                            {% else %}#}
+{#                                <a class="btn btn-sm btn-outline-danger ml-1 my-1 btn-cancel" data-bs-toggle="tooltip"#}
+{#                                   pk="{{ p.id }}"#}
+{#                                   href="#" data-bs-placement="top" title="ANULAR VENTA">#}
+{#                                    <i class="fas fa-ban fa-xs"></i></a>#}
+{#                                <button type="button" class="btn btn-sm btn-credit-note"#}
+{#                                        style="background-color: #e9c8c8" pk="{{ p.id }}">#}
+{#                                    <i class="fas fa-sticky-note fa-xs" style="color: #5a5252;"></i>#}
+{#                                    Nota de Credito#}
+{#                                </button>#}
+{#                            {% endif %}#}
+{#                        {% endif %}#}
                         {% if p.status != 'A' %}
-                            {% if p.note_serial %}
-                                <span class="font-weight-bold text-danger">NOTA DE CREDITO</span> <br>
-                                <a href="javascript:void(0);"
-                                   onclick="forceDownload('{{ p.note_pdf }}', '{{ p.note_serial }}-{{ p.note_number }}.pdf')"
-                                   class="btn btn-sm" style="background-color: #b7b786">
-                                    <i class="icon-trash"></i>
-                                    {{ p.note_serial }}-{{ p.note_number }}
-                                </a>
+                            {% if p.credit_notes %}
+                                <span class="font-weight-bold text-danger">NOTAS DE CRÉDITO</span><br>
+                                {% for note in p.credit_notes %}
+                                    <a href="{{ note.pdf }}" target="_blank" class="btn btn-sm btn-light border mb-1"
+                                       title="Ver PDF de la Nota de Crédito">
+                                        <i class="fas fa-file-pdf text-danger"></i>
+                                        {{ note.serial }}-{{ note.correlative }}
+                                    </a><br>
+                                {% endfor %}
+
+                                {% if not p.fully_returned %}
+                                    <button type="button" class="btn btn-sm btn-credit-note my-1"
+                                            style="background-color: #e9c8c8" pk="{{ p.id }}">
+                                        <i class="fas fa-sticky-note fa-xs" style="color: #5a5252;"></i>
+                                        Nueva Nota de Crédito
+                                    </button>
+                                {% endif %}
+
                             {% else %}
                                 <a class="btn btn-sm btn-outline-danger ml-1 my-1 btn-cancel" data-bs-toggle="tooltip"
-                                   pk="{{ p.id }}"
-                                   href="#" data-bs-placement="top" title="ANULAR VENTA">
-                                    <i class="fas fa-ban fa-xs"></i></a>
-                                <button type="button" class="btn btn-sm btn-credit-note"
+                                   pk="{{ p.id }}" href="#" data-bs-placement="top" title="ANULAR VENTA">
+                                    <i class="fas fa-ban fa-xs"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-credit-note my-1"
                                         style="background-color: #e9c8c8" pk="{{ p.id }}">
                                     <i class="fas fa-sticky-note fa-xs" style="color: #5a5252;"></i>
-                                    Nota de Credito
+                                    Nota de Crédito
                                 </button>
                             {% endif %}
                         {% endif %}

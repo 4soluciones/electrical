@@ -1803,12 +1803,27 @@ def get_dict_order_queries(order_set, start_date, end_date, is_pdf=False, is_uni
         note_number = None
         note_pdf = None
 
+        fully_returned = is_order_fully_returned(o)
+
+        credit_notes_data = []
         credit_note_set = CreditNote.objects.filter(order=o)
-        if credit_note_set.exists():
-            credit_note_obj = credit_note_set.first()
-            note_serial = credit_note_obj.serial
-            note_number = credit_note_obj.correlative
-            note_pdf = credit_note_obj.note_enlace_pdf
+
+        # credit_note_set = CreditNote.objects.filter(order=o)
+        # if credit_note_set.exists():
+        #     credit_note_obj = credit_note_set.first()
+        #     note_serial = credit_note_obj.serial
+        #     note_number = credit_note_obj.correlative
+        #     note_pdf = credit_note_obj.note_enlace_pdf
+
+        for cn in credit_note_set:
+            credit_notes_data.append({
+                'serial': cn.serial,
+                'correlative': cn.correlative,
+                'pdf': cn.note_enlace_pdf,
+                'issue_date': cn.issue_date,
+                'total': cn.note_total,
+                'description': cn.note_description,
+            })
 
         order = {
             'id': o.id,
@@ -1830,9 +1845,11 @@ def get_dict_order_queries(order_set, start_date, end_date, is_pdf=False, is_uni
             'cash_id': cash_id,
             'way_to_pay': o.way_to_pay_type,
             'details': _order_detail.count(),
-            'note_serial': note_serial,
-            'note_number': note_number,
-            'note_pdf': note_pdf,
+            # 'note_serial': note_serial,
+            # 'note_number': note_number,
+            # 'note_pdf': note_pdf,
+            'credit_notes': credit_notes_data,
+            'fully_returned': fully_returned,
         }
 
         for d in _order_detail:
@@ -1945,6 +1962,28 @@ def get_dict_order_queries(order_set, start_date, end_date, is_pdf=False, is_uni
                                                                rounding=decimal.ROUND_HALF_EVEN)
     })
     return tpl.render(context)
+
+
+def is_order_fully_returned(order):
+    """
+    Retorna True si todos los detalles de la orden han sido devueltos completamente.
+    """
+    for detail in order.orderdetail_set.all():
+        # Total vendido
+        quantity_sold = detail.quantity_sold
+
+        # Total devuelto (suma de todas las cantidades de notas de crédito con el mismo producto y orden)
+        total_returned = CreditNoteDetail.objects.filter(
+            credit_note__order=order,
+            product=detail.product,
+            unit=detail.unit
+        ).aggregate(total=Sum('quantity'))['total'] or 0
+
+        if total_returned < quantity_sold:
+            return False  # Si algún detalle no ha sido totalmente devuelto
+
+    return True  # Todos los detalles fueron devueltos completamente
+
 
 
 def get_quantity_ball_5kg(order_detail_set):
@@ -7088,38 +7127,53 @@ def modal_credit_note(request):
     if request.method == 'GET':
         pk = request.GET.get('pk', '')
         if pk:
+            details = []
             my_date = datetime.now()
             date_now = my_date.strftime("%Y-%m-%d")
             order_obj = Order.objects.get(id=int(pk))
             order_bill_obj = OrderBill.objects.get(order=int(pk))
-            details = []
-            details_all = order_obj.orderdetail_set.all()
-            # inputs = details_all.filter(operation='E').values('product_id').annotate(total_entrada=Sum('quantity'))
-            # outputs = details_all.filter(operation='S').values('product_id').annotate(total_salida=Sum('quantity'))
-            # input_dict = {e['product_id']: e['total_entrada'] for e in inputs}
-            # output_dict = {e['product_id']: e['total_salida'] for e in outputs}
+
+            credit_note_totals = CreditNoteDetail.objects.filter(
+                credit_note__order=order_obj
+            ).values('product_id', 'unit_id').annotate(total_returned=Sum('quantity'))
+
+            credit_note_map = {
+                (item['product_id'], item['unit_id']): item['total_returned']
+                for item in credit_note_totals
+            }
             for d in order_obj.orderdetail_set.all():
+
                 product_id = d.product.id
-                # quantity_sold = output_dict.get(product_id, 0)
-                # quantity_returned = input_dict.get(product_id, 0)
-                # quantity_pending = quantity_sold - quantity_returned
+                unit_id = d.unit.id
+                quantity_sold = d.quantity_sold
+                quantity_returned = credit_note_map.get((product_id, unit_id), 0)
+                quantity_pending = max(quantity_sold - quantity_returned, 0)
+
+                if quantity_pending <= 0:
+                    continue
+
                 item = {
                     'id': d.id,
-                    # 'operation': d.operation,
-                    'quantity': d.quantity_sold,
-                    # 'quantity_pending': str(quantity_pending),
-                    # 'quantity_niu': d.quantity_niu,
-                    # 'quantity_remaining': d.quantity_remaining,
+                    'order': d.order.id,
+                    # 'quantity': d.quantity_sold,
+                    'quantity': quantity_pending,
                     'price': d.price_unit,
                     'unit': d.unit,
                     'product_id': d.product.id,
                     'product_name': d.product.name,
-                    # 'product_code': d.product.code,
-                    # 'product_width': d.product.width,
-                    # 'product_length': d.product.length,
-                    # 'product_height': d.product.height,
-                    # 'amount': d.amount()
+                    'product_code': d.product.code,
+                    'price_unit': d.price_unit,
+                    'multiply': d.multiply(),
+                    'serials': [],
                 }
+
+                for s in d.productserial_set.all():
+                    item_serial = {
+                        'id': s.id,
+                        'serial_number': s.serial_number
+                    }
+                    item.get('serials').append(item_serial)
+
                 details.append(item)
 
             tpl = loader.get_template('sales/modal_credit_note.html')
@@ -7135,11 +7189,8 @@ def modal_credit_note(request):
                 'detailID': detail.id,
                 'productID': detail.product.id,
                 'productName': detail.product.name,
-                # 'productCode': detail.product.code,
                 'price': float(detail.price_unit),
                 'quantitySold': float(detail.quantity_sold),
-                # 'quantityNiu': detail.quantity_niu,
-                # 'unit': detail.unit,
                 'isCreditNote': False,
                 'quantityReturned': 0,
                 'newSubtotal': 0,
@@ -7224,14 +7275,33 @@ def save_credit_note(request):
                         kardex_input_credit_note(product_store_id=product_store_obj.id,
                                                  quantity_return=quantity_returned,
                                                  credit_note_detail_obj=credit_detail_obj)
-                        detail_obj = OrderDetail.objects.get(id=detail_id)
-                        product_serial_set = ProductSerial.objects.filter(order_detail=detail_obj,
-                                                                          product_store=product_store_obj)
-                        if product_serial_set.exists():
-                            for ps in product_serial_set:
-                                ps.order_detail = None
-                                ps.status = 'C'
-                                ps.save()
+                        # detail_obj = OrderDetail.objects.get(id=detail_id)
+                        if 'serials' in d and d['serials']:
+                            for serial_id in d['serials']:
+                                try:
+                                    product_serial = ProductSerial.objects.get(
+                                        id=serial_id,
+                                        order_detail_id=detail_id,
+                                        product_store=product_store_obj
+                                    )
+                                    product_serial.order_detail = None
+                                    product_serial.status = 'C'
+                                    product_serial.save()
+
+                                    CreditNoteDetailSerial.objects.create(
+                                        credit_note_detail=credit_detail_obj,
+                                        product_serial=product_serial
+                                    )
+                                except ProductSerial.DoesNotExist:
+                                    # Puedes loggear aquí si es necesario
+                                    continue
+                        # product_serial_set = ProductSerial.objects.filter(order_detail=detail_obj,
+                        #                                                   product_store=product_store_obj)
+                        # if product_serial_set.exists():
+                        #     for ps in product_serial_set:
+                        #         ps.order_detail = None
+                        #         ps.status = 'C'
+                        #         ps.save()
 
                 return JsonResponse({
                     'success': True,

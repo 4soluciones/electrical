@@ -7,12 +7,14 @@
     }
 </style>
 
-<div class="modal-dialog modal-xl pt-3 roboto-condensed-regular" style="max-width: 1320px; margin: 0 auto" role="document">
+<div class="modal-dialog modal-xl pt-3 roboto-condensed-regular" style="max-width: 1320px; margin: 0 auto"
+     role="document">
     <div class="modal-content">
         <form id="formCredit" method="POST" enctype="multipart/form-data"
               action="{% url 'sales:save_credit_note' %}">
             <div class="modal-header">
-                <h5 class="modal-title roboto-condensed-regular font-weight-bold" id="creditNoteModalLabel">GENERAR NOTA DE CRÉDITO</h5>
+                <h5 class="modal-title roboto-condensed-regular font-weight-bold" id="creditNoteModalLabel">GENERAR NOTA
+                    DE CRÉDITO</h5>
                 <input type="hidden" class="form-control" id="id-order" name="id-order"
                        value="{{ order_obj.id }}" required>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -37,7 +39,8 @@
                         z-index: 2000;
                         right: 0;" id="container-loading">
                     <div class="spinner-border border-0" role="status" style="width: auto; height: auto">
-                        <img class="animation__shake img-circle" src="{% static 'assets/logo png blanco y negro 1.png' %}" alt="Logo"
+                        <img class="animation__shake img-circle"
+                             src="{% static 'assets/logo png blanco y negro 1.png' %}" alt="Logo"
                              height="80"
                              width="80">
                         <span class="sr-only">Loading...</span>
@@ -84,7 +87,7 @@
                                value="{{ order_obj.client.names }}">
                     </div>
                     <label for="motive" class="col-sm-2 col-form-label">Motivo:</label>
-                     <div class="col-sm-4">
+                    <div class="col-sm-4">
                         <select class="form-control text-uppercase" id="motive" name="motive-credit-note">
                             <option value="01" selected>Anulación de la operación</option>
                             <option value="02">Anulación por error en el RUC</option>
@@ -107,40 +110,47 @@
                            id="table-detail-guide">
                         <thead>
                         <tr class="font-weight-bold">
-                            <td>CODIGO</td>
-                            <td>PRODUCTO</td>
-                            <td>UNIDAD</td>
-                            <td>PRECIO</td>
-                            <td>CANT. <br>VENDIDA</td>
-                            <td style="background-color: #f6d6d6">CANT. <br>A DEVOLVER</td>
-                            <td style="background-color: #f6d6d6">SUBTOTAL<br> NOTA CREDITO</td>
-                            <td>SUBTOTAL <br>VENTA</td>
+                            <td style="width: 10%">CODIGO</td>
+                            <td style="width: 40%">PRODUCTO</td>
+                            <td style="width: 5%">(UND)</td>
+                            <td style="width: 5%">PRECIO</td>
+                            <td style="width: 10%">CANT. <br>VENDIDA</td>
+                            <td style="background-color: #f6d6d6; width: 10%">CANT. <br>A DEVOLVER</td>
+                            <td style="background-color: #f6d6d6; width: 10%">SUBTOTAL<br> NOTA CREDITO</td>
+                            <td style="width: 10%">SUBTOTAL <br>VENTA</td>
                         </tr>
                         </thead>
                         <tbody>
-                        {% for d in order_obj.orderdetail_set.all %}
-                            <tr pk="{{ d.id }}" product_id="{{ d.product.id }}">
-                                <td class="align-middle">{{ d.product.code }}</td>
+                        {% for d in details %}
+                            <tr pk="{{ d.id }}" product_id="{{ d.product_id }}">
+                                <td class="align-middle">{{ d.product_code }}</td>
                                 <td class="align-middle">
-                                    {{ d.product.name }}<br>
+                                    {{ d.product_name }}<br>
                                     <span style="font-size: 11px">
-                                        {% for s in d.productserial_set.all %}
-                                            {{ s.serial_number }}{% if not forloop.last %}, {% endif %}
+                                        {% for s in d.serials %}
+                                            <input class="align-middle check-serial" order="{{ d.order }}"
+                                                   aria-label="..." type="checkbox" style="transform: scale(1.0);">
+                                            <span class="serial-number"
+                                                  data-id="{{ s.id }}">{{ s.serial_number }}</span>
+                                            {% if not forloop.last %}, {% endif %}
                                         {% endfor %}
                                     </span>
                                 </td>
-                                <td class="align-middle item-unit">{{ d.unit }}</td>
+                                <td class="align-middle item-unit text-center">{{ d.unit }}</td>
                                 <td class="align-middle price">{{ d.price_unit|replace_round }}</td>
                                 <td class="align-middle item-quantity-sold">
                                     <input type="text"
                                            class="form-control bg-success-light1 text-right quantity-sold"
-                                           value="{{ d.quantity_sold|replace_round }}" readonly/>
+                                           value="{{ d.quantity|replace_round }}" readonly/>
                                 </td>
                                 <td class="align-middle item-quantity-returned" style="background-color: #f6d6d6">
                                     <input type="text"
                                            class="form-control text-right quantity-returned-credit"
-                                           detail-id="{{ d.id }}"
-                                           max-value="{{ d.quantity_sold|safe }}" value=""/>
+                                           detail-id="{{ d.id }}" placeholder="0"
+                                            {% if d.serials %}
+                                           readonly
+                                            {% endif %}
+                                           max-value="{{ d.quantity|safe }}" value=""/>
                                 </td>
                                 <td class="align-middle" style="background-color: #f6d6d6">
                                     <input type="text"
@@ -212,22 +222,36 @@
             let data = new FormData($('#formCredit').get(0));
             let motiveText = $('#motive option:selected').text();
             let detailsArray = [];
+
             $('#table-detail-guide tbody tr').each(function () {
+                const $row = $(this);
+                const serials = [];
+
+                // Buscar todos los checkboxes seleccionados en esta fila
+                $row.find('.check-serial:checked').each(function () {
+                    const serialId = $(this).next('.serial-number').data('id');
+                    if (serialId) {
+                        serials.push(serialId);
+                    }
+                });
+
                 let DetailCredit = {
-                    detailID: $(this).attr('pk'),
-                    productID: $(this).attr('product_id'),
-                    quantitySold: $(this).find('td.item-quantity-sold input.quantity-sold').val(),
-                    quantityReturned: $(this).find('td.item-quantity-returned input.quantity-returned-credit').val(),
-                    unit: $(this).find('td.item-unit').text(),
-                    price: $(this).find('td.price').text(),
+                    detailID: $row.attr('pk'),
+                    productID: $row.attr('product_id'),
+                    quantitySold: $row.find('td.item-quantity-sold input.quantity-sold').val(),
+                    quantityReturned: $row.find('td.item-quantity-returned input.quantity-returned-credit').val(),
+                    unit: $row.find('td.item-unit').text().trim(),
+                    price: $row.find('td.price').text().trim(),
+                    serials: serials  // 🔥 Aquí agregamos los seriales seleccionados
                 }
+
                 detailsArray.push(DetailCredit);
             });
+
             data.append('details', JSON.stringify(detailsArray));
             data.append('motive_text', motiveText);
             $('#container-loading').css('display', 'block');
-            //console.log(data)
-            console.log(detailsArray)
+            //console.log(detailsArray)
             $.ajax({
                 url: $(this).attr('action'),
                 type: $(this).attr('method'),
@@ -242,16 +266,48 @@
                         $('#container-loading').css('display', 'none');
                         toastr.success(response.message);
                         $('#modal-credit-note').modal('hide');
+                        $('#btn-search').click();
                     } else {
-                        toastr.error('Corriga el sgt error o contacte con sistemas: ' + response.message, '¡Error de envio de Nota de credito!');
+                        toastr.error('Corrija el sgt error o contacte con sistemas: ' + response.message, '¡Error de envío de Nota de Crédito!');
                     }
                 },
                 error: function (response) {
-                    toastr.error('Corriga el sgt error o contacte con sistemas: ' + response.message, '¡Error de envio de Nota de credito!');
+                    toastr.error('Corrija el sgt error o contacte con sistemas: ' + response.message, '¡Error de envío de Nota de Crédito!');
                 }
             });
         } else {
             return false;
+        }
+    });
+
+    document.addEventListener('change', function (e) {
+        if (e.target.classList.contains('check-serial')) {
+            const checkbox = e.target;
+            const serialSpan = checkbox.nextElementSibling;
+            const serialId = serialSpan.dataset.id;
+            const row = checkbox.closest('tr');
+            const quantityInput = row.querySelector('.quantity-returned-credit');
+            const checkboxesInRow = row.querySelectorAll('.check-serial');
+
+            let checkedCount = 0;
+            checkboxesInRow.forEach(cb => {
+                if (cb.checked) checkedCount++;
+            });
+
+            if (quantityInput) {
+                quantityInput.value = checkedCount || '';
+                $(quantityInput).trigger('input');
+            }
+
+            if (checkbox.checked) {
+                if (!selectedSerials.includes(serialId)) {
+                    selectedSerials.push(serialId);
+                }
+            } else {
+                selectedSerials = selectedSerials.filter(id => id !== serialId);
+            }
+
+            console.log('Seriales seleccionados:', selectedSerials);
         }
     });
 

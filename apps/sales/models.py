@@ -912,3 +912,12 @@ class CreditNoteDetail(models.Model):
 
     def multiply(self):
         return self.quantity * self.price_unit
+
+
+class CreditNoteDetailSerial(models.Model):
+    id = models.AutoField(primary_key=True)
+    credit_note_detail = models.ForeignKey(CreditNoteDetail, on_delete=models.CASCADE, null=True, blank=True)
+    product_serial = models.ForeignKey('sales.ProductSerial', on_delete=models.CASCADE, null=True, blank=True)
+
+    def __str__(self):
+        return str(self.id)
