@@ -1566,12 +1566,27 @@ def kardex_input(
 
     last_kardex = Kardex.objects.filter(product_store_id=product_store.id).last()
     last_remaining_quantity = last_kardex.remaining_quantity
+    last_remaining_price = last_kardex.remaining_price
     last_remaining_price_total = last_kardex.remaining_price_total
 
-    new_remaining_quantity = last_remaining_quantity + new_quantity
-    new_remaining_price = (decimal.Decimal(last_remaining_price_total) +
-                           new_price_total) / new_remaining_quantity
-    new_remaining_price_total = new_remaining_quantity * new_remaining_price
+    # new_remaining_quantity = last_remaining_quantity + new_quantity
+    # new_remaining_price = (decimal.Decimal(last_remaining_price_total) +
+    #                        new_price_total) / new_remaining_quantity
+    # new_remaining_price_total = new_remaining_quantity * new_remaining_price
+
+    # Detectar si es una anulación de venta
+    is_sale_annulment = order_detail_obj is not None and purchase_detail_obj is None
+
+    if is_sale_annulment:
+        # No cambia el precio unitario ni el promedio
+        new_remaining_quantity = last_remaining_quantity + new_quantity
+        new_remaining_price = last_remaining_price
+        new_remaining_price_total = new_remaining_quantity * new_remaining_price
+    else:
+        # Compra u otra entrada válida que sí afecta el costo promedio
+        new_remaining_quantity = last_remaining_quantity + new_quantity
+        new_remaining_price = (decimal.Decimal(last_remaining_price_total) + new_price_total) / new_remaining_quantity
+        new_remaining_price_total = new_remaining_quantity * new_remaining_price
 
     new_kardex = {
         'operation': 'E',
