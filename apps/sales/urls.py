@@ -47,6 +47,7 @@ urlpatterns = [
     path('get_sales_by_subsidiary_store/', get_sales_by_subsidiary_store,
          name='get_sales_by_subsidiary_store'),
     path('get_products_by_subsidiary/', get_products_by_subsidiary, name='get_products_by_subsidiary'),
+    path('toggle_product_enabled/', toggle_product_enabled, name='toggle_product_enabled'),
     path('new_subsidiary_store/', new_subsidiary_store, name='new_subsidiary_store'),
     path('get_recipe/', login_required(get_recipe), name='get_recipe'),
     path('create_recipe/', login_required(create_recipe), name='create_recipe'),

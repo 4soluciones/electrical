@@ -1,9 +1,9 @@
 {% if stores %}
 
-    <div class="card">
+    <div class="card roboto-condensed-regular">
 
         <div class="card-header">
-            <h5 class="card-title">Lista de almacenes</h5>
+            <h5 class="card-title text-uppercase roboto-condensed-regular font-weight-bold">Lista de productos por almacen</h5>
         </div>
 
         <div class="card-body">
@@ -41,21 +41,20 @@
                             <td class="text-center">{{ ss.product.product_brand.name }}</td>
 
                             <td class="text-center">
-                                    <table class="table table-sm m-0 text-uppercase">
-                                    {% for d in ss.product.productdetail_set.all %}
-                                        <tr>
-
-                                            <td class="font-weight-bold">S/ {{ d.price_purchase|floatformat:2 }} </td>
-{#                                            <td> {{ d.unit.name }} </td>#}
-{#                                            <td>{{ ps.product.stock_min }}</td>#}
-{#                                            <td>{{ ps.product.stock_max }}</td>#}
-                                        </tr>
-                                    {% endfor %}
-                                    </table>
+                                {% if ss.last_purchase_price %}
+                                    <span class="font-weight-bold">S/ {{ ss.last_purchase_price|floatformat:3 }}</span>
+                                {% else %}
+                                    <span class="text-muted">Sin precio</span>
+                                {% endif %}
                             </td>
 
-                            <td class="text-center"><input type="checkbox" {% if ss.product.is_enabled %}checked{% endif %}></td>
-                            <td class="{% if ss.stock <= ss.product.stock_min %}text-danger{% else %}text-success{% endif %} text-center font-weight-bold">{{ ss.stock|floatformat:2|safe }}</td>
+                            <td class="text-center">
+                                <input type="checkbox" 
+                                       class="product-enabled-checkbox" 
+                                       data-product-id="{{ ss.product.id }}"
+                                       {% if ss.product.is_enabled %}checked{% endif %}>
+                            </td>
+                            <td class="{% if ss.stock <= ss.product.stock_min %}text-danger{% else %}text-success{% endif %} text-center font-weight-bold">{{ ss.stock|floatformat:0|safe }}</td>
 {#                            <td class="align-middle">{{ ss.stores.all.count }}</td>#}
 {#                            <td class="align-middle">{{ ss.subsidiary_store.subsidiary.name }}</td>#}
                         </tr>

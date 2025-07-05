@@ -1,11 +1,11 @@
 {% extends 'home.html' %}
 
 {% block title %}
-    coronasoft.dev | Clientes
+    Productos por almacen
 {% endblock title %}
 
 {% block body %}
-    <div class="container-fluid">
+    <div class="container-fluid roboto-condensed-regular">
 
         <a class="btn btn-outline-info mb-3 mt-3" href="" data-toggle="modal"
            data-target="#modal-subsidiary-store">
@@ -102,5 +102,36 @@
             $('#modal-subsidiary-store').modal('hide');
 
         }); //end submit
+
+        // Manejar el cambio de estado del checkbox de habilitado
+        $(document).on('change', '.product-enabled-checkbox', function() {
+            var productId = $(this).data('product-id');
+            var isEnabled = $(this).is(':checked');
+            var checkbox = $(this);
+
+            $.ajax({
+                url: '{% url "sales:toggle_product_enabled" %}',
+                type: 'POST',
+                data: {
+                    'product_id': productId,
+                    'is_enabled': isEnabled,
+                    'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success(response.message, '¡Bien hecho!');
+                    } else {
+                        toastr.error(response.error, '¡Ocurrió un error!');
+                        // Revertir el checkbox si hay error
+                        checkbox.prop('checked', !isEnabled);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    toastr.error('Error al cambiar el estado del producto', '¡Ocurrió un error!');
+                    // Revertir el checkbox si hay error
+                    checkbox.prop('checked', !isEnabled);
+                }
+            });
+        });
     </script>
 {% endblock extrajs %}

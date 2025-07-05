@@ -265,11 +265,6 @@ def new_quantity_on_hand(request):
                         response = JsonResponse(data)
                         response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
                         return response
-            # else:
-            #     data = {'error': "Producto con inventario inicial ya registrado!"}
-            #     response = JsonResponse(data)
-            #     response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
-            #     return response
         return JsonResponse({
             'success': True,
         })
@@ -324,11 +319,6 @@ def get_recipe_by_product(request):
                         response = JsonResponse(data)
                         response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
                         return response
-            else:
-                data = {'error': "Producto con inventario inicial ya registrado!"}
-                response = JsonResponse(data)
-                response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
-                return response
         return JsonResponse({
             'success': True,
         })
@@ -1450,11 +1440,11 @@ def generate_receipt_random(request):
                               create_at=date)
             order_obj.save()
             detail_order_obj = OrderDetail(order=order_obj,
-                                           product=product_obj,
-                                           quantity_sold=quantity,
-                                           price_unit=price,
-                                           unit=unit_obj,
-                                           status='V')
+                                         product=product_obj,
+                                         quantity_sold=quantity,
+                                         price_unit=price,
+                                         unit=unit_obj,
+                                         status='V')
             detail_order_obj.save()
             r = send_receipt_nubefact(order_obj.id, is_demo)
             codigo_hash = r.get('codigo_hash')
@@ -2126,16 +2116,13 @@ def get_products_by_subsidiary(request):
     user_obj = User.objects.get(id=user_id)
     subsidiary = get_subsidiary_by_user(user_obj)
 
-    # subsidiary_stores = SubsidiaryStore.objects.filter(
-    #     subsidiary=subsidiary,
-    #     category='V').prefetch_related(
-    #     Prefetch(
-    #         'stores', queryset=ProductStore.objects.select_related('product')
-    #         ),
-    #     Prefetch(
-    #         'stores__product__productdetail_set', queryset=ProductDetail.objects.select_related('unit')
-    #     )
-    # ).select_related('subsidiary')
+    # Obtener el último precio del kardex para cada producto_store
+    from django.db.models import OuterRef, Subquery, DecimalField
+    from decimal import Decimal
+    
+    last_kardex_price = Kardex.objects.filter(
+        product_store=OuterRef('id')
+    ).order_by('-id').values('remaining_price')[:1]
 
     stores = ProductStore.objects.filter(subsidiary_store__category='V',
                                          subsidiary_store__subsidiary=subsidiary).select_related('subsidiary_store',
@@ -2145,6 +2132,8 @@ def get_products_by_subsidiary(request):
             'product__productdetail_set',
             queryset=ProductDetail.objects.select_related('unit', 'product__product_brand')
         )
+    ).annotate(
+        last_purchase_price=Subquery(last_kardex_price)
     ).order_by('product__name')
 
     form_subsidiary_store = FormSubsidiaryStore()
@@ -2153,6 +2142,38 @@ def get_products_by_subsidiary(request):
         'form': form_subsidiary_store,
         'stores': stores
     })
+
+
+@csrf_exempt
+def toggle_product_enabled(request):
+    if request.method == 'POST':
+        product_id = request.POST.get('product_id')
+        is_enabled = request.POST.get('is_enabled') == 'true'
+        
+        try:
+            product = Product.objects.get(id=product_id)
+            product.is_enabled = is_enabled
+            product.save()
+            
+            return JsonResponse({
+                'success': True,
+                'message': f'Producto {"habilitado" if is_enabled else "deshabilitado"} exitosamente.',
+            }, status=HTTPStatus.OK)
+        except Product.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'error': 'Producto no encontrado.',
+            }, status=HTTPStatus.NOT_FOUND)
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': str(e),
+            }, status=HTTPStatus.INTERNAL_SERVER_ERROR)
+    
+    return JsonResponse({
+        'success': False,
+        'error': 'Método no permitido.',
+    }, status=HTTPStatus.METHOD_NOT_ALLOWED)
 
 
 def new_subsidiary_store(request):
@@ -2893,7 +2914,7 @@ def new_expense(request):
             cash_obj = cashflow_set.first().cash
 
             if check_closed:
-                data = {'error': "La caja seleccionada se encuentra cerrada, favor de seleccionar otra"}
+                data = {"error": "La caja seleccionada se encuentra cerrada, favor de seleccionar otra"}
                 response = JsonResponse(data)
                 response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
                 return response
