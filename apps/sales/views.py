@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.db.models.functions import Coalesce, Cast
 from django.shortcuts import render
+from django.template.loader import render_to_string
 from django.views.generic import TemplateView, View, CreateView, UpdateView
 from django.views.decorators.csrf import csrf_exempt
 from django.forms.models import model_to_dict
@@ -7351,3 +7352,246 @@ def save_credit_note(request):
                 'number': order_obj.number,
                 'message': 'Orden sin comprobante electronico',
             }, status=HTTPStatus.OK)
+
+
+def get_credit_notes_report(request):
+    """
+    Vista para mostrar el reporte de notas de crédito
+    """
+    from datetime import datetime, timedelta
+    
+    # Obtener fechas por defecto (último mes)
+    end_date = datetime.now().date()
+    start_date = end_date - timedelta(days=30)
+    
+    formatdate = start_date.strftime('%Y-%m-%d')
+    
+    context = {
+        'formatdate': formatdate,
+        'end_date': end_date.strftime('%Y-%m-%d')
+    }
+    
+    return render(request, 'sales/credit_notes_list.html', context)
+
+
+def get_credit_notes_by_date(request):
+    """
+    Vista AJAX para obtener las notas de crédito filtradas por fecha
+    """
+    from datetime import datetime
+    
+    if request.method == 'POST':
+        start_date = request.POST.get('start-date')
+        end_date = request.POST.get('end-date')
+        
+        try:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+        except ValueError:
+            return JsonResponse({'error': 'Formato de fecha inválido'}, status=400)
+        
+        # Obtener notas de crédito en el rango de fechas
+        credit_notes = CreditNote.objects.filter(
+            issue_date__range=[start_date, end_date],
+            status__in=['E', 'P']  # Emitidas y Pendientes
+        ).order_by('-issue_date')
+        
+        # Preparar datos para el template
+        credit_notes_data = []
+        total_amount = 0
+        
+        for note in credit_notes:
+            # Obtener detalles de la nota de crédito
+            details = CreditNoteDetail.objects.filter(credit_note=note)
+            
+            # Calcular total de la nota
+            note_total = sum(detail.total for detail in details)
+            total_amount += note_total
+            
+            # Obtener información del cliente
+            client_name = "N/A"
+            if note.order and note.order.client:
+                client_name = note.order.client.names
+            
+            # Obtener información del usuario
+            user_name = note.order.user.worker_set.last().employee.names if note.order and note.order.user.worker_set.exists() else "N/A"
+            
+            credit_notes_data.append({
+                'id': note.id,
+                'serial': note.serial or 'N/A',
+                'correlative': note.correlative,
+                'issue_date': note.issue_date,
+                'status': note.get_status_display(),
+                'status_code': note.status,
+                'client_name': client_name,
+                'user_name': user_name,
+                'total': note_total,
+                'motive': note.motive or 'N/A',
+                'details': details,
+                'order_info': f"{note.order.voucher_type}-{note.order.correlative}" if note.order else 'N/A',
+                'pdf_url': note.note_enlace_pdf if note.note_enlace_pdf else None,
+                'qr_code': note.note_qr if note.note_qr else None,
+                'hash_code': note.note_hash if note.note_hash else None,
+            })
+        
+        # Estadísticas por usuario
+        user_stats = {}
+        for note_data in credit_notes_data:
+            user_name = note_data['user_name']
+            if user_name not in user_stats:
+                user_stats[user_name] = {
+                    'user_names': user_name,
+                    'total_notes': 0,
+                    'total_amount': 0,
+                    'emitted_notes': 0,
+                    'pending_notes': 0
+                }
+            
+            user_stats[user_name]['total_notes'] += 1
+            user_stats[user_name]['total_amount'] += note_data['total']
+            
+            if note_data['status_code'] == 'E':
+                user_stats[user_name]['emitted_notes'] += 1
+            elif note_data['status_code'] == 'P':
+                user_stats[user_name]['pending_notes'] += 1
+        
+        # Estadísticas por estado
+        status_stats = {
+            'emitted': len([n for n in credit_notes_data if n['status_code'] == 'E']),
+            'pending': len([n for n in credit_notes_data if n['status_code'] == 'P']),
+            'cancelled': len([n for n in credit_notes_data if n['status_code'] == 'A'])
+        }
+        
+        context = {
+            'credit_notes': credit_notes_data,
+            'total_amount': total_amount,
+            'user_stats': user_stats,
+            'status_stats': status_stats,
+            'start_date': start_date,
+            'end_date': end_date,
+            'f1': start_date.strftime('%Y-%m-%d'),
+            'f2': end_date.strftime('%Y-%m-%d')
+        }
+        
+        # Renderizar el grid
+        grid_html = render_to_string('sales/credit_notes_grid_list.html', context)
+        
+        return JsonResponse({
+            'grid': grid_html,
+            'total_amount': total_amount,
+            'total_notes': len(credit_notes_data)
+        })
+    
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+
+def cancel_credit_note(request):
+    """
+    Vista para anular una nota de crédito
+    """
+    if request.method == 'GET':
+        note_id = request.GET.get('pk')
+        
+        try:
+            credit_note = CreditNote.objects.get(id=note_id)
+            
+            # Solo se pueden anular notas pendientes
+            if credit_note.status == 'P':
+                credit_note.status = 'A'  # Anulada
+                credit_note.save()
+                
+                # Regenerar el grid
+                start_date = request.GET.get('start-date')
+                end_date = request.GET.get('end-date')
+                
+                # Llamar a la función que regenera el grid
+                from datetime import datetime
+                start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+                end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+                
+                credit_notes = CreditNote.objects.filter(
+                    issue_date__range=[start_date, end_date],
+                    status__in=['E', 'P']
+                ).order_by('-issue_date')
+                
+                # Preparar datos para el template (código similar a get_credit_notes_by_date)
+                credit_notes_data = []
+                total_amount = 0
+                
+                for note in credit_notes:
+                    details = CreditNoteDetail.objects.filter(credit_note=note)
+                    note_total = sum(detail.total for detail in details)
+                    total_amount += note_total
+                    
+                    client_name = "N/A"
+                    if note.order and note.order.client:
+                        client_name = note.order.client.names
+                    
+                    user_name = note.order.user.worker_set.last().employee.names if note.order and note.order.user.worker_set.exists() else "N/A"
+                    
+                    credit_notes_data.append({
+                        'id': note.id,
+                        'serial': note.serial or 'N/A',
+                        'correlative': note.correlative,
+                        'issue_date': note.issue_date,
+                        'status': note.get_status_display(),
+                        'status_code': note.status,
+                        'client_name': client_name,
+                        'user_name': user_name,
+                        'total': note_total,
+                        'motive': note.motive or 'N/A',
+                        'details': details,
+                        'order_info': f"{note.order.voucher_type}-{note.order.correlative}" if note.order else 'N/A',
+                        'pdf_url': note.note_enlace_pdf if note.note_enlace_pdf else None,
+                        'qr_code': note.note_qr if note.note_qr else None,
+                        'hash_code': note.note_hash if note.note_hash else None,
+                    })
+                
+                # Estadísticas por usuario
+                user_stats = {}
+                for note_data in credit_notes_data:
+                    user_name = note_data['user_name']
+                    if user_name not in user_stats:
+                        user_stats[user_name] = {
+                            'user_names': user_name,
+                            'total_notes': 0,
+                            'total_amount': 0,
+                            'emitted_notes': 0,
+                            'pending_notes': 0
+                        }
+                    
+                    user_stats[user_name]['total_notes'] += 1
+                    user_stats[user_name]['total_amount'] += note_data['total']
+                    
+                    if note_data['status_code'] == 'E':
+                        user_stats[user_name]['emitted_notes'] += 1
+                    elif note_data['status_code'] == 'P':
+                        user_stats[user_name]['pending_notes'] += 1
+                
+                context = {
+                    'credit_notes': credit_notes_data,
+                    'total_amount': total_amount,
+                    'user_stats': user_stats,
+                    'start_date': start_date,
+                    'end_date': end_date,
+                    'f1': start_date.strftime('%Y-%m-%d'),
+                    'f2': end_date.strftime('%Y-%m-%d')
+                }
+                
+                grid_html = render_to_string('sales/credit_notes_grid_list.html', context)
+                
+                return JsonResponse({
+                    'message': 'Nota de crédito anulada correctamente',
+                    'grid': grid_html
+                })
+            else:
+                return JsonResponse({
+                    'error': 'Solo se pueden anular notas de crédito pendientes'
+                }, status=400)
+                
+        except CreditNote.DoesNotExist:
+            return JsonResponse({
+                'error': 'Nota de crédito no encontrada'
+            }, status=404)
+    
+    return JsonResponse({'error': 'Método no permitido'}, status=405)

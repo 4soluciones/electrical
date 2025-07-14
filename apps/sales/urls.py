@@ -239,4 +239,9 @@ urlpatterns = [
     path('modal_credit_note/', login_required(modal_credit_note), name='modal_credit_note'),
     path('save_credit_note/', login_required(save_credit_note), name='save_credit_note'),
 
+    # Reporte de Notas de Crédito
+    path('credit_notes_report/', login_required(get_credit_notes_report), name='credit_notes_report'),
+    path('get_credit_notes_by_date/', login_required(get_credit_notes_by_date), name='get_credit_notes_by_date'),
+    path('cancel_credit_note/', login_required(cancel_credit_note), name='cancel_credit_note'),
+
 ]

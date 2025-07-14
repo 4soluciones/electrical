@@ -1,0 +1,101 @@
+{% load app_filters %}
+
+<div class="text-right container-fluid pt-0 pb-2">
+    <button type="button" id="btn_export_excel_credit_note" class="btn btn-success">
+        <i class="fas fa-file-csv"></i> Excel
+    </button>
+</div>
+
+<div class="col-sm-12 pl-0 pr-0 mb-3">
+    <input id="myInputCreditNote" type="text" placeholder="Buscar registro..." class="form-control form-control-lg my-1">
+</div>
+
+<table class="table table-sm table-bordered roboto-condensed-regular" id="table-credit-notes">
+    <thead class="font-weight-bold">
+    <tr class="text-dark text-uppercase">
+        <th class="bg-light text-center">#</th>
+        <th class="bg-light text-center">Serie</th>
+        <th class="bg-light text-center">Número</th>
+        <th class="bg-light text-center">Fecha</th>
+        <th class="bg-light text-center">Cliente</th>
+        <th class="bg-light text-center">Usuario</th>
+        <th class="bg-light text-center">Total</th>
+        <th class="bg-light text-center">Estado</th>
+        <th class="bg-light text-center">Motivo</th>
+        <th class="bg-light text-center">PDF</th>
+    </tr>
+    </thead>
+    <tbody class="body">
+    {% for n in credit_notes %}
+        <tr pk="{{ n.id }}">
+            <td class="align-middle text-center">{{ n.id }}</td>
+            <td class="align-middle text-center">{{ n.serial }}</td>
+            <td class="align-middle text-center">{{ n.correlative|zfill:8 }}</td>
+            <td class="align-middle text-center">{{ n.issue_date|date:"d-m-Y" }}</td>
+            <td class="align-middle text-center">{{ n.client_name|upper }}</td>
+            <td class="align-middle text-center">{{ n.user_name|upper }}</td>
+            <td class="align-middle text-right text-primary">{{ n.total|floatformat:2 }}</td>
+            <td class="align-middle text-center">
+                {% if n.status_code == 'E' %}
+                    <span class="badge badge-success">{{ n.status }}</span>
+                {% elif n.status_code == 'P' %}
+                    <span class="badge badge-warning">{{ n.status }}</span>
+                {% elif n.status_code == 'A' %}
+                    <span class="badge badge-danger">ANULADA</span>
+                {% else %}
+                    <span class="badge badge-secondary">{{ n.status }}</span>
+                {% endif %}
+            </td>
+            <td class="align-middle text-center">{{ n.motive|truncatechars:40 }}</td>
+            <td class="align-middle text-center">
+                {% if n.pdf_url %}
+                    <a href="{{ n.pdf_url }}" target="_blank" class="btn btn-sm btn-light border" title="Ver PDF">
+                        <i class="fas fa-file-pdf text-danger"></i>
+                    </a>
+                {% else %}-{% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+
+
+<script type="text/javascript">
+    $("#btn_export_excel_credit_note").click(function () {
+        $("#table-credit-notes").table2excel({
+            exclude: ".noExl",
+            name: "Worksheet Name",
+            filename: "Reporte de Notas de Crédito",
+            fileext: ".xls",
+            preserveColors: true,
+            exclude_img: true,
+            exclude_links: true,
+            exclude_inputs: true
+        });
+    });
+
+    $(document).ready(function () {
+        $("#myInputCreditNote").on("keyup", function () {
+            $("#table-credit-notes tbody tr td").closest("tr").hide()
+            var value = $(this).val().toUpperCase();
+            if (value) {
+                $("#table-credit-notes tbody tr td:contains('" + value + "')").each(function (index) {
+                    const parent = $(this).closest("tr")
+                    const rowspan = $(this).attr("rowspan")
+                    if (rowspan !== undefined) {
+                        var current = parent
+                        for (var i = 0; i < rowspan; i++) {
+                            current.show()
+                            current = current.next()
+                        }
+                    } else {
+                        parent.show()
+                    }
+                })
+            } else {
+                $("#table-credit-notes tbody tr td").closest("tr").show()
+            }
+        });
+    });
+</script> 
