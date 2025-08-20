@@ -405,7 +405,8 @@ def get_purchase_store_list(request):
             user_obj = User.objects.get(id=user_id)
             subsidiary_obj = get_subsidiary_by_user(user_obj)
             purchases_store = Purchase.objects.filter(subsidiary=subsidiary_obj, status='A',
-                                                      purchase_date__range=[date_initial, date_final]).distinct('id')
+                                                      purchase_date__range=[date_initial,
+                                                                            date_final]).distinct('id', 'purchase_date').order_by('purchase_date')
             # purchases_store_serializers = serializers.serialize('json', purchases_store)
             tpl = loader.get_template('buys/purchase_store_grid_list.html')
             context = ({
