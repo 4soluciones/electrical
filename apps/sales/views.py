@@ -1739,13 +1739,18 @@ def get_sales_by_subsidiary_store(request):
             orders = Order.objects.filter(subsidiary_store=subsidiary_store_obj)
             start_date = str(request.POST.get('start-date'))
             end_date = str(request.POST.get('end-date'))
-            by_units = str(request.POST.get('by-units', 'NO-UNIT'))
+            voucher_type_filter = str(request.POST.get('voucher-type', 'TODOS'))
 
             if start_date == end_date:
                 orders = orders.filter(create_at__date=start_date, type='V', status__in=['P', 'A']).order_by('id')
             else:
                 orders = orders.filter(create_at__date__range=[start_date, end_date], type='V',
                                        status__in=['P', 'A']).order_by('id')
+            
+            # Aplicar filtro por tipo de comprobante
+            if voucher_type_filter != 'TODOS':
+                orders = orders.filter(voucher_type=voucher_type_filter)
+            
             if orders:
                 return JsonResponse({
                     'grid': get_dict_order_queries(orders, start_date, end_date, is_pdf=False, is_unit=False),
