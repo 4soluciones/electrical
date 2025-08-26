@@ -37,6 +37,9 @@
                             <button type="button" class="btn btn-outline-warning btn-sm filter-btn" data-filter="FACTURA">
                                 <i class="fas fa-file-invoice me-1"></i>Facturas
                             </button>
+                            <button type="button" class="btn btn-outline-purple btn-sm filter-btn" data-filter="BOLETA_FACTURA">
+                                <i class="fas fa-file-alt me-1"></i>Boletas y Facturas
+                            </button>
                         </div>
                     </div>
                     <div class="d-flex align-items-center">
@@ -381,18 +384,19 @@
         const filterClasses = {
             "all": "btn-primary",
             "CONSIGNACIÓN": "btn-success",
-            "BOLETAS": "btn-info",
-            "FACTURAS": "btn-warning"
+            "BOLETA": "btn-info",
+            "FACTURA": "btn-warning",
+            "BOLETA_FACTURA": "btn-purple"
         };
 
         // Resetear estilos de todos los botones
         $('.filter-btn')
-            .removeClass('active btn-primary btn-success btn-info btn-warning')
-            .addClass('btn-outline-primary btn-outline-success btn-outline-info btn-outline-warning');
+            .removeClass('active btn-primary btn-success btn-info btn-warning btn-purple')
+            .addClass('btn-outline-primary btn-outline-success btn-outline-info btn-outline-warning btn-outline-purple');
 
         // Activar el botón seleccionado
         $(this)
-            .removeClass('btn-outline-primary btn-outline-success btn-outline-info btn-outline-warning')
+            .removeClass('btn-outline-primary btn-outline-success btn-outline-info btn-outline-warning btn-outline-purple')
             .addClass('active ' + filterClasses[filterType]);
 
         // Aplicar filtro
@@ -402,8 +406,8 @@
     // Botón para restablecer filtro
     $('#btn-reset-filter').click(function () {
         $('.filter-btn')
-            .removeClass('active btn-primary btn-success btn-info btn-warning')
-            .addClass('btn-outline-primary btn-outline-success btn-outline-info btn-outline-warning');
+            .removeClass('active btn-primary btn-success btn-info btn-warning btn-purple')
+            .addClass('btn-outline-primary btn-outline-success btn-outline-info btn-outline-warning btn-outline-purple');
         $('.filter-btn[data-filter="all"]')
             .removeClass('btn-outline-primary')
             .addClass('active btn-primary');
@@ -427,7 +431,16 @@
             const $typeCell = $row.find('td.type-cell'); // Buscar por clase CSS
             if ($typeCell.length > 0) {
                 const typeValue = $typeCell.text().trim();
-                if (typeValue === filterType) {
+                
+                // Lógica para el filtro de Boletas y Facturas
+                let shouldShow = false;
+                if (filterType === 'BOLETA_FACTURA') {
+                    shouldShow = (typeValue === 'BOLETA' || typeValue === 'FACTURA');
+                } else {
+                    shouldShow = (typeValue === filterType);
+                }
+                
+                if (shouldShow) {
                     const rowspan = parseInt($typeCell.attr('rowspan') || "1", 10);
                     if (rowspan > 1) {
                         $row.show();
