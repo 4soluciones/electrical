@@ -1616,6 +1616,8 @@ def kardex_ouput(
         distribution_detail_obj=None,
         loan_payment_obj=None,
         ball_change_obj=None,
+        purchase_return_detail=None,
+        price=None
 ):
     product_store = ProductStore.objects.get(pk=int(product_store_id))
 
@@ -1631,13 +1633,20 @@ def kardex_ouput(
 
     new_stock = old_stock - decimal.Decimal(quantity_sold)
     new_quantity = decimal.Decimal(quantity_sold)
+
     old_price_unit = last_kardex.remaining_price
-
     new_price_total = old_price_unit * new_quantity
-
-    new_remaining_quantity = last_remaining_quantity - new_quantity
     new_remaining_price = old_price_unit
+    new_remaining_quantity = last_remaining_quantity - new_quantity
     new_remaining_price_total = new_remaining_quantity * new_remaining_price
+    type_document = '00'
+    type_operation = '99'
+    if price is not None and purchase_return_detail is not None:
+        new_remaining_price = old_price_unit
+        new_price_total = new_remaining_price * new_quantity
+        type_document = '07'
+        type_operation = '06'
+
     new_kardex = {
         'operation': 'S',
         'quantity': new_quantity,
@@ -1654,6 +1663,9 @@ def kardex_ouput(
         'distribution_detail': distribution_detail_obj,
         'loan_payment': loan_payment_obj,
         'ball_change': ball_change_obj,
+        'purchase_return_detail': purchase_return_detail,
+        'type_document': type_document,
+        'type_operation': type_operation
     }
     kardex = Kardex.objects.create(**new_kardex)
     kardex.save()
@@ -1795,7 +1807,7 @@ def get_dict_order_queries(order_set, start_date, end_date, is_pdf=False, is_uni
         order_bill_obj = ''
         serial_bill = ''
         correlative_bill = ''
-        type_bill = 'TICKET'
+        type_bill = 'CONSIGNACIÓN'
         order_bill_set = OrderBill.objects.filter(order=o.id)
 
         if order_bill_set.exists():

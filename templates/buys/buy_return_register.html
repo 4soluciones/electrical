@@ -1,0 +1,343 @@
+<div class="card-body p-4">
+    <form id="purchase-return-form">
+        <!-- Encabezado del formulario -->
+        <div class="form-header mb-4">
+            <div class="row align-items-center">
+                <div class="col-12">
+                    <h5 class="text-primary mb-0">
+                        <i class="fas fa-undo-alt mr-2"></i>
+                        Información de Devolución
+                    </h5>
+                    <small class="text-muted">Complete los datos requeridos para procesar la devolución</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Primera fila de campos -->
+        <div class="row mb-4">
+            <div class="col-12 col-md-6 col-lg-3 mb-3">
+                <div class="form-group">
+                    <label for="id_fechacompra" class="form-label">
+                        <i class="fas fa-calendar-alt text-primary mr-1"></i>
+                        Fecha de Devolución
+                    </label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text bg-light border-right-0">
+                                <i class="fas fa-calendar text-muted"></i>
+                            </span>
+                        </div>
+                        <input type="date" 
+                               class="form-control border-left-0" 
+                               id="id_fechacompra" 
+                               name="fechacompra"
+                               value="{{ formatdate }}" 
+                               required>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12 col-md-6 col-lg-3 mb-3">
+                <div class="form-group">
+                    <label for="id_factura" class="form-label">
+                        <i class="fas fa-file-invoice text-primary mr-1"></i>
+                        Número de Comprobante
+                    </label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text bg-light border-right-0">
+                                <i class="fas fa-hashtag text-muted"></i>
+                            </span>
+                        </div>
+                        <input type="text" 
+                               class="form-control border-left-0" 
+                               id="id_factura" 
+                               name="factura"
+                               autocomplete="off"
+                               placeholder="Ej: FN01-00012345"
+                               required>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12 col-md-6 col-lg-3 mb-3">
+                <div class="form-group">
+                    <label for="id_type_bill" class="form-label">
+                        <i class="fas fa-receipt text-primary mr-1"></i>
+                        Tipo de Comprobante
+                    </label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text bg-light border-right-0">
+                                <i class="fas fa-tag text-muted"></i>
+                            </span>
+                        </div>
+                        <select class="form-control border-left-0" 
+                                id="id_type_bill" 
+                                name="type_bill" 
+                                required>
+
+                            <option value="">Seleccione tipo</option>
+                            <option value="N">📝 NOTA DE CRÉDITO</option>
+                            <option value="T">🎫 TICKET</option>
+                            <option value="B">📄 BOLETA</option>
+                            <option value="F">📋 FACTURA</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12 col-md-6 col-lg-3 mb-3">
+                <div class="form-group">
+                    <label for="id_ruc_provider" class="form-label">
+                        <i class="fas fa-building text-primary mr-1"></i>
+                        RUC del Proveedor
+                    </label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text bg-light border-right-0">
+                                <i class="fas fa-id-card text-muted"></i>
+                            </span>
+                        </div>
+                        <input type="text" 
+                               class="form-control border-left-0" 
+                               id="id_ruc_provider" 
+                               name="ruc_provider"
+                               autocomplete="off"
+                               placeholder="..."
+                               maxlength="11">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Segunda fila de campos -->
+        <div class="row mb-1">
+            <div class="col-12 col-md-6 mb-3">
+                <div class="form-group">
+                    <label for="id_provider" class="form-label">
+                        <i class="fas fa-user-tie text-primary mr-1"></i>
+                        Proveedor Seleccionado
+                    </label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text bg-light border-right-0">
+                                <i class="fas fa-check-circle text-success"></i>
+                            </span>
+                        </div>
+                        <input type="text" 
+                               class="form-control border-left-0" 
+                               id="id_provider" 
+                               name="provider" 
+                               readonly
+                               placeholder="Seleccione un proveedor por RUC">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12 col-md-6 mb-3">
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-cogs text-primary mr-1"></i>
+                        Acciones del Sistema
+                    </label>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="button" id="btn-new" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus mr-1"></i>
+                            <span class="d-none d-sm-inline">Nuevo</span>
+                        </button>
+                        <button type="submit" class="btn btn-success btn-sm">
+                            <i class="fas fa-save mr-1"></i>
+                            <span class="d-none d-sm-inline">Guardar</span>
+                        </button>
+                        <button type="button" id="btn-add-product" class="btn btn-warning btn-sm">
+                            <i class="fas fa-plus mr-1"></i>
+                            <span class="d-none d-sm-inline">Agregar Producto</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información adicional -->
+        <div class="row">
+            <div class="col-12">
+                <div class="alert alert-info border-0 mb-1" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-info-circle text-info mr-2"></i>
+                        <div>
+                            <strong>Nota:</strong> Para agregar productos, utilice el botón "Agregar Producto" En Acciones del Sistema.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<style>
+        /* Mejoras para el formulario profesional */
+        .form-header {
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 1rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 0;
+        }
+
+        .input-group-text {
+            border-color: #e9ecef;
+            background-color: #f8f9fa;
+            color: #6c757d;
+        }
+
+        .input-group .form-control {
+            border-color: #e9ecef;
+            transition: all 0.2s ease;
+        }
+
+        .input-group .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .input-group .form-control:focus + .input-group-append .input-group-text {
+            border-color: #007bff;
+        }
+
+        .btn {
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            padding: 0.5rem 1rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+        }
+
+        .gap-2 {
+            gap: 0.5rem !important;
+        }
+
+        .alert {
+            border-radius: 8px;
+        }
+
+        .form-header h5 {
+            color: #495057;
+        }
+
+        .form-header small {
+            color: #6c757d;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .card-body {
+                padding: 1rem !important;
+            }
+            
+            .form-header {
+                text-align: center;
+            }
+            
+            .d-flex.flex-wrap.gap-2 {
+                justify-content: center;
+            }
+            
+            .btn {
+                flex: 1;
+                min-width: 120px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .btn {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+            
+            .gap-2 {
+                gap: 0.25rem !important;
+            }
+        }
+
+        /* Animaciones suaves */
+        .form-control, .btn, .input-group-text {
+            transition: all 0.2s ease;
+        }
+
+        /* Mejoras visuales para campos readonly */
+        .form-control[readonly] {
+            {#background-color: #f8f9fa;#}
+            {#color: #495057;#}
+            cursor: not-allowed;
+        }
+
+        /* Estilos para el select */
+        select.form-control {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        /* Hover effects */
+        .input-group:hover .input-group-text {
+            {#background-color: #e9ecef;#}
+            {#border-color: #dee2e6;#}
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        /* Mejoras para iconos */
+        .text-primary {
+            color: #007bff !important;
+        }
+
+        .text-success {
+            color: #28a745 !important;
+        }
+
+        .text-muted {
+            color: #6c757d !important;
+        }
+
+        /* Sombras sutiles */
+        .card {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .btn {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+</style>

@@ -96,6 +96,10 @@
                             <span class="text-danger" cd="{{ kardex.credit_note_detail.id }}">
                                 NOTA DE CRÉDITO<br>{{ kardex.credit_note_detail.credit_note.get_credit_document }}
                             </span>
+                        {% elif kardex.purchase_return_detail.id %}
+                            <span class="text-danger" cd="{{ kardex.purchase_return_detail.id }}">
+                                {{ kardex.get_type_operation_display }}<br>{{ kardex.purchase_return_detail.purchase.bill_number|upper }}
+                            </span>
                         {% endif %}
 
                     </td>

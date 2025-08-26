@@ -1,234 +1,244 @@
 {% load app_filters %}
 {% if products %}
-        <table id="product-data-grid" class="table table-sm table-bordered m-0 roboto-condensed-regular" cellspacing="0"
-               width="100%">
-            <thead>
-            <tr class="text-center text-uppercase">
-                {#                <th>#</th>#}
-                {#                <th class="th-sm">Nombre</th>#}
-                {#                <th class="th-sm">Detalles</th>#}
-                {#                <th class="th-sm">Stock en sedes</th>#}
-                {#                <th class="th-sm">Unidades</th>#}
-                {#                <th class="th-sm">Insumos/Receta</th>#}
-                {#                <th class="th-sm">Imagen</th>#}
-                {#                <th class="th-sm">UPDATE</th>#}
+    <table id="product-data-grid" class="table table-sm table-bordered m-0 roboto-condensed-regular" cellspacing="0"
+           width="100%">
+        <thead>
+        <tr class="text-center text-uppercase">
+            {#                <th>#</th>#}
+            {#                <th class="th-sm">Nombre</th>#}
+            {#                <th class="th-sm">Detalles</th>#}
+            {#                <th class="th-sm">Stock en sedes</th>#}
+            {#                <th class="th-sm">Unidades</th>#}
+            {#                <th class="th-sm">Insumos/Receta</th>#}
+            {#                <th class="th-sm">Imagen</th>#}
+            {#                <th class="th-sm">UPDATE</th>#}
 
-                <th>ID</th>
-                <th class="th-sm">Código</th>
-                <th class="th-sm">Código de Barras</th>
-                <th class="th-sm" style="width: 20%">Nombre del Producto</th>
-                <th class="th-sm" style="width: 5%; font-size: 10px">Fecha<br>Ult. Compra</th>
-                <th class="th-sm" style="width: 5%; font-size: 10px">Cantidad<br>Ult. Compra</th>
-                <th class="th-sm text-center">Marca</th>
-                <th class="th-sm text-center">Familia</th>
-                <th class="th-sm" style="width: 5%">Unidad</th>
-{#                <th class="th-sm" style="background: #bed1f3; width: 5%">Precio Compra Dólar</th>#}
-                <th class="th-sm" style="background: #abf6d6; width: 5%">Precio Compra</th>
+            <th>ID</th>
+            <th class="th-sm">Código</th>
+            <th class="th-sm">Código de Barras</th>
+            <th class="th-sm" style="width: 20%">Nombre del Producto</th>
+            <th class="th-sm" style="width: 5%; font-size: 10px">Fecha<br>Ult. Compra</th>
+            <th class="th-sm" style="width: 5%; font-size: 10px">Cantidad<br>Ult. Compra</th>
+            <th class="th-sm text-center">Marca</th>
+            <th class="th-sm text-center">Familia</th>
+            <th class="th-sm" style="width: 5%">Unidad</th>
+            {#                <th class="th-sm" style="background: #bed1f3; width: 5%">Precio Compra Dólar</th>#}
+            <th class="th-sm" style="background: #abf6d6; width: 5%">Precio Compra</th>
+            {% if perms.sales.change_producto %}
                 <th class="th-sm align-middle" style="width: 5%; font-size: 10px">%Porcetanje 1</th>
                 <th class="th-sm align-middle" style="width: 5%; font-size: 10px">%Porcetanje 2</th>
-{#                <th class="th-sm align-middle" style="width: 5%; font-size: 10px">%Porcetanje 3</th>#}
-                <th class="th-sm">Stock</th>
-                {#                <th class="th-sm">Actualizar Stock</th>#}
-                <th class="th-sm">UPDATE</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for product in products %}
-                <tr class="text-center" pk="{{ product.id }}">
-                    <td class="align-middle" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ forloop.counter  }}</td>
-                    <td class="align-middle" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">
-                        {% if product.code %}
-                            {{ product.code|zfill:6 }}
-                        {% else %}
-                            -
-                        {% endif %}
+            {% endif %}
+            {#                <th class="th-sm align-middle" style="width: 5%; font-size: 10px">%Porcetanje 3</th>#}
+            <th class="th-sm">Stock</th>
+            {#                <th class="th-sm">Actualizar Stock</th>#}
+            <th class="th-sm">UPDATE</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for product in products %}
+            <tr class="text-center" pk="{{ product.id }}">
+                <td class="align-middle" rowspan="
+
+
+                        {% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ forloop.counter }}</td>
+                <td class="align-middle" rowspan="
+
+
+                        {% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">
+                    {% if product.code %}
+                        {{ product.code|zfill:6 }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td class="align-middle" rowspan="
+
+
+                        {% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">
+                    {% if product.barcode and product.barcode != 'NULL' %}
+                        {{ product.barcode }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td class="align-middle text-left" rowspan="
+
+
+                        {% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ product.name|upper }}</td>
+                <td class="align-middle text-center" rowspan="
+
+
+                        {% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ product.last_purchase_date|date:"d/m/y" }}</td>
+                <td class="align-middle text-center" rowspan="
+
+
+                        {% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ product.last_purchase_quantity|default:"-"|safe }}</td>
+                <td class="align-middle" rowspan="
+
+
+                        {% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ product.product_brand.name|upper }}</td>
+                <td class="align-middle" rowspan="
+
+
+                        {% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ product.product_family.name|upper }}</td>
+                {% if product.productdetail_set.all.count > 0 %}
+                    {% for product_detail in product.productdetail_set.all %}
+                        {% if not forloop.first %}
+                            <tr class="text-center" pk="{{ product.id }}"> {% endif %}
+                    <td class="align-middle">{{ product_detail.unit.name }}</td>
+                    <td class="align-middle price-purchase" pk="{{ product.id }}"
+                        style="background: #abf6d6">
+                        S/ {{ product_detail.price_purchase|safe }}
+                        <a type="button"
+                           class="btn-sm btn-outline-warning btn-update-price-purchase"
+                           data-toggle="modal"
+                           data-target="#modal-change-price-purchase"
+                           pk="{{ product.id }}"><i class="fas fa-edit fa-xs"></i></a><br>
+                        <span style="font-size: 10px">{{ product_detail.update_at|date:"d/m/y" }}</span>
                     </td>
-                    <td class="align-middle" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">
-                        {% if product.barcode and product.barcode != 'NULL' %}
-                            {{ product.barcode }}
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-                    <td class="align-middle text-left" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ product.name|upper }}</td>
-                    <td class="align-middle text-center" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ product.last_purchase_date|date:"d/m/y" }}</td>
-                    <td class="align-middle text-center" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ product.last_purchase_quantity|default:"-"|safe }}</td>
-                    <td class="align-middle" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ product.product_brand.name|upper }}</td>
-                    <td class="align-middle" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ product.product_family.name|upper }}</td>
-                    {% if product.productdetail_set.all.count > 0 %}
-                        {% for product_detail in product.productdetail_set.all %}
-                            {% if not forloop.first %}
-                                <tr class="text-center" pk="{{ product.id }}"> {% endif %}
-                        <td class="align-middle">{{ product_detail.unit.name }}</td>
-
-{#                        <td class="align-middle price-purchase-dollar font-weight-bold" pk="{{ product.id }}" style="background: #bed1f3">#}
-{#                            {% if product_detail.price_purchase_dollar > 0 %}#}
-{#                                $ {{ product_detail.price_purchase_dollar|safe }}#}
-{#                            {% else %}#}
-{#                                -#}
-{#                            {% endif  %}#}
-{#                            {% if perms.admin %}#}
-{#                                <a type="button"#}
-{#                                   class="btn-sm btn-outline-warning btn-update-price-purchase-dollar"#}
-{#                                   data-toggle="modal"#}
-{#                                   data-target="#modal-change-price-purchase-dollar"#}
-{#                                   pk="{{ product.id }}"><i#}
-{#                                        class="fas fa-edit"></i></a>#}
-{#                            {% endif %}#}
-{#                        </td>#}
-
-
-                        <td class="align-middle price-purchase" pk="{{ product.id }}"
-                            style="background: #abf6d6">
-                            S/ {{ product_detail.price_purchase|safe }}
-                            <a type="button"
-                               class="btn-sm btn-outline-warning btn-update-price-purchase"
-                               data-toggle="modal"
-                               data-target="#modal-change-price-purchase"
-                               pk="{{ product.id }}"><i class="fas fa-edit fa-xs"></i></a><br>
-                            <span style="font-size: 10px">{{ product_detail.update_at|date:"d/m/y" }}</span>
-                        </td>
-
+                    {% if perms.sales.change_producto %}
                         <td class="align-middle new-percent-one" pk="{{ product.id }}">
-                            <span class="font-weight-bold" style="font-size: 10px">Precio al {{ product_detail.percentage_one|floatformat:0 }}%:</span><br>
+                        <span class="font-weight-bold"
+                              style="font-size: 10px">Precio al {{ product_detail.percentage_one|floatformat:0 }}%:</span><br>
                             S/ {{ product_detail.get_calculate_price1|safe }}
                         </td>
                         <td class="align-middle new-percent-two" pk="{{ product.id }}">
-                            <span class="font-weight-bold" style="font-size: 10px">Precio al {{ product_detail.percentage_two|floatformat:0 }}%:</span><br>
+                        <span class="font-weight-bold"
+                              style="font-size: 10px">Precio al {{ product_detail.percentage_two|floatformat:0 }}%:</span><br>
                             S/ {{ product_detail.get_calculate_price2|safe }}
                         </td>
-{#                        <td class="align-middle new-percent-three" pk="{{ product.id }}">#}
-{#                            <span class="font-weight-bold" style="font-size: 10px">Precio al {{ product_detail.percentage_three|floatformat:0 }}%:</span><br>#}
-{#                            S/ {{ product_detail.get_calculate_price3|safe }}#}
-{#                        </td>#}
+                    {% endif %}
 
-                        {% if forloop.first %}
-                            <td class="align-middle" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">
-                                {% if product.productstore_set.all.count > 0 %}
-                                    <table class="table table-sm text-uppercase small m-1">
-                                        {#                                            <thead>#}
-                                        {#                                            <th>Sede</th>#}
-                                        {#                                            <th>Almacen</th>#}
-                                        {#                                            <th>Stock</th>#}
-                                        {#                                            </thead>#}
-                                        <tbody>
-                                        {% for product_store in product.productstore_set.all %}
-                                            <tr class="{% if product_store.subsidiary_store.subsidiary.id == subsidiary.id %}text-danger font-weight-bolder{% endif %}">
-                                                <td>{{ product_store.subsidiary_store.subsidiary.name }}</td>
-                                                <td>{{ product_store.subsidiary_store.name }}</td>
-                                                <td class="{% if product_store.subsidiary_store.subsidiary.id == subsidiary.id %}stock{% endif %}"
-                                                    pk="{{ product.id }}">
-                                                    {{ product_store.get_stock_with_dot }}</td>
-                                                {% if forloop.first %}
-                                                    <td class="align-middle p-0" rowspan="2">
-                                                        <a type="button"
-                                                           class="btn-sm btn-outline-warning btn-update-stock"
-                                                           data-toggle="modal"
-                                                           data-target="#modal-changeStock"
-                                                           pk="{{ product.id }}">
-                                                            <i class="fas fa-edit text-dark"></i>
-                                                        </a>
-                                                    </td>
-                                                {% endif %}
-                                            </tr>
-                                        {% endfor %}
-                                        </tbody>
-                                    </table>
-                                {% else %}
-                                  -
-                                {% endif %}
-                            </td>
+                    {% if forloop.first %}
+                        <td class="align-middle" rowspan="
 
-                            <td class="hide-column" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">
-                                <!-- Example single danger button -->
-                                <div class="btn-group">
-                                    <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown"
-                                            aria-haspopup="true" aria-expanded="false">
-                                        Action
-                                    </button>
-                                    <div class="dropdown-menu bg-danger text-light">
-                                        {% if perms.admin %}
-                                            <a class="dropdown-item"
-                                               onclick="showModalEdition('{% url 'sales:json_product_edit' product.id %}')">
-                                                <i class="fas fa-edit"></i> Editar</a>
-                                        {% endif %}
-                                        <a class="dropdown-item quantity-on-hand" pk="{{ product.id }}">
-                                            <i class="fas fa-sync-alt"></i> Inventario inicial</a>
 
-                                        <a class="dropdown-item get-kardex" pk="{{ product.id }}">
-                                            <i class="fas fa-sync-alt"></i> Ver kardex</a>
-                                        <a class="dropdown-item get-product-detail" pk="{{ product.id }}">
-                                            <i class="fas fa-sync-alt"></i> Ver presentaciones</a>
-                                        <a href="{% url 'sales:product_print_one' product.id %}" target="print"
-                                           class="dropdown-item text-light"><span class="fa fa-print"></span> print</a>
-                                    </div>
-                                </div>
-                            </td>
-                        {% endif %}
-                        </tr>
-                        {% endfor %}
-                    {% else %}
-                        <td class="align-middle"></td>
-                        <td class="align-middle" style="background: #abf6d6"></td>
-                        <td class="align-middle"></td>
-                        <td class="align-middle"></td>
-                        <td class="align-middle"></td>
-                        <td class="align-middle"></td>
-                        <td class="align-middle">
+                                {% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">
+                            {% if product.productstore_set.all.count > 0 %}
+                                <table class="table table-sm text-uppercase small m-1">
+                                    <tbody>
+                                    {% for product_store in product.productstore_set.all %}
+                                        <tr class="{% if product_store.subsidiary_store.subsidiary.id == subsidiary.id %}text-danger font-weight-bolder{% endif %}">
+                                            <td>{{ product_store.subsidiary_store.subsidiary.name }}</td>
+                                            <td>{{ product_store.subsidiary_store.name }}</td>
+                                            <td class="{% if product_store.subsidiary_store.subsidiary.id == subsidiary.id %}stock{% endif %}"
+                                                pk="{{ product.id }}">
+                                                {{ product_store.get_stock_with_dot }}</td>
+                                            {% if forloop.first %}
+                                                <td class="align-middle p-0" rowspan="2">
+                                                    <a type="button"
+                                                       class="btn-sm btn-outline-warning btn-update-stock"
+                                                       data-toggle="modal"
+                                                       data-target="#modal-changeStock"
+                                                       pk="{{ product.id }}">
+                                                        <i class="fas fa-edit text-dark"></i>
+                                                    </a>
+                                                </td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <td class="hide-column" rowspan="
+
+
+                                {% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">
+                            <!-- Example single danger button -->
                             <div class="btn-group">
                                 <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown"
                                         aria-haspopup="true" aria-expanded="false">
                                     Action
                                 </button>
                                 <div class="dropdown-menu bg-danger text-light">
-                                    <a class="dropdown-item"
-                                       onclick="showModalEdition('{% url 'sales:json_product_edit' product.id %}')">
-                                        <i class="fas fa-edit"></i> Editar</a>
+                                    {% if perms.admin %}
+                                        <a class="dropdown-item"
+                                           onclick="showModalEdition('{% url 'sales:json_product_edit' product.id %}')">
+                                            <i class="fas fa-edit"></i> Editar</a>
+                                    {% endif %}
                                     <a class="dropdown-item quantity-on-hand" pk="{{ product.id }}">
                                         <i class="fas fa-sync-alt"></i> Inventario inicial</a>
 
                                     <a class="dropdown-item get-kardex" pk="{{ product.id }}">
                                         <i class="fas fa-sync-alt"></i> Ver kardex</a>
-                                    <a class="dropdown-item get-product-detail" pk="{{ product.id }}">
-                                        <i class="fas fa-sync-alt"></i> Ver presentaciones</a>
+                                    {% if perms.sales.change_producto %}
+                                        <a class="dropdown-item get-product-detail" pk="{{ product.id }}">
+                                            <i class="fas fa-sync-alt"></i> Ver presentaciones</a>
+                                    {% endif %}
                                     <a href="{% url 'sales:product_print_one' product.id %}" target="print"
                                        class="dropdown-item text-light"><span class="fa fa-print"></span> print</a>
                                 </div>
                             </div>
                         </td>
-                        </tr>
                     {% endif %}
-            {% endfor %}
-            </tbody>
-            <tfoot>
-            <tr class="text-center">
-                {#                <th>#</th>#}
-                {#                <th class="th-sm">Nombre</th>#}
-                {#                <th class="th-sm">Detalles</th>#}
-                {#                <th class="th-sm">Stock en sedes</th>#}
-                {#                <th class="th-sm">Unidades</th>#}
-                {#                <th class="th-sm">Insumos/Receta</th>#}
-                {#                <th class="th-sm">Imagen</th>#}
-                {#                <th class="th-sm">UPDATE</th>#}
-                  <th colspan="6"></th>
-                  <th class="th-sm">S/ {{ total_price_purchase|safe }}</th>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <td class="align-middle"></td>
+                    <td class="align-middle" style="background: #abf6d6"></td>
+                    <td class="align-middle"></td>
+                    <td class="align-middle"></td>
+                    <td class="align-middle"></td>
+                    <td class="align-middle"></td>
+                    <td class="align-middle">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown"
+                                    aria-haspopup="true" aria-expanded="false">
+                                Action
+                            </button>
+                            <div class="dropdown-menu bg-danger text-light">
+                                <a class="dropdown-item"
+                                   onclick="showModalEdition('{% url 'sales:json_product_edit' product.id %}')">
+                                    <i class="fas fa-edit"></i> Editar</a>
+                                <a class="dropdown-item quantity-on-hand" pk="{{ product.id }}">
+                                    <i class="fas fa-sync-alt"></i> Inventario inicial</a>
 
-{#                <th>ID</th>#}
-{#                <th class="th-sm">Código</th>#}
-{#                <th class="th-sm">Código de Barras</th>#}
-{#                <th class="th-sm">Nombre del Producto</th>#}
-{#                <th class="th-sm">Marca</th>#}
-{#                <th class="th-sm">Unidad</th>#}
-{#                <th class="th-sm">Precio Compra</th>#}
-{#                <th class="th-sm">%Porcetanje 1</th>#}
-{#                <th class="th-sm">%Porcetanje 2</th>#}
-{#                <th class="th-sm">%Porcetanje 3</th>#}
-{#                <th class="th-sm">STOCK</th>#}
-{#                <th class="th-sm">UPDATE</th>#}
+                                <a class="dropdown-item get-kardex" pk="{{ product.id }}">
+                                    <i class="fas fa-sync-alt"></i> Ver kardex</a>
+                                <a class="dropdown-item get-product-detail" pk="{{ product.id }}">
+                                    <i class="fas fa-sync-alt"></i> Ver presentaciones</a>
+                                <a href="{% url 'sales:product_print_one' product.id %}" target="print"
+                                   class="dropdown-item text-light"><span class="fa fa-print"></span> print</a>
+                            </div>
+                        </div>
+                    </td>
+                    </tr>
+                {% endif %}
+        {% endfor %}
+        </tbody>
+        <tfoot>
+        <tr class="text-center">
+            {#                <th>#</th>#}
+            {#                <th class="th-sm">Nombre</th>#}
+            {#                <th class="th-sm">Detalles</th>#}
+            {#                <th class="th-sm">Stock en sedes</th>#}
+            {#                <th class="th-sm">Unidades</th>#}
+            {#                <th class="th-sm">Insumos/Receta</th>#}
+            {#                <th class="th-sm">Imagen</th>#}
+            {#                <th class="th-sm">UPDATE</th>#}
+            <th colspan="6"></th>
+            <th class="th-sm">S/ {{ total_price_purchase|safe }}</th>
 
-            </tr>
-            </tfoot>
-        </table>
+            {#                <th>ID</th>#}
+            {#                <th class="th-sm">Código</th>#}
+            {#                <th class="th-sm">Código de Barras</th>#}
+            {#                <th class="th-sm">Nombre del Producto</th>#}
+            {#                <th class="th-sm">Marca</th>#}
+            {#                <th class="th-sm">Unidad</th>#}
+            {#                <th class="th-sm">Precio Compra</th>#}
+            {#                <th class="th-sm">%Porcetanje 1</th>#}
+            {#                <th class="th-sm">%Porcetanje 2</th>#}
+            {#                <th class="th-sm">%Porcetanje 3</th>#}
+            {#                <th class="th-sm">STOCK</th>#}
+            {#                <th class="th-sm">UPDATE</th>#}
+
+        </tr>
+        </tfoot>
+    </table>
 
 {% else %}
     <div class="alert alert-info alert-dismissible fade show mt-3" role="alert">

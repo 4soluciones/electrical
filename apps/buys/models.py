@@ -257,3 +257,58 @@ class RateRoutes(models.Model):
     class Meta:
         verbose_name = 'Ruta Tarifario'
         verbose_name_plural = 'Ruta Tarifarios'
+
+
+class PurchaseReturn(models.Model):
+    TYPE_CHOICES = (('T', 'TICKET'), ('B', 'BOLETA'), ('F', 'FACTURA'),)
+    id = models.AutoField(primary_key=True)
+    supplier = models.ForeignKey(Supplier, verbose_name='Proveedor', on_delete=models.CASCADE, null=True, blank=True)
+    purchase_date = models.DateField('Fecha compra', null=True, blank=True)
+    bill_number = models.CharField(max_length=100, null=True, blank=True)
+    type_bill = models.CharField('Tipo de comprobante', max_length=1, choices=TYPE_CHOICES, default='F')
+    user = models.ForeignKey(User, verbose_name='Usuario', on_delete=models.CASCADE, null=True, blank=True)
+    subsidiary = models.ForeignKey(Subsidiary, on_delete=models.SET_NULL, null=True, blank=True)
+    base_total_purchase = models.DecimalField('Base Imponible Compra', max_digits=10, decimal_places=2, default=0)
+    igv_total_purchase = models.DecimalField('Igv Compra', max_digits=10, decimal_places=2, default=0)
+    total_purchase = models.DecimalField('Total Documento', max_digits=10, decimal_places=2, default=0)
+
+    def __str__(self):
+        return str(self.id)
+
+    class Meta:
+        verbose_name = 'Compra devolucion'
+        verbose_name_plural = 'Compras devolucion'
+
+    def total(self):
+        response = 0
+        purchase_detail_set = PurchaseReturnDetail.objects.filter(purchase__id=self.id)
+        for pd in purchase_detail_set:
+            response = response + (pd.quantity * pd.price_unit)
+        return response
+
+    def total_quantity_details(self):
+        response = 0
+        purchase_detail_set = PurchaseReturnDetail.objects.filter(purchase__id=self.id)
+        for pd in purchase_detail_set:
+            response = response + pd.quantity
+        return response
+
+
+class PurchaseReturnDetail(models.Model):
+    id = models.AutoField(primary_key=True)
+    purchase = models.ForeignKey(PurchaseReturn, on_delete=models.CASCADE, null=True, blank=True)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, blank=True)
+    quantity = models.DecimalField('Cantidad comprada', max_digits=10, decimal_places=2, default=0)
+    unit = models.ForeignKey(Unit, on_delete=models.CASCADE, null=True, blank=True)
+    price_unit = models.DecimalField('Precio unitario', max_digits=30, decimal_places=15, default=0)
+    total_detail = models.DecimalField('total', max_digits=10, decimal_places=2, default=0)
+
+    def __str__(self):
+        return str(self.id)
+
+    def multiply(self):
+        return self.quantity * self.price_unit
+
+    class Meta:
+        verbose_name = 'Detalle compra devolucion'
+        verbose_name_plural = 'Detalles de compra devolucion'

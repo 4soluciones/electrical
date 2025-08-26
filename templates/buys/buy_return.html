@@ -1,0 +1,1778 @@
+{% extends 'home.html' %}
+{% block title %}
+    Devolución de Compras
+{% endblock title %}
+
+{% block body %}
+    <div class="col-sm-12 col-sm-12 col-lg-12 pt-3 roboto-condensed-regular">
+        <div class="card">
+            <div class="card-header pt-0">
+                <div class="row" style="background-color: #cdd5ce">
+                    <div class="col-sm-12 col-md-12 col-lg-12">
+                        <div class="row p-2">
+                            <div class="col-sm-10 col-md-10 col-lg-10">
+                                <h4 class="roboto-condensed-regular text-dark font-weight-bold mt-4 mb-0"><label>DEVOLUCIÓN
+                                    DE COMPRA:</label>
+                                </h4>
+                            </div>
+
+                            <div class="col-sm-2 col-md-2 col-lg-2 mb-3">
+                                <button type="button" onclick="showModalView('new_provider')"
+                                        class="btn btn-sm btn-secondary btn-block mt-3 mb-0 col-sm-12 col-md-12 col-lg-12">
+                                    Nuevo Proveedor
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="row border">
+                    <div class="col-sm-12 col-md-12 col-lg-12 border-right">
+                        {% include "buys/buy_return_register.html" %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-12 col-md-12 col-lg-12 pt-1 roboto-condensed-regular">
+        <div class="card">
+            <div class="card-body pt-2">
+                <div class="table-responsive" id="render-table">
+                    {% include "buys/buy_return_detail.html" %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-updetail" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">DETALLE DE LA DEVOLUCIÓN</h5>
+                    <button type="button" class="close" onclick="limper()" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                {% include "buys/buy_modal_detail.html" %}
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <div id="product-grid-list"></div>
+    </div>
+
+    <div class="modal fade bd-example-modal-lg" id="add-modal" tabindex="-1" role="dialog"
+         aria-labelledby="exampleModalLabel" aria-hidden="true"></div>
+
+    <div class="mr-3 ml-0" style="
+            display: none;
+            position: absolute;
+            top: 83px;
+            left: 0px;
+            background: #e9ecef;
+            opacity: 0.5;
+            width: 100%;
+            bottom: 560px;
+            padding-right: 65em;
+            padding-top: 2em;" id="loading-666">
+    </div>
+
+    <style>
+        .input-icon {
+            position: relative;
+        }
+
+        .input-icon > i {
+            position: absolute;
+            display: block;
+            transform: translate(0, -50%);
+            top: 50%;
+            pointer-events: none;
+            width: 25px;
+            text-align: center;
+            font-style: normal;
+        }
+
+        .input-icon > input {
+            padding-left: 25px;
+            padding-right: 8px;
+        }
+
+        .input-icon-right > i {
+            right: 0;
+        }
+
+        .input-icon-right > input {
+            padding-left: 0;
+            padding-right: 25px;
+            text-align: right;
+        }
+
+        /* Estilos para el botón Agregar Producto */
+        #btn-add-product {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        #btn-add-product:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+            background: linear-gradient(135deg, #20c997 0%, #28a745 100%);
+        }
+
+        #btn-add-product:active {
+            transform: translateY(0);
+        }
+
+        /* Mejoras para la tabla */
+        .table th {
+            border-top: none;
+            font-weight: 600;
+        }
+
+        .table td {
+            vertical-align: middle;
+        }
+
+        /* Estilos para el campo de código de barras */
+        .code-bar {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        /* Estilos para el select del tipo de búsqueda */
+        .search-type-select {
+            min-width: 140px;
+            padding: 8px 12px;
+            font-size: 14px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            background-color: #fff;
+            color: #495057;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+
+        .search-type-select:hover {
+            border-color: #80bdff;
+            box-shadow: 0 2px 8px rgba(0,123,255,0.25);
+        }
+
+        .search-type-select:focus {
+            border-color: #80bdff;
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+        }
+
+        .search-type-select option {
+            padding: 8px 12px;
+            font-size: 14px;
+            {#background-color: #fff;#}
+            color: #495057;
+        }
+
+        /* Mejoras para el contenedor del buscador */
+        .product-search-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .search-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-type-selector {
+            flex-shrink: 0;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .search-input-wrapper .product-search-input {
+            width: 100%;
+            padding: 8px 12px 8px 40px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .search-input-wrapper .product-search-input:focus {
+            border-color: #80bdff;
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            pointer-events: none;
+        }
+
+        /* ===== MEJORAS RESPONSIVE ADICIONALES ===== */
+        
+        /* Responsive Design para la tabla principal */
+        @media (max-width: 1200px) {
+            .table-responsive {
+                font-size: 13px;
+            }
+            
+            .table th, .table td {
+                padding: 0.75rem 0.5rem;
+            }
+            
+            .btn {
+                font-size: 0.875rem;
+                padding: 0.5rem 0.75rem;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .card-header .row {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .card-header .col-sm-10,
+            .card-header .col-sm-2 {
+                width: 100%;
+                margin-bottom: 1rem;
+            }
+            
+            .table-responsive {
+                font-size: 12px;
+            }
+            
+            .table th, .table td {
+                padding: 0.5rem 0.375rem;
+            }
+            
+            .input-icon input {
+                font-size: 12px;
+                padding: 6px 25px 6px 8px;
+            }
+            
+            .input-icon > i {
+                font-size: 12px;
+                width: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .card-body {
+                padding: 1rem !important;
+            }
+            
+            .table-responsive {
+                font-size: 11px;
+            }
+            
+            .table th, .table td {
+                padding: 0.375rem 0.25rem;
+            }
+            
+            .btn {
+                font-size: 0.8rem;
+                padding: 0.375rem 0.5rem;
+            }
+            
+            .btn-sm {
+                font-size: 0.75rem;
+                padding: 0.25rem 0.375rem;
+            }
+            
+            .input-icon input {
+                font-size: 11px;
+                padding: 5px 20px 5px 6px;
+            }
+            
+            .input-icon > i {
+                font-size: 11px;
+                width: 18px;
+            }
+            
+            /* Ajustes para el modal */
+            .modal-dialog {
+                margin: 0.5rem;
+                max-width: calc(100% - 1rem);
+            }
+            
+            .modal-body {
+                padding: 1rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .card-body {
+                padding: 0.75rem !important;
+            }
+            
+            .table-responsive {
+                font-size: 10px;
+            }
+            
+            .table th, .table td {
+                padding: 0.25rem 0.125rem;
+            }
+            
+            .btn {
+                font-size: 0.75rem;
+                padding: 0.25rem 0.375rem;
+            }
+            
+            .btn-sm {
+                font-size: 0.7rem;
+                padding: 0.2rem 0.25rem;
+            }
+            
+            .input-icon input {
+                font-size: 10px;
+                padding: 4px 18px 4px 5px;
+            }
+            
+            .input-icon > i {
+                font-size: 10px;
+                width: 16px;
+            }
+            
+            /* Ocultar columnas menos importantes en móvil */
+            .table th:nth-child(4),
+            .table td:nth-child(4) {
+                display: none;
+            }
+            
+            /* Ajustar ancho de columnas en móvil */
+            .table th:nth-child(1),
+            .table td:nth-child(1) {
+                width: 8%;
+            }
+            
+            .table th:nth-child(2),
+            .table td:nth-child(2) {
+                width: 45%;
+            }
+            
+            .table th:nth-child(3),
+            .table td:nth-child(3) {
+                width: 15%;
+            }
+            
+            .table th:nth-child(5),
+            .table td:nth-child(5) {
+                width: 12%;
+            }
+            
+            .table th:nth-child(6),
+            .table td:nth-child(6) {
+                width: 10%;
+            }
+            
+            .table th:nth-child(7),
+            .table td:nth-child(7) {
+                width: 10%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .card-body {
+                padding: 0.5rem !important;
+            }
+            
+            .table-responsive {
+                font-size: 9px;
+            }
+            
+            .table th, .table td {
+                padding: 0.2rem 0.1rem;
+            }
+            
+            .btn {
+                font-size: 0.7rem;
+                padding: 0.2rem 0.25rem;
+            }
+            
+            .btn-sm {
+                font-size: 0.65rem;
+                padding: 0.15rem 0.2rem;
+            }
+            
+            .input-icon input {
+                font-size: 9px;
+                padding: 3px 15px 3px 4px;
+            }
+            
+            .input-icon > i {
+                font-size: 9px;
+                width: 14px;
+            }
+            
+            /* Ocultar más columnas en pantallas muy pequeñas */
+            .table th:nth-child(5),
+            .table td:nth-child(5) {
+                display: none;
+            }
+            
+            /* Ajustar ancho de columnas restantes */
+            .table th:nth-child(2),
+            .table td:nth-child(2) {
+                width: 50%;
+            }
+            
+            .table th:nth-child(3),
+            .table td:nth-child(3) {
+                width: 20%;
+            }
+            
+            .table th:nth-child(6),
+            .table td:nth-child(6) {
+                width: 15%;
+            }
+            
+            .table th:nth-child(7),
+            .table td:nth-child(7) {
+                width: 15%;
+            }
+        }
+
+        /* Mejoras para dispositivos táctiles */
+        @media (hover: none) and (pointer: coarse) {
+            .btn:hover {
+                transform: none;
+                box-shadow: none;
+            }
+            
+            .search-result-item:hover {
+                transform: none;
+            }
+            
+            .btn:active {
+                transform: scale(0.95);
+            }
+            
+            .search-result-item:active {
+                transform: scale(0.98);
+            }
+        }
+
+        /* Mejoras para pantallas de alta densidad */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .table th, .table td {
+                border-width: 0.5px;
+            }
+            
+            .btn {
+                border-width: 1px;
+            }
+        }
+
+        /* Mejoras para modo oscuro del sistema */
+        /*@media (prefers-color-scheme: dark) {
+            .card {
+                background-color: #f8f9fa;
+                border-color: #dee2e6;
+            }
+            
+            .card-header {
+                background-color: #e9ecef !important;
+                border-color: #dee2e6;
+            }
+            
+            .table {
+                background-color: #ffffff;
+                color: #212529;
+            }
+            
+            .table th {
+                background-color: #f8f9fa !important;
+                color: #212529 !important;
+            }
+            
+            .table td {
+                border-color: #dee2e6;
+            }
+            
+            .form-control {
+                background-color: #ffffff;
+                border-color: #ced4da;
+                color: #212529;
+            }
+            
+            .form-control:focus {
+                background-color: #ffffff;
+                border-color: #80bdff;
+                color: #212529;
+            }
+        }*/
+
+        /* Mejoras de accesibilidad */
+        .btn:focus,
+        .form-control:focus,
+        .search-result-item:focus {
+            outline: 2px solid #007bff;
+            outline-offset: 2px;
+        }
+
+        /* Animaciones suaves para transiciones */
+        .table,
+        .card,
+        .btn,
+        .form-control {
+            transition: all 0.2s ease;
+        }
+
+        /* Mejoras para impresión */
+        @media print {
+            .btn,
+            .search-results-dropdown,
+            .modal {
+                display: none !important;
+            }
+            
+            .table {
+                border-collapse: collapse;
+                width: 100%;
+            }
+            
+            .table th,
+            .table td {
+                border: 1px solid #000;
+                padding: 8px;
+                text-align: left;
+            }
+        }
+    </style>
+
+{% endblock body %}
+
+{% block extrajs %}
+    <script type="text/javascript">
+        loader = '<div class="container">' +
+            '<div class="row">' +
+            '<div class="col-md-12">' +
+            '<div class="loader">' +
+            '<p><strong>Cargando Reniec/Sunat...</strong></p>' +
+            '<div class="loader-inner"></div>' +
+            '<div class="loader-inner"></div>' +
+            '<div class="loader-inner"></div>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>';
+
+        $("#id_ruc_provider").attr('maxlength', 11);
+
+        let array_units = [];
+        {% for u in unitmeasurement_obj %}
+            array_units.push({
+                'id': '{{ u.id }}',
+                'description': '{{ u.name }}'
+            });
+        {% endfor %}
+
+        let textOption = '';
+        {% for u in unitmeasurement_obj %}
+            textOption += '<option value="{{ u.id }}">{{ u.name }}</option>';
+        {% endfor %}
+
+
+        $(document).on('keypress', '#id_ruc_provider', function (e) {
+            if (e.keyCode === 13) {
+                e.preventDefault()
+                $(this).trigger("enterKey");
+                let _ruc = $(this).val();
+                let _provider = $('#id_provider')
+
+                $('#loading-666').html(loader).show()
+
+                $.ajax({
+                    url: '/buys/get_provider_by_ruc/',
+                    async: true,
+                    dataType: 'json',
+                    type: 'GET',
+                    data: {
+                        'ruc': _ruc,
+                    },
+                    contentType: 'application/json;charset=UTF-8',
+                    headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                    success: function (response, textStatus, xhr) {
+                        if (xhr.status === 200) {
+                            toastr.success(response.message, '¡Bien hecho!');
+                            _provider.val(response.result);
+                            _provider.attr('provider', response.pk);
+                            $('#loading-666').hide();
+                        }
+                    },
+                    error: function (jqXhr, textStatus, xhr) {
+                        if (jqXhr.status === 500) {
+                            toastr.error(jqXhr.responseJSON.error, 'Mensaje');
+                        } else {
+                            if (textStatus === 'timeout') {
+                                toastr.error('Failed from timeout', 'Mensaje');
+                            } else {
+                                console.log(" STATUS: " + xhr + " " + textStatus);
+                            }
+                        }
+                        $('#loading-666').hide();
+                    },
+                });
+                return false;
+            }
+        });
+
+        $('#id_proveedor').select2({
+            theme: 'bootstrap4',
+        });
+
+        $("#btn-new").click(function () {
+            location.reload();
+        });
+
+        function showModalView(ruta) {
+            $.ajax({
+                url: '/buys/' + ruta + '/',
+                dataType: 'json',
+                type: 'GET',
+                data: {'pk': 1},
+                success: function (response) {
+                    $('#add-modal').html(response.form);
+                    $('#add-modal').modal('show');
+                },
+                fail: function (response) {
+                    console.log(response);
+                }
+            });
+        }
+
+
+
+        $('#id_import').keyup(function () {
+            let _total = parseFloat($(this).val());
+            if (_total !== '') {
+                let _item_quantity = parseFloat($('#id_cantidad').val());
+                let _item_price = _total / _item_quantity;
+                if (isNaN(_item_price)) {
+                    $('#id_preciounitario').val('');
+                } else {
+                    $('#id_preciounitario').val(parseFloat(_item_price).toFixed(2));
+                }
+            }
+        });
+
+        /*$("#id_add").click(function () {
+            let id_product = $('#id_producto').val();
+            let name_product = $('#id_producto option:selected').text();
+            let quantity = parseFloat($('#id_cantidad').val());
+            let id_unit = $('#id_unidad').val();
+            let name_unit = $('#id_unidad option:selected').text();
+            let price_unit = parseFloat($('#id_preciounitario').val());
+            let total_ = parseFloat($('#id_import').val());
+
+            if (id_product > 0 && quantity > 0 && id_unit > 0 && price_unit > 0) {
+                if ($("#id_detail_data_grid tr[product=" + id_product + "]").length) {
+                    toastr.warning('El producto ya se encuentra agregado!');
+                    return false;
+                }
+                $('#id_detail_data_grid').append(
+                    '<tr class="text-center" product="' + id_product + '">' +
+                    '<td class="item-numero align-middle">' + '</td>' +
+                    '<td class="align-middle text-left">' + name_product + '</td>' +
+                    '<td class="item-quantity align-middle">' + quantity.toFixed(2) + '</td>' +
+                    '<td class="item-unit align-middle" pu="' + id_unit + '">' + name_unit + '</td>' +
+                    '<td class="item-price text-right align-middle">' + price_unit.toFixed(2) + '</td>' +
+                    '<td class="text-right align-middle">' + total_.toFixed(2) + '</td>' +
+                    '<td class="align-middle"> ' + '<button type="button" onclick="deleteItem(' + id_product + ')" class="btn btn-success delete-detail"><i class="fa fa-trash"></i></button>' + '</td>' +
+                    '</tr>'
+                );
+                limper()
+                counterStrike()
+                toastr.info('Producto agregado correctamente');
+            } else {
+                toastr.warning('Por favor, complete todos los campos!');
+            }
+        });*/
+
+        $('#purchase-return-form').submit(function (event) {
+            event.preventDefault();
+
+            if ($("#id_detail_data_grid tbody#details-table tr.item-row").length > 0) {
+                let table_foot = $("#id_detail_data_grid tfoot#details-table-foot tr td.td-table-foot").find("#id_detail_data_foot tbody#table-detail-foot tr")
+                let Detail_purchase_return = {
+                    "Invoice": $('#id_factura').val(),
+                    "ProviderId": $('#id_provider').attr("provider"),
+                    "Date": $('#id_fechacompra').val(),
+                    "Type_Bill": $('#id_type_bill').val(),
+                    "Base_Total": Number(table_foot.find("td.foot-base input.total-foot-base").val()),
+                    "Igv_Total": Number(table_foot.find("td.foot-igv input.total-foot-igv").val()),
+                    "Import_Total": Number(table_foot.find("td.foot-total input.total-foot-total").val()),
+                    "Total_Document": Number(table_foot.find("td.foot-document input.total-foot-document").val()),
+                    "Check_Igv": ($("#id_detail_data_grid tfoot#details-table-foot tr td.td-table-foot").find("div.form-check input.check-igv").is(':checked')) ? 1 : 0,
+                    "Details": [],
+                };
+
+                $("#id_detail_data_grid tbody#details-table tr.item-row").each(function () {
+                    let productID = $(this).attr('product')
+                    let serialValue = '';
+                    
+                    // Obtener el valor del campo serial
+                    let serialField = $(this).find('.serial-product');
+                    if (serialField.length > 0) {
+                        if (serialField.is('select')) {
+                            // Si es un select, obtener el valor seleccionado
+                            serialValue = serialField.val() || '';
+                        } else {
+                            // Si es un input, obtener el valor
+                            serialValue = serialField.val() || '';
+                        }
+                    }
+                    
+                    let detailObj = {
+                        "Product": productID,
+                        "Quantity": $(this).find("td.item-quantity input.quantity-product").val(),
+                        "Unit": $(this).attr('unit_id'),
+                        "Price": Number($(this).find("td.item-price input.price-unit-product").val()),
+                        "Price_Without_Igv": Number($(this).find("td.item-value-price input.value-unit-product").val()),
+                        "Total": Number($(this).find("td.item-total input.total-detail").val()),
+                        "Serial": serialValue,
+                    };
+                    Detail_purchase_return.Details.push(detailObj);
+                });
+
+                $.ajax({
+                    url: '/buys/save_purchase_return/',
+                    async: true,
+                    dataType: 'json',
+                    type: 'GET',
+                    data: {'purchase_return': JSON.stringify(Detail_purchase_return)},
+                    contentType: 'application/json;charset=UTF-8',
+                    headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                    success: function (response, textStatus, xhr) {
+                        if (xhr.status === 200) {
+                            toastr.success(response.message, '¡DEVOLUCIÓN REGISTRADA CORRECTAMENTE!');
+                            setTimeout(() => {
+                                location.reload();
+                            }, 800);
+                        }
+                    },
+                    error: function (jqXhr, textStatus, xhr) {
+                        toastr.error("ERROR. ", '¡INCONCEBIBLE!');
+                    }
+                });
+
+            } else {
+                toastr.warning("PARA REALIZAR LA DEVOLUCIÓN AGREGUE AL MENOS UN PRODUCTO. ", '¡ADVERTENCIA!');
+                return false;
+            }
+        });
+
+        $('#id_producto').change(function () {
+            let _search = $(this).val();
+            $('#id_unidad').empty();
+            if ($('#id_producto').val() !== '0') {
+                $.ajax({
+                    url: '/buys/get_units_by_product/',
+                    async: true,
+                    dataType: 'json',
+                    type: 'GET',
+                    data: {'ip': _search},
+                    success: function (response) {
+                        let units = JSON.parse(response['units']);
+                        units.forEach(
+                            element =>
+                                $('#id_unidad').append(
+                                    '<option value="' + element['pk'] + '">' + element['fields']['description'] + '</option>')
+                        )
+                    },
+                });
+            }
+        });
+
+        function deleteItem($id) {
+            $('#details').find("tr[i=" + $id + "]").remove();
+            counterStrike();
+        }
+
+        /*$(document).on('click', '.delete-detail', function (e) {
+            let product = $(this).closest('td').parent('tr').attr('product');
+            if (product) {
+                $('#details-table').find("tr[product=" + product + "]").remove();
+            } else {
+                $(this).closest('td').parent('tr').next('tr.product-serial').remove();
+                $(this).closest('td').parent('tr').remove();
+            }
+            counterStrike2();
+        });*/
+
+        // Event listener para eliminar filas con el botón remove-row
+        $(document).on('click', '.remove-row', function (e) {
+            $(this).closest('tr').next('tr.product-serial').remove();
+            $(this).closest('tr').remove();
+            updateRowNumbers();
+            sum_table();
+        });
+
+        /*function counterStrike() {
+            let l = 1;
+            $('#details tr').each(function () {
+                $(this).attr('i', l);
+                $(this).children('td:nth-child(1)').text(l);
+                l++;
+            });
+        }*/
+
+        /*function counterStrike2() {
+            let l = 1;
+            $('#details-table tr.item-row').each(function () {
+                $(this).attr('i', l);
+                $(this).children('td:nth-child(1)').text(l);
+                l++;
+            });
+        }*/
+
+        /*$(document).on('focusin', '.product-table', function (e) {
+            $(this).parent('td').find('div.dropdown-menu').css({
+                'background-color': 'transparent',
+                'border': 'transparent',
+            })
+            $(this).val(' ');
+            $('#id_unit_product').val('0')
+        });*/
+
+        /*$(document).on('keypress', '.product-table', function (e) {
+            $(this).parent('td').find('div.dropdown-menu').empty()
+
+            if (e.keyCode === 13) {
+                e.preventDefault()
+                $(this).trigger("enterKey");
+                let _product_name = $(this).val();
+                let _td = $(this).parent('td')
+                let _menu = _td.find('.dropdown-menu')
+
+                if (_product_name.length > 3) {
+                    $.ajax({
+                        url: '/buys/get_product_by_criteria_table/',
+                        async: true,
+                        dataType: 'json',
+                        type: 'GET',
+                        data: {
+                            'value': _product_name,
+                        },
+                        contentType: 'application/json;charset=UTF-8',
+                        headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                        success: function (response, textStatus, xhr) {
+                            if (xhr.status === 200) {
+                                let list = response.productList;
+                                _menu.css({'background-color': '#fff', 'border': '1px solid rgba(0,0,0,.15)'})
+                                for (let i = 0; i < list.length; i++) {
+                                    _menu.append(`<a class="dropdown-item product-item" barcode="${list[i].barcode}" unit_name="${list[i].unit}" brand="${list[i].brand}" unit_id="${list[i].unit_id}" href="#" data-id="${list[i].id}">${list[i].name} - ${list[i].brand}</a>`)
+                                }
+                            }
+                        },
+                        error: function (jqXhr, textStatus, xhr) {
+                            if (jqXhr.status === 500) {
+                                toastr.error(jqXhr.responseJSON.error, 'Mensaje');
+                            } else {
+                                if (textStatus === 'timeout') {
+                                    toastr.error('Failed from timeout', 'Mensaje');
+                                } else {
+                                    console.log(" STATUS: " + xhr + " " + textStatus);
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    toastr.warning('Para la busqueda ingrese minimo 3 caracteres', 'Error de llenado');
+                    return false;
+                }
+            }
+        });*/
+
+        /*$(document).on('click', '.product-item', function (e) {
+            let _product_id = $(this).attr('data-id');
+            let _unit_id = $(this).attr('unit_id');
+            let _barcode = $(this).attr('barcode');
+            let _product_name = $(this).text();
+            let _tr = $(this).parent('div.dropdown-menu').parent('td').parent('tr');
+            let _next_tr = _tr.next('tr')
+            let _td = $(this).parent('div.dropdown-menu').parent('td');
+            let _brand_product = $(this).attr('brand');
+            let _unit_product = $(this).attr('unit_name');
+
+            _tr.attr('product', _product_id)
+            _next_tr.attr('product', _product_id)
+            _td.find('input.product-table').val(_product_name)
+            _tr.find('td.brand input.brand-product').val(_brand_product)
+            _tr.find('td.unit input.unit-product').val(_unit_product)
+            _tr.find('td.item-code-bar input.code-bar').val(_barcode)
+
+            _tr.attr('unit_id', _unit_id)
+            _next_tr.attr('unit_id', _unit_id)
+
+            $(this).parent('div.dropdown-menu').empty()
+            $(this).parent('div.dropdown-menu').addClass('hide')
+        });*/
+
+        /*$(document).on('click', '#btn-add-new-detail', function () {
+
+            $('#id_detail_data_grid > tbody').append(
+                '<tr class="text-center item-row" product="" unit_id="">' +
+                '<td class="item-numero align-middle">' + '</td>' +
+                //'<td class="item-code-bar align-middle text-center">' +
+                '<input type="text" class="form-control text-center text-uppercase code-bar" autocomplete="off"' + '</td>' +
+                '<td class="align-middle text-left product-item-table">' +
+                '<input type="text" class="form-control text-uppercase product-table dropdown-toggle" ' +
+                '               data-toggle="dropdown" aria-expanded="false" placeholder="Ingrese producto...">' + '<div class="dropdown-menu"></div>' + '</td>' +
+                '<td class="align-middle item-quantity">' +
+                '<div class="input-group">' +
+                '<input type="text" class="form-control text-center quantity-product text-uppercase" placeholder="0">' +
+                '<div class="input-group-append">' +
+                //'<button type="button" class="btn btn-warning btn-sm add-serial"> Series</button>' +
+                '</div>' +
+                '</div>' +
+                '</td>' +
+                '<td class="align-middle unit">' +
+                '<input type="text" class="form-control text-center text-uppercase unit-product" readonly>' + '</td>' +
+                '<td class="item-value-price text-right align-middle">' + '<div class="input-icon">' +
+                '<input type="text" class="form-control text-right text-uppercase value-unit-product" placeholder="0.00">' + '<i class="change-money">' + _val_money + '</i>' + '</div>' + '</td>' +
+                '<td class="item-price text-right align-middle" price-unit-with-discount="">' + '<div class="input-icon">' +
+                '<input type="text" class="form-control text-right text-uppercase price-unit-product" placeholder="0.00">' + '<i class="change-money">' + _val_money + '</i>' + '</div>' + '</td>' +
+                '<td class="item-total text-right align-middle total-row">' + '<div class="input-icon">' +
+                '<input type="text" class="form-control text-right text-uppercase total-detail" placeholder="0.00">' + '<i class="change-money">' + _val_money + '</i>' + '</div>' + '</td>' +
+                '<td class="align-middle"> ' + '<button type="button" class="btn btn-danger delete-detail"><i class="fa fa-trash"></i></button>' + '</td>' +
+                '</tr>' +
+                '<tr class="product-serial"product="" unit_id="">' + '</tr>'
+            );
+            counterStrike2()
+        });*/
+
+        $(document).on('keyup', '.total-detail', function () {
+            let _tr = $(this).parent('div').parent('td').parent('tr')
+            let _total = Number(_tr.find('td.total-row div.input-icon input.total-detail').val());
+            let _quantity = Number(_tr.find('td.item-quantity div.input-group input.quantity-product').val())
+            let price_unit = _total / _quantity
+
+            _tr.find('td.item-price div.input-icon input.price-unit-product').val(Number(price_unit).toFixed(2));
+            calculate_total(_tr)
+            sum_table()
+        });
+
+        $(document).on('keyup', '.quantity-product', function () {
+            let _tr = $(this).closest('td').parent('tr')
+            let _quantity = Number(_tr.find('td.item-quantity div.input-group input.quantity-product').val())
+            let _price_unit = Number(_tr.find('td.item-price div.input-icon input.price-unit-product').val())
+            let _total = Number(_tr.find('td.total-row div.input-icon input.total-detail').val());
+
+            if (_quantity !== 0 && _price_unit !== 0) {
+                _total = _quantity * _price_unit
+                _tr.find('td.item-total div.input-icon input.total-detail').val(Number(_total).toFixed(2));
+            }
+            calculate_total(_tr)
+            sum_table()
+        });
+
+        $(document).on('keyup', '.value-unit-product', function () {
+            let _tr = $(this).parent('div').parent('td').parent('tr')
+            let _value_unit = $(this).val();
+            let _quantity = Number(_tr.find('td.item-quantity div.input-group input.quantity-product').val())
+            let _price_unit = _tr.find('td.item-price div.input-icon input.price-unit-product');
+            let _total = Number(_tr.find('td.total-row div.input-icon input.total-detail').val());
+
+            if (_value_unit !== '') {
+                let _p_unit = parseFloat(_value_unit) * 1.18
+                _price_unit.val(_p_unit.toFixed(4));
+                if (_quantity !== 0 && _price_unit.val() !== 0) {
+                    _total = _quantity * _price_unit.val()
+                    _tr.find('td.item-total div.input-icon input.total-detail').val(Number(_total).toFixed(2));
+                }
+                calculate_total(_tr)
+                sum_table()
+            } else {
+                _price_unit.val('');
+            }
+        });
+
+        $(document).on('keyup', '.price-unit-product', function () {
+            let _tr = $(this).parent('div').parent('td').parent('tr')
+            let _quantity = Number(_tr.find('td.item-quantity div.input-group input.quantity-product').val())
+            let _price_unit = Number(_tr.find('td.item-price div.input-icon input.price-unit-product').val())
+            let _total = Number(_tr.find('td.total-row div.input-icon input.total-detail').val());
+
+            if (_quantity !== 0 && _price_unit !== 0) {
+                let value_unit = _tr.find('td.item-value-price div.input-icon input.value-unit-product');
+                let _v_unit = parseFloat(_price_unit) / 1.18
+                value_unit.val(_v_unit.toFixed(4))
+                _total = _quantity * _price_unit
+                _tr.find('td.item-total div.input-icon input.total-detail').val(Number(_total).toFixed(2));
+            }
+            calculate_total(_tr)
+            sum_table()
+        });
+
+        function calculate_total(_tr) {
+            if (!_tr || !_tr.length) return;
+
+            let $quantity = Number(_tr.find('td.item-quantity div.input-group input.quantity-product').val()) || 0;
+            let $price_unit = Number(_tr.find('td.item-price div.input-icon input.price-unit-product').val()) || 0;
+            let $total = Number(_tr.find('td.total-row div.input-icon input.total-detail').val()) || 0;
+
+            if ($quantity !== 0 && $price_unit !== 0) {
+                $total = $quantity * $price_unit;
+                _tr.find('td.total-row div.input-icon input.total-detail').val($total.toFixed(2));
+            }
+        }
+
+        function sum_table() {
+            let igv = 0;
+            let base = 0;
+            let sum_total = 0;
+            let _total;
+
+            $("#id_detail_data_grid tbody#details-table tr.item-row").each(function () {
+                let td_total = Number($(this).find("td.total-row div.input-icon input.total-detail").val()) || 0;
+                sum_total = sum_total + td_total;
+            });
+
+            let _check_igv = $("#id_detail_data_grid tfoot tr input.check-igv");
+
+            if (_check_igv.is(':checked')) {
+                base = sum_total / 1.18;
+                igv = sum_total - base;
+                _total = base + igv;
+            } else {
+                base = sum_total;
+                igv = sum_total * 0.18;
+                _total = base + igv;
+            }
+
+            $("#id_detail_data_grid tfoot tr input.total-foot-base").val(base.toFixed(2));
+            $("#id_detail_data_grid tfoot tr input.total-foot-igv").val(igv.toFixed(2));
+            $("#id_detail_data_grid tfoot tr input.total-foot-total").val(_total.toFixed(2));
+            $("#id_detail_data_grid tfoot tr input.total-foot-document").val(_total.toFixed(2));
+        }
+
+        $(document).on('change', '#id_detail_data_grid tfoot tr input.check-igv', function (e) {
+            sum_table()
+        });
+
+        // Función para manejar la búsqueda por código de barras
+        function handleBarcodeSearch(barcodeInput) {
+            const barcode = barcodeInput.val().trim();
+            const row = barcodeInput.closest('tr.item-row');
+            if (barcode.length < 3) {
+                if (barcode.length < 3) {
+                    toastr.warning('Ingrese un código de barras válido', 'Error de llenado');
+                    return;
+                }
+
+                $.ajax({
+                    url: '/buys/get_product_by_code_bar/',
+                    async: true,
+                    dataType: 'json',
+                    type: 'GET',
+                    data: {
+                        'code_bar': barcode,
+                    },
+                    contentType: 'application/json;charset=UTF-8',
+                    headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                    success: function (response, textStatus, xhr) {
+                        if (response.success === true) {
+                            row.attr('product', response.product_id);
+                            row.attr('unit_id', response.unit_id);
+                            
+                            // Buscar el campo de búsqueda de producto (puede ser .product-search-input o .product-table)
+                            let productSearchField = row.find('.product-search-input');
+                            if (productSearchField.length === 0) {
+                                productSearchField = row.find('.product-table');
+                            }
+                            if (productSearchField.length > 0) {
+                                productSearchField.val(response.product_name);
+                            }
+                            
+                            row.find('.unit-product').val(response.unit);
+
+                            // Llenar campo de serie si está disponible
+                            if (response.serial) {
+                                row.find('.serial-product').val(response.serial);
+                            }
+
+                            // Llenar precios si están disponibles
+                            if (response.price_purchase) {
+                                row.find('.value-unit-product').val(response.price_purchase.toFixed(2));
+                                const priceWithIgv = (response.price_purchase * 1.18).toFixed(2);
+                                row.find('.price-unit-product').val(priceWithIgv);
+                            }
+
+                            toastr.success('Producto encontrado por código de barras', '¡Producto Encontrado!');
+                            row.find('.quantity-product').focus();
+                        } else {
+                            toastr.error(response.message, '¡Mensaje!');
+                        }
+                    },
+                    error: function (jqXhr, textStatus, xhr) {
+                        toastr.error('Error al buscar producto por código de barras', '¡Error!');
+                    }
+                });
+            }
+        }
+
+        // Event listener para código de barras en filas dinámicas
+        $(document).on('keypress', '.code-bar', function (e) {
+            if (e.keyCode === 13) {
+                e.preventDefault();
+                handleBarcodeSearch($(this));
+            }
+        });
+
+        $(document).on('click', '.add-serial', function (e) {
+            let productID = $(this).closest('td.item-quantity').parent('tr').attr("product");
+            let _quantity = $(this).parent('div.input-group-append').siblings('input.quantity-product');
+            let _tr = $(this).closest('td.item-quantity').parent('tr').next('tr.product-serial');
+
+            if (productID.length === 0) {
+                toastr.warning('Favor buscar un producto antes de ingresar las Series', 'Error de llenado');
+                return false;
+            }
+            if (_quantity.val().length === 0) {
+                toastr.warning('Ingrese una cantidad', 'Error de llenado');
+                return false;
+            }
+            _tr.empty();
+            let serials = '';
+            for (let i = 0; i < _quantity.val(); i++) {
+                let _number = i + 1;
+                serials += '<tr>' +
+                    '<td class="text-right align-middle text-center">' + _number + '</td>' +
+                    '<td class="text-right align-middle item-serial">' +
+                    '<input type="text" class="form-control serial" placeholder="..." aria-label="" aria-describedby="basic-addon1">' +
+                    '</td>' +
+                    '</tr>';
+            }
+            _tr.append(
+                '<td class="text-right align-middle" colspan="2"></td>' +
+                '<td class="text-right align-middle">' +
+                '<div id="accordion">' +
+                '<div class="card">' +
+                '<div class="card-header p-0" id="heading-' + productID + '">' +
+                '<h5 class="mb-0 text-center">' +
+                '<button class="btn btn-link collapsed text-dark roboto-condensed-regular font-weight-bold"' +
+                'data-toggle="collapse" style="font-size: 11px"' +
+                'data-target="#collapse-' + productID + '" aria-expanded="false" aria-controls="collapse-' + productID + '">' +
+                'Seriales<i class="fas fa-sort-down"></i>' +
+                '</button>' +
+                '</h5>' +
+                '</div>' +
+                '<div id="collapse-' + productID + '" class="collapse" aria-labelledby="heading-' + productID + '" data-parent="#accordion">' +
+                '<div class="card-body p-0">' +
+                '<table class="table table-sm align-content-center table-bordered mb-0">' +
+                '<tbody id="details-serial-' + productID + '"">' +
+                serials +
+                '</tbody>' +
+                '</table>' +
+                '</div>' +
+                '</div>' +
+                '</div>' +
+                '</div>' +
+                '</td>' +
+                '</tr>'
+            );
+            $('#collapse-' + productID).collapse('show');
+        });
+
+        // ===== FUNCIONALIDAD DEL BUSCADOR ELEGANTE DE PRODUCTOS =====
+
+        // Función para inicializar el buscador en una fila
+        function initializeProductSearch(rowIndex) {
+            const searchInput = $(`#product_search_${rowIndex}`);
+            const searchType = $(`#search_type_${rowIndex}`);
+            const resultsDropdown = $(`#search_results_${rowIndex}`);
+            const resultsList = $(`#search_results_list_${rowIndex}`);
+            const resultsCount = resultsDropdown.find('.results-count');
+
+            let searchTimeout;
+            let selectedIndex = -1;
+            let searchResults = [];
+
+            // Función para realizar la búsqueda
+            function performSearch() {
+                const searchTerm = searchInput.val().trim();
+                const searchTypeValue = searchType.val();
+
+                if (searchTerm.length < 2) {
+                    resultsDropdown.hide();
+                    return;
+                }
+
+                // Mostrar loading
+                resultsList.html('<div class="no-results"><span class="loading-spinner"></span>Buscando productos...</div>');
+                
+                // Posicionar el dropdown correctamente
+                positionDropdown();
+                resultsDropdown.show();
+
+                $.ajax({
+                    url: '/buys/search_products_for_return/',
+                    method: 'GET',
+                    data: {
+                        term: searchTerm,
+                        type: searchTypeValue
+                    },
+                    success: function (response) {
+                        searchResults = response.products || [];
+                        displaySearchResults();
+                    },
+                    error: function (xhr, status, error) {
+                        resultsList.html('<div class="no-results">Error en la búsqueda. Intente nuevamente.</div>');
+                        console.error('Error en búsqueda:', error);
+                    }
+                });
+            }
+
+            // Función para posicionar el dropdown correctamente
+            function positionDropdown() {
+                const inputRect = searchInput[0].getBoundingClientRect();
+                const dropdown = resultsDropdown[0];
+                
+                // Calcular posición
+                const top = inputRect.bottom + window.scrollY + 5;
+                const left = inputRect.left + window.scrollX;
+                const width = inputRect.width;
+                
+                // Aplicar posición
+                dropdown.style.top = top + 'px';
+                dropdown.style.left = left + 'px';
+                dropdown.style.width = width + 'px';
+                
+                // Ajustar altura máxima si es necesario
+                const viewportHeight = window.innerHeight;
+                const availableHeight = viewportHeight - inputRect.bottom - 20;
+                const maxHeight = Math.min(400, availableHeight);
+                dropdown.style.maxHeight = maxHeight + 'px';
+            }
+
+            // Función para mostrar los resultados
+            function displaySearchResults() {
+
+                if (searchResults.length === 0) {
+                    resultsList.html('<div class="no-results">No se encontraron productos</div>');
+                    resultsCount.text('0 resultados');
+                    return;
+                }
+
+                resultsCount.text(`${searchResults.length} resultado${searchResults.length !== 1 ? 's' : ''}`);
+
+                let html = '';
+                searchResults.forEach((product, index) => {
+                    const icon = getProductIcon(product.search_type);
+                    const serialInfo = product.serial ? ` - Serie: ${product.serial}` : '';
+                    html += `
+                        <div class="search-result-item" data-index="${index}" data-product='${JSON.stringify(product)}'>
+                            <div class="product-icon">${icon}</div>
+                            <div class="product-info">
+                                <div class="product-name">${product.name}${serialInfo}</div>
+                                <div class="product-details">
+                                    <span class="product-detail-item">
+                                        <i class="fas fa-barcode"></i> ${product.code || 'N/A'}
+                                    </span>
+                                    <span class="product-detail-item">
+                                        <i class="fas fa-tag"></i> ${product.brand || 'N/A'}
+                                    </span>
+                                    <span class="product-detail-item">
+                                        <i class="fas fa-ruler"></i> ${product.unit_name}
+                                    </span>
+                                </div>
+                            </div>
+                            <span class="search-type-badge">${product.search_type}</span>
+                        </div>
+                    `;
+                });
+
+                resultsList.html(html);
+                
+                // Reposicionar después de mostrar resultados
+                positionDropdown();
+                
+                // Seleccionar automáticamente el primer elemento
+                if (searchResults.length > 0) {
+                    selectedIndex = 0;
+                    updateSelection();
+                }
+            }
+
+            // Función para obtener el ícono según el tipo de búsqueda
+            function getProductIcon(searchType) {
+                if (searchType.includes('Código')) return '📊';
+                if (searchType.includes('Descripción')) return '📝';
+                if (searchType.includes('Serie')) return '🔢';
+                return '📦';
+            }
+
+            // Función para seleccionar un producto
+            function selectProduct(product) {
+                const row = searchInput.closest('tr.item-row');
+                const searchTypeValue = searchType.val();
+
+                // Llenar los campos de la fila
+                row.attr('product', product.id);
+                row.attr('unit_id', product.unit_id);
+
+                // Llenar código de barras
+                row.find('.code-bar').val(product.barcode || '');
+
+                // Llenar unidad de medida
+                row.find('.unit-product').val(product.unit_name);
+
+                // Llenar precio unitario (sin IGV)
+                row.find('.value-unit-product').val(product.price_purchase.toFixed(2));
+
+                // Llenar precio unitario (con IGV)
+                const priceWithIgv = (product.price_purchase * 1.18).toFixed(2);
+                row.find('.price-unit-product').val(priceWithIgv);
+
+                // Manejar el campo de serie según el tipo de búsqueda
+                const serialField = row.find('.serial-product');
+                if (searchTypeValue === 'serial') {
+                    // Si la búsqueda es por serie, mostrar la serie en un input
+                    serialField.replaceWith(`
+                        <input type="text" class="form-control text-center serial-product text-uppercase" 
+                               placeholder="Serie" style="width: 200px; min-width: 200px;" 
+                               value="${product.serial || ''}" readonly>
+                    `);
+                } else {
+                    // Para otros tipos de búsqueda, crear un select con las series disponibles
+                    if (product.serials && product.serials.length > 0) {
+                        let options = '<option value="">Seleccione una serie</option>';
+                        product.serials.forEach(serial => {
+                            options += `<option value="${serial}">${serial}</option>`;
+                        });
+                        serialField.replaceWith(`
+                            <select class="form-control text-center serial-product text-uppercase" 
+                                    style="width: 200px; min-width: 200px;">
+                                ${options}
+                            </select>
+                        `);
+                    } else {
+                        // Si no hay series, mantener como input vacío
+                        serialField.replaceWith(`
+                            <input type="text" class="form-control text-center serial-product text-uppercase" 
+                                   placeholder="Serie" style="width: 200px; min-width: 200px;">
+                        `);
+                    }
+                }
+
+                // Ocultar dropdown
+                resultsDropdown.hide();
+
+                // Limpiar input de búsqueda y mostrar nombre del producto
+                let displayName = product.name;
+                if (product.serial) {
+                    displayName += ` - Serie: ${product.serial}`;
+                }
+                searchInput.val(displayName);
+
+                // Calcular total de la fila
+                calculateRowTotal(row);
+
+                // Mostrar mensaje de éxito
+                let successMessage = `Producto "${product.name}" agregado correctamente`;
+                if (product.serial) {
+                    successMessage += ` (Serie: ${product.serial})`;
+                }
+                toastr.success(successMessage, '¡Producto Seleccionado!');
+
+                // Enfocar en cantidad
+                row.find('.quantity-product').focus();
+            }
+
+            // Event listeners
+            searchInput.on('input', function () {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(performSearch, 300);
+            });
+
+            searchInput.on('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    resultsDropdown.hide();
+                    return;
+                }
+
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (searchResults.length > 0 && selectedIndex >= 0) {
+                        selectProduct(searchResults[selectedIndex]);
+                    } else if (searchResults.length === 1) {
+                        selectProduct(searchResults[0]);
+                    }
+                    return;
+                }
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    if (searchResults.length === 0) return;
+                    
+                    if (selectedIndex < searchResults.length - 1) {
+                        selectedIndex++;
+                    } else {
+                        // Si llegamos al final, volver al principio
+                        selectedIndex = 0;
+                    }
+                    updateSelection();
+                    return;
+                }
+
+                if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (searchResults.length === 0) return;
+                    
+                    if (selectedIndex > 0) {
+                        selectedIndex--;
+                    } else {
+                        // Si llegamos al principio, ir al final
+                        selectedIndex = searchResults.length - 1;
+                    }
+                    updateSelection();
+                    return;
+                }
+            });
+
+            // Click en resultados
+            resultsList.on('click', '.search-result-item', function () {
+                const index = $(this).data('index');
+                selectProduct(searchResults[index]);
+            });
+
+            // Cambio de tipo de búsqueda
+            searchType.on('change', function () {
+                // Limpiar campos cuando se cambie el tipo de búsqueda
+                clearFieldsOnSearchTypeChange();
+                
+                if (searchInput.val().trim().length >= 2) {
+                    performSearch();
+                }
+            });
+
+            // Ocultar dropdown al hacer click fuera
+            $(document).on('click', function (e) {
+                if (!$(e.target).closest('.product-search-container').length) {
+                    resultsDropdown.hide();
+                }
+            });
+
+            // Reposicionar dropdown en scroll y resize
+            $(window).on('scroll resize', function() {
+                if (resultsDropdown.is(':visible')) {
+                    positionDropdown();
+                }
+            });
+
+            // Función para actualizar la selección visual
+            function updateSelection() {
+                resultsList.find('.search-result-item').removeClass('selected');
+                if (selectedIndex >= 0) {
+                    const selectedElement = resultsList.find(`[data-index="${selectedIndex}"]`);
+                    selectedElement.addClass('selected');
+                    
+                    // Hacer scroll automático para mostrar el elemento seleccionado
+                    scrollToElement(selectedElement);
+                }
+            }
+
+            // Función para hacer scroll automático al elemento seleccionado
+            function scrollToElement(element) {
+                if (!element.length) return;
+                
+                const container = resultsList[0];
+                const elementTop = element[0].offsetTop;
+                const elementBottom = elementTop + element[0].offsetHeight;
+                const containerTop = container.scrollTop;
+                const containerBottom = containerTop + container.clientHeight;
+                
+                // Si el elemento está por encima del área visible
+                if (elementTop < containerTop) {
+                    container.scrollTop = elementTop - 10; // 10px de margen superior
+                }
+                // Si el elemento está por debajo del área visible
+                else if (elementBottom > containerBottom) {
+                    container.scrollTop = elementBottom - container.clientHeight + 10; // 10px de margen inferior
+                }
+            }
+
+            // Función para limpiar campos cuando se cambie el tipo de búsqueda
+            function clearFieldsOnSearchTypeChange() {
+                const row = searchInput.closest('tr.item-row');
+                
+                // Limpiar campos de la fila
+                row.attr('product', '');
+                row.attr('unit_id', '');
+                row.find('.code-bar').val('');
+                row.find('.unit-product').val('');
+                row.find('.value-unit-product').val('');
+                row.find('.price-unit-product').val('');
+                row.find('.total-detail').val('');
+                row.find('.quantity-product').val('');
+                
+                // Limpiar campo de serie
+                const serialField = row.find('.serial-product');
+                serialField.replaceWith(`
+                    <input type="text" class="form-control text-center serial-product text-uppercase" 
+                           placeholder="Serie" style="width: 200px; min-width: 200px;">
+                `);
+                
+                // Limpiar input de búsqueda
+                searchInput.val('');
+                
+                // Ocultar dropdown si está visible
+                resultsDropdown.hide();
+            }
+        }
+
+        // Función para calcular el total de una fila
+        function calculateRowTotal(row) {
+            const quantity = parseFloat(row.find('.quantity-product').val()) || 0;
+            const price = parseFloat(row.find('.price-unit-product').val()) || 0;
+            const total = quantity * price;
+
+            row.find('.total-detail').val(total.toFixed(2));
+
+            // Recalcular totales del pie de tabla
+            sum_table();
+        }
+
+        // Inicializar buscador en la primera fila
+        $(document).ready(function () {
+            initializeProductSearch(1);
+
+            // Event listener para eliminar la primera fila
+            $('#details-table tr.item-row:first .remove-row').on('click', function () {
+                $(this).closest('tr').next('.product-serial').remove();
+                $(this).closest('tr').remove();
+                updateRowNumbers();
+                sum_table();
+            });
+
+            // Event listener para cambio en cantidad en la primera fila
+            $('#details-table tr.item-row:first .quantity-product').on('input', function () {
+                calculateRowTotal($(this).closest('tr'));
+            });
+
+            // Event listener para código de barras en la primera fila
+            $('#details-table tr.item-row:first .code-bar').on('keypress', function (e) {
+                if (e.keyCode === 13) {
+                    e.preventDefault();
+                    handleBarcodeSearch($(this));
+                }
+            });
+
+            // Event listener para cambio de tipo de búsqueda en la primera fila
+            $('#search_type_1').on('change', function () {
+                const row = $(this).closest('tr.item-row');
+                clearFieldsOnSearchTypeChangeForRow(row, 1);
+            });
+        });
+
+        // Función para agregar nueva fila con buscador
+        function addNewRow() {
+            const currentRowCount = $('#details-table tr.item-row').length;
+            const newRowIndex = currentRowCount + 1;
+
+            const newRow = `
+                <tr class="text-center item-row" product="" unit_id="">
+                    <td class="item-numero align-middle text-center">${newRowIndex}</td>
+                    <td class="align-middle text-left product-item-table">
+                        <div class="product-search-container">
+                            <div class="search-input-group">
+                                <div class="search-type-selector">
+                                    <select class="form-control search-type-select" id="search_type_${newRowIndex}">
+                                        <option value="all">🔍 Todo</option>
+                                        <option value="barcode">📊 Código</option>
+                                        <option value="description">📝 Descripción</option>
+                                        <option value="serial">🔢 Serie</option>
+                                    </select>
+                                </div>
+                                <div class="search-input-wrapper">
+                                    <input type="text"
+                                           class="form-control product-search-input"
+                                           id="product_search_${newRowIndex}"
+                                           placeholder="Buscar producto..."
+                                           autocomplete="off">
+                                    <div class="search-icon">
+                                        <i class="fas fa-search"></i>
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <input aria-label="" type="text"
+                                           class="form-control text-center serial-product text-uppercase"
+                                           placeholder="Serie" style="width: 200px; min-width: 200px;">
+                                </div>
+                            </div>
+
+                            <div class="search-results-dropdown" id="search_results_${newRowIndex}" style="display: none;">
+                                <div class="search-results-header">
+                                    <span class="results-count">0 resultados</span>
+                                    <span class="search-tip">↑↓ Flechas para navegar, Enter para seleccionar</span>
+                                </div>
+                                <div class="search-results-list" id="search_results_list_${newRowIndex}">
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="align-middle item-quantity">
+                        <div class="input-group">
+                            <input type="text" class="form-control text-center quantity-product text-uppercase" placeholder="0">
+                        </div>
+                    </td>
+                    <td class="align-middle unit">
+                        <input type="text" class="form-control text-center text-uppercase unit-product"
+                               name="unit-product" readonly>
+                    </td>
+                    <td class="item-value-price text-right align-middle">
+                        <div class="input-icon">
+                            <input type="text" class="form-control text-right text-uppercase value-unit-product"
+                                   placeholder="0.00">
+                            <i class="change-money">S/</i>
+                        </div>
+                    </td>
+                    <td class="item-price text-right align-middle" price-unit-with-discount="">
+                        <div class="input-icon">
+                            <input type="text" class="form-control text-right text-uppercase price-unit-product"
+                                   placeholder="0.00">
+                            <i class="change-money">S/</i>
+                        </div>
+                    </td>
+                    <td class="item-total text-right align-middle total-row">
+                        <div class="input-icon">
+                            <input type="text" class="form-control text-right text-uppercase total-detail" placeholder="0.00">
+                            <i class="change-money">S/</i>
+                        </div>
+                    </td>
+                    <td class="align-middle">
+                        <button type="button" class="btn btn-danger btn-sm remove-row">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                <tr class="product-serial">
+                </tr>
+            `;
+
+            $('#details-table').append(newRow);
+
+            // Inicializar el buscador en la nueva fila
+            initializeProductSearch(newRowIndex);
+
+            // Event listener para eliminar fila
+            $(`#product_search_${newRowIndex}`).closest('tr').find('.remove-row').on('click', function () {
+                $(this).closest('tr').next('.product-serial').remove();
+                $(this).closest('tr').remove();
+                updateRowNumbers();
+                sum_table();
+            });
+
+            // Event listener para código de barras en la nueva fila
+            $(`#product_search_${newRowIndex}`).closest('tr').find('.code-bar').on('keypress', function (e) {
+                if (e.keyCode === 13) {
+                    e.preventDefault();
+                    handleBarcodeSearch($(this));
+                }
+            });
+
+            // Event listener para cambio en cantidad
+            $(`#product_search_${newRowIndex}`).closest('tr').find('.quantity-product').on('input', function () {
+                calculateRowTotal($(this).closest('tr'));
+            });
+
+            // Event listener para cambio de tipo de búsqueda en la nueva fila
+            $(`#search_type_${newRowIndex}`).on('change', function () {
+                const row = $(this).closest('tr.item-row');
+                clearFieldsOnSearchTypeChangeForRow(row, newRowIndex);
+            });
+        }
+
+        // Función para actualizar números de fila
+        function updateRowNumbers() {
+            $('#details-table tr.item-row').each(function (index) {
+                $(this).find('.item-numero').text(index + 1);
+            });
+        }
+
+        // Event listener para el botón "Agregar Producto"
+        $(document).on('click', '#btn-add-product', function () {
+            addNewRow();
+        });
+
+        // Event listener para cambio en cantidad en filas existentes
+        $(document).on('input', '.quantity-product', function () {
+            calculateRowTotal($(this).closest('tr'));
+        });
+
+        // Corregir la función calculate_total para que funcione correctamente
+        /*function calculate_total(_tr) {
+            if (!_tr || !_tr.length) return;
+
+            let $quantity = Number(_tr.find('td.item-quantity div.input-group input.quantity-product').val()) || 0;
+            let $price_unit = Number(_tr.find('td.item-price div.input-icon input.price-unit-product').val()) || 0;
+            let $total = Number(_tr.find('td.total-row div.input-icon input.total-detail').val()) || 0;
+
+            if ($quantity !== 0 && $price_unit !== 0) {
+                $total = $quantity * $price_unit;
+                _tr.find('td.total-row div.input-icon input.total-detail').val($total.toFixed(2));
+            }
+        }*/
+
+        // Función para limpiar campos cuando se cambie el tipo de búsqueda en filas dinámicas
+        function clearFieldsOnSearchTypeChangeForRow(row, rowIndex) {
+            // Limpiar campos de la fila
+            row.attr('product', '');
+            row.attr('unit_id', '');
+            row.find('.code-bar').val('');
+            row.find('.unit-product').val('');
+            row.find('.value-unit-product').val('');
+            row.find('.price-unit-product').val('');
+            row.find('.total-detail').val('');
+            row.find('.quantity-product').val('');
+            
+            // Limpiar campo de serie
+            const serialField = row.find('.serial-product');
+            serialField.replaceWith(`
+                <input type="text" class="form-control text-center serial-product text-uppercase" 
+                       placeholder="Serie" style="width: 200px; min-width: 200px;">
+            `);
+            
+            // Limpiar input de búsqueda
+            $(`#product_search_${rowIndex}`).val('');
+            
+            // Ocultar dropdown si está visible
+            $(`#search_results_${rowIndex}`).hide();
+        }
+
+
+    </script>
+{% endblock extrajs %}

@@ -208,7 +208,7 @@ class ProductStore(models.Model):
 
 
 class ProductSerial(models.Model):
-    STATUS_CHOICES = (('C', 'COMPRADO'), ('V', 'VENDIDO'), ('A', 'ANULADO'), ('P', 'PENDIENTE'))
+    STATUS_CHOICES = (('C', 'COMPRADO'), ('V', 'VENDIDO'), ('A', 'ANULADO'), ('P', 'PENDIENTE'), ('D', 'DEVUELTA'))
     id = models.AutoField(primary_key=True)
     status = models.CharField('Estado', max_length=1, choices=STATUS_CHOICES, default='C')
     product_store = models.ForeignKey('ProductStore', on_delete=models.CASCADE, null=True, blank=True)
@@ -353,7 +353,7 @@ class ClientAssociate(models.Model):
 
 class Order(models.Model):
     TYPE_CHOICES = (('V', 'VENTA'), ('T', 'COTIZACION'))
-    VOUCHER_CHOICES = (('T', 'TICKET'), ('B', 'BOLETA'), ('F', 'FACTURA'), ('CO', 'COTIZACION'))
+    VOUCHER_CHOICES = (('T', 'CONSIGNACION'), ('B', 'BOLETA'), ('F', 'FACTURA'), ('CO', 'COTIZACION'))
     STATUS_CHOICES = (('P', 'PENDIENTE'), ('C', 'COMPLETADO'), ('A', 'ANULADO'),)
     QUOTATION_CHOICES = (('P', 'PROYECTO'), ('O', 'OBRA'), ('0', 'OTRO'),)
     TYPE_CHOICES_PAYMENT = (('E', 'Efectivo'), ('D', 'Deposito'), ('C', 'Credito'))
@@ -595,6 +595,11 @@ class TransactionPayment(models.Model):
 
 class Kardex(models.Model):
     OPERATION_CHOICES = (('E', 'Entrada'), ('S', 'Salida'), ('C', 'Inventario inicial'), ('CI', 'Cuadre de Inventario'))
+    DOCUMENT_CHOICES = (('00', 'OTROS'), ('01', 'FACTURA'), ('03', 'BOLETA DE VENTA'), ('07', 'NOTE DE CREDITO'),
+                     ('08', 'NOTA DE DEBITO'), ('09', 'GUIA DE REMISION'))
+    TYPE_OPERATION_CHOICES = (('01', 'VENTA'), ('02', 'COMPRA'), ('05', 'DEVOLUCION RECIBIDA'), ('06', 'DEVOLUCION ENTREGADA'),
+                      ('11', 'TRANSFERENCIA ENTRE ALMACENES'), ('12', 'RETIRO'), ('13', 'MERMAS'),
+                      ('16', 'SALDO INICIAL'), ('09', 'DONACION'), ('99', 'OTROS'))
     id = models.AutoField(primary_key=True)
     operation = models.CharField('Tipo de operación', max_length=2,
                                  choices=OPERATION_CHOICES, default='C', )
@@ -625,20 +630,9 @@ class Kardex(models.Model):
                                        blank=True)
     inventory = models.ForeignKey('Inventory', on_delete=models.SET_NULL, null=True, blank=True)
     credit_note_detail = models.ForeignKey('sales.CreditNoteDetail', on_delete=models.SET_NULL, null=True, blank=True)
-
-    def conversion_mml_g(self):
-        response = 0
-        paint_converter = ProductStore.objects.filter(product__product_family__id=4)
-        if paint_converter.count() > 0:
-            response = float(self.quantity) / float(3785.41)
-        return response
-
-    def conversion_mml_g_remainig(self):
-        response = 0
-        paint_converter = ProductStore.objects.filter(product__product_family__id=4)
-        if paint_converter.count() > 0:
-            response = float(self.remaining_quantity) / float(3785.41)
-        return response
+    type_document = models.CharField('Tipo de documento', max_length=2, choices=DOCUMENT_CHOICES, default='00')
+    type_operation = models.CharField('Tipo de operación', max_length=2, choices=TYPE_OPERATION_CHOICES, default='99')
+    purchase_return_detail = models.ForeignKey('buys.PurchaseReturnDetail', on_delete=models.SET_NULL, null=True, blank=True)
 
     class Meta:
         verbose_name = 'Registro de Kardex'

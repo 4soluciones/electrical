@@ -18,7 +18,7 @@ from electrical import settings
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from apps.hrm.views import get_subsidiary_by_user
-from .views import get_kardex_dictionary
+# from .views import get_kardex_dictionary
 from .models import Requirement_buys, RequirementDetail_buys
 from django.template import loader
 from datetime import datetime
@@ -26,24 +26,24 @@ import io
 import pdfkit
 
 
-def kardex_glp_pdf(request, date_initial, date_final):
-    user_id = request.user.id
-    user_obj = User.objects.get(id=user_id)
-    subsidiary_obj = get_subsidiary_by_user(user_obj)
-    if request.method == 'GET':
-        html = get_kardex_dictionary(subsidiary_obj, is_pdf=True, start_date=date_initial, end_date=date_final)
-        options = {
-            'page-size': 'A3',
-            'orientation': 'Landscape',
-            'encoding': "UTF-8",
-        }
-        path_wkhtmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
-        config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
-
-        pdf = pdfkit.from_string(html, False, options, configuration=config)
-        response = HttpResponse(pdf, content_type='application/pdf')
-        # response['Content-Disposition'] = 'attachment;filename="kardex_pdf.pdf"'
-        return response
+# def kardex_glp_pdf(request, date_initial, date_final):
+#     user_id = request.user.id
+#     user_obj = User.objects.get(id=user_id)
+#     subsidiary_obj = get_subsidiary_by_user(user_obj)
+#     if request.method == 'GET':
+#         html = get_kardex_dictionary(subsidiary_obj, is_pdf=True, start_date=date_initial, end_date=date_final)
+#         options = {
+#             'page-size': 'A3',
+#             'orientation': 'Landscape',
+#             'encoding': "UTF-8",
+#         }
+#         path_wkhtmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+#         config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
+#
+#         pdf = pdfkit.from_string(html, False, options, configuration=config)
+#         response = HttpResponse(pdf, content_type='application/pdf')
+#         # response['Content-Disposition'] = 'attachment;filename="kardex_pdf.pdf"'
+#         return response
 
 
 def print_requirement(request, pk=None):

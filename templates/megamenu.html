@@ -22,61 +22,38 @@
                     </ul>
                 </li>
             {% endif %}
-            {% if perms.hrm.view_employee %}
-                <li class="nav-item dropdown"><a class="nav-link dropdown-toggle text-white" href="#"
-                                                 data-toggle="dropdown">
-                    Logistica </a>
-                    <ul class="dropdown-menu">
+
+            <li class="nav-item dropdown"><a class="nav-link dropdown-toggle text-white" href="#"
+                                             data-toggle="dropdown">
+                Logistica </a>
+                <ul class="dropdown-menu">
+                    {% if perms.sales.view_product %}
                         <li><a class="dropdown-item" href="{% url 'sales:product_list' %}"><i
                                 class="fas fa-clipboard-list"></i>
                             Productos </a>
-                            {#                        <ul class="submenu dropdown-menu">#}
-                            {#                            <li><a class="dropdown-item" href="{% url 'sales:product_list' %}"> Catálogo de Productos</a>#}
-                            {#                            </li>#}
-                            {#                            <li><a class="dropdown-item" href="{% url 'sales:get_recipe' %}">Generación/Fabricacíon de#}
-                            {#                                Productos</a></li>#}
-                            {#                            <li><a class="dropdown-item" href="{% url 'sales:get_supplies_view' %}">Stock de insumos</a></li>#}
-                            {#                        </ul>#}
                         </li>
-
+                    {% endif %}
+                    {% if perms.sales.view_subsidiarystore %}
                         <li><a class="dropdown-item" href="{% url 'sales:get_products_by_subsidiary' %}"><i
                                 class="fas fa-store"></i> Almacenes </a>
-                            {#                        <ul class="submenu dropdown-menu">#}
-                            {#                            <li><a class="dropdown-item" href="{% url 'sales:get_products_by_subsidiary' %}">Almacenes#}
-                            {#                                por Sede</a></li>#}
-                            {#                        </ul>#}
                         </li>
-                        {#                    <li><a class="dropdown-item dropdown-toggle" href="#"> Producción </a>#}
-                        {#                        <ul class="submenu dropdown-menu">#}
-                        {#                            <li><a class="dropdown-item" href="{% url 'sales:get_manufacture' %}">Orden de#}
-                        {#                                Producción</a></li>#}
-                        {#                            <li><a class="dropdown-item" href="{% url 'sales:orders_manufacture' %}">Listado de Ordenes#}
-                        {#                                de Producción</a></li>#}
-                        {#                        </ul>#}
-                        {#                    </li>#}
+
 
                         <div class="dropdown-divider"></div>
                         <li><a class="dropdown-item dropdown-toggle" href="#"><i class="fas fa-file-alt"></i> Control de
                             traspaso de productos </a>
                             <ul class="submenu dropdown-menu show">
-
-                                {#                            <li><a class="dropdown-item" href="{% url 'comercial:guide_detail_list' %}"><i class="fas fa-sitemap"></i> Programacion de#}
-                                {#                                Guías </a>#}
-                                {#                            </li>#}
                                 <li><a class="dropdown-item" href="{% url 'comercial:input_workflow' %}"><i
                                         class="fas fa-sticky-note"></i> Notas de
                                     entrada</a></li>
                                 <li><a class="dropdown-item" href="{% url 'comercial:output_workflow' %}"><i
                                         class="far fa-sticky-note"></i> Notas de
                                     salida</a></li>
-
                             </ul>
                         </li>
                         <li><a class="dropdown-item dropdown-toggle" href="#"><i class="fas fa-tasks"></i> Generación de
                             guías y notas de almacén </a>
                             <ul class="submenu dropdown-menu show">
-                                {#                            <li><a class="dropdown-item" href="{% url 'comercial:new_guide' %}"><i class="far fa-file-alt"></i> Emisión de#}
-                                {#                                guias </a></li>#}
                                 <li><a class="dropdown-item" href="{% url 'comercial:input_guide' %}"><i
                                         class="fas fa-file"></i> Registrar de
                                     nota de
@@ -85,7 +62,6 @@
                                         class="far fa-file"></i> Registrar de
                                     nota de
                                     salida</a></li>
-
                             </ul>
                         </li>
 
@@ -97,23 +73,17 @@
                                        href="{% url 'comercial:input_workflow_from_output' %}"><i
                                         class="fas fa-clipboard-check"></i> Notas
                                     de salida para ingresar a almacén</a></li>
-
-                                {#                            <li><a class="dropdown-item"#}
-                                {#                                   href="{% url 'comercial:programming_receive_by_sucursal' %}"><i class="fas fa-bezier-curve"></i>#}
-                                {#                                Programaciones en Ruta - Guias </a></li>#}
-
                             </ul>
                         </li>
-                        {% if perms.sales.view_inventory %}
-                            <div class="dropdown-divider"></div>
-                            <li><a class="dropdown-item" href="{% url 'sales:inventory_store' %}"><i
-                                    class="fas fa-boxes"></i> Cuadre de inventario </a>
-                            </li>
-                        {% endif %}
-
-                    </ul>
-                </li>
-            {% endif %}
+                    {% endif %}
+                    {% if perms.sales.view_inventory %}
+                        <div class="dropdown-divider"></div>
+                        <li><a class="dropdown-item" href="{% url 'sales:inventory_store' %}"><i
+                                class="fas fa-boxes"></i> Cuadre de inventario </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </li>
 
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle text-white" href="#" data-toggle="dropdown"> Compras & Ventas </a>
@@ -135,6 +105,9 @@
                                     compras anuladas</a></li>
                                 <li><a class="dropdown-item" href="{% url 'sales:get_costs_purchase' %}">Costos de
                                     compras</a></li>
+                                <li><a class="dropdown-item" href="{% url 'buys:buy_return' %}"><i
+                                        class="fas fa-undo-alt mr-2"></i>Devolución de Compra</a>
+                                </li>
                             </ul>
                         </li>
                     {% endif %}

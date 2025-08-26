@@ -1,0 +1,745 @@
+<div class="table-responsive dataTables_wrapper roboto-condensed-regular">
+    <table id="id_detail_data_grid"
+           class="table table-hover table-sm align-content-center table-bordered mb-0"
+           cellspacing="0" style="width: 100%;">
+        <thead style="background-color: #cdd5ce">
+        <tr class="text-center text-dark" >
+            <th scope="col" class="align-middle font-weight-bold" style="width: 3%;">Nº</th>
+            <th scope="col" class="align-middle font-weight-bold" style="width: 40%;">Descripción de Artículo</th>
+            <th scope="col" class="align-middle font-weight-bold" style="width: 10%;">Cantidad</th>
+            <th scope="col" class="align-middle font-weight-bold" style="width: 8%;">Unidad Medida</th>
+            <th scope="col" class="align-middle font-weight-bold" style="width: 8%; background-color: #e9ecef">Valor Unit. (Sin IGV)</th>
+            <th scope="col" class="align-middle font-weight-bold" style="width: 7%;">Prec. Unit. (Con IGV)</th>
+            <th scope="col" class="align-middle font-weight-bold" style="width: 6%;">Importe</th>
+            <th scope="col" class="align-middle font-weight-bold" style="width: 4%;">Eliminar</th>
+        </tr>
+        </thead>
+        <tbody id="details-table">
+        <tr class="text-center item-row" product="" unit_id="">
+            <td class="item-numero align-middle text-center">1</td>
+            <td class="align-middle text-left product-item-table">
+                <!-- Buscador elegante de productos -->
+                <div class="product-search-container">
+                    <div class="search-input-group">
+                        <div class="search-type-selector">
+                            <select class="form-control search-type-select" id="search_type_1">
+                                <option value="all">🔍 Todo</option>
+                                <option value="barcode">📊 Código</option>
+                                <option value="description">📝 Descripción</option>
+                                <option value="serial">🔢 Serie</option>
+                            </select>
+                        </div>
+                        <div class="search-input-wrapper">
+                            <input type="text"
+                                   class="form-control product-search-input"
+                                   id="product_search_1"
+                                   placeholder="Buscar producto..."
+                                   autocomplete="off">
+                            <div class="search-icon">
+                                <i class="fas fa-search"></i>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <input aria-label="" type="text"
+                                   class="form-control text-center serial-product text-uppercase" readonly
+                                   placeholder="Serie" style="width: 200px; min-width: 200px;">
+                        </div>
+                    </div>
+
+                    <!-- Dropdown de resultados -->
+                    <div class="search-results-dropdown" id="search_results_1" style="display: none;">
+                        <div class="search-results-header">
+                            <span class="results-count">0 resultados</span>
+                            <span class="search-tip">↑↓ Flechas para navegar, Enter para seleccionar</span>
+                        </div>
+                        <div class="search-results-list" id="search_results_list_1">
+                            <!-- Los resultados se cargarán aquí dinámicamente -->
+                        </div>
+                    </div>
+                </div>
+
+            </td>
+            <td class="align-middle item-quantity">
+                <div class="input-group">
+                    <input type="text" class="form-control text-center quantity-product text-uppercase" placeholder="0">
+{#                    <div class="input-group-append">#}
+{#                        <button type="button" class="btn btn-warning btn-sm add-serial"> Series</button>#}
+{#                    </div>#}
+                </div>
+            </td>
+            <td class="align-middle unit">
+                <input type="text" class="form-control text-center text-uppercase unit-product" id="unit_product_id"
+                       name="unit-product" readonly>
+            </td>
+            <td class="item-value-price text-right align-middle">
+                <div class="input-icon">
+                    <input type="text" class="form-control text-right text-uppercase value-unit-product"
+                           placeholder="0.00">
+                    <i class="change-money">S/</i>
+                </div>
+            </td>
+            <td class="item-price text-right align-middle" price-unit-with-discount="">
+                <div class="input-icon">
+                    <input type="text" class="form-control text-right text-uppercase price-unit-product"
+                           placeholder="0.00">
+                    <i class="change-money">S/</i>
+                </div>
+            </td>
+            <td class="item-total text-right align-middle total-row">
+                <div class="input-icon">
+                    <input type="text" class="form-control text-right text-uppercase total-detail" placeholder="0.00">
+                    <i class="change-money">S/</i>
+                </div>
+            </td>
+            <td class="align-middle">
+                <button type="button" class="btn btn-danger btn-sm remove-row">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        </tr>
+        <tr class="product-serial">
+        </tr>
+        </tbody>
+
+        <tfoot id="details-table-foot">
+        <tr>
+            <td class="border-0" colspan="3"></td>
+            <td class="border td-table-foot" colspan="11">
+                <div class="form-check mt-5">
+                    <input class="form-check-input check-igv" type="checkbox" value="" id="check_igv" checked>
+                    <label class="form-check-label" for="check_igv">
+                        INCLUYE IGV
+                    </label>
+                </div>
+                <table class="table table-hover table-sm align-content-center table-bordered mt-3 table-foot"
+                       cellspacing="0" style="width: 100%;" id="id_detail_data_foot">
+                    <thead style="background-color: #cdd5ce">
+                    <tr class="text-center text-dark">
+                        <th scope="col" class="align-middle font-weight-bold" style="width: 20%;">Base Imponible</th>
+                        <th scope="col" class="align-middle font-weight-bold" style="width: 20%;">IGV (18%)</th>
+                        <th scope="col" class="align-middle font-weight-bold" style="width: 20%;">Importe Total</th>
+                        <th scope="col" class="align-middle font-weight-bold" style="width: 20%;">Total Documento</th>
+                    </thead>
+                    <tbody id="table-detail-foot">
+                    <tr class="text-center">
+                        <td class="foot-base">
+                            <div class="input-icon">
+                                <input type="text"
+                                       class="form-control text-right text-uppercase total-foot-base"
+                                       placeholder="0.00"><i class="change-money">S/</i>
+                            </div>
+                        </td>
+                        <td class="foot-igv">
+                            <div class="input-icon">
+                                <input type="text"
+                                       class="form-control text-right text-uppercase total-foot-igv"
+                                       placeholder="0.00"><i class="change-money">S/</i>
+                            </div>
+                        </td>
+                        <td class="foot-total">
+                            <div class="input-icon">
+                                <input type="text"
+                                       class="form-control text-right text-uppercase total-foot-total"
+                                       placeholder="0.00"><i class="change-money">S/</i>
+                            </div>
+                        </td>
+                        <td class="foot-document">
+                            <div class="input-icon">
+                                <input type="text" class="form-control text-right text-uppercase total-foot-document"
+                                       placeholder="0.00">
+                                <i class="change-money font-weight-lighter">S/</i>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        </tfoot>
+    </table>
+</div>
+
+<!-- Estilos CSS para el buscador elegante y responsive -->
+<style>
+/* Estilos base del buscador */
+.product-search-container {
+    position: relative;
+    width: 100%;
+}
+
+.search-input-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.search-type-selector {
+    flex: 0 0 140px;
+}
+
+.search-input-group .input-group {
+    flex: 0 0 120px;
+}
+
+.search-input-group .input-group input {
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 12px;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.search-input-group .input-group input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.search-type-select {
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 12px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 1px solid #dee2e6;
+    transition: all 0.3s ease;
+    width: 100%;
+    min-width: 140px;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: nowrap;
+}
+
+.search-type-select option {
+    padding: 8px 12px;
+    font-size: 12px;
+    background: white;
+    color: #495057;
+}
+
+.search-type-select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    background: white;
+}
+
+.search-input-wrapper {
+    flex: 1;
+    position: relative;
+    min-width: 200px;
+}
+
+.product-search-input {
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 10px 40px 10px 15px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    width: 100%;
+}
+
+.product-search-input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.3rem rgba(0, 123, 255, 0.15), 0 4px 8px rgba(0,0,0,0.1);
+    transform: translateY(-1px);
+}
+
+.search-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    font-size: 14px;
+}
+
+/* Dropdown de resultados */
+.search-results-dropdown {
+    position: fixed;
+    top: auto;
+    left: auto;
+    right: auto;
+    background: white!important;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    z-index: 9999;
+    margin-top: 5px;
+    max-height: 400px;
+    overflow: hidden;
+    width: 100%;
+    transform: translateZ(0);
+    will-change: transform;
+}
+
+.search-results-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 12px 16px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.results-count {
+    font-weight: 600;
+    color: #495057;
+    font-size: 13px;
+}
+
+.search-tip {
+    font-size: 11px;
+    color: #ffffff;
+    font-style: italic;
+}
+
+.search-results-list {
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.search-result-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f8f9fa;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.search-result-item:hover {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    transform: translateX(2px);
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.product-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.product-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.product-name {
+    font-weight: 600;
+    color: #212529;
+    font-size: 14px;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.product-details {
+    display: flex;
+    gap: 12px;
+    font-size: 12px;
+    color: #6c757d;
+    flex-wrap: wrap;
+}
+
+.product-detail-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+.search-type-badge {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+}
+
+.no-results {
+    padding: 20px;
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 8px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Estilos para elementos seleccionados */
+.search-result-item.selected {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+    color: white !important;
+    transform: translateX(4px);
+}
+
+.search-result-item.selected .product-name {
+    color: white !important;
+}
+
+.search-result-item.selected .product-details {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.search-result-item.selected .product-detail-item {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.search-result-item.selected .search-type-badge {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    color: #007bff;
+    font-weight: 700;
+}
+
+/* Scrollbar personalizado */
+.search-results-list {
+    max-height: 350px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #007bff #f8f9fa;
+    scroll-behavior: smooth;
+}
+
+.search-results-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.search-results-list::-webkit-scrollbar-track {
+    background: #f8f9fa;
+    border-radius: 3px;
+}
+
+.search-results-list::-webkit-scrollbar-thumb {
+    background: #007bff;
+    border-radius: 3px;
+}
+
+.search-results-list::-webkit-scrollbar-thumb:hover {
+    background: #0056b3;
+}
+
+/* Responsive Design - Tablets */
+@media (max-width: 1024px) {
+    .search-input-group {
+        gap: 6px;
+    }
+    
+    .search-type-selector {
+        flex: 0 0 130px;
+    }
+    
+    .search-input-group .input-group {
+        flex: 0 0 110px;
+    }
+    
+    .search-input-wrapper {
+        min-width: 180px;
+    }
+    
+    .product-search-input {
+        font-size: 13px;
+        padding: 8px 35px 8px 12px;
+    }
+    
+    .search-icon {
+        font-size: 13px;
+        right: 10px;
+    }
+}
+
+/* Responsive Design - Mobile Large */
+@media (max-width: 768px) {
+    .search-input-group {
+        flex-direction: column;
+        gap: 8px;
+        align-items: stretch;
+    }
+    
+    .search-type-selector {
+        flex: 0 0 auto;
+        width: 100%;
+    }
+    
+    .search-input-wrapper {
+        flex: 0 0 auto;
+        min-width: 100%;
+    }
+    
+    .search-input-group .input-group {
+        flex: 0 0 auto;
+        width: 100%;
+    }
+    
+    .search-results-dropdown {
+        position: fixed;
+        top: auto !important;
+        left: 10px !important;
+        right: 10px !important;
+        width: calc(100vw - 20px) !important;
+        max-height: 300px;
+        z-index: 10000;
+    }
+    
+    .search-results-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    
+    .search-tip {
+        font-size: 10px;
+    }
+    
+    .product-details {
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .product-detail-item {
+        font-size: 11px;
+    }
+    
+    /* Ajustes para la tabla en móvil */
+    .table-responsive {
+        font-size: 12px;
+    }
+    
+    .table th, .table td {
+        padding: 0.5rem 0.25rem;
+    }
+    
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+}
+
+/* Responsive Design - Mobile Small */
+@media (max-width: 576px) {
+    .search-input-group {
+        gap: 6px;
+    }
+    
+    .search-type-select {
+        font-size: 11px;
+        padding: 6px 10px;
+    }
+    
+    .product-search-input {
+        font-size: 12px;
+        padding: 6px 30px 6px 10px;
+    }
+    
+    .search-icon {
+        font-size: 12px;
+        right: 8px;
+    }
+    
+    .search-results-dropdown {
+        left: 5px !important;
+        right: 5px !important;
+        width: calc(100vw - 10px) !important;
+        max-height: 250px;
+    }
+    
+    .search-result-item {
+        padding: 8px 12px;
+        gap: 8px;
+    }
+    
+    .product-icon {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+    }
+    
+    .product-name {
+        font-size: 13px;
+    }
+    
+    .product-details {
+        font-size: 11px;
+    }
+    
+    .search-type-badge {
+        font-size: 9px;
+        padding: 3px 6px;
+    }
+    
+    /* Ajustes adicionales para tabla muy pequeña */
+    .table-responsive {
+        font-size: 11px;
+    }
+    
+    .table th, .table td {
+        padding: 0.25rem 0.125rem;
+    }
+    
+    .input-group input {
+        font-size: 11px;
+        padding: 4px 8px;
+    }
+    
+    .btn-sm {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.7rem;
+    }
+}
+
+/* Responsive Design - Extra Small */
+@media (max-width: 480px) {
+    .search-input-group {
+        gap: 4px;
+    }
+    
+    .search-results-dropdown {
+        left: 2px !important;
+        right: 2px !important;
+        width: calc(100vw - 4px) !important;
+    }
+    
+    .search-result-item {
+        padding: 6px 10px;
+        gap: 6px;
+    }
+    
+    .product-icon {
+        width: 24px;
+        height: 24px;
+        font-size: 11px;
+    }
+    
+    .product-name {
+        font-size: 12px;
+    }
+    
+    .product-details {
+        font-size: 10px;
+    }
+    
+    .search-type-badge {
+        font-size: 8px;
+        padding: 2px 5px;
+    }
+    
+    /* Ocultar algunos elementos en pantallas muy pequeñas */
+    .search-tip {
+        display: none;
+    }
+    
+    .results-count {
+        font-size: 12px;
+    }
+}
+
+/* Mejoras para orientación landscape en móviles */
+@media (max-width: 768px) and (orientation: landscape) {
+    .search-results-dropdown {
+        max-height: 200px;
+    }
+    
+    .search-input-group {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+    
+    .search-type-selector {
+        flex: 0 0 120px;
+    }
+    
+    .search-input-wrapper {
+        flex: 1;
+        min-width: 150px;
+    }
+}
+
+/* Asegurar que el dropdown esté siempre visible */
+.search-results-dropdown {
+    pointer-events: auto;
+}
+
+/* Mejoras de accesibilidad */
+.search-result-item:focus {
+    outline: 2px solid #007bff;
+    outline-offset: -2px;
+}
+
+.product-search-input:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+/* Animaciones de entrada */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.search-results-dropdown {
+    animation: fadeInUp 0.2s ease-out;
+}
+
+/* Mejoras para modo oscuro (si se implementa) */
+@media (prefers-color-scheme: dark) {
+    .search-results-dropdown {
+        background: #2d3748;
+        border-color: #4a5568;
+    }
+    
+    .search-results-header {
+        background: linear-gradient(135deg, #e4edf1 0%, #2d3748 100%)!important;
+        border-color: #4a5568;
+    }
+    
+    .search-result-item {
+        border-color: #4a5568;
+    }
+    
+    .search-result-item:hover {
+        background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+    }
+}
+</style>
