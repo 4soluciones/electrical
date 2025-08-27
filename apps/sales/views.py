@@ -5462,9 +5462,9 @@ def save_product_detail(request):
         family_product_id = request.POST.get('family-product', '')
         brand_product_id = request.POST.get('brand-product', '')
         id_unit = request.POST.get('unit', '')
-        p1 = request.POST.get('id_p1', '')
-        p2 = request.POST.get('id_p2', '')
-        p3 = request.POST.get('id_p3', '')
+        p1 = request.POST.get('id_p1', 0)
+        p2 = request.POST.get('id_p2', 0)
+        p3 = request.POST.get('id_p3', 0)
         price_purchase = request.POST.get('id_price_purchase', '')
         quantity_minimum = request.POST.get('quantity_minimum', '')
         stock_max = 0
@@ -5521,9 +5521,9 @@ def save_product_detail(request):
                 price_sale=decimal.Decimal(price_sale),
                 unit=unit_obj,
                 quantity_minimum=decimal.Decimal(quantity_minimum),
-                percentage_one=p1,
-                percentage_two=p2,
-                percentage_three=p3,
+                percentage_one=decimal.Decimal(p1),
+                percentage_two=decimal.Decimal(p2),
+                percentage_three=decimal.Decimal(p3),
                 price_purchase=decimal.Decimal(price_purchase)
             )
             product_detail_obj.save()
