@@ -13,7 +13,7 @@ urlpatterns = [
     path('get_purchase_annular_list/', get_purchase_annular_list, name='get_purchase_annular_list'),
     path('get_purchase_store_list/', get_purchase_store_list, name='get_purchase_store_list'),
     path('get_detail_purchase_store/', get_detail_purchase_store, name='get_detail_purchase_store'),
-    # path('get_details_by_purchase/', get_details_by_purchase, name='get_details_by_purchase'),
+    path('get_details_by_purchase/', get_detail_by_purchase, name='get_details_by_purchase'),
 
     # path('get_requirement_programming/', get_requirement_programming, name='get_requirement_programming'),
     # path('get_programming_invoice/', get_programming_invoice, name='get_programming_invoice'),
