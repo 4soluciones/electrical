@@ -119,10 +119,9 @@
                                         class="fas fa-hand-holding-usd"></i> Orden de Ventas </a></li>
                                 <li><a class="dropdown-item" href="{% url 'sales:search_sell_by_serial' %}">
                                     <i class="fas fa-search"></i> Buscar Venta por Serie </a></li>
-
+                                <li><a class="dropdown-item" href="{% url 'sales:get_sales_by_subsidiary_store' %}"><i
+                                        class="fas fa-align-left"></i> Reporte Ventas por sede </a></li>
                                 {% if perms.admin %}
-                                    <li><a class="dropdown-item" href="{% url 'sales:get_sales_by_subsidiary_store' %}"><i
-                                            class="fas fa-align-left"></i> Reporte Ventas por sede </a></li>
                                     <li><a class="dropdown-item" href="{% url 'sales:get_sales_all_subsidiaries' %}"><i
                                             class="fas fa-align-left"></i> Reporte Ventas generales </a></li>
                                     <li><a class="dropdown-item" href="{% url 'sales:get_report_summary_sales' %}"><i
