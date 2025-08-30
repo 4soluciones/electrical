@@ -24,7 +24,7 @@
             <th class="th-sm" style="width: 5%">Unidad</th>
             {#                <th class="th-sm" style="background: #bed1f3; width: 5%">Precio Compra Dólar</th>#}
             <th class="th-sm" style="background: #abf6d6; width: 5%">Precio Compra</th>
-            {% if perms.sales.change_producto %}
+            {% if perms.sales.change_producto or perms.admin %}
                 <th class="th-sm align-middle" style="width: 5%; font-size: 10px">%Porcetanje 1</th>
                 <th class="th-sm align-middle" style="width: 5%; font-size: 10px">%Porcetanje 2</th>
             {% endif %}
