@@ -96,7 +96,7 @@
                            pk="{{ product.id }}"><i class="fas fa-edit fa-xs"></i></a><br>
                         <span style="font-size: 10px">{{ product_detail.update_at|date:"d/m/y" }}</span>
                     </td>
-                    {% if perms.sales.change_producto %}
+                    {% if perms.sales.change_producto or perms.admin %}
                         <td class="align-middle new-percent-one" pk="{{ product.id }}">
                         <span class="font-weight-bold"
                               style="font-size: 10px">Precio al {{ product_detail.percentage_one|floatformat:0 }}%:</span><br>
@@ -165,7 +165,7 @@
 
                                     <a class="dropdown-item get-kardex" pk="{{ product.id }}">
                                         <i class="fas fa-sync-alt"></i> Ver kardex</a>
-                                    {% if perms.sales.change_producto %}
+                                    {% if perms.sales.change_producto or perms.admin %}
                                         <a class="dropdown-item get-product-detail" pk="{{ product.id }}">
                                             <i class="fas fa-sync-alt"></i> Ver presentaciones</a>
                                     {% endif %}
