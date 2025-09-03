@@ -244,4 +244,7 @@ urlpatterns = [
     path('get_credit_notes_by_date/', login_required(get_credit_notes_by_date), name='get_credit_notes_by_date'),
     path('cancel_credit_note/', login_required(cancel_credit_note), name='cancel_credit_note'),
 
+    # Product Serials
+    path('get_product_serials/', login_required(get_product_serials), name='get_product_serials'),
+
 ]

@@ -32,7 +32,7 @@ from apps.sales.views_SUNAT import send_bill_nubefact, send_receipt_nubefact, qu
     query_api_free_ruc, query_api_peru, send_cancel_bill_nubefact, query_apis_net_dni_ruc
 from apps.sales.models import OrderBill
 from apps.sales.number_to_letters import numero_a_letras, numero_a_moneda
-from django.db.models import Min, Sum, Max, Q, Prefetch, Subquery, OuterRef, Value
+from django.db.models import Min, Sum, Max, Q, Prefetch, Subquery, OuterRef, Value, Exists
 from electrical import settings
 import os
 from django.db.models import F, IntegerField
@@ -4552,6 +4552,12 @@ def get_product_list(criteria=None, value=None, brand=None):
 
     last_kardex = Kardex.objects.filter(product_store=OuterRef('id')).order_by('-id')[:1]
 
+    has_serials = Exists(
+        ProductSerial.objects.filter(
+            product_store__product=OuterRef('id')
+        )
+    )
+
     if criteria == 'all':
         product_set = Product.objects.all()
 
@@ -4563,7 +4569,8 @@ def get_product_list(criteria=None, value=None, brand=None):
             'product_family', 'product_brand'
         ).annotate(
             last_purchase_date=Subquery(last_purchase_date),
-            last_purchase_quantity=Subquery(last_purchase_quantity)
+            last_purchase_quantity=Subquery(last_purchase_quantity),
+            has_serials=has_serials
         ).prefetch_related(
             Prefetch(
                 'productstore_set',
@@ -4591,7 +4598,8 @@ def get_product_list(criteria=None, value=None, brand=None):
             'product_family', 'product_brand'
         ).annotate(
             last_purchase_date=Subquery(last_purchase_date),
-            last_purchase_quantity=Subquery(last_purchase_quantity)
+            last_purchase_quantity=Subquery(last_purchase_quantity),
+            has_serials=has_serials
         ).prefetch_related(
             Prefetch(
                 'productstore_set',
@@ -4609,7 +4617,8 @@ def get_product_list(criteria=None, value=None, brand=None):
     elif criteria == 'barcode':
         product_set = Product.objects.filter(productdetail__code=value).annotate(
             last_purchase_date=Subquery(last_purchase_date),
-            last_purchase_quantity=Subquery(last_purchase_quantity)
+            last_purchase_quantity=Subquery(last_purchase_quantity),
+            has_serials=has_serials
         )
 
     return product_set
@@ -6015,8 +6024,16 @@ def get_products_by_inventory(request):
 
         last_kardex = Kardex.objects.filter(product_store=OuterRef('id')).order_by('-id')[:1]
 
+        has_serials = Exists(
+            ProductSerial.objects.filter(
+                product_store__product=OuterRef('id')
+            )
+        )
+
         product_set = Product.objects.filter(product_brand__id=brand_id).select_related(
-            'product_family', 'product_brand').prefetch_related(
+            'product_family', 'product_brand').annotate(
+            has_serials=has_serials
+        ).prefetch_related(
             Prefetch(
                 'productstore_set', queryset=ProductStore.objects.filter(subsidiary_store__subsidiary=subsidiary_obj,
                                                                          subsidiary_store__category='V').select_related(
@@ -6541,11 +6558,19 @@ def get_all_products(request):
             purchase__status='A'
         ).order_by('-purchase__purchase_date').values('quantity')[:1]
 
+        # Subquery para verificar si el producto tiene series
+        has_serials = Exists(
+            ProductSerial.objects.filter(
+                product_store__product=OuterRef('id')
+            )
+        )
+
         product_set = Product.objects.filter(is_enabled=True).select_related(
             'product_family', 'product_brand'
         ).annotate(
             last_purchase_date=Subquery(last_purchase_date),
-            last_purchase_quantity=Subquery(last_purchase_quantity)
+            last_purchase_quantity=Subquery(last_purchase_quantity),
+            has_serials=has_serials  # Ahora sí funciona con Exists
         ).prefetch_related(
             Prefetch(
                 'productstore_set',
@@ -7610,5 +7635,114 @@ def cancel_credit_note(request):
             return JsonResponse({
                 'error': 'Nota de crédito no encontrada'
             }, status=404)
+    
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+
+def get_product_serials(request):
+    """
+    Vista para obtener las series de un producto específico
+    """
+    if request.method == 'GET':
+        product_id = request.GET.get('product_id')
+        
+        try:
+            product = Product.objects.get(id=product_id)
+            
+            # Obtener solo las series disponibles (estado 'C' - Comprado)
+            product_serials = ProductSerial.objects.filter(
+                product_store__product=product,
+                status='C'  # Solo series disponibles
+            ).select_related(
+                'product_store__subsidiary_store__subsidiary',
+                'product_store__subsidiary_store'
+            ).order_by('product_store__subsidiary_store__subsidiary__name', 'serial_number')
+            
+            # Agrupar series por sucursal y almacén
+            serials_by_store = {}
+            for serial in product_serials:
+                store_key = f"{serial.product_store.subsidiary_store.subsidiary.name} - {serial.product_store.subsidiary_store.name}"
+                if store_key not in serials_by_store:
+                    serials_by_store[store_key] = {
+                        'subsidiary': serial.product_store.subsidiary_store.subsidiary.name,
+                        'store': serial.product_store.subsidiary_store.name,
+                        'serials': []
+                    }
+                
+                serials_by_store[store_key]['serials'].append({
+                    'id': serial.id,
+                    'serial_number': serial.serial_number,
+                    'created_at': serial.product_store.create_at if hasattr(serial.product_store, 'create_at') else None
+                })
+            
+            # Crear el HTML del modal
+            html_content = f"""
+            <div class="container-fluid">
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <h6 class="text-primary">
+                            <i class="fas fa-box"></i> {product.name}
+                        </h6>
+                        <small class="text-muted">Código: {product.code or 'N/A'}</small>
+                    </div>
+                </div>
+            """
+            
+            if serials_by_store:
+                for store_key, store_data in serials_by_store.items():
+                    html_content += f"""
+                    <div class="card mb-3">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0">
+                                <i class="fas fa-warehouse"></i> {store_data['subsidiary']} - {store_data['store']}
+                                <span class="badge badge-light ml-2">{len(store_data['serials'])} disponibles</span>
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                    """
+                    
+                    for serial in store_data['serials']:
+                        html_content += f"""
+                                <div class="col-md-4 col-sm-6 mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge badge-success mr-2">
+                                            <i class="fas fa-check"></i>
+                                        </span>
+                                        <span class="font-weight-bold">{serial['serial_number']}</span>
+                                    </div>
+                                </div>
+                        """
+                    
+                    html_content += """
+                            </div>
+                        </div>
+                    </div>
+                    """
+            else:
+                html_content += """
+                <div class="alert alert-warning text-center">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    No se encontraron series disponibles para este producto.
+                </div>
+                """
+            
+            html_content += "</div>"
+            
+            return JsonResponse({
+                'success': True,
+                'html': html_content
+            })
+            
+        except Product.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'error': 'Producto no encontrado'
+            })
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': f'Error al obtener las series: {str(e)}'
+            })
     
     return JsonResponse({'error': 'Método no permitido'}, status=405)
