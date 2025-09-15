@@ -1692,7 +1692,7 @@ def kardex_input_credit_note(
         return response
 
     new_stock = old_stock + decimal.Decimal(quantity_return)
-    new_quantity = decimal.Decimal(new_stock)
+    new_quantity = decimal.Decimal(quantity_return)
     old_price_unit = last_kardex.remaining_price
 
     new_price_total = old_price_unit * new_quantity
