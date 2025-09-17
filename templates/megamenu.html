@@ -112,16 +112,18 @@
                         </li>
                     {% endif %}
                     {% if perms.sales.view_order %}
-                        <li><a class="dropdown-item dropdown-toggle" href="#"><i class="fas fa-hand-holding-usd"></i>
-                            Ventas</a>
-                            <ul class="submenu dropdown-menu show">
-                                <li><a class="dropdown-item" href="{% url 'sales:sales_list' %}"><i
-                                        class="fas fa-hand-holding-usd"></i> Orden de Ventas </a></li>
-                                <li><a class="dropdown-item" href="{% url 'sales:search_sell_by_serial' %}">
-                                    <i class="fas fa-search"></i> Buscar Venta por Serie </a></li>
-                                <li><a class="dropdown-item" href="{% url 'sales:get_sales_by_subsidiary_store' %}"><i
-                                        class="fas fa-align-left"></i> Reporte Ventas por sede </a></li>
-                                {% if perms.admin %}
+                        {% if perms.admin %}
+                            <li><a class="dropdown-item dropdown-toggle" href="#"><i
+                                    class="fas fa-hand-holding-usd"></i>
+                                Ventas</a>
+                                <ul class="submenu dropdown-menu show">
+                                    <li><a class="dropdown-item" href="{% url 'sales:sales_list' %}"><i
+                                            class="fas fa-hand-holding-usd"></i> Orden de Ventas </a></li>
+                                    <li><a class="dropdown-item" href="{% url 'sales:search_sell_by_serial' %}">
+                                        <i class="fas fa-search"></i> Buscar Venta por Serie </a></li>
+                                    <li><a class="dropdown-item" href="{% url 'sales:get_sales_by_subsidiary_store' %}"><i
+                                            class="fas fa-align-left"></i> Reporte Ventas por sede </a></li>
+
                                     <li><a class="dropdown-item" href="{% url 'sales:get_sales_all_subsidiaries' %}"><i
                                             class="fas fa-align-left"></i> Reporte Ventas generales </a></li>
                                     <li><a class="dropdown-item" href="{% url 'sales:get_report_summary_sales' %}"><i
@@ -130,9 +132,10 @@
                                             class="fas fa-align-left"></i> Reporte Ventas por Marca </a></li>
                                     <li><a class="dropdown-item" href="{% url 'sales:credit_notes_report' %}"><i
                                             class="fas fa-file-invoice-dollar"></i> Reporte Notas de Crédito </a></li>
-                                {% endif %}
-                            </ul>
-                        </li>
+
+                                </ul>
+                            </li>
+                        {% endif %}
 
                         <li><a class="dropdown-item dropdown-toggle" href="#"><i class="fas fa-dolly"></i> Cotizaciones</a>
                             <ul class="submenu dropdown-menu show">
