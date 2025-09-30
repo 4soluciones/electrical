@@ -358,9 +358,9 @@
                         igv = base * 0.18;
                         total = base + igv;
                     }*/
-                    $(`table#table-detail-guide tfoot tr td input.old-igv`).val(igv.toFixed(6));
-                    $(`table#table-detail-guide tfoot tr td input.old-base`).val(base.toFixed(6));
-                    $(`table#table-detail-guide tfoot tr td input.old-total`).val(total.toFixed(6));
+                    $(`table#table-detail-guide tfoot tr td input.old-igv`).val(igv.toFixed(4));
+                    $(`table#table-detail-guide tfoot tr td input.old-base`).val(base.toFixed(4));
+                    $(`table#table-detail-guide tfoot tr td input.old-total`).val(total.toFixed(4));
                 },
                 fail: function (response) {
                     console.log("error")
@@ -382,7 +382,7 @@
                 });
                 let price = Number(findDetailObj["price"]);
                 let quantityReturned = Number($(this).val());
-                let subtotal = Number(price * quantityReturned).toFixed(6);
+                let subtotal = Number(price * quantityReturned).toFixed(4);
                 findDetailObj["quantityReturned"] = Number(quantityReturned);
                 findDetailObj["newSubtotal"] = Number(subtotal);
                 findDetailObj["isCreditNote"] = (quantityReturned > 0);
@@ -413,9 +413,9 @@
                 total = base + igv;
             }*/
 
-            $(`table#table-detail-guide tfoot tr td input.new-base`).val(base.toFixed(6));
-            $(`table#table-detail-guide tfoot tr td input.new-igv`).val(igv.toFixed(6));
-            $(`table#table-detail-guide tfoot tr td input.new-total`).val(total.toFixed(6));
+            $(`table#table-detail-guide tfoot tr td input.new-base`).val(base.toFixed(4));
+            $(`table#table-detail-guide tfoot tr td input.new-igv`).val(igv.toFixed(4));
+            $(`table#table-detail-guide tfoot tr td input.new-total`).val(total.toFixed(4));
 
         }
 
