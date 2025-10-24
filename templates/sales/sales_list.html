@@ -743,6 +743,13 @@
                 sum = sum + total_detail;
             });
             $('#sum-total').val(sum.toFixed(2));
+
+            // Validar si tiene crédito y poner el valor de sum en input-amount de créditos
+            if ($('#credit_details tr').length > 0) {
+                $('#credit_details tr td.item-amount-credit input.input-amount').each(function() {
+                    $(this).val(sum.toFixed(2));
+                });
+            }
         }
 
 
@@ -1102,6 +1109,20 @@
                 };
                 creditDict.push(creditObj);
             });
+
+            // Validación: verificar que la suma de cuotas de crédito sea igual al total
+            if (_transaction_payment_type.val() === 'C' && creditDict.length > 0) {
+                let sumCredits = 0;
+                creditDict.forEach(function(credit) {
+                    sumCredits += parseFloat(credit.amount);
+                });
+                let totalOrder = parseFloat($('#sum-total').val());
+                
+                if (Math.abs(sumCredits - totalOrder) > 0.01) { // Tolerancia de 0.01 para decimales
+                    toastr.warning(`La suma de las cuotas de crédito (${sumCredits.toFixed(2)}) no es igual al total de la orden (${totalOrder.toFixed(2)})`, 'Error de Validación');
+                    return false;
+                }
+            }
 
             let data = new FormData($('#order-form').get(0));
             data.append('detail', JSON.stringify(detailOrder));
