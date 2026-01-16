@@ -1,7 +1,8 @@
 from django.urls import path
 from django.contrib.auth.decorators import login_required
 from apps.comercial.views import *
-from apps.comercial.views_PDF import guide_print, print_programming_guide, get_input_note, get_output_note, print_ticket
+from apps.comercial.views_PDF import guide_print, print_programming_guide, get_input_note, get_output_note, print_ticket, \
+    print_ticket, guide, guide_ticket
 
 urlpatterns = [
     path('', login_required(Index.as_view()), name='index'),
@@ -108,5 +109,11 @@ urlpatterns = [
     path('get_product_by_subsidiary_store_origin/', login_required(get_product_by_subsidiary_store_origin), name='get_product_by_subsidiary_store_origin'),
     path('get_product_by_subsidiary_store_destiny/', login_required(get_product_by_subsidiary_store_destiny), name='get_product_by_subsidiary_store_destiny'),
 
+    # NEW GUIDES
+    path('modal_guide/', login_required(modal_guide), name='modal_guide'),
+    path('get_guide/', login_required(get_guide), name='get_guide'),
+    path('guide_save/', login_required(guide_save), name='guide_save'),
+    path('guide/<int:pk>/', login_required(guide), name='guide'),
+    path('guide_ticket/<int:pk>/', login_required(guide_ticket), name='guide_ticket'),
 
 ]

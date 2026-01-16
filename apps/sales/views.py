@@ -1873,6 +1873,10 @@ def get_dict_order_queries(order_set, start_date, end_date, is_pdf=False, is_uni
                 'description': cn.note_description,
             })
 
+        guide = None
+        if o.guide:
+            guide = o.guide.id
+
         order = {
             'id': o.id,
             # 'status': o.get_status_display(),
@@ -1898,6 +1902,7 @@ def get_dict_order_queries(order_set, start_date, end_date, is_pdf=False, is_uni
             # 'note_pdf': note_pdf,
             'credit_notes': credit_notes_data,
             'fully_returned': fully_returned,
+            'guide': guide
         }
 
         for d in _order_detail:

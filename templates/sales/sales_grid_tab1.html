@@ -84,7 +84,7 @@
                                     <option selected value="{{ current_user.id }}">{{ current_user_name|upper }}</option>
                                     {% for uwn in users_with_names %}
                                         <option value="{{ uwn.user.id }}">{{ uwn.name|upper }}</option>
-                                    {% endfor %}
+                                {% endfor %}
                                 {% endif %}
                             </select>
 

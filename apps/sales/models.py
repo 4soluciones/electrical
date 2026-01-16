@@ -416,6 +416,8 @@ class Order(models.Model):
     pay_condition = models.CharField('Payment Condition', max_length=50, null=True, blank=True)
     issue_date = models.DateField('Fecha de emision', null=True, blank=True)
     correlative = models.CharField('Correlativo', max_length=10, null=True, blank=True)
+    guide = models.ForeignKey('comercial.Guide', on_delete=models.SET_NULL, null=True,
+                              blank=True)
 
     def __str__(self):
         return str(self.pk) + " / " + str(self.type) + " / "

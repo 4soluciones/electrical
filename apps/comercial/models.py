@@ -231,6 +231,11 @@ class Guide(models.Model):
     DOCUMENT_TYPE_ATTACHED_CHOICES = (
         ('G', 'Guias de remision'), ('F', 'Factura'), ('P', 'Orden de produccion'), ('T', 'Transferencia de almacen'),
         ('O', 'Otro'))
+    MOTIVE_CHOICES = (('01', 'VENTA'), ('14', 'VENTA SUJETA A CONFIRMACION DEL COMPRADOR'), ('02', 'COMPRA'),
+                      ('04', 'TRASLADO ENTRE ESTABLECIMIENTOS DE LA MISMA EMPRESA'),
+                      ('18', 'TRASLADO EMISOR ITINERANTE CP'),
+                      ('08', 'IMPORTACION'), ('09', 'EXPORTACION'), ('13', 'OTROS'),)
+    MODALITY_TRANSPORT_CHOICES = (('1', 'PUBLICO'), ('2', 'PRIVADO'))
     id = models.AutoField(primary_key=True)
     serial = models.CharField('Serie', max_length=10, null=True, blank=True)
     code = models.CharField('Codigo', max_length=20, null=True, blank=True)
@@ -245,8 +250,37 @@ class Guide(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     programming = models.ForeignKey('Programming', on_delete=models.SET_NULL, null=True, blank=True)
-    guide_motive = models.ForeignKey('GuideMotive', on_delete=models.SET_NULL, null=True, blank=True)
+    guide_reason = models.ForeignKey('GuideMotive', on_delete=models.SET_NULL, null=True, blank=True)
     subsidiary = models.ForeignKey(Subsidiary, verbose_name='Sede', on_delete=models.SET_NULL, null=True, blank=True)
+
+    guide_modality_transport = models.CharField('Modalidad de transporte guia', max_length=1,
+                                                choices=MODALITY_TRANSPORT_CHOICES, default='1')
+    guide_serial = models.CharField(max_length=50, null=True, blank=True, default='-')
+    guide_type = models.CharField('TIPO', max_length=2, null=True, blank=True)
+    guide_number = models.IntegerField(verbose_name='CORRELATIVO', null=True, blank=True)
+    guide_motive = models.CharField('Motivo Guia', max_length=2, choices=MOTIVE_CHOICES, default='1')
+    guide_status = models.CharField('Sunat Status', max_length=5, null=True, blank=True)
+    guide_description = models.CharField('Sunat descripcion', max_length=500, default='-')
+    guide_enlace_pdf = models.CharField('Sunat Enlace Pdf', max_length=500, null=True, blank=True)
+    guide_date = models.DateTimeField(null=True, blank=True)
+    guide_qr = models.CharField('Codigo QR', max_length=500, null=True, blank=True)
+    guide_hash = models.CharField('Codigo Hash', max_length=500, null=True, blank=True)
+    guide_origin = models.CharField('Ubigeo Origen', max_length=10, null=True, blank=True)
+    guide_origin_address = models.CharField('Direccion Origen', max_length=200, null=True, blank=True)
+    guide_destiny = models.CharField('Ubigeo Destino', max_length=10, null=True, blank=True)
+    guide_destiny_address = models.CharField('Direccion Origen', max_length=200, null=True, blank=True)
+    guide_transfer = models.DateTimeField(null=True, blank=True)
+    guide_truck = models.CharField('Vehiculo', max_length=50, null=True, blank=True)
+    guide_driver_name = models.CharField('Nombre conductor', max_length=100, null=True, blank=True)
+    guide_driver_lastname = models.CharField('Apellido conductor', max_length=100, null=True, blank=True)
+    guide_driver_dni = models.CharField('Documento conductor', max_length=15, null=True, blank=True)
+    guide_driver_license = models.CharField('Licencia conductor', max_length=15, null=True, blank=True)
+    guide_driver_full_name = models.CharField('Nombre Completo conductor', max_length=100, null=True, blank=True)
+    guide_package = models.DecimalField('Bulto', max_digits=30, decimal_places=4, default=0)
+    guide_weight = models.DecimalField('Peso', max_digits=30, decimal_places=4, default=0)
+    guide_carrier_document = models.CharField('Numero documento transportista', max_length=11, null=True, blank=True)
+    guide_carrier_names = models.CharField('Razon social transportista', max_length=200, null=True, blank=True)
+    guide_register_mtc = models.CharField('Registro MTC', max_length=200, null=True, blank=True)
 
     def __str__(self):
         return str(self.serial) + "-" + str(self.code)
@@ -289,14 +323,14 @@ class Guide(models.Model):
         origin_set = Route.objects.filter(guide__id=self.id, type='O')
         origin = None
         if origin_set.count() > 0:
-            origin = origin_set.last().subsidiary
+            origin = origin_set.last().subsidiary_store
         return origin
 
     def get_destiny(self):
         destiny_set = Route.objects.filter(guide__id=self.id, type='D')
         destiny = None
         if destiny_set.count() > 0:
-            destiny = destiny_set.last().subsidiary
+            destiny = destiny_set.last().subsidiary_store
         return destiny
 
     def the_one_that_approves(self):

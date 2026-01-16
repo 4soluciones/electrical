@@ -2,6 +2,7 @@ import decimal
 from http import HTTPStatus
 
 from django.db.models import Q, Max
+from django.db.models.functions import Coalesce
 from django.shortcuts import render
 from django.views.generic import View, TemplateView, UpdateView, CreateView
 from django.views.decorators.csrf import csrf_exempt
@@ -12,7 +13,7 @@ from .forms import *
 from django.urls import reverse_lazy
 from apps.sales.models import Product, SubsidiaryStore, ProductStore, ProductDetail, ProductRecipe, \
     ProductSubcategory, ProductSupplier, \
-    TransactionPayment, Order, LoanPayment
+    TransactionPayment, Order, LoanPayment, OrderBill
 from apps.sales.views import kardex_ouput, kardex_input, kardex_initial, calculate_minimum_unit, Supplier
 from apps.hrm.models import Subsidiary
 import json
@@ -26,6 +27,7 @@ from datetime import date
 # Create your views here.
 from .. import sales
 from ..hrm.views import get_subsidiary_by_user
+from ..sales.api_FACT import send_guide_fact
 
 
 class Index(TemplateView):
@@ -2391,4 +2393,176 @@ def save_advancement_client(request):
 
         return JsonResponse({
             'message': 'ADELANTO DE BALONES REGISTRADO CORRECTAMENTE.',
+        }, status=HTTPStatus.OK)
+
+
+# NUEVAS FUNCIONES GUIDES
+
+
+def modal_guide(request):
+    if request.method == 'GET':
+        pk = request.GET.get('pk', '')
+        if pk:
+            my_date = datetime.now()
+            date_now = my_date.strftime("%Y-%m-%d")
+            order_obj = Order.objects.get(id=int(pk))
+            motive_set = Guide._meta.get_field('guide_motive').choices
+            guide_modality_set = Guide._meta.get_field('guide_modality_transport').choices
+            tpl = loader.get_template('comercial/modal_guide.html')
+            context = ({
+                'date_now': date_now,
+                'order_obj': order_obj,
+                'guide_motive_set': motive_set,
+                'guide_modality_set': guide_modality_set
+            })
+            return JsonResponse({
+                'grid': tpl.render(context, request),
+            }, status=HTTPStatus.OK, content_type="application/json")
+        else:
+            return JsonResponse({
+                'success': False,
+                'message': 'Orden desconocida',
+            }, status=HTTPStatus.OK)
+
+
+def get_guide(request):
+    if request.method == 'GET':
+        my_date = datetime.now()
+        date_now = my_date.strftime("%Y-%m-%d")
+        motive_set = Guide._meta.get_field('guide_motive').choices
+        guide_modality_set = Guide._meta.get_field('guide_modality_transport').choices
+        return render(request, 'comercial/get_guide.html', {
+            'date_now': date_now,
+            'guide_motive_set': motive_set,
+            'guide_modality_set': guide_modality_set
+        })
+
+
+def number_guide(subsidiary=None):
+    number = Guide.objects.filter(subsidiary=subsidiary).aggregate(
+        r=Coalesce(Max('guide_number'), 0)).get('r')
+    return number + 1
+
+
+@csrf_exempt
+def guide_save(request):
+    if request.method == 'POST':
+        user_id = request.user.id
+        user_obj = User.objects.get(id=user_id)
+        subsidiary_obj = get_subsidiary_by_user(user_obj)
+        order = request.POST.get('id-order', '')
+        order_obj = Order.objects.get(id=int(order))
+        order_bill = OrderBill.objects.filter(order=order_obj).first()
+        description = 'FACTURA ELECTRONICA: ' + str(order_bill.serial) + '-' + str(order_bill.n_receipt)
+        date_issue = request.POST.get('issue', '')
+        date_transfer = request.POST.get('transfer', '')
+
+        motive = request.POST.get('motive', '')
+        truck = request.POST.get('truck', '')
+
+        driver_name = request.POST.get('driver-names', '')
+        driver_last_name = request.POST.get('driver-lastname', '')
+
+        driver_dni = request.POST.get('driver-dni', '')
+        driver_license = request.POST.get('driver-license', '')
+
+        guide_carrier_document = request.POST.get('guide_carrier_document', '')
+        guide_carrier_names = request.POST.get('guide_carrier_names', '')
+
+        guide_origin_address = request.POST.get('subsidiary-address', '')
+        guide_destiny_address = request.POST.get('person-address', '')
+
+        origin = request.POST.get('origin', '')
+        modality_transport = request.POST.get('modality_transport', '')
+        destiny = request.POST.get('destiny', '')
+        weight = request.POST.get('weight', 0)
+        lumps = request.POST.get('lumps', 0)
+        register_mtc = request.POST.get('register_mtc', '')
+
+        if request.POST.get('observation', '') != '':
+            description = str(request.POST.get('observation', '')) + '\n' + description
+
+        serial = 'T' + str(order_obj.subsidiary_store.subsidiary.serial)
+        correlative = number_guide(subsidiary=order_obj.subsidiary_store.subsidiary)
+
+        guide_weight = decimal.Decimal(0.00)
+        guide_package = decimal.Decimal(0.00)
+
+        if weight:
+            guide_weight = decimal.Decimal(weight)
+        if lumps:
+            guide_package = decimal.Decimal(lumps)
+
+        guide_obj = Guide(
+            guide_serial=serial,
+            guide_description=description,
+            guide_type=7,
+            guide_number=correlative,
+            guide_date=date_issue,
+            guide_transfer=date_transfer,
+            guide_motive=motive,
+            guide_truck=truck,
+            guide_driver_name=driver_name,
+            guide_driver_lastname=driver_last_name,
+            guide_driver_full_name=driver_name + ' ' + driver_last_name,
+            guide_driver_dni=driver_dni,
+            guide_driver_license=driver_license,
+            guide_origin=origin,
+            guide_destiny=destiny,
+            guide_carrier_document=guide_carrier_document,
+            guide_modality_transport=modality_transport,
+            guide_carrier_names=guide_carrier_names,
+            guide_register_mtc=register_mtc,
+            guide_origin_address=guide_origin_address,
+            guide_destiny_address=guide_destiny_address,
+            guide_weight=guide_weight,
+            guide_package=guide_package,
+            user=user_obj,
+            subsidiary=subsidiary_obj
+        )
+        guide_obj.save()
+        order_obj.guide = guide_obj
+        order_obj.save()
+        if guide_obj.id:
+            r = send_guide_fact(guide_obj.id)
+            if r.get('success'):
+                return JsonResponse({
+                    'success': True,
+                    'message': r.get('message'),
+                    'pk': guide_obj.id
+                }, status=HTTPStatus.OK)
+            else:
+                guide_obj.guide_serial = '-'
+                guide_obj.add = 'N'
+                guide_obj.guide_description = '-'
+                guide_obj.guide_type = ''
+                guide_obj.guide_number = None
+                guide_obj.guide_date = None
+                guide_obj.guide_transfer = None
+                guide_obj.guide_motive = '01'
+                guide_obj.guide_truck = ''
+                guide_obj.guide_driver_name = ''
+                guide_obj.guide_driver_lastname = ''
+                guide_obj.guide_driver_full_name = ''
+                guide_obj.guide_driver_dni = ''
+                guide_obj.guide_driver_license = ''
+                guide_obj.guide_origin = ''
+                guide_obj.guide_destiny = ''
+                guide_obj.guide_carrier_document = ''
+                guide_obj.guide_modality_transport = '1'
+                guide_obj.guide_carrier_names = ''
+                guide_obj.guide_origin_address = ''
+                guide_obj.guide_destiny_address = ''
+                guide_obj.guide_weight = decimal.Decimal(0.0000)
+                guide_obj.guide_package = decimal.Decimal(0.0000)
+                guide_obj.guide_register_mtc = ''
+                guide_obj.save()
+                return JsonResponse({
+                    'success': False,
+                    'message': r.get('errors'),
+                }, status=HTTPStatus.OK)
+
+        return JsonResponse({
+            'success': False,
+            'message': 'Orden no idetificada'
         }, status=HTTPStatus.OK)

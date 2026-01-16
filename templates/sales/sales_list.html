@@ -1124,9 +1124,20 @@
                 }
             }
 
+            // Habilitar temporalmente el select si está deshabilitado para que se envíe su valor
+            let userSelectDisabled = $('#user_id').prop('disabled');
+            if (userSelectDisabled) {
+                $('#user_id').prop('disabled', false);
+            }
+            
             let data = new FormData($('#order-form').get(0));
             data.append('detail', JSON.stringify(detailOrder));
             data.append('credit', JSON.stringify(creditDict));
+            
+            // Volver a deshabilitar el select si estaba deshabilitado
+            if (userSelectDisabled) {
+                $('#user_id').prop('disabled', true);
+            }
             //console.log(detailOrder)
             //console.log(creditDict)
             //$('#save-order').prop('disabled', true)

@@ -144,7 +144,7 @@ def send_bill_4_fact(order_id):  # FACTURA 4 FACT
         }}
     }}
     """
-    # print(graphql_query)
+    print(graphql_query)
 
     token = tokens.get("20603890214", "ID no encontrado")
 
@@ -552,3 +552,163 @@ def annul_invoice(order_id):
         return {"success": False, "message": f"Error en la solicitud: {str(e)}"}
     except ValueError:
         return {"success": False, "message": "La respuesta no es un JSON válido"}
+
+
+def send_guide_fact(guide_id):
+    guide_obj = Guide.objects.get(id=guide_id)
+    order_obj = Order.objects.get(guide=guide_obj)
+    correlative = order_obj.orderbill.n_receipt
+    date_transfer = guide_obj.guide_transfer
+    date = guide_obj.guide_date
+    subsidiary_obj = guide_obj.subsidiary
+    client_obj = order_obj.client
+
+    # Get client information
+    client_type_document = '6'
+    client_nro_document = client_obj.clienttype_set.last().document_number
+    client_names = client_obj.names
+    client_address = client_obj.clientaddress_set.last().address
+    client_email = client_obj.email
+
+    if guide_obj.guide_motive == '04':
+        client_type_document = '6'
+        client_nro_document = subsidiary_obj.ruc
+        client_names = subsidiary_obj.business_name.upper()
+        client_address = subsidiary_obj.address.upper()
+        client_email = subsidiary_obj.email
+
+    # Format dates
+    formatdate = date.strftime("%Y-%m-%d")
+    formatdate_hour = date.strftime("%H:%M")
+    formatdate_transfer = date_transfer.strftime("%Y-%m-%d")
+
+    # Get items
+    items = []
+    for d in OrderDetail.objects.filter(order=order_obj):
+        quantity_sent = decimal.Decimal(d.quantity_sold)
+        base_total = quantity_sent * d.price_unit
+        base_amount = base_total / decimal.Decimal(1.1800)
+        product_name = str(d.product.name).replace('"', "'")
+        item = {
+            "producto": product_name,
+            "cantidad": float(quantity_sent),
+            "precioBase": float(round(base_amount / quantity_sent, 6)),
+            "codigoSunat": "10000000",
+            "codigoProducto": str(d.product.code) if d.product.code else "0000",
+            "codigoUnidad": "NIU",
+            "tipoIgvCodigo": "10"
+        }
+        items.append(item)
+
+    # Format items for GraphQL
+    items_graphql = ", ".join(
+        f"""{{  
+               producto: "{item['producto']}", 
+               cantidad: {item['cantidad']}, 
+               precioBase: {item['precioBase']}, 
+               codigoSunat: "{item['codigoSunat']}",
+               codigoProducto: "{item['codigoProducto']}",
+               codigoUnidad: "{item['codigoUnidad']}",                                            
+               tipoIgvCodigo: "{item['tipoIgvCodigo']}" 
+        }}"""
+        for item in items
+    )
+    items_graphql = f"[{items_graphql}]"
+
+    # Determine guide mode and reason
+    guide_mode = "01" if guide_obj.guide_modality_transport == "1" else "02"
+    guide_reason = guide_obj.guide_motive
+
+    # Build GraphQL mutation
+    graphql_query = f"""
+    mutation RegisterGuide {{
+        registerGuide(
+            client: {{
+                razonSocialNombres: "{client_names}",
+                numeroDocumento: "{client_nro_document}",
+                codigoTipoEntidad: {client_type_document},
+                clienteDireccion: "{client_address}",
+                clienteTelefono: "{client_obj.phone if client_obj.phone else ''}"
+            }},
+            guide: {{
+                serial: "{guide_obj.guide_serial}",
+                number: "{guide_obj.guide_number}",
+                guideModeTransfer: "{guide_mode}",
+                guideReasonTransfer: "{guide_reason}",
+                note: "{guide_obj.observation}",
+                emitDate: "{formatdate}",
+                emitHour: "{formatdate_hour}"
+            }},
+            transportation: {{
+                transferDate: "{formatdate_transfer}",
+                totalWeight: "{guide_obj.guide_weight}",
+                quantityPackages: "{guide_obj.guide_package}"
+            }},
+            points: {{
+                guideOriginSerial: "",
+                guideOriginAddress: "{guide_obj.guide_origin_address}",
+                guideOriginDistrictId: "{guide_obj.guide_origin}",
+                guideArrivalSerial: "",
+                guideArrivalAddress: "{guide_obj.guide_destiny_address}",
+                guideArrivalDistrictId: "{guide_obj.guide_destiny}"
+            }},
+            carrier: {{
+                transportationCompanyDocumentType: "6",
+                transportationCompanyDocumentNumber: "{guide_obj.guide_carrier_document}",
+                transportationCompanyNames: "{guide_obj.guide_carrier_names}",
+                transportationCompanyMtcRegistrationNumber: "",
+                mainDriverDocumentNumber: "{guide_obj.guide_driver_dni}",
+                mainDriverNames: "{guide_obj.guide_driver_full_name.upper()}",
+                mainDriverLicense: "{guide_obj.guide_driver_license.upper()}",
+                mainVehicleLicensePlate: "{guide_obj.guide_truck}"
+            }},
+            items: {items_graphql},
+            relatedDocuments: {{
+                tipoDocumentoCodigo: "01",
+                serie: "F{order_obj.subsidiary_store.subsidiary.serial}",
+                numero: "{correlative}",
+                fechaEmision: "{formatdate}"
+            }}
+        ) {{
+            message
+            error
+            operationId
+        }}
+    }}
+    """
+    print(graphql_query)
+
+    token = tokens.get("20603890214", "ID no encontrado")
+
+    HEADERS = {
+        "Content-Type": "application/json",
+        "token": token
+    }
+
+    try:
+        response = requests.post(GRAPHQL_URL, json={"query": graphql_query}, headers=HEADERS)
+        response.raise_for_status()
+
+        result = response.json()
+
+        success = not result.get("data", {}).get("registerGuide", {}).get("error")
+
+        if success:
+            return {
+                "success": success,
+                "message": result.get("data", {}).get("registerGuide", {}).get("message"),
+                "operationId": result.get("data", {}).get("registerGuide", {}).get("operationId"),
+                "serie": "G" + guide_obj.guide_serial,
+                "numero": guide_obj.guide_number,
+            }
+        else:
+            return {
+                "success": False,
+                "message": result.get("data", {}).get("registerGuide", {}).get("message"),
+                "error": result.get("data", {}).get("registerGuide", {}).get("error"),
+            }
+
+    except requests.exceptions.RequestException as e:
+        return {"error": f"Error en la solicitud: {str(e)}"}
+    except ValueError:
+        return {"error": "La respuesta no es un JSON válido"}

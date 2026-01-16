@@ -107,6 +107,9 @@
     <div class="modal fade" id="modal-credit-note" data-backdrop="static" data-keyboard="false" tabindex="-1"
          aria-labelledby="staticBackdropLabel" aria-hidden="true"></div>
 
+    <div class="modal fade" id="modal-guide" data-backdrop="static" data-keyboard="false" tabindex="-1"
+         aria-labelledby="staticBackdropLabel" aria-hidden="true"></div>
+
     <!-- Estilos personalizados -->
     <style>
         .loading-overlay {
@@ -444,12 +447,21 @@
         }
 
 
-        $(document).ready(function () {
-
-            // Funcionalidad del filtro por tipo de comprobante
-
-
-        });
+        function CreateGuide(o) {
+            $.ajax({
+                url: '/comercial/modal_guide/',
+                async: true,
+                dataType: 'json',
+                type: 'GET',
+                data: {'pk': o},
+                success: function (response) {
+                    $('#modal-guide').empty().html(response.grid).modal('show');
+                },
+                error: function (response) {
+                    toastr.error('Ocurrio un problema')
+                }
+            });
+        }
 
     </script>
 {% endblock extrajs %}
