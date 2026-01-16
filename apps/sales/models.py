@@ -180,6 +180,27 @@ class ProductDetail(models.Model):
     def get_calculate_price3(self):
         return round((self.percentage_three * self.price_purchase) / 100 + self.price_purchase, 2)
 
+    def get_last_purchase_price_from_kardex(self):
+        """
+        Obtiene el último precio de compra registrado en el Kardex para este producto.
+        Busca en todas las entradas de compra (con purchase_detail) ordenadas por fecha descendente.
+        """
+        # Importación local para evitar problemas de referencia circular
+        from apps.sales.models import Kardex
+        
+        try:
+            last_kardex = Kardex.objects.filter(
+                product_store__product=self.product,
+                operation='E',  # Entrada
+                purchase_detail__isnull=False  # Que tenga purchase_detail (es una compra)
+            ).order_by('-create_at', '-id').first()
+            
+            if last_kardex and last_kardex.price_unit:
+                return float(last_kardex.price_unit)
+        except Exception:
+            pass
+        return None
+
     class Meta:
         unique_together = ('product', 'unit',)
         verbose_name = 'Presentacion'

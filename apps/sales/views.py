@@ -699,6 +699,31 @@ class SalesList(View):
         contexto['electronic_invoice'] = letter
         contexto['series'] = series_set
         contexto['users'] = users_set
+        contexto['current_user'] = user_obj
+        contexto['user_in_list'] = users_set.filter(id=user_obj.id).exists()
+        
+        # Crear lista de usuarios con sus nombres de persona
+        users_with_names = []
+        for u in users_set:
+            user_name = u.username
+            try:
+                worker_obj = Worker.objects.filter(user=u).last()
+                if worker_obj and worker_obj.employee:
+                    user_name = worker_obj.employee.names
+            except:
+                pass
+            users_with_names.append({'user': u, 'name': user_name})
+        contexto['users_with_names'] = users_with_names
+        
+        # Obtener el nombre de la persona del usuario actual
+        current_user_name = user_obj.username
+        try:
+            worker_obj = Worker.objects.filter(user=user_obj).last()
+            if worker_obj and worker_obj.employee:
+                current_user_name = worker_obj.employee.names
+        except:
+            pass
+        contexto['current_user_name'] = current_user_name
 
         return contexto
 
@@ -4310,6 +4335,31 @@ class SalesOrder(View):
             contexto['series'] = series_set
             contexto['order_set'] = Order._meta.get_field('type').choices
             contexto['users'] = users_set
+            contexto['current_user'] = user_obj
+            contexto['user_in_list'] = users_set.filter(id=user_obj.id).exists()
+            
+            # Crear lista de usuarios con sus nombres de persona
+            users_with_names = []
+            for u in users_set:
+                user_name = u.username
+                try:
+                    worker_obj = Worker.objects.filter(user=u).last()
+                    if worker_obj and worker_obj.employee:
+                        user_name = worker_obj.employee.names
+                except:
+                    pass
+                users_with_names.append({'user': u, 'name': user_name})
+            contexto['users_with_names'] = users_with_names
+            
+            # Obtener el nombre de la persona del usuario actual
+            current_user_name = user_obj.username
+            try:
+                worker_obj = Worker.objects.filter(user=user_obj).last()
+                if worker_obj and worker_obj.employee:
+                    current_user_name = worker_obj.employee.names
+            except:
+                pass
+            contexto['current_user_name'] = current_user_name
 
             return contexto
 

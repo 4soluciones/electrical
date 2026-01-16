@@ -74,11 +74,18 @@
                             {#                    <label for="user_id" class="mb-2 font-weight-bold">Usuario:</label>#}
                             <select id="user_id" name="user"
                                     class="form-control" aria-label=""
-                                    aria-selected="Text input with radio button">
-                                <option selected value="0">Seleccione...</option>
-                                {% for u in users %}
-                                    <option value="{{ u.id }}">{{ u|upper }}</option>
-                                {% endfor %}
+                                    aria-selected="Text input with radio button"
+                                    {% if user_in_list %}disabled{% endif %}>
+                                {% if user_in_list %}
+                                    {% for uwn in users_with_names %}
+                                        <option value="{{ uwn.user.id }}" {% if uwn.user.id == current_user.id %}selected{% endif %}>{{ uwn.name|upper }}</option>
+                                    {% endfor %}
+                                {% else %}
+                                    <option selected value="{{ current_user.id }}">{{ current_user_name|upper }}</option>
+                                    {% for uwn in users_with_names %}
+                                        <option value="{{ uwn.user.id }}">{{ uwn.name|upper }}</option>
+                                    {% endfor %}
+                                {% endif %}
                             </select>
 
                         </div>

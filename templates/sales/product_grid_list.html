@@ -37,50 +37,26 @@
         <tbody>
         {% for product in products %}
             <tr class="text-center" pk="{{ product.id }}">
-                <td class="align-middle" rowspan="
-
-
-                        {% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ forloop.counter }}</td>
-                <td class="align-middle" rowspan="
-
-
-                        {% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">
+                <td class="align-middle" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ forloop.counter }}</td>
+                <td class="align-middle" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">
                     {% if product.code %}
                         {{ product.code|zfill:6 }}
                     {% else %}
                         -
                     {% endif %}
                 </td>
-                <td class="align-middle" rowspan="
-
-
-                        {% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">
+                <td class="align-middle" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">
                     {% if product.barcode and product.barcode != 'NULL' %}
                         {{ product.barcode }}
                     {% else %}
                         -
                     {% endif %}
                 </td>
-                <td class="align-middle text-left" rowspan="
-
-
-                        {% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ product.name|upper }}</td>
-                <td class="align-middle text-center" rowspan="
-
-
-                        {% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ product.last_purchase_date|date:"d/m/y" }}</td>
-                <td class="align-middle text-center" rowspan="
-
-
-                        {% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ product.last_purchase_quantity|default:"-"|safe }}</td>
-                <td class="align-middle" rowspan="
-
-
-                        {% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ product.product_brand.name|upper }}</td>
-                <td class="align-middle" rowspan="
-
-
-                        {% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ product.product_family.name|upper }}</td>
+                <td class="align-middle text-left" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ product.name|upper }}</td>
+                <td class="align-middle text-center" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ product.last_purchase_date|date:"d/m/y" }}</td>
+                <td class="align-middle text-center" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ product.last_purchase_quantity|default:"-"|safe }}</td>
+                <td class="align-middle" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ product.product_brand.name|upper }}</td>
+                <td class="align-middle" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ product.product_family.name|upper }}</td>
                 {% if product.productdetail_set.all.count > 0 %}
                     {% for product_detail in product.productdetail_set.all %}
                         {% if not forloop.first %}
@@ -95,6 +71,11 @@
                            data-target="#modal-change-price-purchase"
                            pk="{{ product.id }}"><i class="fas fa-edit fa-xs"></i></a><br>
                         <span style="font-size: 10px">{{ product_detail.update_at|date:"d/m/y" }}</span>
+                        {% with last_price=product_detail.get_last_purchase_price_from_kardex %}
+                            {% if last_price %}
+                                <br><span style="font-size: 9px; color: #666;">(S/ {{ last_price|floatformat:2 }})</span>
+                            {% endif %}
+                        {% endwith %}
                     </td>
                     {% if perms.sales.change_producto or perms.admin %}
                         <td class="align-middle new-percent-one" pk="{{ product.id }}">
@@ -110,10 +91,7 @@
                     {% endif %}
 
                     {% if forloop.first %}
-                        <td class="align-middle" rowspan="
-
-
-                                {% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">
+                        <td class="align-middle" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">
                             {% if product.productstore_set.all.count > 0 %}
                                 <table class="table table-sm text-uppercase small m-1">
                                     <tbody>
@@ -148,10 +126,7 @@
                             {% endif %}
                         </td>
 
-                        <td class="hide-column" rowspan="
-
-
-                                {% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">
+                        <td class="hide-column" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">
                             <!-- Example single danger button -->
                             <div class="btn-group">
                                 <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown"
