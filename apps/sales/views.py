@@ -398,7 +398,6 @@ def get_list_kardex(request):
                 'purchase_detail',
                 'order_detail__order',
                 'loan_payment',
-                'guide_detail__guide__guide_motive',
                 'credit_note_detail__credit_note'
             ).order_by('id')
 
