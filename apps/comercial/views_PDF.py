@@ -1589,7 +1589,8 @@ def guide(request, pk=None):
     else:
         pdf_transportation = Table(
             [('DATOS DEL TRANSPORTE', '', '', '')] +
-            [('TRANSPORTISTA:', Paragraph(guide_obj.guide_carrier_names.upper(), styles["Left-text"]), 'RUC: ' + guide_obj.guide_carrier_document, 'NRO DE REGISTRO MTC: ' + str(register_mtc))], colWidths=[w * 22 / 100, w * 40 / 100, w * 19 / 100, w * 19 / 100])
+            [('TRANSPORTISTA:', Paragraph(guide_obj.guide_carrier_names.upper(), styles["Left-text"]), '', '')] +
+            [('RUC:', guide_obj.guide_carrier_document, 'NRO DE REGISTRO MTC: ' + str(register_mtc), '')], colWidths=[w * 22 / 100, w * 40 / 100, w * 19 / 100, w * 19 / 100])
 
     style_transportation = [
         ('FONTNAME', (0, 0), (-1, -1), 'Square'),  # all columns
@@ -1898,28 +1899,50 @@ def guide_ticket(request, pk=None):
             [('CONDUCTOR: ', Paragraph(str(guide_obj.guide_driver_full_name.upper()), styles["Left-text"]))] +
             [('DNI: ' + str(guide_obj.guide_driver_dni), Paragraph('NRO LICENCIA: ' + str(guide_obj.guide_driver_license), styles["Left-text"]))],
             colWidths=[w * 30 / 100, w * 70 / 100])
+        style_transportation = [
+            ('FONTNAME', (0, 0), (-1, -1), 'Square'),  # all columns
+            ('FONTNAME', (0, 0), (-1, 0), 'Narrow-b'),  # all columns
+            # ('FONTSIZE', (0, 0), (-1, 0), 10),  # all columns
+            ('FONTSIZE', (0, 0), (-1, -1), 8),  # all columns
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),  # all columns
+            ('LEFTPADDING', (0, 0), (-1, -1), -1),  # first column
+            ('RIGHTPADDING', (0, 0), (-1, -1), -1),
+            ('ALIGNMENT', (0, 0), (-1, -1), 'LEFT'),  # second column
+            ('ALIGNMENT', (1, 1), (1, 1), 'RIGHT'),  # second column
+            # ('TOPPADDING', (0, 0), (-1, -1), 0),
+            ('TOPPADDING', (1, 2), (1, 5), -2),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), -3),
+            # ('BACKGROUND', (1, 2), (1, 2), HexColor('#0362BB')),
+            # ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('GRID', (0, 0), (-1, -1), 0.5, HexColor('#0362BB')),  # all columns
+        ]
     else:
         pdf_transportation = Table(
             [('DATOS DEL TRANSPORTE', '', '', '')] +
-            [('TRANSPORTISTA:', Paragraph(guide_obj.guide_carrier_names.upper(), styles["Left-text"]), 'RUC: ' + guide_obj.guide_carrier_document, 'NRO DE REGISTRO MTC: ' + str(register_mtc))], colWidths=[w * 22 / 100, w * 40 / 100, w * 19 / 100, w * 19 / 100])
-
-    style_transportation = [
-        ('FONTNAME', (0, 0), (-1, -1), 'Square'),  # all columns
-        ('FONTNAME', (0, 0), (-1, 0), 'Narrow-b'),  # all columns
-        # ('FONTSIZE', (0, 0), (-1, 0), 10),  # all columns
-        ('FONTSIZE', (0, 0), (-1, -1), 8),  # all columns
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),  # all columns
-        ('LEFTPADDING', (0, 0), (-1, -1), -1),  # first column
-        ('RIGHTPADDING', (0, 0), (-1, -1), -1),
-        ('ALIGNMENT', (0, 0), (-1, -1), 'LEFT'),  # second column
-        ('ALIGNMENT', (1, 1), (1, 1), 'RIGHT'),  # second column
-        # ('TOPPADDING', (0, 0), (-1, -1), 0),
-        ('TOPPADDING', (1, 2), (1, 5), -2),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), -3),
-        # ('BACKGROUND', (1, 2), (1, 2), HexColor('#0362BB')),
-        # ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        # ('GRID', (0, 0), (-1, -1), 0.5, HexColor('#0362BB')),  # all columns
-    ]
+            [('TRANSPORTISTA:', Paragraph(guide_obj.guide_carrier_names.upper(), styles["Left-text"]), '', '')] +
+            [('RUC:' + guide_obj.guide_carrier_document, '', 'NRO DE REGISTRO MTC: ' + str(register_mtc), '')], colWidths=[w * 22 / 100, w * 40 / 100, w * 19 / 100, w * 19 / 100])
+        style_transportation = [
+            ('FONTNAME', (0, 0), (-1, -1), 'Square'),  # all columns
+            ('FONTNAME', (0, 0), (-1, 0), 'Narrow-b'),  # all columns
+            # ('FONTSIZE', (0, 0), (-1, 0), 10),  # all columns
+            ('FONTSIZE', (0, 0), (-1, -1), 8),  # all columns
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),  # all columns
+            ('LEFTPADDING', (0, 0), (-1, -1), -1),  # first column
+            ('RIGHTPADDING', (0, 0), (-1, -1), -1),
+            ('ALIGNMENT', (0, 0), (-1, -1), 'LEFT'),  # second column
+            ('ALIGNMENT', (1, 1), (1, 1), 'RIGHT'),  # second column
+            # ('TOPPADDING', (0, 0), (-1, -1), 0),
+            # ('TOPPADDING', (1, 2), (1, 5), -2),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), -2),
+            # ('BACKGROUND', (1, 2), (1, 2), HexColor('#0362BB')),
+            ('LEFTPADDING', (1, 1), (1, 1), 5),
+            # ('BOTTOMPADDING', (1, 2), (1, 2), 2),
+            ('TOPPADDING', (1, 2), (1, 2), 2),
+            ('BOTTOMPADDING', (1, 1), (1, 1), 2),
+            # ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            # ('GRID', (0, 0), (-1, -1), 0.5, HexColor('#0362BB')),  # all columns
+            ('SPAN', (1, 1), (3, 1)),  # transportista nombre ocupa columnas 1-3
+        ]
     pdf_transportation.setStyle(TableStyle(style_transportation))
     # ----------------------------------------------------------------
     style_header = [
@@ -1967,12 +1990,12 @@ def guide_ticket(request, pk=None):
     pdf_observation = 'OBSERVACIÓN: ' + str(guide_obj.guide_description)
     # -----------------------------------------------------------------------------------------------
     # ----------------------------------------------------------------------------------------------
-    code_qr = 'https://4soluciones.pse.pe/20600854535'
+    code_qr = 'https://www.tuf4ct.com/cpe'
 
     qr_left = [
         [Paragraph('Representación impresa de la GUÍA DE REMISIÓN REMITENTE ELECTRÓNICA, para ver el documento visita', styles["narrow_center_footer"])],
-        [Paragraph('https://4soluciones.pse.pe/' + str(subsidiary_obj.ruc), styles["narrow_center_footer"])],
-        [Paragraph('Emitido mediante un PROVEEDOR Autorizado por la SUNAT mediante Resolución de Intendencia No.034-005-0005315', styles["narrow_center_footer"])],
+        [Paragraph('https://www.tuf4ct.com/cpe', styles["narrow_center_footer"])],
+        [Paragraph('Emitido mediante un PROVEEDOR Autorizado por la SUNAT', styles["narrow_center_footer"])],
     ]
 
     # pdf_link_uno = 'Representación impresa de la ' + str(
