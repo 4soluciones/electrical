@@ -2,7 +2,7 @@ import decimal
 
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models import Min, Sum
+from django.db.models import Min, Sum, Avg
 
 from apps.comercial import apps
 from apps.hrm.models import Subsidiary, District, DocumentType
@@ -197,6 +197,26 @@ class ProductDetail(models.Model):
             
             if last_kardex and last_kardex.price_unit:
                 return float(last_kardex.price_unit)
+        except Exception:
+            pass
+        return None
+
+    def get_average_purchase_price(self):
+        """
+        Obtiene el precio promedio de todas las compras registradas en el Kardex para este producto.
+        """
+        # Importación local para evitar problemas de referencia circular
+        from apps.sales.models import Kardex
+        
+        try:
+            average_price = Kardex.objects.filter(
+                product_store__product=self.product,
+                operation='E',  # Entrada
+                purchase_detail__isnull=False  # Que tenga purchase_detail (es una compra)
+            ).aggregate(Avg('price_unit'))['price_unit__avg']
+            
+            if average_price:
+                return float(average_price)
         except Exception:
             pass
         return None

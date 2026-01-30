@@ -71,9 +71,9 @@
                            data-target="#modal-change-price-purchase"
                            pk="{{ product.id }}"><i class="fas fa-edit fa-xs"></i></a><br>
                         <span style="font-size: 10px">{{ product_detail.update_at|date:"d/m/y" }}</span>
-                        {% with last_price=product_detail.get_last_purchase_price_from_kardex %}
-                            {% if last_price %}
-                                <br><span style="font-size: 9px; color: #666;">(S/ {{ last_price|floatformat:2 }})</span>
+                        {% with avg_price=product_detail.get_average_purchase_price %}
+                            {% if avg_price %}
+                                <br><span style="font-size: 9px; color: #666;">(S/ {{ avg_price|floatformat:2 }})</span>
                             {% endif %}
                         {% endwith %}
                     </td>
