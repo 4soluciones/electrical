@@ -1634,7 +1634,7 @@ def print_order_bill(request, pk=None, check=None):
     dictionary.append(Spacer(1, 5))
     dictionary.append(total_footer)
 
-    if check == 'true':
+    if check and str(check).lower() == 'true':
         dictionary.append(PageBreak())
         dictionary.append(header_serial)
         dictionary.append(detail_serial)

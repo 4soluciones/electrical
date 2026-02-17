@@ -6976,6 +6976,7 @@ def save_order(request):
         # subsidiary_store_sales_obj = SubsidiaryStore.objects.get(
         #     subsidiary=subsidiary_obj, category='V')
         print_series = request.POST.get('print-series', '')
+        check_print_series = 'true' if str(print_series).lower() in ('true', '1') else 'false'
         _type_payment = request.POST.get('transaction_payment_type', '')
         _client_id = request.POST.get('client-id', '')
         _issue_date = request.POST.get('date', '')
@@ -7252,7 +7253,7 @@ def save_order(request):
             'type_doc': order_obj.type,
             'voucher_type': order_obj.voucher_type,
             'format_pdf': format_pdf,
-            'check_print_series': print_series,
+            'check_print_series': check_print_series,
             'msg_sunat': msg_sunat,
             'sunat_pdf': sunat_pdf,
         }, status=HTTPStatus.OK)

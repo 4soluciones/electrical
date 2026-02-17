@@ -43,101 +43,8 @@
     {#    <div class="modal fade bd-example-modal-xl" id="add-modal" tabindex="-1" role="dialog"#}
     {#         aria-labelledby="exampleModalLabel" aria-hidden="true"></div>#}
 
-{#    <div class="modal fade" id="modal-voucher" tabindex="-1" role="dialog" aria-labelledby="ModalHelpTitle"#}
-{#         aria-hidden="true">#}
-{#        <div class="modal-dialog modal-lg modal-dialog-centered roboto-condensed-regular" role="document">#}
-{#            <div class="modal-content">#}
-{#                <div class="modal-header" style="background: #0b55a4">#}
-{#                    <h6 class="modal-title  text-white">TIPOS DE COMPROBANTES</h6>#}
-{#                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">#}
-{#                        <span aria-hidden="true">&times;</span>#}
-{#                    </button>#}
-{#                </div>#}
-{#                <div class="modal-body">#}
-{##}
-{#                    <div class="row col-sm-12 p-0 m-0 menu-sales">#}
-{##}
-{#                        <div class="col-sm-6">#}
-{##}
-{#                            <div class="card m-0" style="border-color: #0f478a">#}
-{##}
-{#                                <div class="card-header text-center" style="background: #0f478a">#}
-{#                                    <label class="card-title m-0 text-white"> FORMATO TICKETS</label>#}
-{#                                </div>#}
-{##}
-{#                                <div class="card-body">#}
-{#                                    <div class="row col-sm-12 p-0 m-0">#}
-{#                                        <div class="col-sm-4">#}
-{#                                            <button type="button" id="save-order" onclick="create_voucher('T', 'T')"#}
-{#                                                    class="btn btn-sm btn-outline-success">#}
-{#                                                <i class="fas fa-ticket-alt"></i> TICKET INTERNO#}
-{#                                            </button>#}
-{#                                        </div>#}
-{#                                        <div class="col-sm-6">#}
-{#                                            <button type="button" id="btn-invoice-ticket"#}
-{#                                                    onclick="create_voucher('F', 'T')"#}
-{#                                                    class="btn btn-sm btn-outline-success">#}
-{#                                                <i class="fas fa-ticket-alt"></i> FACTURA FORMATO TICKET#}
-{#                                            </button>#}
-{#                                        </div>#}
-{#                                        <div class="col-sm-6">#}
-{#                                            <button type="button" id="btn-bill-ticket"#}
-{#                                                    onclick="create_voucher('B', 'T')"#}
-{#                                                    class="btn btn-sm btn-outline-success">#}
-{#                                                <i class="fas fa-ticket-alt"></i> BOLETA FORMATO TICKET#}
-{#                                            </button>#}
-{#                                        </div>#}
-{#                                    </div>#}
-{#                                </div>#}
-{#                            </div>#}
-{##}
-{#                        </div>#}
-{#                        <div class="col-sm-6">#}
-{#                            <div class="card m-0" style="border-color: #0f478a">#}
-{#                                <div class="card-header text-center" style="background: #0f478a">#}
-{#                                    <label class="card-title m-0 text-white"> FORMATO A4</label>#}
-{#                                </div>#}
-{#                                <div class="card-body pt-2">#}
-{#                                    <div class="row col-sm-12">#}
-{#                                        <div class="col-sm-12 text-center">#}
-{#                                            <div class="form-check mb-2">#}
-{#                                                <input class="form-check-input check-print-series" type="checkbox"#}
-{#                                                       value=""#}
-{#                                                       id="check_print_series">#}
-{#                                                <label class="form-check-label font-weight-bold text-danger"#}
-{#                                                       for="check_print_series">#}
-{#                                                    IMPRIMIR SERIES#}
-{#                                                </label>#}
-{#                                            </div>#}
-{#                                        </div>#}
-{#                                    </div>#}
-{#                                    <div class="row col-sm-12 p-0 m-0">#}
-{##}
-{#                                        <div class="col-sm-6">#}
-{#                                            <button type="button" id="btn-invoice-a4"#}
-{#                                                    onclick="create_voucher('F', 'A4')"#}
-{#                                                    class="btn btn-sm btn-outline-secondary btn-block">#}
-{#                                                <i class="fas fa-file-invoice"></i> FACTURA FORMATO A4#}
-{#                                            </button>#}
-{#                                        </div>#}
-{##}
-{#                                        <div class="col-sm-6">#}
-{#                                            <button type="button" id="btn-bill-a4" onclick="create_voucher('B', 'A4')"#}
-{#                                                    class="btn btn-sm btn-outline-secondary btn-block">#}
-{#                                                <i class="fas fa-file-invoice"></i> BOLETA <br>FORMATO A4#}
-{#                                            </button>#}
-{#                                        </div>#}
-{#                                    </div>#}
-{#                                </div>#}
-{#                            </div>#}
-{#                        </div>#}
-{#                    </div>#}
-{#                </div>#}
-{#            </div>#}
-{#        </div>#}
-{#    </div>#}
 
-    <!----------------------- Modal Client----------------------------->
+   
     <div class="modal fade" id="modalClient" data-backdrop="static" data-keyboard="false" tabindex="-1"
          aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -245,7 +152,7 @@
             </div>
         </div>
     </div>
-    <!----------------------- Modal Client----------------------------->
+   
 
     <div class="modal fade" id="modal-serial" tabindex="-1" role="dialog"
          aria-labelledby="ModalHelpTitle" data-backdrop="static" data-keyboard="false"
@@ -1133,6 +1040,7 @@
             let data = new FormData($('#order-form').get(0));
             data.append('detail', JSON.stringify(detailOrder));
             data.append('credit', JSON.stringify(creditDict));
+            data.append('print-series', $('#check_print_series').prop('checked') ? 'true' : 'false');
             
             // Volver a deshabilitar el select si estaba deshabilitado
             if (userSelectDisabled) {
