@@ -10,389 +10,212 @@
 
 {% block body %}
 
+    <style>
+        /* Fondo verde claro para la página de cotización */
+        #quotation-page-wrap { background-color: #e8f5e9; min-height: 100%; padding: 1.5rem 0; }
+        /* Paneles con contorno redondeado */
+        #quotation-page-wrap .card { border-radius: 12px; overflow: hidden; }
+        #quotation-page-wrap .card .py-2.px-4.text-white,
+        #quotation-page-wrap .card .py-2.px-3.text-white { border-radius: 12px 12px 0 0; }
+        #quotation-page-wrap .mb-4[style*="border: 2px solid"] { border-radius: 12px !important; overflow: hidden; }
+        /* Botones redondeados */
+        #quotation-page-wrap .btn { border-radius: 10px; }
+        #quotation-page-wrap .input-group .form-control { border-radius: 10px; }
+        #quotation-page-wrap .input-group .input-group-append .btn { border-radius: 0 10px 10px 0; }
+        #quotation-page-wrap .input-group .input-group-prepend .input-group-text { border-radius: 10px 0 0 10px; }
+    </style>
+
+    <div id="quotation-page-wrap">
     <input type="hidden" class="form-control form-control-sm type" id="id_order_sale_quotation" value=""
            readonly="true">
     <input type="hidden" class="form-control form-control-sm type" id="id_order_sale_quotation_correlative" value=""
            readonly="true">
 
     <div class="card-group">
-        <div class="card col-sm-5 p-0">
-            <div class="col-sm-12 m-0 p-0 text-center">
-                <div id="product_list_sales">
-                    <strong> <br><br> Atencion!</strong> <br> Ingrese un texto para comenzar la búsqueda de productos...
+        <div class="card col-sm-5 p-0 shadow-sm" style="border-color: #33a922; border-width: 2px;">
+            <div class="card-body p-2">
+                <div class="py-2 px-4 text-white font-weight-bold small text-uppercase" style="background: #33a922;">Buscar producto</div>
+                <div class="p-2" style="background-color: #cfe9da;">
+                <div class="input-group input-group-sm">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text bg-light border-right-0"><i class="fa fa-search text-muted"></i></span>
+                    </div>
+                    <input type="text" id="custom-search-product" class="form-control form-control-sm text-uppercase border-left-0" placeholder="Nombre del producto (Enter para buscar)">
+                </div>
+                <div id="product_list_sales" class="mt-1 small text-muted py-2">
+                    Los resultados aparecerán aquí.
                 </div>
                 <div class="loader-container col-auto" id="loader-product" style="display: none">
                     <div class="loader"></div>
-
                 </div>
-
+                </div>
             </div>
         </div>
 
-        <div class="card col-sm-7 p-0" id="tab-two">
+        <div class="card col-sm-7 p-0 shadow-sm" id="tab-two" style="border-color: #33a922; border-width: 2px; ">
+            <div class="card-body px-4 py-4" style="background: #e8f5e9">
+                <!-- Título centrado, grande y estirado -->
+                <div class="text-center mb-0 py-1 card-header bg-light" style="letter-spacing: 0.15em;">
+                    <span class="title-without h4 font-weight-bold text-dark text-uppercase mb-0 d-block montserrat">Nueva cotización</span>
+                    <span class="title-with h4 font-weight-bold text-primary d-none mb-0">Editar cotización Nº <label id="lbl-order"></label></span>
+                    <input type="hidden" id="order_id" value="">
+                </div>
 
-
-            <div class="card col-sm-12 p-0 roboto-condensed-regular" style="border-color: #33a922">
-
-                <div class="card-header text-center pb-3" style="background: #33a922">
-                    <div class="row align-self-center">
-                        <div class="col-sm-2 text-white align-self-center pl-0 pr-0">Productos</div>
-                        <div class="col-sm-4 pl-0">
-
-                            <input type="text" id="custom-search-product" class="form-control ml-2 text-uppercase"
-                                   placeholder="Ingrese un producto">
+                <!-- Fila: Usuario + Buscar cotización + Botones (estirados) -->
+                <div class="form-row align-items-end mb-3">
+                    <div class="col">
+                        <label for="user_id" class="small font-weight-bold text-muted mb-1">Usuario</label>
+                        <select id="user_id" name="user" class="form-control form-control-sm">
+                            <option selected value="0">Seleccione...</option>
+                            {% for u in users %}<option value="{{ u.id }}">{{ u|upper }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="col">
+                        <label for="id-search-quotation" class="small font-weight-bold text-muted mb-1">Nº Cotización</label>
+                        <div class="input-group input-group-sm">
+                            <input id="id-search-quotation" type="text" class="form-control" placeholder="Número">
+                            <div class="input-group-append">
+                                <button id="btn-search-quotation" class="btn text-white" type="button" onclick="SearchQuotation()" style="background: #33a922;"><i class="fa fa-search"></i> Buscar</button>
+                            </div>
                         </div>
-                        <div class="col-sm-2 text-white align-self-center pl-0 pr-0">Cod. Barras</div>
-                        <div class="col-sm-4 pl-0">
-                            <input type="text" id="custom-search-barcode" class="form-control ml-2 text-uppercase"
-                                   placeholder="Ingrese un codigo de barras">
+                    </div>
+                    <div class="col save-order">
+                        <label class="small font-weight-bold text-muted mb-1 d-block">&nbsp;</label>
+                        <button type="button" id="btn-save-quotation" class="btn btn-primary btn-sm w-100"><i class="fas fa-save mr-1"></i>Guardar</button>
+                    </div>
+                    <div class="col update-order d-none">
+                        <label class="small font-weight-bold text-muted mb-1 d-block">&nbsp;</label>
+                        <button type="button" id="btn-update-order" class="btn btn-secondary btn-sm w-100"><i class="fas fa-sync mr-1"></i>Actualizar</button>
+                    </div>
+                    <div class="col">
+                        <label class="small font-weight-bold text-muted mb-1 d-block">&nbsp;</label>
+                        <button type="button" class="btn btn-sm w-100 btn-secondary" id="btn-new-form"><i class="far fa-plus-square mr-1"></i>Nuevo</button>
+                    </div>
+                </div>
+
+                <!-- Bloque Cliente (estilo tabla: borde y cabecera verde) -->
+                <div class="mb-3" style="border: 2px solid #33a922; border-radius: 12px; overflow: hidden;">
+                    <div class="py-2 px-3 text-white font-weight-bold small text-uppercase" style="background: #33a922;">Cliente</div>
+                    <div class="p-3" style="background-color: #cfe9da;">
+                        <div class="form-row align-items-center mb-2">
+                            <div class="col-md-2 col-12 mb-2 mb-md-0">
+                                <div class="form-check mb-0">
+                                    <input class="form-check-input" type="radio" id="radio1" name="radio">
+                                    <label class="form-check-label small" for="radio1">Por documento</label>
+                                </div>
+                            </div>
+                            <div class="col-md-2 col-6 mb-2 mb-md-0">
+                                <select id="document_type_sender" name="document_type_sender" class="form-control form-control-sm">
+                                    <option selected value="0">Tipo</option>
+                                    {% for type in document_types %}
+                                        {% if type.id == '01' %}<option value="{{ type.id }}">DNI</option>{% elif type.id == '06' %}<option value="{{ type.id }}">RUC</option>{% elif type.id == '-' %}<option value="{{ type.id }}">OTRO</option>{% endif %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-2 col-6 mb-2 mb-md-0">
+                                <input type="text" class="form-control form-control-sm text-uppercase" id="id-nro-document-sender" name="nro-document-sender" placeholder="Nº documento">
+                            </div>
+                            <div class="col-md-2 col-6 mb-2 mb-md-0">
+                                <button type="button" class="btn btn-sm w-100 text-white" data-toggle="modal" data-target="#modalClient" style="background: #33a922;"><i class="fas fa-user-plus mr-1"></i>Nuevo cliente</button>
+                            </div>
+                        </div>
+                        <div class="form-row align-items-center">
+                            <div class="col-md-2 col-12 mb-2 mb-md-0">
+                                <div class="form-check mb-0">
+                                    <input class="form-check-input" type="radio" id="radio2" name="radio" checked>
+                                    <label class="form-check-label small" for="radio2">Por nombre</label>
+                                </div>
+                            </div>
+                            <div class="col-md-10 col-12">
+                                <input type="text" class="form-control form-control-sm text-uppercase client-table dropdown-toggle" data-toggle="dropdown" aria-expanded="false" placeholder="Buscar por nombre (Enter para buscar)">
+                                <input type="hidden" id="id-client-sender" name="id-client-sender" value="">
+                                <div class="dropdown-menu"></div>
+                            </div>
+                        </div>
+                        <div class="form-row mt-3">
+                            <div class="col-md-6">
+                                <label for="id_sender" class="small font-weight-bold text-muted mb-1">Razón social / Nombres</label>
+                                <input type="text" class="form-control form-control-sm text-uppercase" id="id_sender" name="sender" readonly placeholder="">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="id_address" class="small font-weight-bold text-muted mb-1">Dirección</label>
+                                <input type="text" class="form-control form-control-sm text-uppercase" id="id_address" name="name_address" placeholder="">
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="card-body p-0">
-                    <div class="card-group">
-                        <div class="card p-0 border-0" style="flex-grow: 4">
-                            <div class="card-body pl-1 pt-2 pb-1 pr-1">
-                                <div class="form-row mb-0">
-                                    <div class="form-group col-md-12 text-uppercase small mt-2 mb-0">
-                                        <div class="card col-sm-12 pr-0 pl-0 border-right-0 border-top-0 border-left-0 border-bottom-0">
-                                            <div class="col-sm-12 col-sm-12 col-lg-12 ">
-                                                <div class="row">
-                                                    <div class="col-sm-4 col-md-4 col-lg-4 pr-0 pl-0">
-                                                        <div class="card-body pt-2 pb-1">
-                                                            <div class="card header mb-2 border-bottom-2 text-center font-weight-bold"
-                                                                 style="background-color: #cfe9da">
-                                                                <h4 class="montserrat text-dark font-weight-bold mt-1 mb-1 title-without">
-                                                                    NUEVA COTIZACIÓN
-                                                                </h4>
-                                                                <h4 class="montserrat font-weight-bold mt-1 mb-1 title-with text-primary d-none">
-                                                                    EDITAR COTIZACIÓN Nº:
-                                                                    <label id="lbl-order"></label>
-                                                                    <input type="hidden" id="order_id" value="">
-                                                                </h4>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-sm-2 col-md-2 col-lg-2 text-left align-middle pl-0 mt-0 mb-2">
-{#                                                        <input class="form-check-input pl-2 mt-2 mr-3" type="checkbox"#}
-{#                                                               value="" id="duplicate_check" disabled#}
-{#                                                               style=" transform: scale(2.1);">#}
-{#                                                        <label class="form-check-label ml-2 mt-2 font-weight-bold"#}
-{#                                                               for="duplicate_check">#}
-{#                                                            Duplicar#}
-{#                                                        </label>#}
-{#                                                        <div class="col-sm-2 col-md-2 col-lg-2 pl-0">#}
-                                                            <label for="user_id" class="mb-0 font-weight-bold">Seleccione Usuario:</label>
-                                                            <select id="user_id" name="user"
-                                                                    class="form-control form-control-sm"
-                                                                    aria-selected="Text input with radio button">
-                                                                <option selected value="0">Seleccione...</option>
-                                                                {% for u in users %}
-                                                                    <option value="{{ u.id }}">{{ u|upper }}</option>
-                                                                {% endfor %}
-                                                            </select>
 
-{#                                                        </div>#}
-                                                    </div>
-                                                    <div class="col-sm-6 col-md-6 col-lg-6 align-middle border border-primary">
-                                                        <div class="row pt-2 pb-0">
-                                                            <div class="col-sm-4 col-md-4 col-lg-4">
-                                                                <div class="input-group">
-                                                                    <input id="id-search-quotation" type="text"
-                                                                           class="form-control form-control-sm"
-                                                                           style="border-color: #96a494">
-                                                                    <span class="input-group-btn">
-                                                                        <button id="btn-search-quotation"
-                                                                                class="btn btn-sm btn-success"
-                                                                                type="button"
-                                                                                onclick="SearchQuotation()">
-                                                                          Buscar <span class="fa fa-search"></span>
-                                                                        </button>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
+                <!-- Condiciones (estilo tabla) -->
+                <div class="mb-3" style="border: 2px solid #33a922; border-radius: 12px; overflow: hidden;">
+                    <div class="py-2 px-3 text-white font-weight-bold small text-uppercase" style="background: #33a922;">Condiciones de pago y vigencia</div>
+                    <div class="p-3" style="background-color: #cfe9da;">
+                    <div class="form-row">
+                        <div class="col-md-2 col-6 form-group mb-2 mb-md-0">
+                            <label for="transaction_payment_type" class="small text-muted mb-1">Pago</label>
+                            <select id="transaction_payment_type" class="form-control form-control-sm">
+                                <option value="0">Seleccione</option>
+                                {% for item in choices_payments %}<option value="{{ item.0 }}">{{ item.1 }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2 col-6 form-group mb-2 mb-md-0" id="cash" style="display: none;">
+                            <label for="id_cash" class="small text-muted mb-1">Caja</label>
+                            <select id="id_cash" name="id_cash_efectivo" class="form-control form-control-sm text-uppercase">
+                                {% for c in choices_account %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2 col-6 form-group mb-2 mb-md-0" id="cash_date_wrap" style="display: none;">
+                            <label for="id_date" class="small text-muted mb-1">Fecha caja</label>
+                            <input type="date" id="id_date" name="id_date" readonly class="form-control form-control-sm">
+                        </div>
+                        <div class="col-md-2 col-6 form-group mb-2 mb-md-0" id="deposit" style="display: none;">
+                            <label for="id_cash_deposit" class="small text-muted mb-1">Depósito</label>
+                            <select id="id_cash_deposit" name="id_cash_deposit" class="form-control form-control-sm text-uppercase">
+                                {% for c in choices_account_bank %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2 col-6 form-group mb-2 mb-md-0" id="deposit_code_wrap" style="display: none;">
+                            <label for="code-operation" class="small text-muted mb-1">Cód. oper.</label>
+                            <input type="text" class="form-control form-control-sm" id="code-operation" placeholder="">
+                        </div>
+                        <div class="col-md-2 col-6 form-group mb-2 mb-md-0" id="credit" style="display: none;">
+                            <label for="id-credit-client" class="small text-muted mb-1">Crédito</label>
+                            <input type="text" class="form-control form-control-sm" id="id-credit-client" value="Crédito" readonly>
+                        </div>
+                        <div class="col-md-2 col-6 form-group mb-2 mb-md-0">
+                            <label for="id_serie" class="small text-muted mb-1">Serie</label>
+                            <select id="id_serie" name="id_serie" class="form-control form-control-sm">
+                                <option selected value="0">Seleccione</option>
+                                {% for serie in series %}
+                                    {% if serie.serial %}<option selected value="{{ serie.id }}">{{ serie.serial|zfill:4 }}</option>{% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2 col-6 form-group mb-2 mb-md-0">
+                            <label for="date" class="small text-muted mb-1">Fecha</label>
+                            <input type="date" class="form-control form-control-sm" id="date" value="{{ date }}">
+                        </div>
+                    </div>
+                    <div class="form-row mt-2" id="form_quotation">
+                        <div class="col-md-2 col-6 form-group mb-2 mb-md-0">
+                            <label for="id_validity_date" class="small text-muted mb-1">Válido hasta</label>
+                            <input type="date" class="form-control form-control-sm" id="id_validity_date" value="{{ date }}">
+                        </div>
+                        <div class="col-md-2 col-6 form-group mb-2 mb-md-0">
+                            <label for="id_date_completion" class="small text-muted mb-1">Plazo (días)</label>
+                            <input type="number" class="form-control form-control-sm" id="id_date_completion" name="date_completion" placeholder="0">
+                        </div>
+                        <div class="col-md-8 col-12 form-group mb-0">
+                            <label for="id_observation" class="small text-muted mb-1">Observación</label>
+                            <input type="text" class="form-control form-control-sm text-uppercase" id="id_observation" name="observation" value="PRECIO SUJETO A VARIACIÓN POR EL MERCADO" placeholder="">
+                        </div>
+                    </div>
+                    </div>
+                </div>
 
-                                                            <div class="col-sm-4 col-md-4 col-lg-4">
-                                                                <div class="row save-order">
-                                                                    <button type="button" id="btn-save-quotation"
-                                                                            class="btn btn-success btn-sm text-uppercase text-center col-sm-12 col-md-12 col-lg-12">
-                                                                        <i class="fas fa-save"></i> Guardar cotización
-                                                                    </button>
-                                                                </div>
-                                                                <div class="row update-order d-none">
-                                                                    <button type="button" id="btn-update-order"
-                                                                            class="btn btn-primary btn-sm text-uppercase text-center">
-                                                                        <i class="fas fa-sync"></i> Actualizar
-                                                                        cotización
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-
-                                                            <div class="col-sm-4 col-md-4 col-lg-4">
-                                                                <button type="button"
-                                                                        class="btn btn-warning btn-sm text-uppercase text-center col-sm-12 col-md-12 col-lg-12"
-                                                                        id="btn-new-form"><i
-                                                                        class="far fa-check-circle"></i>
-                                                                    Nuevo
-                                                                </button>
-
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-
-                                            <div class="card-body pt-1 pb-0 ">
-                                                <div class="card header mb-0 border-0 text-left font-weight-bold">
-                                                    Metodo de Busqueda:
-                                                </div>
-
-                                                <table class="table table-sm text-uppercase small align-right"
-                                                       style="width: 100%">
-                                                    <tr class="align-right">
-                                                        <th class="border-top-0 align-middle text-left p-0"
-                                                            style="width: 5%">
-                                                            <input type="radio"
-                                                                   aria-label="Radio button for following text input"
-                                                                   id="radio1" name="radio">
-                                                        </th>
-                                                        <th class="border-top-0 align-middle text-left p-0"
-                                                            style="width: 10%">Numero Documento:
-                                                        </th>
-                                                        <th class="border-top-0 custom-control-inline text-left"
-                                                            style="width: 100%">
-                                                            <select id="document_type_sender"
-                                                                    name="document_type_sender"
-                                                                    class="form-control form-control-sm"
-                                                                    style="font-size: .8375rem;">
-                                                                <option selected value="0">Seleccione...</option>
-                                                                {% for type in document_types %}
-                                                                    {% if type.id == '01' %}
-                                                                        <option value="{{ type.id }}">DNI</option>
-                                                                    {% elif type.id == '06' %}
-                                                                        <option value="{{ type.id }}">RUC</option>
-                                                                    {% elif type.id == '-' %}
-                                                                        <option value="{{ type.id }}">OTRO</option>
-                                                                    {% endif %}
-                                                                {% endfor %}
-                                                            </select>
-                                                            <input type="hidden"
-                                                                   class="form-control form-control-sm text-uppercase"
-                                                                   id="id-client-sender"
-                                                                   name="id-client-sender"
-                                                                   placeholder="">
-
-                                                        </th>
-                                                        <th class="border-top-0 align-middle text-right p-0"
-                                                            style="width: 30%">
-                                                            <input type="text"
-                                                                   class="form-control form-control-sm text-uppercase"
-                                                                   id="id-nro-document-sender"
-                                                                   name="nro-document-sender"
-                                                                   placeholder="" style="width: 100%">
-                                                        </th>
-                                                        <th class="border-top-0 align-middle text-right p-0"
-                                                            style="width: 30%">
-                                                            <button type="button" class="btn btn-sm btn-outline-info"
-                                                                    data-toggle="modal"
-                                                                    data-target="#modalClient" style="width: 90%">
-                                                                <i class="fas fa-user-plus"></i> &nbsp;NUEVO CLIENTE
-                                                            </button>
-
-                                                        </th>
-                                                    </tr>
-                                                    <tr>
-                                                        <th class="border-top-0 align-middle text-left p-0">
-                                                            <input type="radio"
-                                                                   aria-label="Radio button for following text input"
-                                                                   id="radio2" name="radio" checked="checked">
-                                                        </th>
-                                                        <th class="border-top-0 align-middle text-left p-0">
-                                                            Nombres/Razón Social:
-                                                        </th>
-                                                        <td class="border-top-0 text-left" colspan="3">
-                                                            <input type="text"
-                                                                   class="form-control text-uppercase client-table dropdown-toggle"
-                                                                   data-toggle="dropdown" aria-expanded="false"
-                                                                   placeholder="Ingrese cliente y presione enter...">
-                                                            <div class="dropdown-menu"></div>
-                                                        </td>
-                                                    </tr>
-                                                </table>
-                                            </div>
-                                            <div class="form-row pl-1 pr-3">
-                                                <div class="form-group col-md-5 text-uppercase small">
-                                                    <label class="mb-2 text-center font-weight-bold"
-                                                           style="font-size: 1.3em">Cliente
-                                                        - Nombres/Razón social:</label>
-                                                    <input type="text"
-                                                           class="form-control form-control-sm text-uppercase"
-                                                           id="id_sender"
-                                                           name="sender" readonly
-                                                           placeholder="">
-                                                </div>
-                                                <div class="form-group col-md-7 text-uppercase small">
-                                                    <label class="mb-2 text-center font-weight-bold"
-                                                           style="font-size: 1.3em">
-                                                        Dirección:</label>
-                                                    <input type="text"
-                                                           class="form-control form-control-sm text-uppercase"
-                                                           id="id_address"
-                                                           name="name_address"
-                                                           placeholder="">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-row mt-1 ml-0 mr-2">
-                                    <div class="col-md-2 text-uppercase small pl-1 pr-0">
-                                        <label for="transaction_payment_type_" class="mb-0">Pago</label>
-                                        <select id="transaction_payment_type" class="form-control form-control-sm">
-                                            <option value="0">Seleccione</option>
-                                            {% for item in choices_payments %}
-                                                <option value="{{ item.0 }}">{{ item.1 }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                    <div class="col-md-5 text-uppercase small pl-0 pr-0">
-                                        <div class="row col-sm-12 m-0 p-0" id="cash" style="display: none">
-                                            <div class="col-sm-6 pl-1 pr-0">
-                                                <label for="code-operation" class="mb-0">Caja destino</label>
-                                                <select id="id_cash" name="id_cash_efectivo"
-                                                        class="form-control form-control-sm text-uppercase"
-                                                        aria-selected="Text input with radio button">
-                                                    {% for c in choices_account %}
-                                                        <option value="{{ c.id }}"
-                                                        >{{ c.name }}</option>
-                                                    {% endfor %}
-                                                </select>
-                                            </div>
-                                            <div class="col-sm-6 pl-1 pr-1">
-                                                <label for="code-operation" class="mb-0">Fecha</label>
-                                                <input type="date"
-                                                       id="id_date"
-                                                       name="id_date"
-                                                       readonly
-                                                       class="form-control form-control-sm">
-                                            </div>
-                                        </div>
-                                        <div class="row col-sm-12 m-0 p-0" id="deposit" style="display: none">
-                                            <div class="col-sm-6 pl-1 pr-0">
-                                                <label for="code-operation" class="mb-0">Deposito a cuenta</label>
-                                                <select id="id_cash_deposit" name="id_cash_deposit"
-                                                        class="form-control form-control-sm text-uppercase"
-                                                        aria-selected="Text input with radio button">
-                                                    {% for c in choices_account_bank %}
-                                                        <option value="{{ c.id }}"
-                                                        >{{ c.name }}</option>
-                                                    {% endfor %}
-                                                </select>
-                                            </div>
-                                            <div class="col-sm-6 pl-1 pr-0">
-                                                <label for="code-operation" class="mb-0">Codigo operacion</label>
-                                                <input type="text" class="form-control form-control-sm"
-                                                       id="code-operation"
-                                                       placeholder="">
-                                            </div>
-                                        </div>
-                                        <div class="row col-sm-12 m-0 p-0 text-center pl-1 pr-0" id="credit"
-                                             style="display: none">
-                                            <label for="id-credit-client" class="mb-0 text-center"> Deuda </label>
-                                            <input type="text" class="form-control form-control-sm "
-                                                   id="id-credit-client"
-                                                   value="Credito del cliente" readonly>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-2 text-uppercase small pl-1 pr-1">
-                                        <label for="code-operation" class="mb-0">Serie</label>
-                                        <select id="id_serie" name="id_serie"
-                                                class="form-control form-control-sm"
-                                                aria-selected="Text input with radio button">
-                                            <option selected value="0">Seleccione...</option>
-                                            {% for serie in series %}
-                                                {% if serie.serial %}
-                                                    <option selected
-                                                            value="{{ serie.id }}">{{ serie.serial|zfill:4 }}</option>
-                                                {% endif %}
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                    <div class="col-md-3 text-uppercase small pl-0 pr-0">
-                                        <label for="hour" class="mb-0">Fecha y Hora</label>
-                                        <input type="date" class="form-control form-control-sm" id="date"
-                                               value="{{ date }}"
-                                               placeholder="Fecha">
-                                    </div>
-                                </div>
-
-                                <div class="form-row mt-1 ml-0 mr-2" id="form_quotation">
-                                    <div class="col-md-2 text-uppercase small pl-1 pr-0">
-                                        <label for="hour" class="mb-0">Valido hasta:</label>
-                                        <input type="date" class="form-control form-control-sm" id="id_validity_date"
-                                               value="{{ date }}">
-                                    </div>
-                                    <div class="col-md-2 text-uppercase small pl-1 pr-0">
-                                        <label for="id_date_completion" class="mb-0">Tiempo entrega dias</label>
-                                        <input type="number" class="form-control form-control-sm"
-                                               id="id_date_completion"
-                                               name="date_completion"
-                                               placeholder="0">
-                                    </div>
-                                    <div class="col-md-8 text-uppercase small pl-1 pr-1">
-                                        <label for="id_place_delivery" class="mb-0">Lugar de entrega</label>
-                                        <input type="text" class="form-control form-control-sm text-uppercase"
-                                               id="id_place_delivery"
-                                               name="place_delivery"
-                                               placeholder="">
-                                    </div>
-
-                                </div>
-
-                                <div class="form-row mt-1 ml-0 mr-2" id="form_quotation_row2">
-                                    <div class="col-md-2 text-uppercase small pl-1 pr-0">
-                                        <label for="id_type_quotation" class="mb-0">Tipo de Cotización</label>
-                                        <select id="id_type_quotation" name="type_quotation"
-                                                class="form-control form-control-sm"
-                                                aria-selected="Text input with radio button">
-                                            <option selected value="0">Seleccione...</option>
-                                            <option value="P">PROYECTO</option>
-                                            <option value="O">OBRA</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-2 text-uppercase small pl-1 pr-1">
-                                        <label for="id_name_type_quotation" class="mb-0">Nombre de Proyecto /
-                                            Obra</label>
-                                        <input type="text" class="form-control form-control-sm text-uppercase"
-                                               id="id_name_type_quotation"
-                                               name="name_type_quotation"
-                                               placeholder="">
-                                    </div>
-                                    <div class="col-md-8 text-uppercase small pl-1 pr-1">
-                                        <label for="id_observation" class="mb-0">Observación</label>
-                                        <input type="text" class="form-control form-control-sm text-uppercase"
-                                               id="id_observation"
-                                               name="observation" value="PRECIO SUJETO A VARIACIÓN POR EL MERCADO"
-                                               placeholder="">
-                                    </div>
-                                </div>
-
-                            </div> <!-- card-body -->
-                        </div>     <!-- card -->
-
-
-                    </div><!-- card-group -->
-
-
-                    {% include "sales/quotation_detail.html" %}
-
-                </div><!-- card-body-->
-            </div><!-- card-->
-
-
+                {% include "sales/quotation_detail.html" %}
+            </div>
         </div>
-
+    </div>
     </div>
 
     <div class="mr-3 ml-0" style="
@@ -447,22 +270,22 @@
         $('#transaction_payment_type').change(function () {
             let type = $('#transaction_payment_type').val();
             if (type === 'E') {
-                $('#cash').css('display', '');
-                $('#deposit').css('display', 'none');
+                $('#cash').add('#cash_date_wrap').css('display', '');
+                $('#deposit').add('#deposit_code_wrap').css('display', 'none');
                 $('#id_cash').trigger('change');
                 $('#credit').css('display', 'none');
             } else if (type === 'D') {
-                $('#deposit').css('display', '');
-                $('#cash').css('display', 'none');
+                $('#deposit').add('#deposit_code_wrap').css('display', '');
+                $('#cash').add('#cash_date_wrap').css('display', 'none');
                 $('#credit').css('display', 'none');
             } else if (type === 'C') {
                 $('#credit').css('display', '');
-                $('#cash').css('display', 'none');
-                $('#deposit').css('display', 'none');
+                $('#cash').add('#cash_date_wrap').css('display', 'none');
+                $('#deposit').add('#deposit_code_wrap').css('display', 'none');
             } else if (type === '0') {
                 $('#credit').css('display', 'none');
-                $('#cash').css('display', 'none');
-                $('#deposit').css('display', 'none');
+                $('#cash').add('#cash_date_wrap').css('display', 'none');
+                $('#deposit').add('#deposit_code_wrap').css('display', 'none');
             }
         });
 
@@ -617,7 +440,6 @@
         $(document).on('keypress', '#custom-search-product', function (e) {
 
             $('#product_list_sales').empty();
-            $('#custom-search-barcode').val(' ')
 
             if (e.keyCode === 13) {
 
@@ -632,28 +454,6 @@
                     return false;
                 }
                 getProductsByNameOrBarcode(_product_name, '')
-
-            }
-        });
-
-        $(document).on('keypress', '#custom-search-barcode', function (e) {
-
-            $('#product_list_sales').empty();
-            $('#custom-search-product').val(' ');
-
-            if (e.keyCode === 13) {
-
-                e.preventDefault()
-
-                $(this).trigger("enterKey");
-
-                let _barcode = $(this).val().trim();
-
-                if (_barcode.length === 0) {
-                    toastr.warning('¡Favor de ingresar un codigo de barras', 'Error de Datos');
-                    return false;
-                }
-                getProductsByNameOrBarcode('', _barcode)
 
             }
         });
@@ -1168,8 +968,8 @@
                 return false;
             }
 
-            if ($('#id_date_completion').val() === '' || $('#id_place_delivery').val() === '' || $('#id_type_quotation').val() === '0' || $('#id_name_type_quotation').val() === '' || $('#id_observation').val() === '') {
-                toastr.warning('Complete los campos de la cotización');
+            if ($('#id_date_completion').val() === '' || $('#id_observation').val() === '') {
+                toastr.warning('Complete los campos de la cotización (tiempo de entrega y observación)');
                 return false;
             }
 
@@ -1180,7 +980,6 @@
                 "SaleTotal": $('#sum-total').val(),
                 "TransactionPaymentType": $('#transaction_payment_type').val(),
                 "Distribution": $('#id_distribution').val(),
-                {#"Type": 'V',#}
                 "order_type": $('#id-type-order').val(),
                 "Serie": $('#id_serie').val(),
                 "BillType": sessionStorage.BillType,
@@ -1193,10 +992,10 @@
                 "cod_operation": $('#code-operation').val(),
                 "validity_date": $('#id_validity_date').val(),
                 "date_completion": $('#id_date_completion').val(),
-                "place_delivery": $('#id_place_delivery').val(),
-                "type_quotation": $('#id_type_quotation').val(),
+                "place_delivery": "",
+                "type_quotation": "0",
                 "observation": $('#id_observation').val(),
-                "name_type_quotation": $('#id_name_type_quotation').val(),
+                "name_type_quotation": "",
                 "order_sale_quotation": Number($('#id_order_sale_quotation').val()),
                 "userID": $('#user_id').val()
             };
@@ -1283,10 +1082,6 @@
                         $("#document_type_sender").trigger('change');
                         $("#id_validity_date").val(response.validity_date);
                         $("#id_date_completion").val(response.date_completion);
-                        $("#id_place_delivery").val(response.place_delivery);
-                        $("#id_type_quotation").val(response.type_quotation);
-                        $("#id_type_quotation").trigger('change');
-                        $("#id_name_type_quotation").val(response.type_name_quotation);
                         $("#id_observation").val(response.observation);
                         $("#btn-voucher-order").prop("disabled", true);
                         $('.print-ticket-bill-quotation').css('display', 'flex');
@@ -1322,8 +1117,8 @@
         $(document).on('click', '#btn-update-order', function (e) {
 
             if ($('#id-type-order').val() === 'T') {
-                if ($('#id_date_completion').val() === '' || $('#id_place_delivery').val() === '' || $('#id_type_quotation').val() === '0' || $('#id_name_type_quotation').val() === '' || $('#id_observation').val() === '') {
-                    toastr.warning('Complete los campos de la cotización');
+                if ($('#id_date_completion').val() === '' || $('#id_observation').val() === '') {
+                    toastr.warning('Complete los campos de la cotización (tiempo de entrega y observación)');
                     return false;
                 }
             }
@@ -1356,10 +1151,10 @@
                 "cod_operation": $('#code-operation').val(),
                 "validity_date": $('#id_validity_date').val(),
                 "date_completion": $('#id_date_completion').val(),
-                "place_delivery": $('#id_place_delivery').val(),
-                "type_quotation": $('#id_type_quotation').val(),
+                "place_delivery": "",
+                "type_quotation": "0",
                 "observation": $('#id_observation').val(),
-                "name_type_quotation": $('#id_name_type_quotation').val(),
+                "name_type_quotation": "",
                 "order_sale_quotation": Number($('#id_order_sale_quotation').val()),
                 "correlative_sale": $('#id_order_sale_quotation_correlative').val(),
             };
@@ -1542,10 +1337,10 @@
                 "cod_operation": $('#code-operation').val(),
                 "validity_date": $('#id_validity_date').val(),
                 "date_completion": $('#id_date_completion').val(),
-                "place_delivery": $('#id_place_delivery').val(),
-                "type_quotation": $('#id_type_quotation').val(),
+                "place_delivery": "",
+                "type_quotation": "0",
                 "observation": $('#id_observation').val(),
-                "name_type_quotation": $('#id_name_type_quotation').val(),
+                "name_type_quotation": "",
                 "order_sale_quotation": Number($('#id_order_sale_quotation').val()),
                 "userID": $('#user_id').val()
             };

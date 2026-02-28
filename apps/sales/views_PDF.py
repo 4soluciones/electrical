@@ -877,8 +877,6 @@ def print_quotation(request, pk=None, t=None):
         ['Dirección :', Paragraph(str(info_address), styles['Left_Square'])],
         ['Teléfono :', Paragraph(str(telephone), styles['Left_Square'])],
         ['Correo :', Paragraph(str(email), styles['Left_Square'])],
-        # ['Forma Pago:', Paragraph(str(description), styles['Left_Square'])],
-        ['Lugar de Entrega  : ', Paragraph(str(order_obj.place_delivery.upper()), styles['Left_Square'])],
     ]
     tbl2_col_1 = Table(tbl2_col1, colWidths=[_bts * 20 / 100, _bts * 50 / 100])
     style_table2_col1 = [
@@ -893,11 +891,8 @@ def print_quotation(request, pk=None, t=None):
         ['Fecha Emisión: ', Paragraph(order_obj.create_at.strftime("%d-%m-%Y"), styles['Left_Square'])],
         ['Fecha Vencimiento: ', Paragraph(order_obj.validity_date.strftime("%d-%m-%Y"), styles['Left_Square'])],
         ['Vendedor: ', Paragraph(order_obj.user.username.upper(), styles['Left_Square'])],
-        # ['Moneda: ', Paragraph(order_obj.get_coin_display(), styles['Left_Square'])],
         ['Cond. Venta: ', Paragraph(str(payment.upper()), styles['Left_Square'])],
-        ['Plazo: ', Paragraph(str(order_obj.date_completion) + ' dia(s)', styles['Left_Square'])],
-        ['Tipo: ', Paragraph(str(order_obj.get_type_quotation_display()), styles['Left_Square'])],
-        ['Nombre: ', Paragraph(str(order_obj.type_name_quotation.upper()), styles['Left_Square'])]
+        ['Plazo: ', Paragraph(str(order_obj.date_completion or '0') + ' dia(s)', styles['Left_Square'])],
     ]
     tbl2_col_2 = Table(tbl2_col2, colWidths=[_bts * 18 / 100, _bts * 14 / 100])
 

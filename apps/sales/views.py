@@ -5650,9 +5650,9 @@ def update_quotation(request):
 
         validity_date = (data_sale["validity_date"])
         date_completion = (data_sale["date_completion"])
-        place_delivery = (data_sale["place_delivery"])
-        type_quotation = (data_sale["type_quotation"])
-        type_name_quotation = (data_sale["name_type_quotation"])
+        place_delivery = data_sale.get("place_delivery") or ""
+        type_quotation = data_sale.get("type_quotation") or "0"
+        type_name_quotation = data_sale.get("name_type_quotation") or ""
         observation = (data_sale["observation"])
 
         order_sale_quotation_obj.type = 'T'
@@ -6318,9 +6318,9 @@ def save_quotation(request):
 
         validity_date = (data_quotation["validity_date"])
         date_completion = (data_quotation["date_completion"])
-        place_delivery = (data_quotation["place_delivery"])
-        type_quotation = (data_quotation["type_quotation"])
-        type_name_quotation = (data_quotation["name_type_quotation"])
+        place_delivery = data_quotation.get("place_delivery") or ""
+        type_quotation = data_quotation.get("type_quotation") or "0"
+        type_name_quotation = data_quotation.get("name_type_quotation") or ""
         observation = (data_quotation["observation"])
 
         order_sale_quotation = None

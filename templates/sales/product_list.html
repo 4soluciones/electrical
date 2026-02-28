@@ -223,19 +223,29 @@
                         <div class="card bg-light">
                             <div class="card-body">
                                 <div class="row pb-1">
-                                    <div class="col-sm-5 col-md-5 col-lg-5">
-                                        <label for="product_id" class="col-form-label">Fecha Inicial:</label>
+                                    <div class="col-sm-4 col-md-4 col-lg-4">
+                                        <label for="start_date" class="col-form-label">Fecha Inicial:</label>
                                         <input type="date" class="form-control form-control-sm" id="start_date"
                                                value="{{ date }}">
                                     </div>
-                                    <div class="col-sm-5 col-md-5 col-lg-5">
-                                        <label for="product_id" class="col-form-label">Fecha Final:</label>
+                                    <div class="col-sm-4 col-md-4 col-lg-4">
+                                        <label for="end_date" class="col-form-label">Fecha Final:</label>
                                         <input type="date" class="form-control form-control-sm" id="end_date"
                                                value="{{ date }}">
                                     </div>
-                                    <div class="col-sm-2 col-md-2 col-lg-2">
-                                        <label for="product_id" class="col-form-label">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
-                                        <button type="button" class="btn-sm btn-success btn-block"
+                                    <div class="col-sm-4 col-md-4 col-lg-4">
+                                        <label for="kardex_total_brand_id" class="col-form-label">Marca:</label>
+                                        <select class="form-control form-control-sm" id="kardex_total_brand_id">
+                                            <option value="0">Todas</option>
+                                            {% for pb in product_brand_set %}
+                                                <option value="{{ pb.id }}">{{ pb.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row pb-1">
+                                    <div class="col-sm-12 text-right">
+                                        <button type="button" class="btn-sm btn-success"
                                                 id="excel">
                                             <i class="fas fa-file-excel"></i> Generar
                                         </button>
@@ -273,8 +283,18 @@
                                                value="{{ date }}">
                                     </div>
                                     <div class="col-sm-6 col-md-6 col-lg-6">
-                                        <label for="excel" class="col-form-label">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
-                                        <button type="button" class="btn-sm btn-success btn-block"
+                                        <label for="kardex_by_date_brand_id" class="col-form-label">Marca:</label>
+                                        <select class="form-control form-control-sm" id="kardex_by_date_brand_id">
+                                            <option value="0">Todas</option>
+                                            {% for pb in product_brand_set %}
+                                                <option value="{{ pb.id }}">{{ pb.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row pb-1">
+                                    <div class="col-sm-12 text-right">
+                                        <button type="button" class="btn-sm btn-success"
                                                 id="excel-total">
                                             <i class="fas fa-file-excel"></i> Generar
                                         </button>
@@ -690,7 +710,12 @@
         document.getElementById('excel').addEventListener('click', function () {
             const startDate = document.getElementById('start_date').value;
             const endDate = document.getElementById('end_date').value;
-            window.location.href = `/sales/export_all_products/${startDate}/${endDate}/`;
+            const brandId = document.getElementById('kardex_total_brand_id').value;
+            let url = `/sales/export_all_products/${startDate}/${endDate}/`;
+            if (brandId && brandId !== '0') {
+                url += `?brand=${brandId}`;
+            }
+            window.location.href = url;
         });
 
         $(document).on('click', '#report-excel-by-date', function () {
@@ -699,7 +724,12 @@
 
         document.getElementById('excel-total').addEventListener('click', function () {
             const date = document.getElementById('date').value;
-            window.location.href = `/sales/report_kardex_by_date/${date}/`;
+            const brandId = document.getElementById('kardex_by_date_brand_id').value;
+            let url = `/sales/report_kardex_by_date/${date}/`;
+            if (brandId && brandId !== '0') {
+                url += `?brand=${brandId}`;
+            }
+            window.location.href = url;
         });
 
         /*$(document).on('click', '#btn-search', function (e) {

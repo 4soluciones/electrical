@@ -18,7 +18,15 @@ def export_all_products(request, start_date=None, end_date=None):
         'CI': 'Cuadre de Inventario',
     }
 
-    for p in Product.objects.filter(is_enabled=True).exclude(id__in=[71, 145, 146]).order_by('id'):
+    product_queryset = Product.objects.filter(is_enabled=True).exclude(id__in=[71, 145, 146])
+    brand_id = request.GET.get('brand', '0')
+    if brand_id and brand_id != '0':
+        try:
+            product_queryset = product_queryset.filter(product_brand_id=int(brand_id))
+        except (ValueError, TypeError):
+            pass
+
+    for p in product_queryset.order_by('id'):
     # for p in Product.objects.filter(id=386):
         product = p.name
         product_store_set = ProductStore.objects.filter(product=p.id, subsidiary_store__id=1)
@@ -220,7 +228,14 @@ def get_unique_sheet_name(sheet_name, workbook):
 def report_kardex_by_date(request, date=None):
     print(date)
     report_data = []
-    for idx, p in enumerate(Product.objects.filter(is_enabled=True).order_by('id'), start=1):
+    product_queryset = Product.objects.filter(is_enabled=True)
+    brand_id = request.GET.get('brand', '0')
+    if brand_id and brand_id != '0':
+        try:
+            product_queryset = product_queryset.filter(product_brand_id=int(brand_id))
+        except (ValueError, TypeError):
+            pass
+    for idx, p in enumerate(product_queryset.order_by('id'), start=1):
         product_store_set = ProductStore.objects.filter(product=p.id, subsidiary_store__id=1)
         if product_store_set.exists():
             product_store = product_store_set.last()
