@@ -27,7 +27,7 @@ urlpatterns = [
     # path('get_approve_detail_requirement/', get_approve_detail_requirement, name='get_approve_detail_requirement'),
     # path('update_details_requirement_store/', update_details_requirement_store,
     #      name='update_details_requirement_store'),
-    # path('update_state_annular_purchase/', update_state_annular_purchase, name='update_state_annular_purchase'),
+    path('update_state_annular_purchase/', update_state_annular_purchase, name='update_state_annular_purchase'),
     # path('get_products_by_requirement/', get_products_by_requirement, name='get_products_by_requirement'),
     # path('get_list_requirement_stock/', get_list_requirement_stock, name='get_list_requirement_stock'),
     # path('get_requirement_balance/', get_requirement_balance, name='get_requirement_balance'),

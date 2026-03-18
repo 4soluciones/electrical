@@ -275,9 +275,6 @@
                                     </th>
                                     <th scope="col" class="align-middle font-weight-normal" style="width: 6%;">Importe
                                     </th>
-                                    <th scope="col" class="align-middle font-weight-normal" style="width: 3%;">Afecta
-                                        Kardex
-                                    </th>
                                     <th scope="col" class="align-middle font-weight-normal" style="width: 4%;">
                                         Eliminar
                                     </th>
@@ -305,10 +302,23 @@
                                                    readonly>
                                         </td>
                                         <td class="align-middle item-quantity">
-                                            <input type="text"
-                                                   class="form-control text-center quantity-product text-uppercase"
-                                                   placeholder="0"
-                                                   value="{{ pd.quantity|floatformat:0 }}">
+                                            <div class="quantity-cell-wrapper">
+                                                <input type="text"
+                                                       class="form-control text-center quantity-product text-uppercase"
+                                                       placeholder="0"
+                                                       value="{{ pd.quantity|floatformat:0 }}">
+                                                <button type="button" class="btn btn-sm btn-outline-primary btn-series-toggle mt-1"
+                                                        data-toggle="collapse" data-target="#collapse-serials-{{ pd.id }}"
+                                                        aria-expanded="false" aria-controls="collapse-serials-{{ pd.id }}"
+                                                        title="Agregar, modificar o gestionar series">
+                                                    <i class="fa fa-barcode"></i> Series
+                                                    {% if pd.productserial_set.all %}
+                                                        <span class="badge badge-primary badge-pill ml-1 series-count">{{ pd.productserial_set.all|length }}</span>
+                                                    {% else %}
+                                                        <span class="badge badge-light badge-pill ml-1 series-count">0</span>
+                                                    {% endif %}
+                                                </button>
+                                            </div>
                                         </td>
                                         <td class="align-middle unit">
                                             <input type="text"
@@ -357,64 +367,61 @@
                                                 <i class="change-money font-weight-lighter">S/</i>
                                             </div>
                                         </td>
-                                        <td class="item-check text-center align-middle">
-                                            <div class="form-check">
-                                                <input class="form-check-input position-static check-kardex"
-                                                       type="checkbox"
-                                                       value="" checked>
-                                            </div>
-                                        </td>
                                         <td class="align-middle text-center">
-                                            <button type="button" onclick="deleteItem({{ pd.product.id }})"
+                                            <button type="button" onclick="deleteItem(this)"
                                                     pd_id="{{ pd.id }}"
                                                     class="btn btn-danger delete-detail"><i
                                                     class="fa fa-trash"></i></button>
                                         </td>
                                     </tr>
-                                    {% if pd.productserial_set.all %}
-                                        <tr class="product-serial">
-                                            <td class="text-right align-middle" colspan="1"></td>
-                                            <td class="text-right align-middle">
-                                                <div id="accordion">
-                                                    <div class="card">
-                                                        <div class="card-header p-0" id="heading-{{ pd.product.id }}">
-                                                            <h5 class="mb-0 text-center">
-                                                                <button class="btn btn-link collapsed text-dark roboto-condensed-regular font-weight-bold"
-                                                                        data-toggle="collapse" style="font-size: 11px"
-                                                                        data-target="#collapse-{{ pd.product.id }}"
-                                                                        aria-expanded="false"
-                                                                        aria-controls="collapse-{{ pd.product.id }}">
-                                                                    Seriales <i class="fas fa-sort-down"></i>
-                                                                </button>
-                                                            </h5>
-                                                        </div>
-                                                        <div id="collapse-{{ pd.product.id }}" class="collapse"
-                                                             aria-labelledby="heading-{{ pd.product.id }}"
-                                                             data-parent="#accordion">
-                                                            <div class="card-body p-0">
-                                                                <table class="table table-sm align-content-center table-bordered mb-0">
-                                                                    <tbody id="details-serial-{{ pd.product.id }}">
-                                                                    {% for s in pd.productserial_set.all %}
-                                                                        <tr>
-                                                                            <td class="text-right align-middle text-center">{{ forloop.counter }}</td>
-                                                                            <td class="text-right item-serial align-middle">
-{#                                                                                <input type="hidden" value="{{ s.id }}">#}
-                                                                                <input type="text" class="form-control serial"
-                                                                                       aria-label=""
-                                                                                       value="{{ s.serial_number }}"
-                                                                                       aria-describedby="basic-addon1">
-                                                                            </td>
-                                                                        </tr>
-                                                                    {% endfor %}
-                                                                    </tbody>
-                                                                </table>
-                                                            </div>
-                                                        </div>
+                                    <tr class="product-serial" data-pd-id="{{ pd.id }}">
+                                        <td class="align-middle" colspan="2">
+                                            <div id="collapse-serials-{{ pd.id }}" class="collapse serial-panel"
+                                                 aria-labelledby="heading-serials-{{ pd.id }}">
+                                                <div class="card border-primary">
+                                                    <div class="card-header py-1 px-2 bg-light d-flex justify-content-between align-items-center">
+                                                        <span class="font-weight-bold" style="font-size: 12px;">
+                                                            <i class="fa fa-barcode text-primary mr-1"></i>Gestionar Series
+                                                        </span>
+                                                        <button type="button" class="btn btn-sm btn-warning btn-clear-serials mr-1"
+                                                                data-target="#details-serial-{{ pd.id }}"
+                                                                title="Limpiar todas las series para volver a ingresar">
+                                                            <i class="fa fa-eraser"></i> Limpiar
+                                                        </button>
+                                                    </div>
+                                                    <div class="card-body p-2">
+                                                        <table class="table table-sm table-bordered mb-0">
+                                                            <thead class="thead-light">
+                                                                <tr>
+                                                                    <th style="width: 10%;" class="text-center">Nº</th>
+                                                                    <th style="width: 75%;">Número de Serie</th>
+                                                                    <th style="width: 15%;" class="text-center">Acción</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="details-serial-{{ pd.id }}">
+                                                            {% for s in pd.productserial_set.all %}
+                                                                <tr>
+                                                                    <td class="text-center align-middle">{{ forloop.counter }}</td>
+                                                                    <td class="item-serial align-middle">
+                                                                        <input type="text" class="form-control form-control-sm serial"
+                                                                               placeholder="Ingrese serie"
+                                                                               value="{{ s.serial_number }}">
+                                                                    </td>
+                                                                    <td class="text-center align-middle">
+                                                                        <button type="button" class="btn btn-sm btn-outline-danger btn-remove-serial" title="Eliminar serie">
+                                                                            <i class="fa fa-trash"></i>
+                                                                        </button>
+                                                                    </td>
+                                                                </tr>
+                                                            {% endfor %}
+                                                            </tbody>
+                                                        </table>
                                                     </div>
                                                 </div>
-                                            </td>
-                                        </tr>
-                                    {% endif %}
+                                            </div>
+                                        </td>
+                                        <td colspan="9" class="border-0"></td>
+                                    </tr>
                                 {% endfor %}
                                 </tbody>
 
@@ -579,6 +586,17 @@
             padding-right: 25px;
             text-align: right;
         }
+
+        .quantity-cell-wrapper {
+            min-width: 110px;
+        }
+        .quantity-cell-wrapper .btn-series-toggle {
+            font-size: 0.75rem;
+            padding: 0.15rem 0.35rem;
+        }
+        .serial-panel .card {
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
     </style>
 
 
@@ -609,6 +627,7 @@
             } else {
                 $(".change-money").text('S/')
             }
+            sum_table();
         });
 
         $(document).on('click', '#check_dollar', function (e) {
@@ -823,15 +842,23 @@
                 _val_money = '$'
             }
 
+            let _collapseId = 'collapse-serials-new-' + Date.now();
+            let _detailsId = 'details-serial-new-' + Date.now();
+
             $('#id_detail_data_grid > tbody').append(
-                '<tr class="text-center">' +
+                '<tr class="item-row text-center" product="" unit_id="" pd_id="NaN">' +
                 '<td class="item-numero align-middle">' + '</td>' +
                 '<td class="align-middle text-left product-item-table">' +
                 '<input type="text" class="form-control text-uppercase product-table dropdown-toggle" ' +
                 '               data-toggle="dropdown" aria-expanded="false" placeholder="Ingrese producto...">' + '<div class="dropdown-menu"></div>' + '</td>' +
                 '<td class="align-middle brand">' +
                 '<input type="text" class="form-control text-center text-uppercase brand-product" id="brand_id" name="brand" readonly>' + '</td>' +
-                '<td class="align-middle item-quantity">' + '<input type="text" class="form-control text-center quantity-product text-uppercase" placeholder="0">' + '</td>' +
+                '<td class="align-middle item-quantity">' +
+                '<div class="quantity-cell-wrapper">' +
+                '<input type="text" class="form-control text-center quantity-product text-uppercase" placeholder="0">' +
+                '<button type="button" class="btn btn-sm btn-outline-primary btn-series-toggle mt-1" data-toggle="collapse" data-target="#' + _collapseId + '" title="Agregar, modificar o gestionar series">' +
+                '<i class="fa fa-barcode"></i> Series <span class="badge badge-light badge-pill ml-1 series-count">0</span></button>' +
+                '</div></td>' +
                 /*'<td class="align-middle unit">' +
                 '<select class="form-control unit-product" id="id_unit_product" name="unit_product" required>' +
                 '<option value="0"> Seleccione</option>'+ textOption + '</td>' +*/
@@ -849,12 +876,23 @@
                 '<input type="text" class="form-control text-right text-uppercase discount4" placeholder="0.00">' + '</td>' +
                 '<td class="item-total text-right align-middle total-row">' + '<div class="input-icon">' +
                 '<input type="text" class="form-control text-right text-uppercase total-detail" placeholder="0.00">' + '<i class="change-money">' + _val_money + '</i>' + '</div>' + '</td>' +
-                '<td class="item-check text-center align-middle">' +
-                '<div class="form-check">' + '<input class="form-check-input position-static check-kardex" type="checkbox" value="" checked> ' + '</div>' +
-                '</td>' +
                 '<td class="align-middle"> ' + '<button type="button" onclick="deleteItem2(this)" class="btn btn-danger delete-detail"><i class="fa fa-trash"></i></button>' + '</td>' +
-                '</tr>');
-            counterStrike2()
+                '</tr>' +
+                '<tr class="product-serial" data-pd-id="new">' +
+                '<td class="align-middle" colspan="2">' +
+                '<div id="' + _collapseId + '" class="collapse serial-panel">' +
+                '<div class="card border-primary">' +
+                '<div class="card-header py-1 px-2 bg-light d-flex justify-content-between align-items-center">' +
+                '<span class="font-weight-bold" style="font-size: 12px;"><i class="fa fa-barcode text-primary mr-1"></i>Gestionar Series</span>' +
+                '<button type="button" class="btn btn-sm btn-success btn-add-serial" data-target="#' + _detailsId + '" title="Agregar nueva serie">' +
+                '<i class="fa fa-plus"></i> Agregar</button></div>' +
+                '<div class="card-body p-2">' +
+                '<table class="table table-sm table-bordered mb-0">' +
+                '<thead class="thead-light"><tr><th style="width:10%;" class="text-center">Nº</th><th style="width:75%;">Número de Serie</th><th style="width:15%;" class="text-center">Acción</th></tr></thead>' +
+                '<tbody id="' + _detailsId + '"></tbody></table></div></div></div></td>' +
+                '<td colspan="9" class="border-0"></td></tr>');
+            counterStrike2();
+            sum_table();
         });
 
         $(document).on('keyup', '#id_total_freight', function () {
@@ -863,8 +901,8 @@
         $(document).on('keyup', '.total-detail', function () {
             let _tr = $(this).parent('div').parent('td').parent('tr')
             {#let _tr = $("#id_detail_data_grid tbody#details-table tr")#}
-            let _total = Number(_tr.find('td.total-row div.input-icon input.total-detail').val());
-            let _quantity = Number(_tr.find('td.item-quantity input.quantity-product').val())
+            let _total = parseDecimal(_tr.find('td.total-row div.input-icon input.total-detail').val());
+            let _quantity = parseDecimal(_tr.find('td.item-quantity input.quantity-product').val())
             {#console.log('_total', _total)#}
             {#console.log('_quantity', _quantity)#}
             let price_unit = _total / _quantity
@@ -877,15 +915,15 @@
 
         $(document).on('keyup', '.quantity-product', function () {
 
-            let _tr = $(this).parent('td').parent('tr')
-            let _quantity = Number(_tr.find('td.item-quantity input.quantity-product').val())
-            let _price_unit = Number(_tr.find('td.item-price div.input-icon input.price-unit-product').val())
-            let _total = Number(_tr.find('td.total-row div.input-icon input.total-detail').val());
+            let _tr = $(this).closest('tr.item-row')
+            let _quantity = parseDecimal(_tr.find('td.item-quantity input.quantity-product').val())
+            let _price_unit = parseDecimal(_tr.find('td.item-price div.input-icon input.price-unit-product').val())
+            let _total = parseDecimal(_tr.find('td.total-row div.input-icon input.total-detail').val())
 
-            {#console.log("_tr", _tr.find('td.item-price div.input-icon input.price-unit-product'))#}
-            {#console.log("_quantity", _quantity)#}
-            {#console.log("_price_unit", _price_unit)#}
-            {#console.log("_total", _total)#}
+            /*console.log("_tr", _tr.find('td.item-price div.input-icon input.price-unit-product'))
+            console.log("_quantity", _quantity)
+            console.log("_price_unit", _price_unit)
+            console.log("_total", _total)*/
 
             if (_quantity !== 0 && _price_unit !== 0) {
                 _total = _quantity * _price_unit
@@ -898,9 +936,9 @@
         $(document).on('keyup', '.price-unit-product', function () {
 
             let _tr = $(this).parent('div').parent('td').parent('tr')
-            let _quantity = Number(_tr.find('td.item-quantity input.quantity-product').val())
-            let _price_unit = Number(_tr.find('td.item-price div.input-icon input.price-unit-product').val())
-            let _total = Number(_tr.find('td.total-row div.input-icon input.total-detail').val());
+            let _quantity = parseDecimal(_tr.find('td.item-quantity input.quantity-product').val())
+            let _price_unit = parseDecimal(_tr.find('td.item-price div.input-icon input.price-unit-product').val())
+            let _total = parseDecimal(_tr.find('td.total-row div.input-icon input.total-detail').val())
 
             {#console.log("_quantity", _quantity)#}
             {#console.log("_price_unit", _price_unit)#}
@@ -923,33 +961,22 @@
 
         function calculate_total(_tr) {
 
-            let $quantity = Number(_tr.find('td.item-quantity input.quantity-product').val());
-            let $price_unit = Number(_tr.find('td.item-price input.price-unit-product').val());
-            // let $price_unit;
-            let $d1_val = Number(_tr.find('td.item-discount1 input.discount1').val());
-            let $d2_val = Number(_tr.find('td.item-discount2 input.discount2').val());
-            let $d3_val = Number(_tr.find('td.item-discount3 input.discount3').val());
-            let $d4_val = Number(_tr.find('td.item-discount4 input.discount4').val());
-            let $total = Number(_tr.find('td.total-row input.total-detail').val());
+            let $quantity = parseDecimal(_tr.find('td.item-quantity input.quantity-product').val());
+            let $price_unit = parseDecimal(_tr.find('td.item-price input.price-unit-product').val());
+            let $d1_val = parseDecimal(_tr.find('td.item-discount1 input.discount1').val());
+            let $d2_val = parseDecimal(_tr.find('td.item-discount2 input.discount2').val());
+            let $d3_val = parseDecimal(_tr.find('td.item-discount3 input.discount3').val());
+            let $d4_val = parseDecimal(_tr.find('td.item-discount4 input.discount4').val());
+            let $total = parseDecimal(_tr.find('td.total-row input.total-detail').val());
 
             let d1, d2, d3, d4, d1p, d2p, d3p, d4p, amount, $totalTemp
-
-            $price_unit = Number(_tr.find('td.item-price input.price-unit-product').val());
             amount = $quantity * $price_unit
 
             if ($d1_val === 0 && $d2_val === 0 && $d3_val === 0 && $d4_val === 0) {
-                d1 = amount - [(amount * $d1_val) / 100]
-                d2 = d1 - [(d1 * $d2_val) / 100]
-                d3 = d2 - [(d2 * $d3_val) / 100]
-                d4 = d3 - [(d3 * $d4_val) / 100]
-
-                d1p = $price_unit - [($price_unit * $d1_val) / 100]
-                d2p = d1p - [(d1p * $d2_val) / 100]
-                d3p = d2p - [(d2p * $d3_val) / 100]
-                d4p = d3p - [(d3p * $d4_val) / 100]
-
+                d4 = amount
+                d4p = $price_unit
                 _tr.find('td.item-price').attr('price-unit-with-discount', d4p.toFixed(2))
-                {#console.log('en el if', d4p)#}
+                _tr.find('td.total-row input.total-detail, td.item-total input.total-detail').val(amount.toFixed(2))
             } else {
                 d1 = amount - [(amount * $d1_val) / 100]
                 d2 = d1 - [(d1 * $d2_val) / 100]
@@ -969,6 +996,13 @@
 
         }
 
+        function parseDecimal(val) {
+            if (val === undefined || val === null || val === '') return 0;
+            let s = String(val).trim().replace(',', '.');
+            let n = parseFloat(s);
+            return isNaN(n) ? 0 : n;
+        }
+
         function sum_table() {
             let igv = 0;
             let base = 0;
@@ -977,52 +1011,50 @@
             let total_document = 0;
             let _total;
 
-            {#total_freight = Number($("#id_freight_data_grid tbody#details-freight tr td.total-freight input#id_total_freight").val());#}
-
-            $("#id_detail_data_grid tbody#details-table tr").each(function () {
-                let td_total = Number($(this).find("td.total-row input.total-detail").val().replace(',', '.'));
-                sum_total = sum_total + td_total
+            $("#id_detail_data_grid tbody#details-table tr.item-row").each(function () {
+                let val = $(this).find("td.item-total input.total-detail, td.total-row input.total-detail").val();
+                sum_total += parseDecimal(val);
             });
 
-            let _check_igv = $("#id_detail_data_grid tfoot tr input.check-igv")
+            let _check_igv = $("#check_igv");
 
             if (_check_igv.is(':checked')) {
-                base = sum_total / 1.18
-                igv = sum_total - base
-                _total = base + igv
-                total_document = _total + total_freight
-
+                base = sum_total / 1.18;
+                igv = sum_total - base;
+                _total = base + igv;
+                total_document = _total + total_freight;
             } else {
-                base = sum_total
-                igv = sum_total * 0.18
-                _total = base + igv
-                total_document = _total + total_freight
+                base = sum_total;
+                igv = sum_total * 0.18;
+                _total = base + igv;
+                total_document = _total + total_freight;
             }
 
-            $("#id_detail_data_grid tfoot tr input.total-foot-base").val(base.toFixed(2));
-            $("#id_detail_data_grid tfoot tr input.total-foot-igv").val(igv.toFixed(2));
-            $("#id_detail_data_grid tfoot tr input.total-foot-total").val(_total.toFixed(2));
-            {#$("#id_detail_data_grid tfoot tr input.total-foot-freight").val(total_freight.toFixed(2));#}
-            $("#id_detail_data_grid tfoot tr input.total-foot-document").val(total_document.toFixed(2));
+            $("#id_detail_data_foot input.total-foot-base").val(base.toFixed(2));
+            $("#id_detail_data_foot input.total-foot-igv").val(igv.toFixed(2));
+            $("#id_detail_data_foot input.total-foot-total").val(_total.toFixed(2));
+            $("#id_detail_data_foot input.total-foot-document").val(total_document.toFixed(2));
         }
 
-        $(document).on('change', '#id_detail_data_grid tfoot tr input.check-igv', function (e) {
+        $(document).on('change', '#check_igv', function (e) {
             sum_table()
         });
 
-        function deleteItem($id) {
-            let rows = $('#details-table').find("tr[product=" + $id + "]");
-            let detail_id = parseInt(rows.attr('pd_id'));
-            counterStrike2();
-            if (!isNaN(detail_id)) {
-                deleteProduct(detail_id);
+        function deleteItem(btn) {
+            let _row = $(btn).closest('tr.item-row');
+            let _pd_id = _row.attr('pd_id');
+            _row.next('tr.product-serial').remove();
+            _row.remove();
+            if (_pd_id && _pd_id !== 'NaN' && !isNaN(parseInt(_pd_id))) {
+                deleteProduct(parseInt(_pd_id));
             }
-            $('#details-table').find("tr[product=" + $id + "]").remove();
+            counterStrike2();
+            sum_table();
         }
 
         function counterStrike2() {
             let l = 1;
-            $('#details-table tr').each(function () {
+            $('#details-table tr.item-row').each(function () {
                 $(this).attr('i', l);
                 $(this).children('td:nth-child(1)').text(l);
                 l++;
@@ -1030,8 +1062,79 @@
         }
 
         function deleteItem2(btn) {
-            btn.parentNode.parentNode.remove();
+            let _row = $(btn).closest('tr.item-row');
+            _row.next('tr.product-serial').remove();
+            _row.remove();
             counterStrike2();
+            sum_table();
+        }
+
+        function syncSeriesToQuantity($itemRow) {
+            let qty = parseInt($itemRow.find('td.item-quantity input.quantity-product').val()) || 0;
+            let $serialRow = $itemRow.next('tr.product-serial');
+            let $tbody = $serialRow.find('tbody[id^="details-serial-"]');
+            let $rows = $tbody.find('tr');
+            let currentCount = $rows.length;
+            if (qty > currentCount) {
+                for (let i = currentCount; i < qty; i++) {
+                    $tbody.append(
+                        '<tr><td class="text-center align-middle">' + (i+1) + '</td>' +
+                        '<td class="item-serial align-middle"><input type="text" class="form-control form-control-sm serial" placeholder="Ingrese serie"></td>' +
+                        '<td class="text-center align-middle"><button type="button" class="btn btn-sm btn-outline-danger btn-remove-serial" title="Eliminar serie"><i class="fa fa-trash"></i></button></td></tr>'
+                    );
+                }
+            } else if (qty < currentCount) {
+                $rows.slice(qty).remove();
+            }
+            updateSeriesCountAndNumbers($serialRow);
+        }
+
+        $(document).on('show.bs.collapse', '.serial-panel', function () {
+            let $serialRow = $(this).closest('tr.product-serial');
+            let $itemRow = $serialRow.prev('tr.item-row');
+            syncSeriesToQuantity($itemRow);
+        });
+
+        $(document).on('click', '.btn-clear-serials', function (e) {
+            let $panel = $(this).closest('tr.product-serial');
+            let $tbody = $panel.find('tbody[id^="details-serial-"]');
+            $tbody.empty();
+            updateSeriesCountAndNumbers($panel);
+        });
+
+        $(document).on('click', '.btn-add-serial', function (e) {
+            let tbodyId = $(this).attr('data-target');
+            let $tbody = $(tbodyId);
+            let count = $tbody.find('tr').length + 1;
+            $tbody.append(
+                '<tr>' +
+                '<td class="text-center align-middle">' + count + '</td>' +
+                '<td class="item-serial align-middle">' +
+                '<input type="text" class="form-control form-control-sm serial" placeholder="Ingrese serie">' +
+                '</td>' +
+                '<td class="text-center align-middle">' +
+                '<button type="button" class="btn btn-sm btn-outline-danger btn-remove-serial" title="Eliminar serie">' +
+                '<i class="fa fa-trash"></i></button>' +
+                '</td>' +
+                '</tr>'
+            );
+            updateSeriesCountAndNumbers($(this).closest('tr.product-serial'));
+        });
+
+        $(document).on('click', '.btn-remove-serial', function (e) {
+            let $panel = $(this).closest('tr.product-serial');
+            $(this).closest('tr').remove();
+            updateSeriesCountAndNumbers($panel);
+        });
+
+        function updateSeriesCountAndNumbers($productSerialRow) {
+            let $itemRow = $productSerialRow.prev('tr.item-row');
+            let $tbody = $productSerialRow.find('tbody[id^="details-serial-"]');
+            let count = $tbody.find('tr').length;
+            $tbody.find('tr').each(function (i) {
+                $(this).find('td:first').text(i + 1);
+            });
+            $itemRow.find('.series-count').text(count).toggleClass('badge-primary', count > 0).toggleClass('badge-light', count === 0);
         }
 
         function deleteProduct(detail_id) {
@@ -1162,14 +1265,14 @@
                         "Dto3": Number($(this).find("td.item-discount3 input.discount3").val().replace(',', '.')),
                         "Dto4": Number($(this).find("td.item-discount4 input.discount4").val().replace(',', '.')),
                         "Total": Number($(this).find("td.item-total input.total-detail").val().replace(',', '.')),
-                        "Check_kardex": ($(this).find("td.item-check div.form-check input.check-kardex").is(':checked')) ? 1 : 0,
+                        "Check_kardex": 1,
                         "Serials": []
                     };
-                    $(this).next('tr.product-serial').find(`tbody#details-serial-${productID} tr`).each(function () {
-                        let serialObj = {
-                            "Serial": $(this).find('td.item-serial input.serial').val()
+                    $(this).next('tr.product-serial').find('tbody[id^="details-serial-"] tr').each(function () {
+                        let serialVal = $(this).find('td.item-serial input.serial').val();
+                        if (serialVal && String(serialVal).trim() !== '') {
+                            detailObj.Serials.push({"Serial": String(serialVal).trim()});
                         }
-                        detailObj.Serials.push(serialObj);
                     });
                     Detail_purchase.Details.push(detailObj);
                 });

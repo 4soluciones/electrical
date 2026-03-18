@@ -254,12 +254,14 @@ def save_purchase(request):
             purchase_detail_obj.save()
 
             for serial in detail['Serials']:
-                product_serial_obj = ProductSerial(
-                    serial_number=serial['Serial'],
-                    purchase_detail=purchase_detail_obj,
-                    status='P'
-                )
-                product_serial_obj.save()
+                serial_val = serial.get('Serial', '') or ''
+                if serial_val and str(serial_val).strip():
+                    product_serial_obj = ProductSerial(
+                        serial_number=str(serial_val).strip(),
+                        purchase_detail=purchase_detail_obj,
+                        status='P'
+                    )
+                    product_serial_obj.save()
 
         return JsonResponse({
             'message': 'Compra Registrada Correctamente',
@@ -1108,7 +1110,7 @@ def save_update_purchase(request):
                     dt4 = decimal.Decimal(detail['Dto4'])
 
                     total_detail = decimal.Decimal(detail['Total'])
-                    checked_kardex = bool(int(detail["Check_kardex"]))
+                    checked_kardex = bool(int(detail.get("Check_kardex", 1)))
 
                     purchase_detail_obj.purchase = purchase_obj
                     purchase_detail_obj.product = product_obj
@@ -1162,12 +1164,14 @@ def save_update_purchase(request):
                     purchase_detail_obj.save()
 
                 for serial in detail['Serials']:
-                    product_serial_obj = ProductSerial(
-                        serial_number=serial['Serial'],
-                        purchase_detail=purchase_detail_obj,
-                        status='P'
-                    )
-                    product_serial_obj.save()
+                    serial_val = serial.get('Serial', '') or ''
+                    if serial_val and str(serial_val).strip():
+                        product_serial_obj = ProductSerial(
+                            serial_number=str(serial_val).strip(),
+                            purchase_detail=purchase_detail_obj,
+                            status='P'
+                        )
+                        product_serial_obj.save()
 
             purchase_obj.save()
 
@@ -1433,3 +1437,19 @@ def search_products_for_return(request):
 
     return JsonResponse({'error': 'Método no permitido'}, status=HTTPStatus.METHOD_NOT_ALLOWED)
 
+
+def update_state_annular_purchase(request):
+    if request.method == 'GET':
+        id_purchase = request.GET.get('pk', '')
+        purchase_obj = Purchase.objects.get(pk=int(id_purchase))
+        if purchase_obj.status == 'A':
+            data = {'error': 'LA COMPRA YA ESTA APROBADA NO ES POSIBLE ANULAR'}
+            response = JsonResponse(data)
+            response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+            return response
+        purchase_obj.status = 'N'
+        purchase_obj.save()
+    return JsonResponse({
+        'message': 'COMPRA ANULADA CORRECTAMENTE',
+
+    }, status=HTTPStatus.OK)
