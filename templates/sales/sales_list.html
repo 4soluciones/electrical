@@ -1040,8 +1040,9 @@
             let data = new FormData($('#order-form').get(0));
             data.append('detail', JSON.stringify(detailOrder));
             data.append('credit', JSON.stringify(creditDict));
-            data.append('print-series', $('#check_print_series').prop('checked') ? 'true' : 'false');
-            
+            //data.append('print-series', $('#check_print_series').prop('checked') ? 'true' : 'false');
+            data.append('print-series', $('#print_series').val());
+            //console.log($('#print_series').val())
             // Volver a deshabilitar el select si estaba deshabilitado
             if (userSelectDisabled) {
                 $('#user_id').prop('disabled', true);
@@ -1064,7 +1065,7 @@
                 },
                 success: function (response, textStatus, xhr) {
                     if (xhr.status === 200) {
-                        //console.log(response)
+                        console.log(response)
                         if (response.msg_sunat !== undefined) {
                             toastr.success(response.message + response.msg_sunat, '¡Mensaje!');
                         } else {
@@ -1080,9 +1081,9 @@
                             }
                         }
                         $('#loading-bill').hide();
-                        setTimeout(() => {
+                        /*setTimeout(() => {
                             location.reload();
-                        }, 1000);
+                        }, 1000);*/
                     }
                 },
                 error: function (jqXhr, textStatus, xhr) {
