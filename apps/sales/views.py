@@ -2703,6 +2703,18 @@ def get_dict_orders(client_obj=None, start_date=None, end_date=None):
         Prefetch(
             'cashflow_set', queryset=CashFlow.objects.select_related('cash')
         ),
+        Prefetch(
+            'creditnote_set',
+            queryset=CreditNote.objects.prefetch_related(
+                Prefetch(
+                    'creditnotedetail_set',
+                    queryset=CreditNoteDetail.objects.select_related('product', 'unit'),
+                )
+            ).only(
+                'id', 'serial', 'correlative', 'note_enlace_pdf', 'issue_date',
+                'note_total', 'note_description', 'order',
+            ).order_by('id'),
+        ),
     ).select_related('client').order_by('id')
 
     dictionary = []
@@ -2749,6 +2761,7 @@ def get_dict_orders(client_obj=None, start_date=None, end_date=None):
                 'c_status': o.status,
                 'total': '{:,}'.format(o.total.quantize(decimal.Decimal('0.00'), rounding=decimal.ROUND_HALF_EVEN)),
                 'type_pay': o.way_to_pay_type,
+                'type_pay_display': o.get_way_to_pay_type_display(),
                 'total_repay_loan': '{:,}'.format(
                     total_repay_loan(order_detail_set=order_detail_set).quantize(decimal.Decimal('0.00'),
                                                                                  rounding=decimal.ROUND_HALF_EVEN)),
@@ -2814,6 +2827,33 @@ def get_dict_orders(client_obj=None, start_date=None, end_date=None):
                 }
                 new.get('order_detail_set').append(order_detail)
                 new['rowspan'] = new['rowspan'] + rowspan
+
+            credit_notes_data = []
+            for cn in o.creditnote_set.all():
+                nc_detail_rows = []
+                for nd in cn.creditnotedetail_set.all():
+                    prod_label = nd.product.name if nd.product else (nd.description or '—')
+                    unit_label = nd.unit.name if nd.unit else '—'
+                    nc_detail_rows.append({
+                        'product': prod_label,
+                        'unit': unit_label,
+                        'quantity': nd.quantity,
+                        'price_unit': '{:,}'.format(
+                            nd.price_unit.quantize(decimal.Decimal('0.00'), rounding=decimal.ROUND_HALF_EVEN)),
+                        'line_total': '{:,}'.format(
+                            nd.total.quantize(decimal.Decimal('0.00'), rounding=decimal.ROUND_HALF_EVEN)),
+                    })
+                credit_notes_data.append({
+                    'serial': cn.serial,
+                    'correlative': cn.correlative,
+                    'pdf': cn.note_enlace_pdf,
+                    'issue_date': cn.issue_date,
+                    'total': '{:,}'.format(
+                        cn.note_total.quantize(decimal.Decimal('0.00'), rounding=decimal.ROUND_HALF_EVEN)),
+                    'description': cn.note_description or '',
+                    'details': nc_detail_rows,
+                })
+            new['credit_notes'] = credit_notes_data
 
             dictionary.append(new)
 
