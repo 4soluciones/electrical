@@ -1,3 +1,200 @@
+<style>
+    #table-dictionary.account-ledger-table {
+        border-color: #c5cdd4;
+    }
+    #table-dictionary.account-ledger-table thead th {
+        vertical-align: middle;
+        font-size: 0.68rem;
+        letter-spacing: 0.06em;
+        border-color: #aeb8c1;
+    }
+    .acct-money-box {
+        padding: 0.5rem 0.35rem !important;
+        background: #fafbfc;
+        border-left: 2px solid #cfd6dc !important;
+    }
+    .acct-money-box .acct-money-label {
+        font-size: 0.58rem;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: #6b7785;
+        font-weight: 700;
+        margin-bottom: 0.2rem;
+    }
+    .acct-money-box .acct-money-value {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #1e3a5f;
+        line-height: 1.2;
+    }
+    .acct-money-box.acct-paid .acct-money-value { color: #1a5f3c; }
+    .acct-money-box.acct-due .acct-money-value { color: #8b4513; }
+    .acct-money-box.acct-due {
+        background: linear-gradient(180deg, #fffaf5 0%, #fff5eb 100%);
+        border-left: 3px solid #c17f24 !important;
+    }
+    .acct-pay-type-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.45rem 0.65rem;
+        border-radius: 4px;
+        border: 1px solid #c5cdd4;
+        background: linear-gradient(180deg, #fff 0%, #f4f6f8 100%);
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #2f3d4a;
+        max-width: 11rem;
+        margin: 0 auto;
+    }
+    .acct-pay-type-pill i { color: #c17f24; }
+    .acct-credit-due-banner {
+        background: linear-gradient(180deg, #fff8f0 0%, #ffeedd 100%);
+        border: 1px solid #d9b48c;
+        border-radius: 4px;
+        padding: 0.4rem 0.5rem;
+        text-align: center;
+        margin-bottom: 0.35rem;
+    }
+    .acct-credit-due-banner .acct-due-label {
+        font-size: 0.58rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #6d471f;
+        font-weight: 700;
+    }
+    .acct-credit-due-banner .acct-due-value {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #8b4513;
+        line-height: 1.2;
+    }
+    .acct-credit-payments-wrap {
+        padding: 0.35rem !important;
+        background: #f8fafb;
+        border-left: 2px solid #5a6c7d !important;
+    }
+    .acct-credit-payments-wrap .table { margin-bottom: 0; font-size: 0.78rem; }
+    .acct-credit-payments-wrap thead th {
+        background: #5a6c7d !important;
+        color: #fff !important;
+        font-size: 0.62rem;
+        letter-spacing: 0.05em;
+    }
+    .account-order-nc-header-tipo {
+        background: linear-gradient(180deg, #fff9f0 0%, #fff3e6 100%);
+        border: 1px solid #e5d4c0;
+        border-left: 3px solid #c17f24;
+        border-radius: 4px;
+        padding: 0.4rem 0.35rem;
+        margin-top: 0.45rem;
+        text-align: center;
+    }
+    .account-order-nc-header-tipo .nc-h-label {
+        font-size: 0.58rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #6d471f;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+    .account-order-nc-header-tipo .nc-h-doc {
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: #2c3338;
+        line-height: 1.25;
+    }
+    .account-order-nc-header-tipo .nc-h-meta {
+        font-size: 0.68rem;
+        color: #5c4a32;
+        margin-top: 0.2rem;
+    }
+    .account-order-nc-header-tipo .nc-h-desc {
+        font-size: 0.65rem;
+        color: #4a4035;
+        margin-top: 0.25rem;
+        line-height: 1.25;
+        text-align: left;
+    }
+    .account-order-nc-header-tipo .nc-link {
+        display: inline-block;
+        margin: 0.1rem 0;
+        padding: 0.15rem 0.4rem;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #2c3338;
+        background: #fff;
+        border: 1px solid #c9b8a0;
+        border-radius: 3px;
+        text-decoration: none;
+    }
+    .account-order-nc-header-tipo .nc-link:hover {
+        background: #fffdf8;
+        border-color: #c17f24;
+        text-decoration: none;
+        color: #1a1a1a;
+    }
+    .acct-nc-detail-block {
+        background: linear-gradient(180deg, #fff5eb 0%, #f8ecdf 100%);
+        border: 1px solid #e0c9a8;
+        border-radius: 4px;
+        padding: 0.35rem;
+        margin-top: 0.45rem;
+    }
+    .acct-nc-detail-block .acct-nc-detail-caption {
+        font-size: 0.58rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 700;
+        color: #8b5a2b;
+        margin-bottom: 0.25rem;
+        padding: 0.15rem 0.25rem;
+        background: rgba(193, 127, 36, 0.12);
+        border-radius: 3px;
+    }
+    .acct-nc-detail-block .nc-detail-mini {
+        font-size: 0.68rem;
+        margin-bottom: 0;
+        background: #fff;
+        border: 1px solid #dcc9b3;
+        border-radius: 3px;
+    }
+    .acct-nc-detail-block .nc-detail-mini th {
+        background: #d4a574 !important;
+        color: #fff !important;
+        font-size: 0.58rem;
+        padding: 0.22rem !important;
+        border-color: #c99760 !important;
+    }
+    .acct-nc-detail-block .nc-detail-mini td {
+        padding: 0.22rem !important;
+        border-color: #eadbcc !important;
+        background: #fffef9;
+    }
+    td.account-order-cell-has-nc-tipo {
+        box-shadow: inset 0 0 0 1px rgba(193, 127, 36, 0.18);
+    }
+    .acct-detail-block.has-nc-detail-rows {
+        box-shadow: inset 0 0 0 1px rgba(193, 127, 36, 0.15);
+    }
+    .acct-detail-block .table thead th {
+        background: #4a6572 !important;
+        color: #fff !important;
+        font-size: 0.62rem;
+        letter-spacing: 0.05em;
+    }
+    .acct-tfoot-sum {
+        background: linear-gradient(180deg, #eef1f4 0%, #e4e9ee 100%);
+        font-weight: 700;
+        border-top: 2px solid #aeb8c1 !important;
+    }
+    .acct-order-date {
+        font-size: 0.72rem;
+        color: #5a6570;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+    }
+</style>
 <div class="card-header text-center text-uppercase bg-light font-weight-bold">
     <h2 class="roboto-condensed-regular"> {{ client_obj }} </h2>
 </div>
@@ -6,20 +203,13 @@
 <input type="hidden" id="end_date" name="end_date" value="{{ end_date }}">
 
 <div class="roboto-condensed-regular" id="grid-dictionary" style="overflow:scroll;width: 100%;height: 45em">
-    <table class="table table-sm table-bordered" id="table-dictionary" style="border-collapse: collapse;">
+    <table class="table table-sm table-bordered account-ledger-table" id="table-dictionary" style="border-collapse: collapse;">
         <thead>
-        <tr class="text-white small text-uppercase text-center">
-            <td class="bg-primary">ID</td>
-            <td class="bg-primary">TIPO - Nº</td>
-            <td class="bg-primary">FECHA</td>
-
-            <td class="bg-info" colspan="5">DETALLES DE ORDEN</td>
-
-            <td class="bg-primary">TOTAL VENTA</td>
-            <td class="bg-primary">TOTAL PAGADO</td>
-            <td class="bg-primary">PAGO FALTANTE</td>
-
-            <td class="bg-secondary">PAGOS</td>
+        <tr class="text-center text-white small text-uppercase">
+            <th class="bg-primary border-secondary">Comprobante — Nº — Fecha</th>
+            <th class="bg-info text-dark" colspan="5" style="border-color:#8fb3c4;">Detalle de productos</th>
+            <th class="bg-primary border-secondary">Total venta</th>
+            <th class="bg-secondary border-secondary">Pagos / forma</th>
         </tr>
         </thead>
         <tbody>
@@ -29,18 +219,25 @@
 
             <tr info="{{ o.id }}" class="">
 
-                <td class="align-middle text-center id-obj">{{ o.id }}</td>
-                <td class="align-middle text-center" {% if o.c_status == 'A' %} style="background-color: #ea6969" {% endif %}>
+                <td class="align-middle text-center {% if o.credit_notes and o.c_status != 'A' %}account-order-cell-has-nc-tipo{% endif %}"
+                    {% if o.c_status == 'A' %} style="background-color: #ea6969" {% endif %}>
                     {% if o.type == 'VENTA' %}
                         {% if o.c_status == 'A' %}
                             <span class="text-dark">{{ o.status }}</span>
                         {% else %}
-                            <span class="text-success">{{ o.type }}</span>
+                            {% if o.type_bill == 'FACTURA' %}
+                                <span class="text-primary font-weight-bolder">Factura</span>
+                            {% elif o.type_bill == 'BOLETA' %}
+                                <span class="text-info font-weight-bolder">Boleta</span>
+                            {% else %}
+                                <span class="text-success font-weight-bolder">Ticket</span>
+                            {% endif %}
                         {% endif %}
                     {% else %}
                         <span class="text-dark font-weight-bolder">{{ o.type }}</span>
                     {% endif %}<br>
                     <span class="font-weight-bold">{{ o.serial }} - {{ o.correlative_sale }}</span><br>
+                    <span class="acct-order-date"><i class="far fa-calendar-alt"></i> {{ o.date|date:"d-m-Y" }}</span><br>
                     {% if o.status != 'A' %}
                         {% if o.order_bill %}
                             <div class="btn-group" role="group" aria-label="Basic example">
@@ -68,19 +265,53 @@
                     {% else %}
                         <span class="font-weight-bold">ANULADA</span>
                     {% endif %}
+
+                    {% if o.credit_notes and o.c_status != 'A' %}
+                        <div class="account-order-nc-header-tipo noExl">
+                            {% for note in o.credit_notes %}
+                                <div class="{% if not forloop.last %}mb-2 pb-2 border-bottom{% endif %}" style="border-color:#e8ddd0!important;">
+                                    <div class="nc-h-label text-center">
+                                        <i class="fas fa-file-invoice-dollar" style="color:#c17f24;"></i>
+                                        Nota de crédito{% if o.credit_notes|length > 1 %} ({{ forloop.counter }}/{{ o.credit_notes|length }}){% endif %}
+                                    </div>
+                                    <div class="nc-h-doc text-center">
+                                        {% if note.pdf %}
+                                            <a href="{{ note.pdf }}" target="_blank" rel="noopener noreferrer" class="nc-link"
+                                               title="Ver PDF SUNAT">
+                                                <i class="fas fa-file-pdf text-danger"></i>
+                                                {{ note.serial }} — {{ note.correlative }}
+                                            </a>
+                                        {% else %}
+                                            <span class="nc-link" style="cursor:default;">
+                                                <i class="fas fa-receipt text-secondary"></i>
+                                                {{ note.serial }} — {{ note.correlative }}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="nc-h-meta text-center">
+                                        {% if note.issue_date %}
+                                            <span><i class="far fa-calendar-alt"></i> {{ note.issue_date|date:"d-m-Y" }}</span>
+                                        {% endif %}
+                                        {% if note.total %}
+                                            {% if note.issue_date %}<span class="mx-1">·</span>{% endif %}
+                                            <span class="font-weight-bold">Total: {{ note.total }}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </td>
 
-                <td class="align-middle text-center">{{ o.date|date:"d-m-y" }}</td>
-
-                <td class="align-middle text-center" colspan="5">
-                <table class="table">
+                <td class="align-middle text-center acct-detail-block {% if o.credit_notes and o.c_status != 'A' %}has-nc-detail-rows{% endif %}" colspan="5">
+                <table class="table table-sm table-bordered mb-0">
                 <thead>
                 <tr>
-                    <th class="bg-info" style="width: 60%">PRODUCTO</th>
-                    <th class="bg-info" style="width: 10%">UND</th>
-                    <th class="bg-info" style="width: 10%">CANT.</th>
-                    <th class="bg-info" style="width: 10%">PREC.</th>
-                    <th class="bg-info" style="width: 10%">IMP.</th>
+                    <th style="width: 52%">Producto</th>
+                    <th style="width: 12%">Und.</th>
+                    <th style="width: 12%">Cant.</th>
+                    <th style="width: 12%">Prec.</th>
+                    <th style="width: 12%">Importe</th>
                 </tr>
                 </thead>
                     {% for d in o.order_detail_set %}
@@ -95,85 +326,125 @@
                     {% endfor %}
                 </table>
 
+                    {% if o.credit_notes and o.c_status != 'A' %}
+                        {% for note in o.credit_notes %}
+                            {% if note.details %}
+                                <div class="acct-nc-detail-block noExl">
+                                    <div class="acct-nc-detail-caption">
+                                         NC: {{ note.serial }}-{{ note.correlative }}
+                                    </div>
+                                    <table class="table table-sm table-bordered nc-detail-mini mb-0">
+                                        <thead>
+                                        <tr>
+                                            <th>Producto</th>
+                                            <th class="text-center">Und.</th>
+                                            <th class="text-center">Cant.</th>
+                                            <th class="text-right">P.U.</th>
+                                            <th class="text-right">Imp.</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for nd in note.details %}
+                                            <tr>
+                                                <td>{{ nd.product }}</td>
+                                                <td class="text-center">{{ nd.unit }}</td>
+                                                <td class="text-center">{{ nd.quantity|floatformat:2 }}</td>
+                                                <td class="text-right">{{ nd.price_unit }}</td>
+                                                <td class="text-right">{{ nd.line_total }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+
                 </td>
                 {% if o.c_status != 'A' %}
-                    <td class="align-middle text-primary text-center">{{ o.total|safe }}</td>
-                    <td class="align-middle text-primary text-center">{{ o.total_repay_loan|safe }}</td>
-                    <td class="align-middle text-primary text-center total-remaining-repay-loan-obj pay-loan-rest">{{ o.total_remaining_repay_loan }}</td>
+                    <td class="align-middle text-center acct-money-box">
+                        <div class="acct-money-label">Total venta</div>
+                        <div class="acct-money-value text-primary">{{ o.total|safe }}</div>
+                    </td>
                 {% else %}
-                    <td class="align-middle text-danger text-center" colspan="3">ANULADO</td>
+                    <td class="align-middle text-danger text-center font-weight-bold" style="background:#fdeaea;">ANULADO</td>
                 {% endif %}
-                <td class="align-middle text-center" colspan="4">
-                    <table class="table">
+                <td class="align-middle text-center {% if o.type_pay == 'C' %}acct-credit-payments-wrap{% endif %}">
+                    {% if o.c_status == 'A' %}
+                        <span class="text-muted">—</span>
+                    {% elif o.type_pay == 'C' %}
+                    {% if o.c_status != 'A' %}
+                        <div class="acct-credit-due-banner total-remaining-repay-loan-obj pay-loan-rest noExl">
+                            <div class="acct-due-label">Saldo por cobrar</div>
+                            <div class="acct-due-value">{{ o.total_remaining_repay_loan }}</div>
+                        </div>
+                    {% endif %}
+                    <table class="table table-bordered table-sm">
                     <thead>
                     <tr>
-                        <th class="bg-secondary">FECHA DE PAGO</th>
-                        <th class="bg-secondary">TIPO PAGO</th>
-                        <th class="bg-secondary">TOTAL PAGADO</th>
-                        <th class="bg-secondary">ACCIÓN</th>
+                        <th>Fecha pago</th>
+                        <th>Tipo / caja</th>
+                        <th>Monto</th>
+                        <th>Acción</th>
                     </tr>
                     </thead>
                         {% for l in o.loan_payment_set %}
                             <tr>
-                                {% if o.c_status != 'A' %}
-                                    <td class="align-middle text-center">{{ l.operation_date|date:"d-m-y" }}</td>
-                                    <td class="align-middle text-center">
-                                        {{ l.type }}
-                                        {% if l.cash_flow %}
-                                            <br>{{ l.cash_flow.cash.name }}
-                                            <br>{{ l.cash_flow.operation_code }}
-                                        {% endif %}
-                                    </td>
-                                    <td class="align-middle text-success text-center">{{ l.price|floatformat:2 }}</td>
-
-                                    {% if o.total != o.total_repay_loan %}
-                                        {% if forloop.first %}
-                                            <td class="td-green" style="!important;height: 100%;" rowspan="{{ o.loans_count }}" >
-                                                <button type="button"
-                                                        class="btn btn-success btn-sm btn-block btn-payment"
-                                                        data-toggle="modal"
-                                                        data-target="#modal-payment" pk="{{ o.first_detail }}"
-                                                        style="!important;height: 100%;!important;width: 100%;display: inline-grid">
-                                                    <i class="fas fa-dollar-sign"></i> Pagar
-                                                </button>
-                                            </td>
-                                        {% endif %}
-
-                                    {% else %}
-                                        <td class="align-middle text-success text-center">PAGADO</td>
+                                <td class="align-middle text-center">{{ l.operation_date|date:"d-m-y" }}</td>
+                                <td class="align-middle text-center">
+                                    {{ l.type }}
+                                    {% if l.cash_flow %}
+                                        <br><span class="small text-muted">{{ l.cash_flow.cash.name }}</span>
+                                        <br><span class="small">{{ l.cash_flow.operation_code }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="align-middle text-success text-center font-weight-bold">{{ l.price|floatformat:2 }}</td>
+                                {% if o.total != o.total_repay_loan %}
+                                    {% if forloop.first %}
+                                        <td class="td-green align-middle p-1" rowspan="{{ o.loans_count }}">
+                                            <button type="button"
+                                                    class="btn btn-success btn-sm btn-block btn-payment"
+                                                    data-toggle="modal"
+                                                    data-target="#modal-payment" pk="{{ o.first_detail }}">
+                                                <i class="fas fa-dollar-sign"></i> Pagar
+                                            </button>
+                                        </td>
                                     {% endif %}
                                 {% else %}
-                                    <td class="align-middle text-danger text-center" colspan="3">ANULADO </td>
-                                    <td class="align-middle text-success text-center">-</td>
+                                    <td class="align-middle text-success text-center small font-weight-bold">Pagado</td>
                                 {% endif %}
-                            {% empty %}
-                                    {% if o.c_status != 'A' %}
-                                        <td class="align-middle text-primary text-center" colspan="3">SIN PAGOS </td>
-                                        {% if o.total != o.total_repay_loan %}
-                                            <td class="td-green" style="!important;height: 100%;">
-                                                <button type="button"
-                                                        class="btn btn-success btn-sm btn-block btn-payment"
-                                                        data-toggle="modal"
-                                                        data-target="#modal-payment" pk="{{ o.first_detail }}"
-                                                        style="!important;height: 100%;!important;width: 100%;display: inline-grid">
-                                                    <i class="fas fa-dollar-sign"></i> Pagar
-                                                </button>
-                                            </td>
-                                        {% else %}
-                                            <td class="align-middle text-success text-center">PAGADO</td>
-                                        {% endif %}
-
-                                    {% else %}
-
-                                        <td class="align-middle text-danger text-center" colspan="3">ANULADO</td>
-                                        <td class="align-middle text-success text-center">-</td>
-                                    {% endif %}
-
-
                             </tr>
-
+                        {% empty %}
+                            <tr>
+                                <td class="align-middle text-center text-muted small" colspan="3">Sin abonos registrados</td>
+                                {% if o.total != o.total_repay_loan %}
+                                    <td class="td-green align-middle p-1">
+                                        <button type="button"
+                                                class="btn btn-success btn-sm btn-block btn-payment"
+                                                data-toggle="modal"
+                                                data-target="#modal-payment" pk="{{ o.first_detail }}">
+                                            <i class="fas fa-dollar-sign"></i> Pagar
+                                        </button>
+                                    </td>
+                                {% else %}
+                                    <td class="align-middle text-success text-center small font-weight-bold">Pagado</td>
+                                {% endif %}
+                            </tr>
                         {% endfor %}
                     </table>
+                    {% else %}
+                        <div class="acct-pay-type-pill noExl">
+                            {% if o.type_pay == 'E' %}
+                                <i class="fas fa-money-bill-wave"></i>
+                            {% elif o.type_pay == 'D' %}
+                                <i class="fas fa-university"></i>
+                            {% else %}
+                                <i class="fas fa-wallet"></i>
+                            {% endif %}
+                            <span>{{ o.type_pay_display }}</span>
+                        </div>
+                        <div class="small text-muted mt-1">Venta al contado / no a crédito</div>
+                    {% endif %}
                 </td>
 
 
@@ -232,11 +503,13 @@
         {% endfor %}
         </tbody>
         <tfoot>
-        <tr class="text-center">
-            <td colspan="8"></td>
-            <td class="align-middle text-primary">{{ sum_total|safe }}</td>
-            <td class="align-middle text-primary">{{ sum_total_repay_loan|safe }}</td>
-            <td class="align-middle text-primary">{{ sum_total_remaining_repay_loan|safe }}</td>
+        <tr class="text-center acct-tfoot-sum">
+            <td colspan="6"></td>
+            <td class="align-middle acct-money-box py-2">
+                <div class="acct-money-label">Total venta</div>
+                <div class="acct-money-value text-primary">{{ sum_total|safe }}</div>
+            </td>
+            <td class="align-middle small text-muted">—</td>
         </tr>
         </tfoot>
     </table>
