@@ -74,7 +74,8 @@ def send_bill_4_fact(order_id):  # FACTURA 4 FACT
         sub_total = sub_total + base_amount
         total = total + base_total
         igv_total = igv_total + igv
-        _base_amount_v = float(round((base_amount / d.quantity_sold), 6))
+        # _base_amount_v = float(round((base_amount / d.quantity_sold), 6))
+        _base_amount_v = (base_amount / d.quantity_sold).quantize(decimal.Decimal("0.0000000001"))
         product_name = str(d.product.name).replace('"', "'")
         _unit = 'NIU'
         if d.unit.name == 'ZZ':
@@ -87,7 +88,8 @@ def send_bill_4_fact(order_id):  # FACTURA 4 FACT
             "codigoSunat": "10000000",
             "producto": product_name,
             "cantidad": float(d.quantity_sold),
-            "precioBase": float(round(_base_amount_v, 6)),
+            # "precioBase": float(round(_base_amount_v, 6)),
+            "precioBase": str(_base_amount_v),
             "tipoIgvCodigo": "10"
         }
         items.append(item)
@@ -144,7 +146,7 @@ def send_bill_4_fact(order_id):  # FACTURA 4 FACT
         }}
     }}
     """
-    print(graphql_query)
+    # print(graphql_query)
 
     token = tokens.get("20603890214", "ID no encontrado")
 
