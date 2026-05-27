@@ -98,8 +98,6 @@
          aria-labelledby="exampleModalLabel" aria-hidden="true"></div>
     <div class="modal fade" id="edition" tabindex="-1" role="dialog" aria-labelledby="ModalHelpTitle"
          aria-hidden="true"></div>
-    <div class="modal fade" id="set-quantity-on-hand" tabindex="-1" role="dialog" aria-labelledby="ModalHelpTitle"
-         aria-hidden="true"></div>
     <div class="modal fade" id="show-kardex" tabindex="-1" role="dialog" aria-labelledby="ModalHelpTitle"
          aria-hidden="true"></div>
     <div class="modal fade" id="set-product-detail" tabindex="-1" role="dialog" aria-labelledby="ModalHelpTitle"
@@ -343,25 +341,6 @@
                 },
                 fail: function (response) {
                     toastr.error('Formulario con problemas', '¡Mensaje!');
-                }
-            });
-        });
-        $(document).on('click', '.quantity-on-hand', function () {
-            var search = $(this).attr('pk');
-            $.ajax({
-                url: '/sales/get_product/',
-                dataType: 'json',
-                type: 'GET',
-                data: {'pk': search},
-                success: function (response) {
-                    if (response.success) {
-                        $('#set-quantity-on-hand').html(response.form);
-                        $('#set-quantity-on-hand').modal('show');
-                        {#$('#set-quantity-on-hand').html(response.grid);#}
-                    }
-                },
-                fail: function (response) {
-                    console.log(response);
                 }
             });
         });

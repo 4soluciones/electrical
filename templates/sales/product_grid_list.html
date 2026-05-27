@@ -1,235 +1,504 @@
 {% load app_filters %}
 {% if products %}
-    <table id="product-data-grid" class="table table-sm table-bordered m-0 roboto-condensed-regular" cellspacing="0"
-           width="100%">
-        <thead>
-        <tr class="text-center text-uppercase">
-            {#                <th>#</th>#}
-            {#                <th class="th-sm">Nombre</th>#}
-            {#                <th class="th-sm">Detalles</th>#}
-            {#                <th class="th-sm">Stock en sedes</th>#}
-            {#                <th class="th-sm">Unidades</th>#}
-            {#                <th class="th-sm">Insumos/Receta</th>#}
-            {#                <th class="th-sm">Imagen</th>#}
-            {#                <th class="th-sm">UPDATE</th>#}
+<style>
+    .product-grid-camera {
+        --pgc-dark: #1a2332;
+        --pgc-accent: #2563eb;
+        --pgc-accent-soft: #dbeafe;
+        --pgc-border: #e2e8f0;
+        --pgc-muted: #64748b;
+        --pgc-success: #059669;
+        --pgc-warning: #d97706;
+        --pgc-danger: #dc2626;
+        font-size: 0.9rem;
+    }
+    .product-grid-camera .pgc-card {
+        border: none;
+        border-radius: 0.5rem;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08), 0 4px 12px rgba(15, 23, 42, 0.04);
+        overflow: hidden;
+    }
+    .product-grid-camera .pgc-card-header {
+        background: linear-gradient(135deg, var(--pgc-dark) 0%, #243044 100%);
+        color: #f8fafc;
+        padding: 0.65rem 1rem;
+        border: none;
+    }
+    .product-grid-camera .pgc-card-header i {
+        opacity: 0.85;
+    }
+    .product-grid-camera #product-data-grid thead th {
+        background: #f1f5f9;
+        color: #334155;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        border-color: var(--pgc-border);
+        vertical-align: middle;
+        padding: 0.55rem 0.4rem;
+        white-space: nowrap;
+    }
+    .product-grid-camera #product-data-grid tbody td {
+        border-color: var(--pgc-border);
+        vertical-align: middle;
+        padding: 0.45rem 0.4rem;
+    }
+    .product-grid-camera #product-data-grid tbody tr:hover {
+        background-color: #f8fafc;
+    }
+    .product-grid-camera .pgc-sub {
+        display: block;
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: var(--pgc-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        margin-bottom: 0.15rem;
+    }
+    .product-grid-camera .pgc-value {
+        font-weight: 600;
+        color: #0f172a;
+    }
+    .product-grid-camera .pgc-code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 0.82rem;
+        background: #f1f5f9;
+        padding: 0.1rem 0.35rem;
+        border-radius: 0.2rem;
+        display: inline-block;
+    }
+    .product-grid-camera .pgc-product-name {
+        font-weight: 600;
+        color: #0f172a;
+        line-height: 1.3;
+    }
+    .product-grid-camera .pgc-brand {
+        color: var(--pgc-accent);
+        font-weight: 700;
+        font-size: 0.82rem;
+    }
+    .product-grid-camera .pgc-family {
+        color: var(--pgc-muted);
+        font-size: 0.8rem;
+    }
+    .product-grid-camera .pgc-col-purchase {
+        background: #ecfdf5 !important;
+    }
+    .product-grid-camera .pgc-col-prices {
+        background: #eff6ff !important;
+        min-width: 7.5rem;
+    }
+    .product-grid-camera .pgc-price-block {
+        padding: 0.2rem 0;
+        border-bottom: 1px dashed #cbd5e1;
+    }
+    .product-grid-camera .pgc-price-block:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    .product-grid-camera .pgc-price-block:first-child {
+        padding-top: 0;
+    }
+    .product-grid-camera .pgc-pct-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: var(--pgc-muted);
+        text-transform: uppercase;
+    }
+    .product-grid-camera .pgc-purchase-price {
+        font-weight: 700;
+        color: #065f46;
+    }
+    .product-grid-camera .pgc-limits {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        align-items: center;
+    }
+    .product-grid-camera .pgc-limit-item {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.72rem;
+    }
+    .product-grid-camera .pgc-limit-badge {
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 0.12rem 0.4rem;
+        border-radius: 0.2rem;
+        min-width: 2rem;
+        text-align: center;
+    }
+    .product-grid-camera .pgc-limit-min {
+        background: #fef3c7;
+        color: #92400e;
+    }
+    .product-grid-camera .pgc-limit-max {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+    .product-grid-camera .pgc-stock-wrap {
+        min-width: 11rem;
+    }
+    .product-grid-camera .pgc-stock-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.35rem;
+        padding: 0.2rem 0.35rem;
+        margin-bottom: 0.2rem;
+        border-radius: 0.25rem;
+        background: #f8fafc;
+        font-size: 0.78rem;
+    }
+    .product-grid-camera .pgc-stock-row.pgc-current-subsidiary {
+        background: #fff7ed;
+        border: 1px solid #fed7aa;
+    }
+    .product-grid-camera .pgc-stock-loc {
+        text-align: left;
+        flex: 1;
+        min-width: 0;
+    }
+    .product-grid-camera .pgc-stock-loc strong {
+        display: block;
+        color: #334155;
+        font-size: 0.76rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .product-grid-camera .pgc-stock-loc span {
+        color: var(--pgc-muted);
+        font-size: 0.7rem;
+    }
+    .product-grid-camera .pgc-stock-qty {
+        font-weight: 800;
+        font-size: 0.88rem;
+        padding: 0.15rem 0.45rem;
+        border-radius: 0.25rem;
+        min-width: 2rem;
+        text-align: center;
+    }
+    .product-grid-camera .pgc-stock-low {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+    .product-grid-camera .pgc-stock-high {
+        background: #1e3a5f;
+        color: #f8fafc;
+    }
+    .product-grid-camera .pgc-stock-actions {
+        margin-top: 0.35rem;
+        display: flex;
+        justify-content: center;
+    }
+    .product-grid-camera .pgc-btn-action {
+        font-size: 0.78rem;
+        font-weight: 600;
+        padding: 0.35rem 0.55rem;
+        border-radius: 0.3rem;
+    }
+    .product-grid-camera .pgc-id {
+        color: var(--pgc-muted);
+        font-weight: 600;
+        font-size: 0.82rem;
+    }
+    .product-grid-camera .pgc-dropdown-menu {
+        border: 1px solid var(--pgc-border);
+        padding: 0.35rem 0;
+        min-width: 11rem;
+    }
+    .product-grid-camera .pgc-dropdown-menu .dropdown-item {
+        color: #334155;
+        font-size: 0.85rem;
+        padding: 0.5rem 1rem;
+        background-color: #fff;
+        transition: background-color 0.15s ease, color 0.15s ease;
+    }
+    .product-grid-camera .pgc-dropdown-menu .dropdown-item i {
+        width: 1.1rem;
+        margin-right: 0.35rem;
+    }
+    .product-grid-camera .pgc-dropdown-menu .dropdown-item:hover,
+    .product-grid-camera .pgc-dropdown-menu .dropdown-item:focus {
+        background-color: #f1f5f9 !important;
+        color: #0f172a !important;
+    }
+    .product-grid-camera .pgc-dropdown-menu .dropdown-item:active {
+        background-color: #e2e8f0 !important;
+        color: #0f172a !important;
+    }
+    .product-grid-camera .pgc-dropdown-menu .dropdown-divider {
+        margin: 0.25rem 0;
+        border-color: var(--pgc-border);
+    }
+    .product-grid-camera .table-responsive {
+        border-radius: 0 0 0.5rem 0.5rem;
+    }
+</style>
 
-            <th>ID</th>
-            <th class="th-sm">Código</th>
-            <th class="th-sm">Código de Barras</th>
-            <th class="th-sm" style="width: 20%">Nombre del Producto</th>
-            <th class="th-sm" style="width: 5%; font-size: 10px">Fecha<br>Ult. Compra</th>
-            <th class="th-sm" style="width: 5%; font-size: 10px">Cantidad<br>Ult. Compra</th>
-            <th class="th-sm text-center">Marca</th>
-            <th class="th-sm text-center">Familia</th>
-            <th class="th-sm" style="width: 5%">Unidad</th>
-            {#                <th class="th-sm" style="background: #bed1f3; width: 5%">Precio Compra Dólar</th>#}
-            <th class="th-sm" style="background: #abf6d6; width: 5%">Precio Compra</th>
-            {% if perms.sales.change_producto or perms.admin %}
-                <th class="th-sm align-middle" style="width: 5%; font-size: 10px">%Porcetanje 1</th>
-                <th class="th-sm align-middle" style="width: 5%; font-size: 10px">%Porcetanje 2</th>
-            {% endif %}
-            {#                <th class="th-sm align-middle" style="width: 5%; font-size: 10px">%Porcetanje 3</th>#}
-            <th class="th-sm">Stock</th>
-            {#                <th class="th-sm">Actualizar Stock</th>#}
-            <th class="th-sm">UPDATE</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for product in products %}
-            <tr class="text-center" pk="{{ product.id }}">
-                <td class="align-middle" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ forloop.counter }}</td>
-                <td class="align-middle" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">
-                    {% if product.code %}
-                        {{ product.code|zfill:6 }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>
-                <td class="align-middle" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">
-                    {% if product.barcode and product.barcode != 'NULL' %}
-                        {{ product.barcode }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>
-                <td class="align-middle text-left" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ product.name|upper }}</td>
-                <td class="align-middle text-center" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ product.last_purchase_date|date:"d/m/y" }}</td>
-                <td class="align-middle text-center" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ product.last_purchase_quantity|default:"-"|safe }}</td>
-                <td class="align-middle" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ product.product_brand.name|upper }}</td>
-                <td class="align-middle" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">{{ product.product_family.name|upper }}</td>
-                {% if product.productdetail_set.all.count > 0 %}
-                    {% for product_detail in product.productdetail_set.all %}
-                        {% if not forloop.first %}
-                            <tr class="text-center" pk="{{ product.id }}"> {% endif %}
-                    <td class="align-middle">{{ product_detail.unit.name }}</td>
-                    <td class="align-middle price-purchase" pk="{{ product.id }}"
-                        style="background: #abf6d6">
-                        S/ {{ product_detail.price_purchase|safe }}
-                        <a type="button"
-                           class="btn-sm btn-outline-warning btn-update-price-purchase"
-                           data-toggle="modal"
-                           data-target="#modal-change-price-purchase"
-                           pk="{{ product.id }}"><i class="fas fa-edit fa-xs"></i></a><br>
-                        <span style="font-size: 10px">{{ product_detail.update_at|date:"d/m/y" }}</span>
-                        {% with avg_price=product_detail.get_average_purchase_price %}
-                            {% if avg_price %}
-                                <br><span style="font-size: 9px; color: #666;">(S/ {{ avg_price|floatformat:2 }})</span>
-                            {% endif %}
-                        {% endwith %}
-                    </td>
+<div class="product-grid-camera">
+    <div class="card pgc-card mb-0">
+        <div class="pgc-card-header d-flex align-items-center justify-content-between">
+            <span class="font-weight-bold text-uppercase" style="font-size: 0.88rem; letter-spacing: 0.06em;">
+                <i class="fas fa-camera mr-2"></i>Catálogo de productos
+            </span>
+            <span class="badge badge-light text-dark" style="font-size: 0.78rem;">{{ products|length }} ítem(s)</span>
+        </div>
+        <div class="table-responsive">
+            <table id="product-data-grid" class="table table-hover m-0 roboto-condensed-regular" cellspacing="0" width="100%">
+                <thead>
+                <tr class="text-center text-uppercase">
+                    <th style="width: 2%">#</th>
+                    <th style="width: 9%">Códigos</th>
+                    <th style="width: 18%">Producto</th>
+                    <th style="width: 7%">Últ. compra</th>
+                    <th style="width: 9%">Marca / Familia</th>
+                    <th style="width: 5%">Unidad</th>
+                    <th class="pgc-col-purchase" style="width: 8%">Precio compra</th>
                     {% if perms.sales.change_producto or perms.admin %}
-                        <td class="align-middle new-percent-one" pk="{{ product.id }}">
-                        <span class="font-weight-bold"
-                              style="font-size: 10px">Precio al {{ product_detail.percentage_one|floatformat:0 }}%:</span><br>
-                            S/ {{ product_detail.get_calculate_price1|safe }}
-                        </td>
-                        <td class="align-middle new-percent-two" pk="{{ product.id }}">
-                        <span class="font-weight-bold"
-                              style="font-size: 10px">Precio al {{ product_detail.percentage_two|floatformat:0 }}%:</span><br>
-                            S/ {{ product_detail.get_calculate_price2|safe }}
-                        </td>
+                        <th class="pgc-col-prices" style="width: 10%">Precios venta</th>
                     {% endif %}
-
-                    {% if forloop.first %}
-                        <td class="align-middle" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">
-                            {% if product.productstore_set.all.count > 0 %}
-                                <table class="table table-sm text-uppercase small m-1">
-                                    <tbody>
-                                    {% for product_store in product.productstore_set.all %}
-                                        <tr class="{% if product_store.subsidiary_store.subsidiary.id == subsidiary.id %}text-danger font-weight-bolder{% endif %}">
-                                            <td>{{ product_store.subsidiary_store.subsidiary.name }}</td>
-                                            <td>{{ product_store.subsidiary_store.name }}</td>
-                                            <td class="{% if product_store.subsidiary_store.subsidiary.id == subsidiary.id %}stock{% endif %}"
-                                                pk="{{ product.id }}">
-                                                {{ product_store.get_stock_with_dot }}</td>
-                                            {% if forloop.first %}
-                                                <td class="align-middle p-0" rowspan="2">
-                                                    <a type="button"
-                                                       class="btn-sm btn-outline-warning btn-update-stock"
-                                                       data-toggle="modal"
-                                                       data-target="#modal-changeStock"
-                                                       pk="{{ product.id }}">
-                                                        <i class="fas fa-edit text-dark"></i>
-                                                    </a>
-                                                    {% if product.has_serials %}
-                                                        <a class="dropdown-item get-product-serials" pk="{{ product.id }}">
-                                                            <i class="fas fa-barcode fa-xs"></i> <small class="text-muted">Ver series</small></a>
-                                                    {% endif %}
-                                                </td>
-                                            {% endif %}
-                                        </tr>
-                                    {% endfor %}
-                                    </tbody>
-                                </table>
-                            {% else %}
-                                -
+                    <th style="width: 6%">Límites stock</th>
+                    <th style="width: 14%">Inventario</th>
+                    <th style="width: 5%" class="noExl">Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for product in products %}
+                    {% with detail_count=product.productdetail_set.all.count %}
+                    {% if detail_count > 0 %}
+                        {% with row_span=detail_count %}
+                        {% for product_detail in product.productdetail_set.all %}
+                            <tr class="text-center" pk="{{ product.id }}">
+                                {% if forloop.first %}
+                                    <td class="align-middle pgc-id" rowspan="{{ row_span }}">{{ forloop.parentloop.counter }}</td>
+                                    <td class="align-middle text-left" rowspan="{{ row_span }}">
+                                        <span class="pgc-sub">Código</span>
+                                        <span class="pgc-code">{% if product.code %}{{ product.code|zfill:6 }}{% else %}—{% endif %}</span>
+                                        <span class="pgc-sub mt-1">Cód. barras</span>
+                                        <span class="pgc-code">{% if product.barcode and product.barcode != 'NULL' %}{{ product.barcode }}{% else %}—{% endif %}</span>
+                                    </td>
+                                    <td class="align-middle text-left" rowspan="{{ row_span }}">
+                                        <span class="pgc-product-name">{{ product.name|upper }}</span>
+                                    </td>
+                                    <td class="align-middle" rowspan="{{ row_span }}">
+                                        <span class="pgc-sub">Fecha</span>
+                                        <span class="pgc-value">{{ product.last_purchase_date|date:"d/m/y"|default:"—" }}</span>
+                                        <span class="pgc-sub mt-1">Cantidad</span>
+                                        <span class="pgc-value">{{ product.last_purchase_quantity|default:"—"|safe }}</span>
+                                    </td>
+                                    <td class="align-middle text-left" rowspan="{{ row_span }}">
+                                        <span class="pgc-sub">Marca</span>
+                                        <span class="pgc-brand d-block">{{ product.product_brand.name|upper }}</span>
+                                        <span class="pgc-sub mt-1">Familia</span>
+                                        <span class="pgc-family d-block">{{ product.product_family.name|upper }}</span>
+                                    </td>
+                                {% endif %}
+                                <td class="align-middle">{{ product_detail.unit.name }}</td>
+                                <td class="align-middle pgc-col-purchase price-purchase" pk="{{ product.id }}">
+                                    <span class="pgc-purchase-price">S/ {{ product_detail.price_purchase|safe }}</span>
+                                    <br>
+                                    <span class="text-muted" style="font-size: 0.72rem;">{{ product_detail.update_at|date:"d/m/y" }}</span>
+                                    {% with avg_price=product_detail.get_average_purchase_price %}
+                                        {% if avg_price %}
+                                            <br><span class="text-muted" style="font-size: 0.7rem;">Prom. S/ {{ avg_price|floatformat:2 }}</span>
+                                        {% endif %}
+                                    {% endwith %}
+                                </td>
+                                {% if perms.sales.change_producto or perms.admin %}
+                                    <td class="align-middle pgc-col-prices text-left">
+                                        <div class="pgc-price-block new-percent-one" pk="{{ product.id }}">
+                                            <span class="pgc-pct-label">Margen {{ product_detail.percentage_one|floatformat:0 }}%</span>
+                                            <span class="font-weight-bold text-primary">S/ {{ product_detail.get_calculate_price1|safe }}</span>
+                                        </div>
+                                        <div class="pgc-price-block new-percent-two" pk="{{ product.id }}">
+                                            <span class="pgc-pct-label">Margen {{ product_detail.percentage_two|floatformat:0 }}%</span>
+                                            <span class="font-weight-bold text-primary">S/ {{ product_detail.get_calculate_price2|safe }}</span>
+                                        </div>
+                                    </td>
+                                {% endif %}
+                                {% if forloop.first %}
+                                    <td class="align-middle" rowspan="{{ row_span }}">
+                                        <div class="pgc-limits">
+                                            <div class="pgc-limit-item">
+                                                <span class="pgc-limit-badge pgc-limit-min">Mín</span>
+                                                <strong>{{ product.stock_min|default:0 }}</strong>
+                                            </div>
+                                            <div class="pgc-limit-item">
+                                                <span class="pgc-limit-badge pgc-limit-max">Máx</span>
+                                                <strong>{{ product.stock_max|default:0 }}</strong>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="align-middle pgc-stock-wrap" rowspan="{{ row_span }}">
+                                        {% if product.productstore_set.all.count > 0 %}
+                                            {% for product_store in product.productstore_set.all %}
+                                                {% with stk=product_store.stock|default:0 %}
+                                                <div class="pgc-stock-row {% if product_store.subsidiary_store.subsidiary.id == subsidiary.id %}pgc-current-subsidiary{% endif %}">
+                                                    <div class="pgc-stock-loc">
+                                                        <strong>{{ product_store.subsidiary_store.subsidiary.name }}</strong>
+                                                        <span>{{ product_store.subsidiary_store.name }}</span>
+                                                    </div>
+                                                    <span class="pgc-stock-qty {% if product_store.subsidiary_store.subsidiary.id == subsidiary.id %}stock{% endif %}
+                                                        {% if product.stock_min > 0 and stk|stock_near_min:product.stock_min %}pgc-stock-low
+                                                        {% elif product.stock_max > 0 and stk|stock_near_max:product.stock_max %}pgc-stock-high{% endif %}"
+                                                          pk="{{ product.id }}">
+                                                        {{ product_store.get_stock_with_dot }}
+                                                    </span>
+                                                </div>
+                                                {% endwith %}
+                                            {% endfor %}
+                                        {% else %}
+                                            <span class="text-muted">Sin inventario</span>
+                                        {% endif %}
+                                        {% if product.has_serials %}
+                                            <div class="pgc-stock-actions">
+                                                <a type="button"
+                                                   class="btn btn-outline-info btn-sm pgc-btn-action get-product-serials"
+                                                   pk="{{ product.id }}">
+                                                    <i class="fas fa-barcode"></i> Ver series
+                                                </a>
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                    <td class="align-middle hide-column" rowspan="{{ row_span }}">
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-dark btn-sm dropdown-toggle pgc-btn-action"
+                                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right shadow pgc-dropdown-menu">
+                                                {% if perms.admin %}
+                                                    <a class="dropdown-item"
+                                                       onclick="showModalEdition('{% url 'sales:json_product_edit' product.id %}')">
+                                                        <i class="fas fa-edit text-primary"></i> Editar producto</a>
+                                                {% endif %}
+                                                <a class="dropdown-item get-kardex" pk="{{ product.id }}">
+                                                    <i class="fas fa-history text-info"></i> Ver kardex</a>
+                                                {% if perms.sales.change_producto or perms.admin %}
+                                                    <a class="dropdown-item get-product-detail" pk="{{ product.id }}">
+                                                        <i class="fas fa-layer-group text-success"></i> Presentaciones</a>
+                                                {% endif %}
+                                                {% if product.has_serials %}
+                                                    <a class="dropdown-item get-product-serials" pk="{{ product.id }}">
+                                                        <i class="fas fa-barcode"></i> Ver series</a>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                        {% endwith %}
+                    {% else %}
+                        <tr class="text-center" pk="{{ product.id }}">
+                            <td class="align-middle pgc-id">{{ forloop.counter }}</td>
+                            <td class="align-middle text-left">
+                                <span class="pgc-sub">Código</span>
+                                <span class="pgc-code">{% if product.code %}{{ product.code|zfill:6 }}{% else %}—{% endif %}</span>
+                                <span class="pgc-sub mt-1">Cód. barras</span>
+                                <span class="pgc-code">{% if product.barcode and product.barcode != 'NULL' %}{{ product.barcode }}{% else %}—{% endif %}</span>
+                            </td>
+                            <td class="align-middle text-left">
+                                <span class="pgc-product-name">{{ product.name|upper }}</span>
+                            </td>
+                            <td class="align-middle">
+                                <span class="pgc-sub">Fecha</span>
+                                <span class="pgc-value">{{ product.last_purchase_date|date:"d/m/y"|default:"—" }}</span>
+                                <span class="pgc-sub mt-1">Cantidad</span>
+                                <span class="pgc-value">{{ product.last_purchase_quantity|default:"—"|safe }}</span>
+                            </td>
+                            <td class="align-middle text-left">
+                                <span class="pgc-sub">Marca</span>
+                                <span class="pgc-brand d-block">{{ product.product_brand.name|upper }}</span>
+                                <span class="pgc-sub mt-1">Familia</span>
+                                <span class="pgc-family d-block">{{ product.product_family.name|upper }}</span>
+                            </td>
+                            <td class="align-middle text-muted">—</td>
+                            <td class="align-middle pgc-col-purchase text-muted">—</td>
+                            {% if perms.sales.change_producto or perms.admin %}
+                                <td class="align-middle pgc-col-prices text-muted">—</td>
                             {% endif %}
-                        </td>
-
-                        <td class="hide-column" rowspan="{% if product.productdetail_set.all.count > 0 %}{{ product.productdetail_set.all.count }}{% else %}1{% endif %}">
-                            <!-- Example single danger button -->
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown"
-                                        aria-haspopup="true" aria-expanded="false">
-                                    Action
-                                </button>
-                                <div class="dropdown-menu bg-danger text-light">
-                                    {% if perms.admin %}
+                            <td class="align-middle">
+                                <div class="pgc-limits">
+                                    <div class="pgc-limit-item">
+                                        <span class="pgc-limit-badge pgc-limit-min">Mín</span>
+                                        <strong>{{ product.stock_min|default:0 }}</strong>
+                                    </div>
+                                    <div class="pgc-limit-item">
+                                        <span class="pgc-limit-badge pgc-limit-max">Máx</span>
+                                        <strong>{{ product.stock_max|default:0 }}</strong>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="align-middle pgc-stock-wrap">
+                                {% if product.productstore_set.all.count > 0 %}
+                                    {% for product_store in product.productstore_set.all %}
+                                        {% with stk=product_store.stock|default:0 %}
+                                        <div class="pgc-stock-row {% if product_store.subsidiary_store.subsidiary.id == subsidiary.id %}pgc-current-subsidiary{% endif %}">
+                                            <div class="pgc-stock-loc">
+                                                <strong>{{ product_store.subsidiary_store.subsidiary.name }}</strong>
+                                                <span>{{ product_store.subsidiary_store.name }}</span>
+                                            </div>
+                                            <span class="pgc-stock-qty stock
+                                                {% if product.stock_min > 0 and stk|stock_near_min:product.stock_min %}pgc-stock-low
+                                                {% elif product.stock_max > 0 and stk|stock_near_max:product.stock_max %}pgc-stock-high{% endif %}"
+                                                  pk="{{ product.id }}">
+                                                {{ product_store.get_stock_with_dot }}
+                                            </span>
+                                        </div>
+                                        {% endwith %}
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="text-muted">Sin inventario</span>
+                                {% endif %}
+                                {% if product.has_serials %}
+                                    <div class="pgc-stock-actions">
+                                        <a type="button"
+                                           class="btn btn-outline-info btn-sm pgc-btn-action get-product-serials"
+                                           pk="{{ product.id }}">
+                                            <i class="fas fa-barcode"></i> Ver series
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td class="align-middle hide-column">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-dark btn-sm dropdown-toggle pgc-btn-action"
+                                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right shadow pgc-dropdown-menu">
                                         <a class="dropdown-item"
                                            onclick="showModalEdition('{% url 'sales:json_product_edit' product.id %}')">
-                                            <i class="fas fa-edit"></i> Editar</a>
-                                    {% endif %}
-                                    <a class="dropdown-item quantity-on-hand" pk="{{ product.id }}">
-                                        <i class="fas fa-sync-alt"></i> Inventario inicial</a>
-
-                                    <a class="dropdown-item get-kardex" pk="{{ product.id }}">
-                                        <i class="fas fa-sync-alt"></i> Ver kardex</a>
-                                    {% if perms.sales.change_producto or perms.admin %}
+                                            <i class="fas fa-edit text-primary"></i> Editar producto</a>
+                                        <a class="dropdown-item get-kardex" pk="{{ product.id }}">
+                                            <i class="fas fa-history text-info"></i> Ver kardex</a>
                                         <a class="dropdown-item get-product-detail" pk="{{ product.id }}">
-                                            <i class="fas fa-sync-alt"></i> Ver presentaciones</a>
-                                    {% endif %}
-                                    {% if product.has_serials %}
-                                        <a class="dropdown-item get-product-serials" pk="{{ product.id }}">
-                                            <i class="fas fa-barcode"></i> Ver series</a>
-                                    {% endif %}
-                                    <a href="{% url 'sales:product_print_one' product.id %}" target="print"
-                                       class="dropdown-item text-light"><span class="fa fa-print"></span> print</a>
+                                            <i class="fas fa-layer-group text-success"></i> Presentaciones</a>
+                                        {% if product.has_serials %}
+                                            <a class="dropdown-item get-product-serials" pk="{{ product.id }}">
+                                                <i class="fas fa-barcode"></i> Ver series</a>
+                                        {% endif %}
+                                    </div>
                                 </div>
-                            </div>
-                        </td>
+                            </td>
+                        </tr>
                     {% endif %}
-                    </tr>
-                    {% endfor %}
-                {% else %}
-                    <td class="align-middle"></td>
-                    <td class="align-middle" style="background: #abf6d6"></td>
-                    <td class="align-middle"></td>
-                    <td class="align-middle"></td>
-                    <td class="align-middle"></td>
-{#                    <td class="align-middle"></td>#}
-                    <td class="align-middle">
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown"
-                                    aria-haspopup="true" aria-expanded="false">
-                                Action
-                            </button>
-                            <div class="dropdown-menu bg-danger text-light">
-                                <a class="dropdown-item"
-                                   onclick="showModalEdition('{% url 'sales:json_product_edit' product.id %}')">
-                                    <i class="fas fa-edit"></i> Editar</a>
-                                <a class="dropdown-item quantity-on-hand" pk="{{ product.id }}">
-                                    <i class="fas fa-sync-alt"></i> Inventario inicial</a>
-
-                                <a class="dropdown-item get-kardex" pk="{{ product.id }}">
-                                    <i class="fas fa-sync-alt"></i> Ver kardex</a>
-                                <a class="dropdown-item get-product-detail" pk="{{ product.id }}">
-                                    <i class="fas fa-sync-alt"></i> Ver presentaciones</a>
-                                {% if product.has_serials %}
-                                    <a class="dropdown-item get-product-serials" pk="{{ product.id }}">
-                                        <i class="fas fa-barcode"></i> Ver series</a>
-                                {% endif %}
-                                <a href="{% url 'sales:product_print_one' product.id %}" target="print"
-                                   class="dropdown-item text-light"><span class="fa fa-print"></span> print</a>
-                            </div>
-                        </div>
-                    </td>
-                    </tr>
-                {% endif %}
-        {% endfor %}
-        </tbody>
-        <tfoot>
-        <tr class="text-center">
-            {#                <th>#</th>#}
-            {#                <th class="th-sm">Nombre</th>#}
-            {#                <th class="th-sm">Detalles</th>#}
-            {#                <th class="th-sm">Stock en sedes</th>#}
-            {#                <th class="th-sm">Unidades</th>#}
-            {#                <th class="th-sm">Insumos/Receta</th>#}
-            {#                <th class="th-sm">Imagen</th>#}
-            {#                <th class="th-sm">UPDATE</th>#}
-{#            <th colspan="6"></th>#}
-{#            <th class="th-sm">S/ {{ total_price_purchase|safe }}</th>#}
-
-            {#                <th>ID</th>#}
-            {#                <th class="th-sm">Código</th>#}
-            {#                <th class="th-sm">Código de Barras</th>#}
-            {#                <th class="th-sm">Nombre del Producto</th>#}
-            {#                <th class="th-sm">Marca</th>#}
-            {#                <th class="th-sm">Unidad</th>#}
-            {#                <th class="th-sm">Precio Compra</th>#}
-            {#                <th class="th-sm">%Porcetanje 1</th>#}
-            {#                <th class="th-sm">%Porcetanje 2</th>#}
-            {#                <th class="th-sm">%Porcetanje 3</th>#}
-            {#                <th class="th-sm">STOCK</th>#}
-            {#                <th class="th-sm">UPDATE</th>#}
-
-        </tr>
-        </tfoot>
-    </table>
+                    {% endwith %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
 {% else %}
-    <div class="alert alert-info alert-dismissible fade show mt-3" role="alert">
-        <strong>Atencion!</strong> No existen Productos registrados con ese Nombre.
+    <div class="alert alert-info alert-dismissible fade show mt-3 roboto-condensed-regular" role="alert">
+        <i class="fas fa-search mr-2"></i>
+        <strong>Sin resultados.</strong> No hay productos registrados con ese criterio de búsqueda.
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
             <span aria-hidden="true">&times;</span>
         </button>
@@ -249,9 +518,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div id="product-serials-content">
-                    <!-- El contenido se cargará aquí via AJAX -->
-                </div>
+                <div id="product-serials-content"></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">
@@ -264,70 +531,11 @@
 
 <script type="text/javascript">
 
-    {#$('#product-data-grid').dataTable({#}
-    {#    "pageLength": 50#}
-    {# });#}
-
-    $(document).on('click', '.btn-update-stock', function () {
-        let _product_id = $(this).attr('pk');
-        $('#lending').empty();
-        $.ajax({
-            url: '/sales/get_modal_update_stock/',
-            async: true,
-            dataType: 'json',
-            type: 'GET',
-            data: {'_product_id': _product_id,},
-            success: function (response) {
-                $('#update-stock').html(response.grid);
-            },
-            fail: function (response) {
-                console.log("error");
-            }
-        });
-    });
-
-    $(document).on('click', '.btn-update-price-purchase', function () {
-        let _product_id = $(this).attr('pk');
-        $('#lending').empty();
-        $.ajax({
-            url: '/sales/get_modal_change_price_purchase/',
-            async: true,
-            dataType: 'json',
-            type: 'GET',
-            data: {'_product_id': _product_id,},
-            success: function (response) {
-                $('#change-price-purchase').html(response.grid);
-            },
-            fail: function (response) {
-                console.log("error");
-            }
-        });
-    });
-
-    $(document).on('click', '.btn-update-price-purchase-dollar', function () {
-        let _product_id = $(this).attr('pk');
-        $('#lending').empty();
-        $.ajax({
-            url: '/sales/get_modal_change_price_purchase_dollar/',
-            async: true,
-            dataType: 'json',
-            type: 'GET',
-            data: {'_product_id': _product_id,},
-            success: function (response) {
-                $('#change-price-purchase-dollar').html(response.grid);
-            },
-            fail: function (response) {
-                console.log("error");
-            }
-        });
-    });
-
-    // Manejar click en el botón de series
     $(document).on('click', '.get-product-serials', function () {
         let _product_id = $(this).attr('pk');
         $('#product-serials-content').html('<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando series...</div>');
         $('#modal-product-serials').modal('show');
-        
+
         $.ajax({
             url: '/sales/get_product_serials/',
             async: true,
@@ -346,56 +554,5 @@
             }
         });
     });
-
-    /*$('#product-data-grid').bootstrapTable({
-
-        //pagination: true,
-        showFooter: false,
-        //search: true,
-        showExport: true,
-        //filter: true,
-        //showRefresh:true,
-        showPrint: true,
-        //showColumns: true,
-        showFullScreen: true,
-        //pageList:[10, 25, 50, 100, 'All'],
-        //showPaginationSwitch: true,
-        exportDataType: 'all',
-        exportTypes: ['pdf', 'excel', 'xlsx', 'txt', 'json', 'xml'],
-        //exportFooter: true,
-
-        exportOptions: {
-            fileName: 'Listado de Precios de Productos',
-            buttons: [{
-                extend: 'excel',
-                text: 'Export Search Results',
-                className: 'btn btn-primary',
-            }],
-            type: 'pdf',
-            className: 'btn btn-primary',
-            jspdf: {
-                orientation: 'l',
-                format: 'bestfit', //a3, bestfit
-                margins: {left: 10, right: 10, top: 100, bottom: 20},
-                autotable: {
-                    styles: {
-                        fillColor: '#fff',
-                        textColor: '#343a40',
-                        fontSize: 10,
-                        valign: 'middle',
-                        lineWidth: 0.02,
-                        lineColor: '#343a40'
-                    },
-                    tableLineColor: '#409EFF',
-                    tableWidth: 'wrap', // auto
-                    theme: 'grid',
-                    //tableExport: {onBeforeAutotable: DoBeforeAutotable, onCellData: DoCellData}
-                }
-            }
-        },
-        ignoreRow: [],
-
-    });*/
-
 
 </script>
