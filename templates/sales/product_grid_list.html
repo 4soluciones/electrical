@@ -236,15 +236,36 @@
     .product-grid-camera .table-responsive {
         border-radius: 0 0 0.5rem 0.5rem;
     }
+    .product-grid-camera .pgc-btn-export {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        border: none;
+        color: #fff;
+        font-size: 0.78rem;
+        font-weight: 600;
+        padding: 0.35rem 0.75rem;
+        border-radius: 0.3rem;
+        box-shadow: 0 1px 3px rgba(5, 150, 105, 0.35);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .product-grid-camera .pgc-btn-export:hover {
+        color: #fff;
+        transform: translateY(-1px);
+        box-shadow: 0 3px 8px rgba(5, 150, 105, 0.4);
+    }
 </style>
 
 <div class="product-grid-camera">
     <div class="card pgc-card mb-0">
-        <div class="pgc-card-header d-flex align-items-center justify-content-between">
+        <div class="pgc-card-header d-flex align-items-center justify-content-between flex-wrap">
             <span class="font-weight-bold text-uppercase" style="font-size: 0.88rem; letter-spacing: 0.06em;">
                 <i class="fas fa-camera mr-2"></i>Catálogo de productos
             </span>
-            <span class="badge badge-light text-dark" style="font-size: 0.78rem;">{{ products|length }} ítem(s)</span>
+            <div class="d-flex align-items-center gap-2">
+                <button type="button" id="btn-export-product-catalog" class="btn btn-sm pgc-btn-export" title="Descargar catálogo en Excel">
+                    <i class="fas fa-file-excel mr-1"></i> Exportar Excel
+                </button>
+                <span class="badge badge-light text-dark ml-2" style="font-size: 0.78rem;">{{ products|length }} ítem(s)</span>
+            </div>
         </div>
         <div class="table-responsive">
             <table id="product-data-grid" class="table table-hover m-0 roboto-condensed-regular" cellspacing="0" width="100%">

@@ -1,11 +1,13 @@
 from collections import defaultdict
 
 import pandas as pd
-from django.db.models import Q, Subquery, Sum, F, Value, FloatField, OuterRef, Avg, Prefetch
+from django.db.models import Q, Subquery, Sum, F, Value, FloatField, OuterRef, Avg, Prefetch, Exists
 from django.db.models.functions import Coalesce
 from django.http import HttpResponse
-from ..sales.models import Product, ProductStore, ProductDetail, Kardex, SubsidiaryStore
+from ..sales.models import Product, ProductStore, ProductDetail, Kardex, SubsidiaryStore, ProductSerial
+from ..buys.models import PurchaseDetail
 from datetime import datetime as dt, timedelta, datetime
+import xlsxwriter
 
 
 def export_all_products(request, start_date=None, end_date=None):
@@ -318,4 +320,229 @@ def report_kardex_by_date(request, date=None):
         worksheet.set_column('F:F', 22, numeric_format)  # Precio Restante sin IGV
         worksheet.set_column('G:G', 28, numeric_format)  # Precio Total Restante sin IGV
 
+    return response
+
+
+def get_products_for_catalog_export(criteria=None, value=None, brand_id=None):
+    """Misma lógica de filtrado que la grilla de productos."""
+    last_purchase_date = PurchaseDetail.objects.filter(
+        product=OuterRef('id'),
+        purchase__status='A'
+    ).order_by('-purchase__purchase_date').values('purchase__purchase_date')[:1]
+
+    last_purchase_quantity = PurchaseDetail.objects.filter(
+        product=OuterRef('id'),
+        purchase__status='A'
+    ).order_by('-purchase__purchase_date').values('quantity')[:1]
+
+    has_serials = Exists(
+        ProductSerial.objects.filter(product_store__product=OuterRef('id'))
+    )
+
+    last_kardex = Kardex.objects.filter(product_store=OuterRef('id')).order_by('-id')[:1]
+
+    base_qs = Product.objects.filter(is_enabled=True).select_related(
+        'product_family', 'product_brand'
+    ).annotate(
+        last_purchase_date=Subquery(last_purchase_date),
+        last_purchase_quantity=Subquery(last_purchase_quantity),
+        has_serials=has_serials,
+    ).prefetch_related(
+        Prefetch(
+            'productstore_set',
+            queryset=ProductStore.objects.select_related('subsidiary_store__subsidiary')
+            .exclude(subsidiary_store__subsidiary=3)
+            .annotate(
+                last_remaining_quantity=Subquery(last_kardex.values('remaining_quantity'))
+            ),
+        ),
+        Prefetch(
+            'productdetail_set',
+            queryset=ProductDetail.objects.select_related('unit').order_by('id'),
+        ),
+    )
+
+    criteria = (criteria or '').strip()
+    value = (value or '').strip()
+
+    if criteria == 'name_contains' and value:
+        full_query = None
+        for term in value.split():
+            q = Q(name__icontains=term) | Q(product_brand__name__icontains=term)
+            full_query = q if full_query is None else full_query & q
+        return base_qs.filter(full_query).order_by('id')
+
+    if brand_id:
+        return base_qs.filter(product_brand_id=brand_id).order_by('id')
+
+    if criteria == 'name' and value:
+        return base_qs.filter(name__icontains=value).order_by('id')
+
+    return base_qs.order_by('id')
+
+
+def _format_excel_date(value):
+    if not value:
+        return ''
+    if hasattr(value, 'strftime'):
+        try:
+            return value.strftime('%d/%m/%Y')
+        except (ValueError, TypeError):
+            return str(value)
+    return str(value)
+
+
+def export_product_catalog(request):
+    criteria = request.GET.get('criteria', 'all')
+    value = request.GET.get('value', '')
+    brand = request.GET.get('brand', '0')
+    brand_id = None
+    if brand and brand != '0':
+        try:
+            brand_id = int(brand)
+        except (ValueError, TypeError):
+            brand_id = None
+
+    products = get_products_for_catalog_export(criteria, value, brand_id)
+    export_date = datetime.now().strftime('%d/%m/%Y %H:%M')
+
+    filename = f'Catalogo_Productos_{datetime.now().strftime("%Y%m%d_%H%M")}.xlsx'
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename={filename}'
+
+    workbook = xlsxwriter.Workbook(response, {'in_memory': True})
+    worksheet = workbook.add_worksheet('Catálogo')
+
+    title_fmt = workbook.add_format({
+        'bold': True, 'font_size': 16, 'font_color': '#FFFFFF', 'bg_color': '#1a2332',
+        'align': 'left', 'valign': 'vcenter', 'font_name': 'Calibri',
+    })
+    subtitle_fmt = workbook.add_format({
+        'font_size': 10, 'font_color': '#64748b', 'italic': True, 'font_name': 'Calibri',
+    })
+    header_fmt = workbook.add_format({
+        'bold': True, 'font_size': 10, 'font_color': '#FFFFFF', 'bg_color': '#2563eb',
+        'align': 'center', 'valign': 'vcenter', 'border': 1, 'font_name': 'Calibri',
+    })
+    text_fmt = workbook.add_format({
+        'font_size': 9, 'align': 'left', 'valign': 'vcenter', 'border': 1,
+        'font_name': 'Calibri', 'text_wrap': True,
+    })
+    text_alt_fmt = workbook.add_format({
+        'font_size': 9, 'align': 'left', 'valign': 'vcenter', 'border': 1,
+        'font_name': 'Calibri', 'text_wrap': True, 'bg_color': '#f8fafc',
+    })
+    center_fmt = workbook.add_format({
+        'font_size': 9, 'align': 'center', 'valign': 'vcenter', 'border': 1, 'font_name': 'Calibri',
+    })
+    center_alt_fmt = workbook.add_format({
+        'font_size': 9, 'align': 'center', 'valign': 'vcenter', 'border': 1,
+        'font_name': 'Calibri', 'bg_color': '#f8fafc',
+    })
+    money_fmt = workbook.add_format({
+        'num_format': '"S/ "#,##0.00', 'font_size': 9, 'align': 'right', 'valign': 'vcenter',
+        'border': 1, 'font_name': 'Calibri',
+    })
+    money_alt_fmt = workbook.add_format({
+        'num_format': '"S/ "#,##0.00', 'font_size': 9, 'align': 'right', 'valign': 'vcenter',
+        'border': 1, 'font_name': 'Calibri', 'bg_color': '#f8fafc',
+    })
+    stock_fmt = workbook.add_format({
+        'num_format': '#,##0.##', 'font_size': 9, 'align': 'right', 'valign': 'vcenter',
+        'border': 1, 'font_name': 'Calibri', 'bold': True,
+    })
+    stock_alt_fmt = workbook.add_format({
+        'num_format': '#,##0.##', 'font_size': 9, 'align': 'right', 'valign': 'vcenter',
+        'border': 1, 'font_name': 'Calibri', 'bold': True, 'bg_color': '#f8fafc',
+    })
+    int_fmt = workbook.add_format({
+        'num_format': '0', 'font_size': 9, 'align': 'center', 'valign': 'vcenter',
+        'border': 1, 'font_name': 'Calibri',
+    })
+    int_alt_fmt = workbook.add_format({
+        'num_format': '0', 'font_size': 9, 'align': 'center', 'valign': 'vcenter',
+        'border': 1, 'font_name': 'Calibri', 'bg_color': '#f8fafc',
+    })
+
+    headers = [
+        'N°', 'Código', 'Producto', 'Precio compra', 'Fecha precio compra',
+        'Stock mínimo', 'Stock máximo', 'Almacén', 'Stock actual',
+    ]
+
+    worksheet.set_row(0, 28)
+    worksheet.merge_range(0, 0, 0, len(headers) - 1, 'Catálogo de productos — Inventario y precios', title_fmt)
+    worksheet.set_row(1, 18)
+    worksheet.merge_range(
+        1, 0, 1, len(headers) - 1,
+        f'Generado: {export_date}  |  Total productos: {products.count()}',
+        subtitle_fmt,
+    )
+
+    header_row = 3
+    worksheet.set_row(header_row, 22)
+    for col, title in enumerate(headers):
+        worksheet.write(header_row, col, title, header_fmt)
+
+    data_row = header_row + 1
+    row_index = 0
+
+    for product in products:
+        details = list(product.productdetail_set.all())
+        detail = details[0] if details else None
+        price = float(detail.price_purchase) if detail else None
+        price_date = _format_excel_date(detail.update_at if detail else None)
+        code = str(product.code).zfill(6) if product.code else ''
+        stock_min = product.stock_min or 0
+        stock_max = product.stock_max or 0
+        stores = list(product.productstore_set.all())
+
+        store_rows = stores if stores else [None]
+
+        for store in store_rows:
+            alt = row_index % 2 == 1
+            t_fmt = text_alt_fmt if alt else text_fmt
+            c_fmt = center_alt_fmt if alt else center_fmt
+            m_fmt = money_alt_fmt if alt else money_fmt
+            s_fmt = stock_alt_fmt if alt else stock_fmt
+            i_fmt = int_alt_fmt if alt else int_fmt
+
+            worksheet.write(data_row, 0, row_index + 1, c_fmt)
+            worksheet.write(data_row, 1, code, c_fmt)
+            worksheet.write(data_row, 2, product.name.upper(), t_fmt)
+
+            if price is not None:
+                worksheet.write_number(data_row, 3, price, m_fmt)
+            else:
+                worksheet.write(data_row, 3, '—', c_fmt)
+
+            worksheet.write(data_row, 4, price_date or '—', c_fmt)
+            worksheet.write_number(data_row, 5, stock_min, i_fmt)
+            worksheet.write_number(data_row, 6, stock_max, i_fmt)
+
+            if store:
+                worksheet.write(data_row, 7, store.subsidiary_store.name, t_fmt)
+                worksheet.write_number(data_row, 8, float(store.stock or 0), s_fmt)
+            else:
+                worksheet.write(data_row, 7, '—', c_fmt)
+                worksheet.write(data_row, 8, 0, s_fmt)
+
+            data_row += 1
+            row_index += 1
+
+    last_row = max(data_row - 1, header_row)
+    worksheet.autofilter(header_row, 0, last_row, len(headers) - 1)
+    worksheet.freeze_panes(header_row + 1, 0)
+
+    worksheet.set_column('A:A', 5)
+    worksheet.set_column('B:B', 10)
+    worksheet.set_column('C:C', 42)
+    worksheet.set_column('D:D', 14)
+    worksheet.set_column('E:E', 16)
+    worksheet.set_column('F:G', 12)
+    worksheet.set_column('H:H', 22)
+    worksheet.set_column('I:I', 12)
+
+    workbook.close()
     return response

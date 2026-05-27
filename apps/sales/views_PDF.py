@@ -1375,7 +1375,15 @@ def print_order_bill(request, pk=None, check=None):
     _total = 0
     for detail in order_obj.orderdetail_set.all().order_by('unit'):
         count = count + 1
-        _product = Paragraph(str(detail.commentary.upper()), styles["Justify_Square_detail"])
+        _commentary = str(detail.commentary or '').upper()
+        _brand = ''
+        if detail.product.product_brand and detail.product.product_brand.name:
+            _brand = str(detail.product.product_brand.name).upper()
+        _family = ''
+        if detail.product.product_family and detail.product.product_family.name:
+            _family = str(detail.product.product_family.name).upper()
+        _product_text = ' - '.join((_commentary, _brand, _family))
+        _product = Paragraph(_product_text, styles["Justify_Square_detail"])
         detail_rows.append((
             # str(count),
             str(decimal.Decimal(round(detail.quantity_sold, 0))),

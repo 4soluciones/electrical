@@ -75,6 +75,11 @@
                     {#                    </button>#}
 
 
+                    <button type="button" class="btn-sm btn-outline-success my-1 mr-2 ml-2" id="btn-export-product-catalog-top"
+                            title="Exportar catálogo visible a Excel">
+                        <i class="fas fa-file-excel"></i> Catálogo Excel
+                    </button>
+
                     <button type="button" class="btn-sm btn-outline-success my-1 mr-2 ml-2" id="report-excel">
                         <i class="fas fa-file-excel"></i> Kardex Total
                     </button>
@@ -680,6 +685,23 @@
                     }
                 });
             }
+        });
+
+        function exportProductCatalog() {
+            const value = ($('#custom-input-product-by-name').val() || '').trim();
+            const brand = $('#brand_id').val() || '0';
+            let criteria = 'all';
+            if (value) {
+                criteria = 'name_contains';
+            } else if (brand && brand !== '0') {
+                criteria = 'brand';
+            }
+            const params = new URLSearchParams({criteria: criteria, value: value, brand: brand});
+            window.location.href = '/sales/export_product_catalog/?' + params.toString();
+        }
+
+        $(document).on('click', '#btn-export-product-catalog, #btn-export-product-catalog-top', function () {
+            exportProductCatalog();
         });
 
         $(document).on('click', '#report-excel', function () {

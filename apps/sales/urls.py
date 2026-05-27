@@ -1,7 +1,7 @@
 from django.urls import path
 from django.contrib.auth.decorators import login_required
 
-from apps.sales.excels import export_all_products, report_kardex_by_date
+from apps.sales.excels import export_all_products, report_kardex_by_date, export_product_catalog
 from apps.sales.views import *
 from apps.sales.views_SUNAT import query_dni
 from apps.sales.views_PDF import product_print, print_ticket_order_sales, print_quotation, print_order_bill, print_orders_sales
@@ -212,6 +212,7 @@ urlpatterns = [
 
     # EXCEL
     path('export_all_products/<str:start_date>/<str:end_date>/', login_required(export_all_products), name='export_all_products'),
+    path('export_product_catalog/', login_required(export_product_catalog), name='export_product_catalog'),
     path('report_kardex_by_date/<str:date>/', login_required(report_kardex_by_date), name='report_kardex_by_date'),
 
     # SELL SERIAL
