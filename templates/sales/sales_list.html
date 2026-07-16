@@ -1719,31 +1719,37 @@
                 }
             });
         }
-        $(document).on('blur', '#sales-details tr td.item-price input.input-price', function (e) {
-            let val = Number($(this).val());
-            let row = $(this).parent('td.item-price').parent('tr');
+        // change: valida solo cuando el usuario termina de editar (sale del campo o Enter)
+        $(document).on('change', '#sales-details tr td.item-price input.input-price', function (e) {
+            let raw = String($(this).val()).trim();
+            let row = $(this).closest('tr');
             let price_purchase = Number(row.attr('price_p'));
             let product_id = row.attr('product');
-            validatePrice(val, price_purchase, product_id)
-            //$(this).val('');
-            //$(this).focus();
-            /*if (val < price_purchase){
-                toastr.error('El precio de venta no puede ser menor al precio de compra', '¡Error de escritura!');
-                $(this).val('');
-                $(this).focus();
-                calculateTotal();
-            }*/
+            validatePrice(raw, price_purchase, product_id, $(this));
         });
 
-        function validatePrice(val, price_purchase, product_id) {
-            let rows = $('#sales-details').find("tr[product=" + product_id + "]");
-            if (val < price_purchase){
-                toastr.error('El precio de venta no puede ser menor al precio de compra', '¡Error de escritura!');
-                let _input = rows.find('td.item-price input.input-price');
-                _input.val('');
-                //_input.focus();
-                calculateTotal();
+        function validatePrice(rawVal, price_purchase, product_id, $input) {
+            // No validar mientras el número está incompleto (vacío, solo punto, "7.", etc.)
+            if (rawVal === '' || rawVal === '.' || rawVal === '-' || /[.,]$/.test(rawVal)) {
+                return true;
             }
+            let val = Number(String(rawVal).replace(',', '.'));
+            if (isNaN(val) || !isFinite(val)) {
+                return true;
+            }
+            if (val < price_purchase) {
+                toastr.error('El precio de venta no puede ser menor al precio de compra', '¡Error de escritura!');
+                if ($input && $input.length) {
+                    $input.val('');
+                    $input.focus();
+                } else {
+                    let rows = $('#sales-details').find("tr[product=" + product_id + "]");
+                    rows.find('td.item-price input.input-price').val('');
+                }
+                calculateTotal();
+                return false;
+            }
+            return true;
         }
 
         $(document).on('keyup', '#sales-details tr td.item-price input.input-price', function (e) {
@@ -1788,10 +1794,15 @@
             {#console.log('price_unit', price_unit)#}
             row.find('td.item-price input.input-price').val((price_unit).toFixed(6))
             calculateTotal();
-            let price_sale = Number(row.find('td.item-price input.input-price').val());
+            // No validar aquí: keyup se dispara en cada tecla (ej. "7" antes de "7.5")
+        });
+
+        $(document).on('change', '#sales-details tr td.item-total input.input-total-detail', function (e) {
+            let row = $(this).closest('tr');
+            let price_sale = String(row.find('td.item-price input.input-price').val()).trim();
             let price_purchase = Number(row.attr('price_p'));
             let product_id = row.attr('product');
-            validatePrice(price_sale, price_purchase, product_id)
+            validatePrice(price_sale, price_purchase, product_id, row.find('td.item-price input.input-price'));
         });
 
 
