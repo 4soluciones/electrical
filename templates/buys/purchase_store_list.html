@@ -95,7 +95,7 @@
         $(document).on('click', '.btn-show-detail', function () {
             let parent_id = $(this).attr('pk_parent');
             let purchase_id = $(this).attr('pk');
-            let _table = $(this).parent('td').parent('tr').next('tr').children('td.table-details-purchase');
+            let _table = $(this).closest('td').parent('tr').next('tr').children('td.table-details-purchase');
             let _icon = $(this).find('i.see-icon')
 
             if (_icon.hasClass("fas fa-sort-down fa-lg")) {

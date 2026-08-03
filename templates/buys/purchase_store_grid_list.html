@@ -1,72 +1,250 @@
+<style>
+    #purchase-store-data-grid {
+        margin-bottom: 0 !important;
+    }
+    #purchase-store-data-grid thead th,
+    #purchase-store-data-grid tfoot th {
+        font-size: 0.8rem;
+        letter-spacing: 0.04em;
+        white-space: nowrap;
+        vertical-align: middle;
+    }
+    #purchase-store-data-grid tbody td {
+        vertical-align: middle;
+    }
+    .btn-show-detail,
+    .btn-serial-purchase {
+        border-radius: 0.3rem;
+        white-space: nowrap;
+        font-size: 0.78rem;
+        padding: 0.3rem 0.7rem;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+        transition: all 0.15s ease-in-out;
+    }
+    .btn-show-detail:hover {
+        background: #17a2b8;
+        color: #fff;
+    }
+    .btn-serial-purchase:hover {
+        filter: brightness(1.05);
+    }
+    .table-details-purchase {
+        border-top: 2px solid #17a2b8;
+    }
+</style>
+
 {% if purchases_store %}
-    <div class="card border-info m-3">
-        <div class="card-header bg-info">
-            <h4 class="card-title text-center text-white roboto-condensed-regular">LISTA DE COMPRAS EN ALMACEN</h4>
+    <div class="card border-info m-3 shadow-sm">
+        <div class="card-header bg-info py-2 d-flex justify-content-between align-items-center">
+            <h4 class="card-title text-white roboto-condensed-regular mb-0">LISTA DE COMPRAS EN ALMACEN</h4>
+            <span class="badge badge-light badge-pill px-3 py-1 roboto-condensed-regular">
+                {{ purchases_store|length }} compra(s)
+            </span>
         </div>
         <div class="card-body roboto-condensed-regular">
-            <div class="table-responsive dataTables_wrapper ">
+            <div class="table-responsive mb-0">
                 <table id="purchase-store-data-grid"
-                       class="table table-primary table-striped align-content-center table-bordered response"
+                       class="table table-sm table-hover table-bordered mb-0"
                        cellspacing="0" width="100%">
                     <thead>
-                    <tr class="text-center bg-info text-white" style="height: 20px">
-                        <th>#</th>
-                        <th class="th-sm">Proveedor</th>
-                        <th class="th-sm">Numero comprobante</th>
-                        <th class="th-sm">Fecha compra</th>
-                        <th class="th-sm">Total</th>
-                        <th class="th-sm">Empleado</th>
-                        <th class="th-sm">Estado</th>
-                        <th class="th-sm">Detalle</th>
+                    <tr class="text-center bg-info text-white">
+                        <th class="align-middle" style="width: 4%">#</th>
+                        <th class="align-middle">Proveedor</th>
+                        <th class="align-middle">N° Comprobante</th>
+                        <th class="align-middle">Fecha compra</th>
+                        <th class="align-middle text-right">Total</th>
+                        <th class="align-middle">Empleado</th>
+                        <th class="align-middle" style="width: 11%">Estado</th>
+                        <th class="align-middle" style="width: 18%">Acciones</th>
                     </tr>
                     </thead>
                     <tbody>
                     {% for p in purchases_store %}
-                        <tr class="text-center ">
+                        <tr class="text-center align-middle">
                             <td>{{ p.id }}</td>
                             <td>{{ p.supplier.name|upper }}</td>
                             <td>{{ p.bill_number|upper }}</td>
                             <td>{{ p.purchase_date|date:'d-m-Y' }}</td>
-                            <td>{{ p.total_import|floatformat:2 }}</td>
+                            <td class="text-right font-weight-bold">{{ p.total_import|floatformat:2 }}</td>
                             <td>{{ p.user.worker_set.last.employee.names|upper }}</td>
-                            <td class=" text-success bg-white">{{ p.get_status_display }}</td>
+                            <td>
+                                <span class="badge badge-pill badge-success px-3 py-1">{{ p.get_status_display }}</span>
+                            </td>
                             <td class="p-1">
-                               <button type="button" class="btn btn-sm btn-show-detail"
-                                        pk="{{ p.id }}">
-                                    <i class="fas fa-sort-down fa-lg see-icon"></i>
-                                </button>
+                                <div class="d-flex justify-content-center align-items-center" style="gap: 0.35rem">
+                                    <button type="button" class="btn btn-outline-info btn-sm btn-show-detail"
+                                            pk="{{ p.id }}" title="Ver detalle de la compra">
+                                        <i class="fas fa-sort-down fa-lg see-icon"></i> Detalle
+                                    </button>
+                                    <button type="button" class="btn btn-info btn-sm btn-serial-purchase"
+                                            purchase="{{ p.id }}" title="Agregar series al producto">
+                                        <i class="fas fa-qrcode"></i> Series
+                                    </button>
+                                </div>
                             </td>
                         </tr>
-                         <tr style="display: none">
-                            <td colspan="7" class="table-details-purchase bg-white p-0"></td>
-                         </tr>
+                        <tr style="display: none">
+                            <td colspan="8" class="table-details-purchase bg-white p-0"></td>
+                        </tr>
                     {% endfor %}
                     </tbody>
                     <tfoot>
-                    <tr class="text-center bg-info text-white" style="height: 20px">
-                        <th>#</th>
-                        <th class="th-sm">Proveedor</th>
-                        <th class="th-sm">Numero comprobante</th>
-                        <th class="th-sm">Fecha compra</th>
-                        <th class="th-sm">Total</th>
-                        <th class="th-sm">Empleado</th>
-                        <th class="th-sm">Estado</th>
-                        <th class="th-sm">Detalle</th>
+                    <tr class="text-center bg-info text-white">
+                        <th class="align-middle">#</th>
+                        <th class="align-middle">Proveedor</th>
+                        <th class="align-middle">N° Comprobante</th>
+                        <th class="align-middle">Fecha compra</th>
+                        <th class="align-middle text-right">Total</th>
+                        <th class="align-middle">Empleado</th>
+                        <th class="align-middle">Estado</th>
+                        <th class="align-middle">Acciones</th>
                     </tr>
                     </tfoot>
                 </table>
-
             </div>
-
         </div>
-
-        <!-- Card -->
     </div>
-
-
 {% else %}
-    <h1>No existen compras en almacen</h1>
+    <div class="alert alert-info text-center mt-4 roboto-condensed-regular">
+        No existen compras en almacén.
+    </div>
 {% endif %}
-<script>
 
+<div class="modal fade" id="modal-serial-purchase" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white py-2">
+                <h5 class="modal-title roboto-condensed-regular">
+                    <i class="fas fa-qrcode"></i> AGREGAR SERIES A PRODUCTO
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body roboto-condensed-regular">
+                <div class="form-group">
+                    <label class="font-weight-bold">PRODUCTO</label>
+                    <select id="id_product_serial" class="form-control">
+                        <option value="">Seleccione un producto</option>
+                    </select>
+                </div>
+                <div id="container-serial"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="btn-save-serial">Guardar Series</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).on('click', '.btn-serial-purchase', function () {
+        let purchase_id = $(this).attr('purchase');
+        $('#id_product_serial').empty().append('<option value="">Cargando productos...</option>');
+        $('#container-serial').empty();
+        $('#modal-serial-purchase').modal('show');
+        $.ajax({
+            url: '/buys/get_products_serial_purchase/',
+            async: true,
+            dataType: 'json',
+            type: 'GET',
+            data: {'purchase': purchase_id},
+            contentType: 'application/json;charset=UTF-8',
+            headers: {"X-CSRFToken": '{{ csrf_token }}'},
+            success: function (response) {
+                let options = '<option value="">Seleccione un producto</option>';
+                $.each(response.products, function (i, p) {
+                    options += '<option value="' + p.purchase_detail_id + '">' + p.name +
+                        ' [' + p.code + '] - Cantidad: ' + p.quantity + ' ' + p.unit + '</option>';
+                });
+                $('#id_product_serial').html(options);
+            },
+            error: function (jqXhr) {
+                toastr.error(jqXhr.responseJSON.error, '¡MENSAJE!');
+            }
+        });
+    });
+
+    $(document).on('change', '#id_product_serial', function () {
+        let purchase_detail_id = $(this).val();
+        if (!purchase_detail_id) {
+            $('#container-serial').empty();
+            return;
+        }
+        $.ajax({
+            url: '/buys/get_serials_by_detail/',
+            async: true,
+            dataType: 'json',
+            type: 'GET',
+            data: {'purchase_detail': purchase_detail_id},
+            success: function (response) {
+                let existing = response.serials;
+                let quantity = parseInt(response.quantity);
+                let remaining = quantity - existing.length;
+                let html = '';
+                if (existing.length) {
+                    html += '<div class="form-group">' +
+                        '<label class="font-weight-bold">SERIES REGISTRADAS</label>' +
+                        '<table class="table table-sm table-bordered mb-2"><tbody>';
+                    $.each(existing, function (i, s) {
+                        html += '<tr><td class="text-center">' + (i + 1) + '</td>' +
+                            '<td><input type="text" class="form-control" value="' + s.serial + '" readonly></td>' +
+                            '<td class="text-center">' + s.status + '</td></tr>';
+                    });
+                    html += '</tbody></table></div>';
+                }
+                html += '<div class="form-group">' +
+                    '<label class="font-weight-bold">AGREGAR SERIES (' + remaining + ' pendientes)</label>';
+                if (remaining > 0) {
+                    html += '<table class="table table-sm table-bordered"><tbody id="details-serial">';
+                    for (let i = 0; i < remaining; i++) {
+                        html += '<tr><td class="text-center">' + (existing.length + i + 1) + '</td>' +
+                            '<td><input type="text" class="form-control serial-new" placeholder="Ingrese serie"></td></tr>';
+                    }
+                    html += '</tbody></table>';
+                } else {
+                    html += '<p class="text-muted">No faltan series por ingresar.</p>';
+                }
+                html += '</div>';
+                $('#container-serial').html(html);
+            }
+        });
+    });
+
+    $(document).on('click', '#btn-save-serial', function () {
+        let purchase_detail_id = $('#id_product_serial').val();
+        if (!purchase_detail_id) {
+            toastr.warning('Seleccione un producto', '¡ADVERTENCIA!');
+            return false;
+        }
+        let serials = [];
+        $('#container-serial .serial-new').each(function () {
+            let val = $(this).val().trim();
+            if (val) serials.push({'Serial': val});
+        });
+        if (!serials.length) {
+            toastr.warning('Ingrese al menos una serie', '¡ADVERTENCIA!');
+            return false;
+        }
+        let data = {'PurchaseDetail': purchase_detail_id, 'Serials': serials};
+        $.ajax({
+            url: '/buys/save_serial_purchase/',
+            async: true,
+            dataType: 'json',
+            type: 'GET',
+            data: {'serials': JSON.stringify(data)},
+            contentType: 'application/json;charset=UTF-8',
+            headers: {"X-CSRFToken": '{{ csrf_token }}'},
+            success: function (response, textStatus, xhr) {
+                if (xhr.status === 200) {
+                    toastr.success(response.message, '¡EXITOSO!');
+                    $('#modal-serial-purchase').modal('hide');
+                }
+            },
+            error: function (jqXhr) {
+                toastr.error(jqXhr.responseJSON.error, '¡MENSAJE!');
+            }
+        });
+    });
 </script>

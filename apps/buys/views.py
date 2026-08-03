@@ -657,6 +657,93 @@ def get_detail_by_purchase(request):
         }, status=HTTPStatus.OK)
 
 
+def get_products_serial_purchase(request):
+    if request.method == 'GET':
+        purchase_id = request.GET.get('purchase', '')
+        purchase_obj = Purchase.objects.get(id=int(purchase_id))
+        products = []
+        for d in purchase_obj.purchasedetail_set.all().select_related('product', 'unit'):
+            if d.product.is_serial:
+                products.append({
+                    'purchase_detail_id': d.id,
+                    'name': d.product.name,
+                    'code': d.product.code,
+                    'quantity': d.quantity,
+                    'unit': d.unit.name if d.unit else '',
+                })
+        return JsonResponse({'products': products}, status=HTTPStatus.OK)
+
+
+def get_serials_by_detail(request):
+    if request.method == 'GET':
+        purchase_detail_id = request.GET.get('purchase_detail', '')
+        purchase_detail_obj = PurchaseDetail.objects.get(id=int(purchase_detail_id))
+        serials = []
+        for s in purchase_detail_obj.productserial_set.all().order_by('id'):
+            serials.append({
+                'id': s.id,
+                'serial': s.serial_number,
+                'status': s.get_status_display(),
+            })
+        return JsonResponse({
+            'serials': serials,
+            'quantity': purchase_detail_obj.quantity,
+        }, status=HTTPStatus.OK)
+
+
+@csrf_exempt
+def save_serial_purchase(request):
+    if request.method == 'GET':
+        serials_request = request.GET.get('serials', '')
+        data = json.loads(serials_request)
+
+        purchase_detail_id = int(data['PurchaseDetail'])
+        purchase_detail_obj = PurchaseDetail.objects.get(id=purchase_detail_id)
+        product_obj = purchase_detail_obj.product
+
+        user_id = request.user.id
+        user_obj = User.objects.get(id=user_id)
+        subsidiary_obj = get_subsidiary_by_user(user_obj)
+
+        try:
+            subsidiary_store_obj = SubsidiaryStore.objects.get(subsidiary=subsidiary_obj, category='V')
+            product_store_obj = ProductStore.objects.get(product=product_obj, subsidiary_store=subsidiary_store_obj)
+        except (SubsidiaryStore.DoesNotExist, ProductStore.DoesNotExist):
+            data = {'error': 'EL PRODUCTO NO SE ENCUENTRA ASIGNADO A NINGUN ALMACEN DE VENTA'}
+            response = JsonResponse(data)
+            response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+            return response
+
+        existing_count = purchase_detail_obj.productserial_set.count()
+        serials_requested = [str(s.get('Serial', '')).strip() for s in data['Serials'] if str(s.get('Serial', '')).strip()]
+        if existing_count + len(serials_requested) > int(decimal.Decimal(purchase_detail_obj.quantity)):
+            data = {
+                'error': 'LA CANTIDAD DE SERIES SUPERA LA CANTIDAD COMPRADA DEL PRODUCTO (' + str(
+                    purchase_detail_obj.quantity) + ')'}
+            response = JsonResponse(data)
+            response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+            return response
+
+        saved = 0
+        duplicates = []
+        for serial_val in serials_requested:
+            if ProductSerial.objects.filter(serial_number=serial_val).exists():
+                duplicates.append(serial_val)
+                continue
+            ProductSerial.objects.create(
+                serial_number=serial_val,
+                purchase_detail=purchase_detail_obj,
+                product_store=product_store_obj,
+                status='C'
+            )
+            saved += 1
+
+        message = 'Series guardadas correctamente.'
+        if duplicates:
+            message += ' Series duplicadas omitidas: ' + ', '.join(duplicates)
+        return JsonResponse({'message': message, 'saved': saved}, status=HTTPStatus.OK)
+
+
 def get_requirements_buys_list_approved(request):
     if request.method == 'GET':
         pk = request.GET.get('pk', '')
