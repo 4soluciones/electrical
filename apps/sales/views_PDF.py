@@ -1310,10 +1310,11 @@ def print_order_bill(request, pk=None, check=None):
         ['Vendedor: ', Paragraph(order_obj.user.username.upper(), styles['Left_Square'])],
         # ['Moneda: ', 'coin'],
         ['Cond. Venta: ', Paragraph(str(payment.upper()), styles['Left_Square'])],
-        _row_payment_deposit
         # ['Nº Proyecto : ', Paragraph(str(nro_project), styles['Left_Square'])],
         # ['Nº Compra Cliente: ', Paragraph(str(nro_purchase_client), styles['Left_Square'])]
     ]
+    if _row_payment_deposit:
+        tbl2_col2.append(_row_payment_deposit)
     tbl2_col_2 = Table(tbl2_col2, colWidths=[_bts * 18 / 100, _bts * 14 / 100])
 
     _tbl_header2 = [
@@ -1592,7 +1593,7 @@ def print_order_bill(request, pk=None, check=None):
     header_serial.setStyle(TableStyle(style_header_serial))
 
     detail_rows = []
-    detail_serial = []
+    detail_serial = None
 
     for detail in order_obj.orderdetail_set.all():
         if detail.productserial_set.exists():
@@ -1632,7 +1633,7 @@ def print_order_bill(request, pk=None, check=None):
     dictionary.append(detail_body)
     dictionary.append(Spacer(1, 5))
     dictionary.append(total_page)
-    if order_obj.way_to_pay_type == 'C':
+    if order_obj.way_to_pay_type == 'C' and credit_list is not None:
         dictionary.append(credit_list)
     dictionary.append(Spacer(1, 5))
     dictionary.append(total_footer)
@@ -1640,7 +1641,8 @@ def print_order_bill(request, pk=None, check=None):
     if check and str(check).lower() == 'true':
         dictionary.append(PageBreak())
         dictionary.append(header_serial)
-        dictionary.append(detail_serial)
+        if detail_serial is not None:
+            dictionary.append(detail_serial)
 
     # dictionary.append(Paragraph('www.electrical.com', styles["Center_Newgot"]))
     response = HttpResponse(content_type='application/pdf')
