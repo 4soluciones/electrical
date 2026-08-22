@@ -1,101 +1,374 @@
 {% load app_filters %}
 
-<div class="text-right container-fluid pt-0 pb-2">
-    <button type="button" id="btn_export_excel_credit_note" class="btn btn-success">
-        <i class="fas fa-file-csv"></i> Excel
-    </button>
+<style>
+    /* ====== Reporte Notas de Crédito - estilos locales ====== */
+    .cn-report .cn-table-wrap {
+        max-height: 65vh;
+        overflow: auto;
+        border: 1px solid #dee2e6;
+        border-radius: .5rem;
+        background: #fff;
+    }
+
+    .cn-report table {
+        margin-bottom: 0 !important;
+        font-size: .84rem;
+    }
+
+    .cn-report thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: #1e3a5f;
+        color: #ffffff;
+        text-align: center;
+        text-transform: uppercase;
+        font-size: .72rem;
+        letter-spacing: .5px;
+        vertical-align: middle !important;
+        white-space: nowrap;
+        border-color: rgba(255, 255, 255, .15) !important;
+    }
+
+    .cn-report tbody tr.cn-main-row {
+        cursor: pointer;
+        transition: background-color .15s ease;
+    }
+
+    .cn-report tbody tr.cn-main-row:hover {
+        background-color: #eef4fa;
+    }
+
+    .cn-report tbody tr.cn-main-row.expanded {
+        background-color: #e3edf7;
+    }
+
+    .cn-report .cn-toggle {
+        width: 26px;
+        height: 26px;
+        line-height: 1;
+        padding: 0;
+        font-size: .7rem;
+        border-radius: 50%;
+    }
+
+    .cn-report .badge-pill {
+        min-width: 74px;
+        font-size: .7rem;
+        letter-spacing: .4px;
+    }
+
+    .cn-report .cn-money {
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    /* Panel de detalle desplegable */
+    .cn-report tbody tr.cn-detail-row > td {
+        border: 0;
+    }
+
+    .cn-detail-box {
+        background: #f8fafc;
+        border-left: 3px solid #25628f;
+        border-bottom: 1px solid #dee2e6;
+        padding: 1rem 1.25rem;
+    }
+
+    .cn-report .cn-items-table {
+        font-size: .78rem;
+        background: #fff;
+    }
+
+    .cn-report .cn-items-table thead th {
+        position: static;
+        background: #e9eef5;
+        color: #343a40;
+        font-size: .68rem;
+        border-bottom: 1px solid #d5dbe3;
+    }
+
+    .cn-info-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        font-size: .8rem;
+    }
+
+    .cn-info-list li {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: .45rem;
+    }
+
+    .cn-info-list li > i {
+        width: 22px;
+        color: #25628f;
+        margin-top: 2px;
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+    .cn-qr-img {
+        max-height: 110px;
+        border: 1px solid #dee2e6;
+        border-radius: .35rem;
+        background: #fff;
+        padding: .2rem;
+    }
+
+    @media (max-width: 575.98px) {
+        .cn-report .cn-table-wrap { max-height: none; }
+        .cn-report table { font-size: .8rem; }
+    }
+</style>
+
+<div class="cn-report">
+
+    {# ================= BARRA DE HERRAMIENTAS ================= #}
+    <div class="d-flex flex-column flex-md-row align-items-stretch align-items-md-center mb-2">
+        <div class="input-group flex-grow-1 mr-md-2 mb-2 mb-md-0">
+            <div class="input-group-prepend">
+                <span class="input-group-text bg-white border-right-0"><i class="fas fa-search text-muted"></i></span>
+            </div>
+            <input id="myInputCreditNote" type="text" placeholder="Buscar por serie, número, cliente, usuario..." class="form-control border-left-0">
+        </div>
+        <button type="button" id="btn_export_excel_credit_note" class="btn btn-success text-nowrap">
+            <i class="fas fa-file-excel mr-1"></i> Exportar Excel
+        </button>
+    </div>
+
+    {# ================= GRID ================= #}
+    <div class="cn-table-wrap">
+        <table class="table table-sm table-hover roboto-condensed-regular" id="table-credit-notes">
+            <thead>
+            <tr>
+                <th class="noExl" style="width:46px;"><i class="fas fa-eye"></i></th>
+                <th style="width:60px;">#</th>
+                <th>Serie</th>
+                <th>Número</th>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Usuario</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th>Motivo</th>
+                <th class="noExl">PDF</th>
+            </tr>
+            </thead>
+            <tbody class="body">
+            {% for n in credit_notes %}
+                <tr pk="{{ n.id }}" class="cn-main-row">
+                    <td class="align-middle text-center noExl">
+                        <button type="button" class="btn btn-sm btn-outline-primary cn-toggle"
+                                data-toggle="collapse" data-target="#cn-detail-{{ n.id }}"
+                                aria-expanded="false" aria-controls="cn-detail-{{ n.id }}"
+                                title="Ver detalle">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </td>
+                    <td class="align-middle text-center text-muted">{{ n.id }}</td>
+                    <td class="align-middle text-center">{{ n.serial }}</td>
+                    <td class="align-middle text-center">{{ n.correlative|zfill:8 }}</td>
+                    <td class="align-middle text-center text-nowrap">{{ n.issue_date|date:"d-m-Y" }}</td>
+                    <td class="align-middle">{{ n.client_name|upper }}</td>
+                    <td class="align-middle">{{ n.user_name|upper }}</td>
+                    <td class="align-middle text-right cn-money text-primary">S/ {{ n.total|floatformat:2 }}</td>
+                    <td class="align-middle text-center">
+                        {% if n.status_code == 'E' %}
+                            <span class="badge badge-pill badge-success">{{ n.status }}</span>
+                        {% elif n.status_code == 'P' %}
+                            <span class="badge badge-pill badge-warning">{{ n.status }}</span>
+                        {% elif n.status_code == 'A' %}
+                            <span class="badge badge-pill badge-danger">ANULADA</span>
+                        {% else %}
+                            <span class="badge badge-pill badge-secondary">{{ n.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="align-middle">{{ n.motive|truncatechars:40 }}</td>
+                    <td class="align-middle text-center noExl">
+                        {% if n.pdf_url %}
+                            <a href="{{ n.pdf_url }}" target="_blank" class="btn btn-sm btn-light border" title="Ver PDF">
+                                <i class="fas fa-file-pdf text-danger"></i>
+                            </a>
+                        {% else %}<span class="text-muted">&mdash;</span>{% endif %}
+                    </td>
+                </tr>
+
+                {# ---------- FILA DETALLE (desplegable) ---------- #}
+                <tr class="cn-detail-row noExl">
+                    <td colspan="11" class="p-0 border-top-0">
+                        <div id="cn-detail-{{ n.id }}" class="collapse cn-collapse">
+                            <div class="cn-detail-box">
+                                <div class="row">
+                                    {# Detalle de productos #}
+                                    <div class="col-lg-8 mb-3 mb-lg-0">
+                                        <h6 class="font-weight-bold text-uppercase mb-2" style="font-size:.75rem;color:#1e3a5f;">
+                                            <i class="fas fa-box-open mr-1"></i>Productos devueltos ({{ n.items_count }})
+                                        </h6>
+                                        <div class="table-responsive border rounded">
+                                            <table class="table table-sm table-striped mb-0 cn-items-table">
+                                                <thead>
+                                                <tr>
+                                                    <th style="width:36px;">#</th>
+                                                    <th>C&oacute;digo</th>
+                                                    <th>Descripci&oacute;n</th>
+                                                    <th class="text-center">U/M</th>
+                                                    <th class="text-right">Cant.</th>
+                                                    <th class="text-right">P. Unit</th>
+                                                    <th class="text-right">Total</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {% for d in n.items %}
+                                                    <tr>
+                                                        <td class="text-muted">{{ forloop.counter }}</td>
+                                                        <td><code>{{ d.code }}</code></td>
+                                                        <td>{{ d.description }}</td>
+                                                        <td class="text-center">{{ d.unit }}</td>
+                                                        <td class="text-right">{{ d.quantity|floatformat:2 }}</td>
+                                                        <td class="text-right">{{ d.price_unit|floatformat:2 }}</td>
+                                                        <td class="text-right cn-money">{{ d.total|floatformat:2 }}</td>
+                                                    </tr>
+                                                {% empty %}
+                                                    <tr>
+                                                        <td colspan="7" class="text-center text-muted py-3">
+                                                            <i class="fas fa-info-circle mr-1"></i>Sin detalles registrados
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    {# Información adicional #}
+                                    <div class="col-lg-4">
+                                        <h6 class="font-weight-bold text-uppercase mb-2" style="font-size:.75rem;color:#1e3a5f;">
+                                            <i class="fas fa-info-circle mr-1"></i>Informaci&oacute;n SUNAT
+                                        </h6>
+                                        <ul class="cn-info-list">
+                                            <li>
+                                                <i class="fas fa-receipt"></i>
+                                                <div>
+                                                    <span class="text-muted d-block" style="font-size:.68rem;">COMPROBANTE AFECTADO</span>
+                                                    <strong>{{ n.order_info }}</strong>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <i class="fas fa-comment-dots"></i>
+                                                <div>
+                                                    <span class="text-muted d-block" style="font-size:.68rem;">MOTIVO</span>
+                                                    {{ n.motive }}
+                                                </div>
+                                            </li>
+                                            {% if n.hash_code %}
+                                                <li>
+                                                    <i class="fas fa-fingerprint"></i>
+                                                    <div style="min-width:0;">
+                                                        <span class="text-muted d-block" style="font-size:.68rem;">HASH</span>
+                                                        <code style="word-break:break-all;font-size:.68rem;">{{ n.hash_code }}</code>
+                                                    </div>
+                                                </li>
+                                            {% endif %}
+                                        </ul>
+                                        <div class="mt-2 d-flex align-items-end flex-wrap">
+                                            {% if n.qr_code %}
+                                                <img src="{{ n.qr_code }}" alt="QR" class="cn-qr-img mr-3 mb-2"
+                                                     onerror="this.style.display='none'">
+                                            {% endif %}
+                                            {% if n.pdf_url %}
+                                                <a href="{{ n.pdf_url }}" target="_blank" class="btn btn-sm btn-outline-danger mb-2">
+                                                    <i class="fas fa-file-pdf mr-1"></i>Ver comprobante PDF
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="11" class="py-5 text-center text-muted">
+                        <i class="fas fa-inbox fa-3x mb-3 d-block text-secondary" style="opacity:.35;"></i>
+                        No se encontraron notas de cr&eacute;dito en el rango de fechas seleccionado.
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {# ================= PIE ================= #}
+    <div class="d-flex flex-wrap justify-content-between align-items-center mt-2 px-1">
+        <span class="text-muted" style="font-size:.8rem;">
+            <i class="fas fa-list-ul mr-1"></i>{{ credit_notes|length }} nota(s) encontrada(s)
+        </span>
+        <span class="badge p-2 text-white" style="background:#1e3a5f;font-size:.85rem;">
+            <i class="fas fa-coins mr-1"></i>Monto total: S/ {{ total_amount|floatformat:2 }}
+        </span>
+    </div>
 </div>
-
-<div class="col-sm-12 pl-0 pr-0 mb-3">
-    <input id="myInputCreditNote" type="text" placeholder="Buscar registro..." class="form-control form-control-lg my-1">
-</div>
-
-<table class="table table-sm table-bordered roboto-condensed-regular" id="table-credit-notes">
-    <thead class="font-weight-bold">
-    <tr class="text-dark text-uppercase">
-        <th class="bg-light text-center">#</th>
-        <th class="bg-light text-center">Serie</th>
-        <th class="bg-light text-center">Número</th>
-        <th class="bg-light text-center">Fecha</th>
-        <th class="bg-light text-center">Cliente</th>
-        <th class="bg-light text-center">Usuario</th>
-        <th class="bg-light text-center">Total</th>
-        <th class="bg-light text-center">Estado</th>
-        <th class="bg-light text-center">Motivo</th>
-        <th class="bg-light text-center">PDF</th>
-    </tr>
-    </thead>
-    <tbody class="body">
-    {% for n in credit_notes %}
-        <tr pk="{{ n.id }}">
-            <td class="align-middle text-center">{{ n.id }}</td>
-            <td class="align-middle text-center">{{ n.serial }}</td>
-            <td class="align-middle text-center">{{ n.correlative|zfill:8 }}</td>
-            <td class="align-middle text-center">{{ n.issue_date|date:"d-m-Y" }}</td>
-            <td class="align-middle text-center">{{ n.client_name|upper }}</td>
-            <td class="align-middle text-center">{{ n.user_name|upper }}</td>
-            <td class="align-middle text-right text-primary">{{ n.total|floatformat:2 }}</td>
-            <td class="align-middle text-center">
-                {% if n.status_code == 'E' %}
-                    <span class="badge badge-success">{{ n.status }}</span>
-                {% elif n.status_code == 'P' %}
-                    <span class="badge badge-warning">{{ n.status }}</span>
-                {% elif n.status_code == 'A' %}
-                    <span class="badge badge-danger">ANULADA</span>
-                {% else %}
-                    <span class="badge badge-secondary">{{ n.status }}</span>
-                {% endif %}
-            </td>
-            <td class="align-middle text-center">{{ n.motive|truncatechars:40 }}</td>
-            <td class="align-middle text-center">
-                {% if n.pdf_url %}
-                    <a href="{{ n.pdf_url }}" target="_blank" class="btn btn-sm btn-light border" title="Ver PDF">
-                        <i class="fas fa-file-pdf text-danger"></i>
-                    </a>
-                {% else %}-{% endif %}
-            </td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
-
-
 
 <script type="text/javascript">
-    $("#btn_export_excel_credit_note").click(function () {
-        $("#table-credit-notes").table2excel({
-            exclude: ".noExl",
-            name: "Worksheet Name",
-            filename: "Reporte de Notas de Crédito",
-            fileext: ".xls",
-            preserveColors: true,
-            exclude_img: true,
-            exclude_links: true,
-            exclude_inputs: true
-        });
-    });
+    (function () {
 
-    $(document).ready(function () {
-        $("#myInputCreditNote").on("keyup", function () {
-            $("#table-credit-notes tbody tr td").closest("tr").hide()
-            var value = $(this).val().toUpperCase();
-            if (value) {
-                $("#table-credit-notes tbody tr td:contains('" + value + "')").each(function (index) {
-                    const parent = $(this).closest("tr")
-                    const rowspan = $(this).attr("rowspan")
-                    if (rowspan !== undefined) {
-                        var current = parent
-                        for (var i = 0; i < rowspan; i++) {
-                            current.show()
-                            current = current.next()
-                        }
-                    } else {
-                        parent.show()
-                    }
-                })
-            } else {
-                $("#table-credit-notes tbody tr td").closest("tr").show()
-            }
-        });
-    });
-</script> 
+        // ---- Icono +/- al expandir/colapsar el detalle ----
+        $(document).off('show.bs.collapse.cnDetail hide.bs.collapse.cnDetail')
+            .on('show.bs.collapse.cnDetail', '#table-credit-notes .cn-collapse', function () {
+                var $btn = $('#table-credit-notes .cn-toggle[data-target="#' + this.id + '"]');
+                $btn.removeClass('btn-outline-primary').addClass('btn-primary active');
+                $btn.find('i').removeClass('fa-plus').addClass('fa-minus');
+                $btn.closest('tr.cn-main-row').addClass('expanded');
+            })
+            .on('hide.bs.collapse.cnDetail', '#table-credit-notes .cn-collapse', function () {
+                var $btn = $('#table-credit-notes .cn-toggle[data-target="#' + this.id + '"]');
+                $btn.addClass('btn-outline-primary').removeClass('btn-primary active');
+                $btn.find('i').removeClass('fa-minus').addClass('fa-plus');
+                $btn.closest('tr.cn-main-row').removeClass('expanded');
+            });
+
+        // ---- Clic en la fila para abrir/cerrar el detalle ----
+        $(document).off('click.cnRowToggle')
+            .on('click.cnRowToggle', '#table-credit-notes tr.cn-main-row', function (event) {
+                if ($(event.target).closest('a, button').length) return;
+                $(this).find('.cn-toggle').trigger('click');
+            });
+
+        // ---- Filtro de búsqueda (incluye el texto del detalle) ----
+        function cnApplyFilter(value) {
+            var v = (value || '').toUpperCase().trim();
+            $('#table-credit-notes tbody tr.cn-main-row').each(function () {
+                var $row = $(this);
+                var $detailRow = $row.next('tr.cn-detail-row');
+                var $detail = $detailRow.find('.cn-collapse');
+                var text = ($row.text() + ' ' + $detail.text()).toUpperCase();
+                var match = !v || text.indexOf(v) > -1;
+                $row.toggle(match);
+                $detailRow.toggle(match && $detail.hasClass('show'));
+            });
+        }
+
+        $(document).off('input.cnSearch keyup.cnSearch')
+            .on('input.cnSearch keyup.cnSearch', '#myInputCreditNote', function () {
+                cnApplyFilter($(this).val());
+            });
+
+        // ---- Exportar Excel (excluye filas/columnas .noExl) ----
+        $(document).off('click.cnExport')
+            .on('click.cnExport', '#btn_export_excel_credit_note', function () {
+                $("#table-credit-notes").table2excel({
+                    exclude: ".noExl",
+                    name: "Notas de Crédito",
+                    filename: "Reporte de Notas de Crédito",
+                    fileext: ".xls",
+                    preserveColors: true,
+                    exclude_img: true,
+                    exclude_links: true,
+                    exclude_inputs: true
+                });
+            });
+    })();
+</script>

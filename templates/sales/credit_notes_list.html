@@ -5,66 +5,138 @@
 {% endblock title %}
 
 {% block body %}
-<div class="container-fluid roboto-condensed-regular">
-    <form class="form-inline" id="search-form-credit-note" method="POST">
-        {% csrf_token %}
-        <label class="my-1 mr-2" for="id-start-date">Fecha Inicial</label>
-        <input type="date" class="form-control my-1 mr-sm-2" id="id-start-date" name="start-date" value="{{ formatdate }}">
-        <label class="my-1 mr-2" for="id-end-date">Fecha final</label>
-        <input type="date" class="form-control my-1 mr-sm-2" id="id-end-date" name="end-date" value="{{ end_date }}">
-        <button type="submit" class="btn btn-primary my-1 mr-2" id="btn-search-credit-note">
-            <i class="fas fa-search-dollar"></i> Buscar
-        </button>
-    </form>
-    <div class="mr-3 ml-0" style="display: none; position: absolute; top: 0px; left: 0px; background: #e9ecef; opacity: 0.5; width: 100%; height: 46em; padding-top: 21em;" id="loading-credit-note"></div>
-    <div id="credit-notes-grid-list"></div>
+<style>
+    .cn-page-card {
+        border: 0;
+        border-radius: .75rem;
+        overflow: hidden;
+    }
+
+    .cn-page-header {
+        background: linear-gradient(90deg, #1e3a5f 0%, #25628f 100%);
+        color: #fff;
+        padding: 1rem 1.25rem;
+    }
+
+    .cn-page-header h5 {
+        font-weight: 600;
+        letter-spacing: .3px;
+    }
+
+    .cn-page-header small {
+        color: rgba(255, 255, 255, .75);
+    }
+
+    .cn-filter-label {
+        font-size: .78rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        color: #6c757d;
+        margin-bottom: .15rem;
+        display: block;
+    }
+</style>
+
+<div class="container-fluid roboto-condensed-regular py-3 px-2 px-md-4">
+    <div class="card shadow-sm cn-page-card">
+        <div class="card-body p-0">
+            <div class="cn-page-header d-flex flex-column flex-sm-row justify-content-between align-items-sm-center">
+                <div>
+                    <h5 class="mb-0 text-white"><i class="fas fa-file-invoice-dollar mr-2"></i>Reporte de Notas de Crédito</h5>
+                    <small>Consulta, exporta y revisa el detalle completo de las notas de crédito emitidas.</small>
+                </div>
+                <i class="fas fa-hand-holding-usd d-none d-sm-block" style="font-size:2rem;opacity:.35;"></i>
+            </div>
+
+            <div class="p-3 position-relative">
+                <form id="search-form-credit-note" method="POST" autocomplete="off">
+                    {% csrf_token %}
+                    <div class="form-row align-items-end">
+                        <div class="col-12 col-md-4 col-lg-3 mb-2 mb-md-0">
+                            <label class="cn-filter-label" for="id-start-date">Fecha Inicial</label>
+                            <input type="date" class="form-control" id="id-start-date" name="start-date" value="{{ formatdate }}">
+                        </div>
+                        <div class="col-12 col-md-4 col-lg-3 mb-2 mb-md-0">
+                            <label class="cn-filter-label" for="id-end-date">Fecha Final</label>
+                            <input type="date" class="form-control" id="id-end-date" name="end-date" value="{{ end_date }}">
+                        </div>
+                        <div class="col-12 col-md-4 col-lg-3">
+                            <button type="submit" class="btn btn-primary btn-block" id="btn-search-credit-note">
+                                <i class="fas fa-search mr-1"></i> Buscar
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <hr class="my-3">
+
+                <div class="cn-loading-overlay" id="loading-credit-note">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary mb-2" role="status">
+                            <span class="sr-only">Cargando...</span>
+                        </div>
+                        <p class="text-muted mb-0">Cargando notas de cr&eacute;dito...</p>
+                    </div>
+                </div>
+
+                <div id="credit-notes-grid-list"></div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock body %}
 
 {% block extrajs %}
+<style>
+    .cn-loading-overlay {
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        min-height: 200px;
+        background: rgba(255, 255, 255, .85);
+        z-index: 10;
+        padding-top: 5rem;
+        border-radius: .25rem;
+    }
+</style>
 <script type="text/javascript">
-    let loader = '<div class="container">' +
-        '<div class="row">' +
-        '<div class="col-md-12">' +
-        '<div class="loader">' +
-        '<p>Cargando...</p>' +
-        '<div class="loader-inner"></div>' +
-        '<div class="loader-inner"></div>' +
-        '<div class="loader-inner"></div>' +
-        '</div>' +
-        '</div>' +
-        '</div>' +
-        '</div>';
-
-    $('#search-form-credit-note').submit(function (event) {
-        event.preventDefault();
-        let data = new FormData($('#search-form-credit-note').get(0));
-        $('#btn-search-credit-note').attr("disabled", "true");
-        $('#credit-notes-grid-list').empty();
-        $('#loading-credit-note').html(loader).show();
-        $.ajax({
-            url: '/sales/get_credit_notes_by_date/',
-            type: "POST",
-            data: data,
-            cache: false,
-            processData: false,
-            contentType: false,
-            success: function (response, textStatus, xhr) {
-                if (xhr.status === 200) {
-                    $('#credit-notes-grid-list').html(response.grid);
+    $(function () {
+        $('#search-form-credit-note').off('submit.cnSearch').on('submit.cnSearch', function (event) {
+            event.preventDefault();
+            let data = new FormData(this);
+            let $btn = $('#btn-search-credit-note');
+            $btn.attr("disabled", "true").find('i').addClass('fa-spin');
+            $('#loading-credit-note').show();
+            $.ajax({
+                url: '/sales/get_credit_notes_by_date/',
+                type: "POST",
+                data: data,
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function (response, textStatus, xhr) {
+                    if (xhr.status === 200) {
+                        $('#credit-notes-grid-list').html(response.grid);
+                    }
+                },
+                error: function (jqXhr) {
+                    if (jqXhr.status === 500) {
+                        toastr.error(jqXhr.responseJSON.error, '¡Inconcebible!');
+                    }
+                },
+                complete: function () {
                     $('#loading-credit-note').hide();
+                    $btn.removeAttr("disabled").find('i').removeClass('fa-spin');
                 }
-            },
-            error: function (jqXhr, textStatus, xhr) {
-                if (jqXhr.status === 500) {
-                    toastr.error(jqXhr.responseJSON.error, '¡Inconcebible!');
-                    $('#loading-credit-note').hide();
-                }
-            }
+            });
         });
-        $('#btn-search-credit-note').removeAttr("disabled", "false");
+
+        // Carga automática al abrir la página con las fechas por defecto
+        $('#search-form-credit-note').trigger('submit');
     });
-
-
 </script>
-{% endblock extrajs %} 
+{% endblock extrajs %}

@@ -7515,65 +7515,85 @@ def get_credit_notes_report(request):
     return render(request, 'sales/credit_notes_list.html', context)
 
 
+def build_credit_note_row(note):
+    """
+    Serializa una nota de crédito y sus detalles para el grid del reporte
+    """
+    details = CreditNoteDetail.objects.filter(credit_note=note).select_related('product', 'unit')
+
+    items = []
+    note_total = 0
+    for d in details:
+        note_total += d.total
+        product = d.product
+        items.append({
+            'id': d.id,
+            'code': d.code or (product.code if product else ''),
+            'description': d.description or (product.name if product else ''),
+            'quantity': d.quantity,
+            'unit': d.unit.name if d.unit else '',
+            'price_unit': d.price_unit,
+            'total': d.total,
+        })
+
+    # Obtener información del cliente
+    client_name = "N/A"
+    if note.order and note.order.client:
+        client_name = note.order.client.names
+
+    # Obtener información del usuario
+    user_name = note.order.user.worker_set.last().employee.names if note.order and note.order.user.worker_set.exists() else "N/A"
+
+    return {
+        'id': note.id,
+        'serial': note.serial or 'N/A',
+        'correlative': note.correlative,
+        'issue_date': note.issue_date,
+        'status': note.get_status_display(),
+        'status_code': note.status,
+        'client_name': client_name,
+        'user_name': user_name,
+        'total': note_total if note_total else (note.note_total or 0),
+        'motive': note.motive or 'N/A',
+        'items': items,
+        'items_count': len(items),
+        'order_info': f"{note.order.voucher_type}-{note.order.correlative}" if note.order else 'N/A',
+        'pdf_url': note.note_enlace_pdf if note.note_enlace_pdf else None,
+        'qr_code': note.note_qr if note.note_qr else None,
+        'hash_code': note.note_hash if note.note_hash else None,
+    }
+
+
 def get_credit_notes_by_date(request):
     """
     Vista AJAX para obtener las notas de crédito filtradas por fecha
     """
     from datetime import datetime
-    
+
     if request.method == 'POST':
         start_date = request.POST.get('start-date')
         end_date = request.POST.get('end-date')
-        
+
         try:
             start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
             end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
         except ValueError:
             return JsonResponse({'error': 'Formato de fecha inválido'}, status=400)
-        
+
         # Obtener notas de crédito en el rango de fechas
         credit_notes = CreditNote.objects.filter(
             issue_date__range=[start_date, end_date],
             status__in=['E', 'P']  # Emitidas y Pendientes
         ).order_by('-issue_date')
-        
+
         # Preparar datos para el template
         credit_notes_data = []
         total_amount = 0
-        
+
         for note in credit_notes:
-            # Obtener detalles de la nota de crédito
-            details = CreditNoteDetail.objects.filter(credit_note=note)
-            
-            # Calcular total de la nota
-            note_total = sum(detail.total for detail in details)
-            total_amount += note_total
-            
-            # Obtener información del cliente
-            client_name = "N/A"
-            if note.order and note.order.client:
-                client_name = note.order.client.names
-            
-            # Obtener información del usuario
-            user_name = note.order.user.worker_set.last().employee.names if note.order and note.order.user.worker_set.exists() else "N/A"
-            
-            credit_notes_data.append({
-                'id': note.id,
-                'serial': note.serial or 'N/A',
-                'correlative': note.correlative,
-                'issue_date': note.issue_date,
-                'status': note.get_status_display(),
-                'status_code': note.status,
-                'client_name': client_name,
-                'user_name': user_name,
-                'total': note_total,
-                'motive': note.motive or 'N/A',
-                'details': details,
-                'order_info': f"{note.order.voucher_type}-{note.order.correlative}" if note.order else 'N/A',
-                'pdf_url': note.note_enlace_pdf if note.note_enlace_pdf else None,
-                'qr_code': note.note_qr if note.note_qr else None,
-                'hash_code': note.note_hash if note.note_hash else None,
-            })
+            note_data = build_credit_note_row(note)
+            credit_notes_data.append(note_data)
+            total_amount += note_data['total']
         
         # Estadísticas por usuario
         user_stats = {}
@@ -7658,35 +7678,11 @@ def cancel_credit_note(request):
                 # Preparar datos para el template (código similar a get_credit_notes_by_date)
                 credit_notes_data = []
                 total_amount = 0
-                
+
                 for note in credit_notes:
-                    details = CreditNoteDetail.objects.filter(credit_note=note)
-                    note_total = sum(detail.total for detail in details)
-                    total_amount += note_total
-                    
-                    client_name = "N/A"
-                    if note.order and note.order.client:
-                        client_name = note.order.client.names
-                    
-                    user_name = note.order.user.worker_set.last().employee.names if note.order and note.order.user.worker_set.exists() else "N/A"
-                    
-                    credit_notes_data.append({
-                        'id': note.id,
-                        'serial': note.serial or 'N/A',
-                        'correlative': note.correlative,
-                        'issue_date': note.issue_date,
-                        'status': note.get_status_display(),
-                        'status_code': note.status,
-                        'client_name': client_name,
-                        'user_name': user_name,
-                        'total': note_total,
-                        'motive': note.motive or 'N/A',
-                        'details': details,
-                        'order_info': f"{note.order.voucher_type}-{note.order.correlative}" if note.order else 'N/A',
-                        'pdf_url': note.note_enlace_pdf if note.note_enlace_pdf else None,
-                        'qr_code': note.note_qr if note.note_qr else None,
-                        'hash_code': note.note_hash if note.note_hash else None,
-                    })
+                    note_data = build_credit_note_row(note)
+                    credit_notes_data.append(note_data)
+                    total_amount += note_data['total']
                 
                 # Estadísticas por usuario
                 user_stats = {}
@@ -7713,6 +7709,11 @@ def cancel_credit_note(request):
                     'credit_notes': credit_notes_data,
                     'total_amount': total_amount,
                     'user_stats': user_stats,
+                    'status_stats': {
+                        'emitted': len([n for n in credit_notes_data if n['status_code'] == 'E']),
+                        'pending': len([n for n in credit_notes_data if n['status_code'] == 'P']),
+                        'cancelled': len([n for n in credit_notes_data if n['status_code'] == 'A'])
+                    },
                     'start_date': start_date,
                     'end_date': end_date,
                     'f1': start_date.strftime('%Y-%m-%d'),
