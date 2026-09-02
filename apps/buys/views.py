@@ -74,6 +74,47 @@ def get_buy_return(request):
     })
 
 
+def get_report_buy_return(request):
+    if request.method == 'GET':
+        my_date = datetime.now()
+        formatdate = my_date.strftime("%Y-%m-%d")
+        return render(request, 'buys/report_buy_return.html', {'formatdate': formatdate, })
+    elif request.method == 'POST':
+        user_id = request.user.id
+        user_obj = User.objects.get(pk=int(user_id))
+        subsidiary_obj = get_subsidiary_by_user(user_obj)
+
+        start_date = str(request.POST.get('start-date'))
+        end_date = str(request.POST.get('end-date'))
+
+        purchase_return_set = PurchaseReturn.objects.filter(
+            purchase_date__range=[start_date, end_date]
+        ).order_by('-purchase_date', '-id')
+
+        if subsidiary_obj is not None:
+            purchase_return_set = purchase_return_set.filter(subsidiary=subsidiary_obj)
+
+        if not purchase_return_set.exists():
+            data = {'error': 'No hay devoluciones de compra registradas en el rango de fechas seleccionado'}
+            response = JsonResponse(data)
+            response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+            return response
+
+        return JsonResponse({
+            'grid': get_dict_buy_return(purchase_return_set, start_date, end_date),
+        }, status=HTTPStatus.OK)
+
+
+def get_dict_buy_return(purchase_return_set, start_date, end_date):
+    tpl = loader.get_template('buys/report_buy_return_grid.html')
+    context = ({
+        'purchase_return_set': purchase_return_set,
+        'start_date': start_date,
+        'end_date': end_date,
+    })
+    return tpl.render(context)
+
+
 @csrf_exempt
 def save_purchase_return(request):
     if request.method == 'GET':

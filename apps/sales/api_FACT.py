@@ -330,6 +330,48 @@ def number_note(serial=None):
     return number + 1
 
 
+def _safe_fact_text(value):
+    return str(value or '').replace('\\', ' ').replace('"', "'").replace('\n', ' ').strip()
+
+
+def product_description_with_serials(product_name, detail):
+    """
+    Arma la descripción del ítem para el facturador.
+    Si el detalle tiene series seleccionadas, las agrega entre paréntesis:
+    PRODUCTO (SERIE1, SERIE2)
+    """
+    description = _safe_fact_text(str(product_name).upper())
+    serial_ids = detail.get('serials') or []
+    serial_numbers = []
+
+    id_list = []
+    for sid in serial_ids:
+        try:
+            id_list.append(int(sid))
+        except (TypeError, ValueError):
+            continue
+
+    if id_list:
+        found = {
+            s.id: s.serial_number
+            for s in ProductSerial.objects.filter(id__in=id_list)
+            if s.serial_number
+        }
+        for sid in id_list:
+            number = found.get(sid)
+            if number:
+                serial_numbers.append(_safe_fact_text(str(number).upper()))
+
+    if not serial_numbers:
+        for number in (detail.get('serialNumbers') or []):
+            if number:
+                serial_numbers.append(_safe_fact_text(str(number).upper()))
+
+    if serial_numbers:
+        description = f"{description} ({', '.join(serial_numbers)})"
+    return description
+
+
 def send_credit_note_fact(pk, details, motive):
     order_obj = Order.objects.get(id=int(pk))
     serial = str(order_obj.voucher_type) + "N01"
@@ -344,7 +386,7 @@ def send_credit_note_fact(pk, details, motive):
         if d['quantityReturned']:
             product_id = int(d['productID'])
             product_obj = Product.objects.get(id=product_id)
-            description = str(str(product_obj.name).upper()).replace('"', "'")
+            description = product_description_with_serials(product_obj.name, d)
             total_item_igv = decimal.Decimal(d['quantityReturned']) * decimal.Decimal(d['price'])
             price_igv = decimal.Decimal(d['price'])
             price_sin_igv = price_igv / decimal.Decimal(1.1800)

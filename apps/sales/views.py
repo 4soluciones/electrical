@@ -8,7 +8,7 @@ from django.forms.models import model_to_dict
 from django.http import JsonResponse, HttpResponse
 from http import HTTPStatus
 
-from .api_FACT import send_bill_4_fact, send_receipt_4_fact, send_credit_note_fact, annul_invoice
+from .api_FACT import send_bill_4_fact, send_receipt_4_fact, send_credit_note_fact, annul_invoice, product_description_with_serials
 from .format_dates import validate
 from .models import *
 from .forms import *
@@ -7319,6 +7319,12 @@ def modal_credit_note(request):
                 (item['product_id'], item['unit_id']): item['total_returned']
                 for item in credit_note_totals
             }
+            returned_serial_ids = set(
+                CreditNoteDetailSerial.objects.filter(
+                    credit_note_detail__credit_note__order=order_obj,
+                    credit_note_detail__credit_note__status__in=['E', 'P']
+                ).values_list('product_serial_id', flat=True)
+            )
             for d in order_obj.orderdetail_set.all():
 
                 product_id = d.product.id
@@ -7346,6 +7352,8 @@ def modal_credit_note(request):
                 }
 
                 for s in d.productserial_set.all():
+                    if s.id in returned_serial_ids:
+                        continue
                     item_serial = {
                         'id': s.id,
                         'serial_number': s.serial_number
@@ -7402,6 +7410,45 @@ def save_credit_note(request):
             order_obj = Order.objects.get(id=int(order))
             details = request.POST.get('details', '')
             details_data = json.loads(details)
+
+            has_items = False
+            for d in details_data:
+                quantity_returned = d.get('quantityReturned')
+                if not quantity_returned:
+                    continue
+                try:
+                    qty = decimal.Decimal(str(quantity_returned))
+                except (decimal.InvalidOperation, TypeError, ValueError):
+                    return JsonResponse({
+                        'success': False,
+                        'message': 'Cantidad a devolver inválida.',
+                    }, status=HTTPStatus.OK)
+                if qty <= 0:
+                    continue
+
+                has_items = True
+                serial_ids = d.get('serials') or []
+                remaining_serials = ProductSerial.objects.filter(
+                    order_detail_id=d.get('detailID')
+                ).count()
+                if remaining_serials:
+                    if not serial_ids:
+                        return JsonResponse({
+                            'success': False,
+                            'message': 'Debe seleccionar las series del producto a devolver.',
+                        }, status=HTTPStatus.OK)
+                    if qty != decimal.Decimal(len(serial_ids)):
+                        return JsonResponse({
+                            'success': False,
+                            'message': 'La cantidad a devolver no coincide con las series seleccionadas.',
+                        }, status=HTTPStatus.OK)
+
+            if not has_items:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Debe indicar al menos un producto a devolver.',
+                }, status=HTTPStatus.OK)
+
             # nc = credit_note_by_parts(order, details_data)
             nc = send_credit_note_fact(order, details_data, motive)
             if nc.get('success'):
@@ -7435,9 +7482,10 @@ def save_credit_note(request):
                         price = decimal.Decimal(d['price'])
 
                         product_obj = Product.objects.get(id=product_id)
+                        description_with_serials = product_description_with_serials(product_obj.name, d)
                         credit_detail_obj = CreditNoteDetail(
                             code=product_obj.code,
-                            description=product_obj.name,
+                            description=description_with_serials[:200],
                             quantity=quantity_returned,
                             product=product_obj,
                             unit=unit_obj,

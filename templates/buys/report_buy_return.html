@@ -1,0 +1,143 @@
+{% extends 'home.html' %}
+
+{% block title %}
+    Reporte de Devoluciones de Compra
+{% endblock title %}
+
+{% block body %}
+    <div class="container-fluid roboto-condensed-regular">
+        <div class="card pt-2">
+            <div class="card-header py-3" style="background: linear-gradient(135deg, #0e3a5d 0%, #1a77c8 100%);">
+                <div class="d-flex align-items-center justify-content-between flex-wrap">
+                    <h5 class="mb-0 text-white font-weight-bold">
+                        <i class="fas fa-undo-alt mr-2"></i> Reporte de Devoluciones de Compra
+                    </h5>
+                    <small class="text-light">Detalle de cabecera y artículos devueltos</small>
+                </div>
+            </div>
+            <div class="card-body">
+                <form class="form-inline" id="search-form" method="POST">
+                    {% csrf_token %}
+                    <label class="my-1 mr-2 font-weight-bold" for="id-start-date">
+                        <i class="fas fa-calendar-alt mr-1 text-primary"></i>Fecha Inicial
+                    </label>
+                    <input type="date" class="form-control my-1 mr-sm-3" id="id-start-date" name="start-date"
+                           value="{{ formatdate }}">
+
+                    <label class="my-1 mr-2 font-weight-bold" for="id-end-date">
+                        <i class="fas fa-calendar-check mr-1 text-primary"></i>Fecha Final
+                    </label>
+                    <input type="date" class="form-control my-1 mr-sm-3" id="id-end-date" name="end-date"
+                           value="{{ formatdate }}">
+
+                    <button type="submit" class="btn btn-success my-1 mr-2" id="btn-search">
+                        <i class="fas fa-search mr-1"></i> Buscar
+                    </button>
+                    <button type="button" class="btn btn-outline-dark my-1 mr-2" id="btn-clear">
+                        <i class="fas fa-eraser mr-1"></i> Limpiar
+                    </button>
+                </form>
+
+                <hr>
+
+                <div id="buy-return-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mr-3 ml-0" style="
+        display: none;
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        background: #e9ecef;
+        opacity: 0.5;
+        width: 100%;
+        height: 46em;
+        padding-top: 21em;" id="loading-666">
+    </div>
+
+    <style>
+        .card {
+            border: none;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .form-control, .btn {
+            border-radius: 6px;
+        }
+
+        .btn {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+{% endblock body %}
+
+{% block extrajs %}
+    <script type="text/javascript">
+        loader = '<div class="container">' +
+            '<div class="row">' +
+            '<div class="col-md-12">' +
+            '<div class="loader">' +
+            '<p><strong>Cargando Devoluciones...</strong></p>' +
+            '<div class="loader-inner"></div>' +
+            '<div class="loader-inner"></div>' +
+            '<div class="loader-inner"></div>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>';
+
+        $('#search-form').submit(function (event) {
+            event.preventDefault();
+            let data = new FormData($('#search-form').get(0));
+
+            $('#btn-search').attr("disabled", "true");
+            $('#buy-return-grid').empty();
+            $('#loading-666').html(loader).show();
+
+            $.ajax({
+                url: '/buys/report_buy_return/',
+                type: "POST",
+                data: data,
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function (response, textStatus, xhr) {
+                    if (xhr.status === 200) {
+                        toastr.success('Reporte generado correctamente', '¡Bien hecho!');
+                        $('#buy-return-grid').html(response.grid);
+                        $('#loading-666').hide();
+                    }
+                },
+                error: function (jqXhr, textStatus, xhr) {
+                    if (jqXhr.status === 500) {
+                        toastr.error(jqXhr.responseJSON.error, '¡Inconcebible!');
+                        $('#buy-return-grid').empty();
+                        $('#loading-666').hide();
+                    }
+                }
+            });
+            $('#btn-search').removeAttr("disabled", "false");
+        });
+
+        $('#btn-clear').click(function () {
+            $('#buy-return-grid').empty();
+        });
+
+        $('#id-start-date, #id-end-date').on('change', function () {
+            let start = $('#id-start-date').val();
+            let end = $('#id-end-date').val();
+            if (start && end && start > end) {
+                toastr.warning('La fecha inicial no puede ser mayor a la fecha final', '¡Validación!');
+                $(this).val(end);
+            }
+        });
+    </script>
+{% endblock extrajs %}

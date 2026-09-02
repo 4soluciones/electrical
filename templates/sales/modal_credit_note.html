@@ -223,17 +223,29 @@
             let motiveText = $('#motive option:selected').text();
             let detailsArray = [];
 
+            let invalidSerialRow = false;
             $('#table-detail-guide tbody tr').each(function () {
                 const $row = $(this);
                 const serials = [];
+                const serialNumbers = [];
+                const hasSerials = $row.find('.check-serial').length > 0;
+                const quantityReturned = Number($row.find('td.item-quantity-returned input.quantity-returned-credit').val()) || 0;
 
-                // Buscar todos los checkboxes seleccionados en esta fila
                 $row.find('.check-serial:checked').each(function () {
-                    const serialId = $(this).next('.serial-number').data('id');
+                    const $serialSpan = $(this).next('.serial-number');
+                    const serialId = $serialSpan.data('id');
+                    const serialNumber = $.trim($serialSpan.text());
                     if (serialId) {
                         serials.push(serialId);
+                        if (serialNumber) {
+                            serialNumbers.push(serialNumber);
+                        }
                     }
                 });
+
+                if (hasSerials && quantityReturned > 0 && serials.length !== quantityReturned) {
+                    invalidSerialRow = true;
+                }
 
                 let DetailCredit = {
                     detailID: $row.attr('pk'),
@@ -242,11 +254,17 @@
                     quantityReturned: $row.find('td.item-quantity-returned input.quantity-returned-credit').val(),
                     unit: $row.find('td.item-unit').text().trim(),
                     price: $row.find('td.price').text().trim(),
-                    serials: serials  // 🔥 Aquí agregamos los seriales seleccionados
+                    serials: serials,
+                    serialNumbers: serialNumbers
                 }
 
                 detailsArray.push(DetailCredit);
             });
+
+            if (invalidSerialRow) {
+                toastr.error('Seleccione las series que coincidan con la cantidad a devolver.', '¡Validación!');
+                return;
+            }
 
             data.append('details', JSON.stringify(detailsArray));
             data.append('motive_text', motiveText);
@@ -262,9 +280,9 @@
                 contentType: false,
                 headers: {"X-CSRFToken": '{{ csrf_token }}'},
                 success: function (response) {
+                    $('#container-loading').css('display', 'none');
                     if (response.success) {
                         window.open(response.enlace, '_blank');
-                        $('#container-loading').css('display', 'none');
                         toastr.success(response.message);
                         $('#modal-credit-note').modal('hide');
                         $('#btn-search').click();
@@ -273,6 +291,7 @@
                     }
                 },
                 error: function (response) {
+                    $('#container-loading').css('display', 'none');
                     toastr.error('Corrija el sgt error o contacte con sistemas: ' + response.message, '¡Error de envío de Nota de Crédito!');
                 }
             });

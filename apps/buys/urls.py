@@ -53,6 +53,7 @@ urlpatterns = [
     # path('get_units_product/', get_units_product, name='get_units_product'),
     path('buy_list/', get_buy_list, name='buy_list'),
     path('buy_return/', get_buy_return, name='buy_return'),
+    path('report_buy_return/', get_report_buy_return, name='report_buy_return'),
     path('save_purchase_return/', save_purchase_return, name='save_purchase_return'),
     path('search_products_for_return/', search_products_for_return, name='search_products_for_return'),
     path('new_provider/', new_provider, name='new_provider'),

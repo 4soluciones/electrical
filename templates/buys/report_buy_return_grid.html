@@ -1,0 +1,231 @@
+{% load app_filters %}
+
+<div class="row mb-3">
+    <div class="col-md-12 d-flex flex-wrap align-items-center justify-content-between">
+        <div>
+            <h5 class="mb-0 font-weight-bold text-dark">
+                <i class="fas fa-list-alt mr-1 text-primary"></i> Devoluciones de Compra
+            </h5>
+            <small class="text-muted">
+                Periodo: {{ start_date }} al {{ end_date }} &nbsp;|&nbsp;
+                <strong>{{ purchase_return_set|length }}</strong> devolución(es)
+            </small>
+        </div>
+        <div>
+            <a href="#" id="table-to-excel" class="btn btn-outline-danger btn-sm">
+                <i class="fas fa-file-excel mr-1"></i> EXCEL
+            </a>
+            <a href="#" id="btn-print-report" class="btn btn-outline-dark btn-sm">
+                <i class="fas fa-print mr-1"></i> IMPRIMIR
+            </a>
+        </div>
+    </div>
+</div>
+
+<div id="print-area">
+    <div class="report-title text-center d-none d-print-block mb-3">
+        <h4 class="mb-0 font-weight-bold">REPORTE DE DEVOLUCIONES DE COMPRA</h4>
+        <small>Periodo: {{ start_date }} al {{ end_date }}</small>
+    </div>
+
+    {% for pr in purchase_return_set %}
+        <div class="card return-card mb-4">
+            <div class="card-header py-2 return-header">
+                <div class="d-flex align-items-center justify-content-between flex-wrap">
+                    <div>
+                        <span class="badge badge-light mr-2">N° {{ pr.id|stringformat:"04d" }}</span>
+                        <span class="font-weight-bold text-white">
+                            <i class="fas fa-file-invoice mr-1"></i>
+                            {% if pr.type_bill == 'F' %}FACTURA{% elif pr.type_bill == 'B' %}BOLETA{% elif pr.type_bill == 'T' %}TICKET{% elif pr.type_bill == 'N' %}NOTA DE CRÉDITO{% else %}COMPROBANTE{% endif %}
+                            - {{ pr.bill_number }}
+                        </span>
+                    </div>
+                    <div class="text-white">
+                        <i class="fas fa-calendar-alt mr-1"></i>{{ pr.purchase_date|date:"d/m/Y" }}
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row header-info mb-3">
+                    <div class="col-md-4 col-lg-3 mb-2">
+                        <div class="info-label"><i class="fas fa-building mr-1 text-primary"></i>Proveedor</div>
+                        <div class="info-value">{{ pr.supplier.name }}</div>
+                        <small class="text-muted">RUC: {{ pr.supplier.ruc|default:"—" }}</small>
+                    </div>
+                    <div class="col-md-4 col-lg-3 mb-2">
+                        <div class="info-label"><i class="fas fa-user mr-1 text-primary"></i>Razón Social</div>
+                        <div class="info-value">{{ pr.supplier.business_name|default:"—" }}</div>
+                        <small class="text-muted">Tel: {{ pr.supplier.phone|default:"—" }}</small>
+                    </div>
+                    <div class="col-md-4 col-lg-3 mb-2">
+                        <div class="info-label"><i class="fas fa-user-tie mr-1 text-primary"></i>Registrado por</div>
+                        <div class="info-value">
+                            {% if pr.user %}{{ pr.user.first_name }} {{ pr.user.last_name }}{% else %}—{% endif %}
+                        </div>
+                        <small class="text-muted">Sede: {{ pr.subsidiary.name|default:"—" }}</small>
+                    </div>
+                    <div class="col-md-4 col-lg-3 mb-2">
+                        <div class="info-label"><i class="fas fa-cubes mr-1 text-primary"></i>Unidades Devueltas</div>
+                        <div class="info-value">{{ pr.total_quantity_details|floatformat:2 }}</div>
+                        <small class="text-muted">{{ pr.purchasereturndetail_set.count }} artículo(s)</small>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm table-hover detail-table mb-0">
+                        <thead>
+                        <tr class="detail-head">
+                            <th class="w-5">N°</th>
+                            <th>Descripción de Artículo</th>
+                            <th class="w-10 text-center">Cantidad</th>
+                            <th class="w-10 text-center">Unidad</th>
+                            <th class="w-12 text-right">P. Unit. (Sin IGV)</th>
+                            <th class="w-12 text-right">P. Unit. (Con IGV)</th>
+                            <th class="w-12 text-right">Importe</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for d in pr.purchasereturndetail_set.all %}
+                            <tr>
+                                <td class="text-center">{{ forloop.counter }}</td>
+                                <td>
+                                    {% if d.product %}{{ d.product.name }}{% else %}—{% endif %}
+                                    {% if d.product.code %}<small class="text-muted"> ({{ d.product.code }})</small>{% endif %}
+                                </td>
+                                <td class="text-center decimal">{{ d.quantity|floatformat:2 }}</td>
+                                <td class="text-center">{{ d.unit.name|default:"—" }}</td>
+                                <td class="text-right decimal">{{ d.price_unit|floatformat:2 }}</td>
+                                <td class="text-right decimal">{{ d.total_detail|floatformat:2 }}</td>
+                                <td class="text-right decimal font-weight-bold">{{ d.total_detail|floatformat:2 }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted">Sin detalles</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                        <tfoot>
+                        <tr class="foot-totals">
+                            <th colspan="4" class="text-right text-uppercase">Totales de la devolución</th>
+                            <th colspan="2" class="text-right">Base / IGV incluidos en importe</th>
+                            <th class="text-right decimal">{{ pr.total_purchase|floatformat:2 }}</th>
+                        </tr>
+                        <tr class="foot-summary">
+                            <th colspan="4" class="text-right">Base Imponible</th>
+                            <th colspan="2" class="text-right decimal">{{ pr.base_total_purchase|floatformat:2 }}</th>
+                            <th></th>
+                        </tr>
+                        <tr class="foot-summary">
+                            <th colspan="4" class="text-right">IGV (18%)</th>
+                            <th colspan="2" class="text-right decimal">{{ pr.igv_total_purchase|floatformat:2 }}</th>
+                            <th></th>
+                        </tr>
+                        <tr class="foot-summary">
+                            <th colspan="4" class="text-right">Total Documento</th>
+                            <th colspan="2" class="text-right font-weight-bold decimal">{{ pr.total_purchase|floatformat:2 }}</th>
+                            <th></th>
+                        </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<div class="d-none">
+    <table id="data-table-buy-return-excel">
+        <thead>
+        <tr>
+            <th>N° Devolución</th>
+            <th>Fecha</th>
+            <th>Proveedor</th>
+            <th>RUC</th>
+            <th>Tipo Comprobante</th>
+            <th>Comprobante</th>
+            <th>Usuario</th>
+            <th>Sede</th>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th>Unidad</th>
+            <th>P. Unit. Sin IGV</th>
+            <th>P. Unit. Con IGV</th>
+            <th>Importe</th>
+            <th>Base Imponible</th>
+            <th>IGV</th>
+            <th>Total</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for pr in purchase_return_set %}
+            {% for d in pr.purchasereturndetail_set.all %}
+                <tr>
+                    <td>{{ pr.id }}</td>
+                    <td>{{ pr.purchase_date|date:"d/m/Y" }}</td>
+                    <td>{{ pr.supplier.name }}</td>
+                    <td>{{ pr.supplier.ruc }}</td>
+                    <td>{{ pr.get_type_bill_display }}</td>
+                    <td>{{ pr.bill_number }}</td>
+                    <td>{{ pr.user.first_name }} {{ pr.user.last_name }}</td>
+                    <td>{{ pr.subsidiary.name }}</td>
+                    <td>{{ d.product.name }}</td>
+                    <td>{{ d.quantity }}</td>
+                    <td>{{ d.unit.name }}</td>
+                    <td>{{ d.price_unit }}</td>
+                    <td>{{ d.total_detail }}</td>
+                    <td>{{ d.total_detail }}</td>
+                    <td>{{ pr.base_total_purchase }}</td>
+                    <td>{{ pr.igv_total_purchase }}</td>
+                    <td>{{ pr.total_purchase }}</td>
+                </tr>
+            {% endfor %}
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+    .return-card { border: none; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); overflow: hidden; }
+    .return-header { background: linear-gradient(135deg, #0e3a5d 0%, #1a77c8 100%) !important; }
+    .detail-table thead th { background: #eef3f8; color: #1a3a55; text-transform: uppercase; font-size: 12px; }
+    .detail-head th { border-bottom: 2px solid #1a77c8; }
+    .detail-table tbody tr:hover { background: #f5f9ff; }
+    .info-label { font-size: 11px; text-transform: uppercase; color: #6c757d; font-weight: 600; letter-spacing: 0.3px; }
+    .info-value { font-size: 15px; font-weight: 700; color: #1a3a55; }
+    .foot-totals { background: #e9eef5; }
+    .foot-summary th { font-size: 13px; font-weight: 500; }
+    .table-sm th, .table-sm td { padding: 0.5rem; vertical-align: middle; }
+
+    @media print {
+        .btn, .badge-light { display: none !important; }
+        .return-card { box-shadow: none; border: 1px solid #dee2e6; page-break-inside: avoid; }
+        .card { page-break-inside: avoid; }
+        .text-muted { color: #6c757d !important; }
+    }
+</style>
+
+<script>
+    $(document).ready(function () {
+        $('table tr td.decimal, table tr th.decimal').each(function () {
+            let _str = $(this).text();
+            _str = _str.replace(',', '.');
+            $(this).text(_str);
+        });
+
+        $("#table-to-excel").click(function (e) {
+            e.preventDefault();
+            $("#data-table-buy-return-excel").table2excel({
+                exclude: ".noExl",
+                name: "Devoluciones de Compra",
+                filename: "reporte_devoluciones_compra",
+                fileext: ".xlsx",
+                preserveColors: false
+            });
+        });
+
+        $("#btn-print-report").click(function (e) {
+            e.preventDefault();
+            window.print();
+        });
+    });
+</script>
