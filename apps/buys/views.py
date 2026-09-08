@@ -725,6 +725,8 @@ def get_serials_by_detail(request):
                 'id': s.id,
                 'serial': s.serial_number,
                 'status': s.get_status_display(),
+                'status_code': s.status,
+                'editable': s.status == 'C',
             })
         return JsonResponse({
             'serials': serials,
@@ -742,47 +744,196 @@ def save_serial_purchase(request):
         purchase_detail_obj = PurchaseDetail.objects.get(id=purchase_detail_id)
         product_obj = purchase_detail_obj.product
 
-        user_id = request.user.id
-        user_obj = User.objects.get(id=user_id)
-        subsidiary_obj = get_subsidiary_by_user(user_obj)
+        serials_requested = [
+            str(s.get('Serial', '')).strip()
+            for s in data.get('Serials', [])
+            if str(s.get('Serial', '')).strip()
+        ]
+        updated_requested = data.get('UpdatedSerials', []) or []
 
-        try:
-            subsidiary_store_obj = SubsidiaryStore.objects.get(subsidiary=subsidiary_obj, category='V')
-            product_store_obj = ProductStore.objects.get(product=product_obj, subsidiary_store=subsidiary_store_obj)
-        except (SubsidiaryStore.DoesNotExist, ProductStore.DoesNotExist):
-            data = {'error': 'EL PRODUCTO NO SE ENCUENTRA ASIGNADO A NINGUN ALMACEN DE VENTA'}
-            response = JsonResponse(data)
+        updates_to_apply = []
+        updated_ids = []
+        incoming_values = []
+
+        for item in updated_requested:
+            serial_id = item.get('id')
+            new_val = str(item.get('Serial', '')).strip()
+            if not serial_id:
+                continue
+            if not new_val:
+                response = JsonResponse({'error': 'LA SERIE MODIFICADA NO PUEDE ESTAR VACIA'})
+                response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+                return response
+            try:
+                product_serial_obj = ProductSerial.objects.get(
+                    id=int(serial_id),
+                    purchase_detail=purchase_detail_obj
+                )
+            except ProductSerial.DoesNotExist:
+                response = JsonResponse({'error': 'LA SERIE A MODIFICAR NO EXISTE EN ESTA COMPRA'})
+                response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+                return response
+            if product_serial_obj.status != 'C':
+                response = JsonResponse({
+                    'error': 'SOLO SE PUEDEN MODIFICAR SERIES CON ESTADO COMPRADO. '
+                             'LA SERIE ' + str(product_serial_obj.serial_number) + ' ESTA BLOQUEADA'
+                })
+                response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+                return response
+            current_val = str(product_serial_obj.serial_number or '').strip()
+            if new_val == current_val:
+                continue
+            updates_to_apply.append((product_serial_obj, new_val))
+            updated_ids.append(product_serial_obj.id)
+            incoming_values.append(new_val)
+
+        incoming_values.extend(serials_requested)
+        if incoming_values and len(incoming_values) != len(set(incoming_values)):
+            response = JsonResponse({'error': 'HAY SERIES DUPLICADAS EN LOS DATOS ENVIADOS'})
             response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
             return response
 
-        existing_count = purchase_detail_obj.productserial_set.count()
-        serials_requested = [str(s.get('Serial', '')).strip() for s in data['Serials'] if str(s.get('Serial', '')).strip()]
-        if existing_count + len(serials_requested) > int(decimal.Decimal(purchase_detail_obj.quantity)):
-            data = {
-                'error': 'LA CANTIDAD DE SERIES SUPERA LA CANTIDAD COMPRADA DEL PRODUCTO (' + str(
-                    purchase_detail_obj.quantity) + ')'}
-            response = JsonResponse(data)
+        for _, serial_val in updates_to_apply:
+            qs = ProductSerial.objects.filter(serial_number=serial_val)
+            if updated_ids:
+                qs = qs.exclude(id__in=updated_ids)
+            if qs.exists():
+                response = JsonResponse({
+                    'error': 'LA SERIE ' + serial_val + ' YA EXISTE EN LA BASE DE DATOS'
+                })
+                response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+                return response
+
+        product_store_obj = None
+        if serials_requested:
+            user_id = request.user.id
+            user_obj = User.objects.get(id=user_id)
+            subsidiary_obj = get_subsidiary_by_user(user_obj)
+            try:
+                subsidiary_store_obj = SubsidiaryStore.objects.get(subsidiary=subsidiary_obj, category='V')
+                product_store_obj = ProductStore.objects.get(product=product_obj, subsidiary_store=subsidiary_store_obj)
+            except (SubsidiaryStore.DoesNotExist, ProductStore.DoesNotExist):
+                data = {'error': 'EL PRODUCTO NO SE ENCUENTRA ASIGNADO A NINGUN ALMACEN DE VENTA'}
+                response = JsonResponse(data)
+                response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+                return response
+
+            existing_count = purchase_detail_obj.productserial_set.count()
+            if existing_count + len(serials_requested) > int(decimal.Decimal(purchase_detail_obj.quantity)):
+                data = {
+                    'error': 'LA CANTIDAD DE SERIES SUPERA LA CANTIDAD COMPRADA DEL PRODUCTO (' + str(
+                        purchase_detail_obj.quantity) + ')'}
+                response = JsonResponse(data)
+                response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+                return response
+
+        if not updates_to_apply and not serials_requested:
+            response = JsonResponse({'error': 'NO HAY SERIES NUEVAS NI MODIFICACIONES PARA GUARDAR'})
             response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
             return response
 
         saved = 0
+        updated = 0
         duplicates = []
-        for serial_val in serials_requested:
-            if ProductSerial.objects.filter(serial_number=serial_val).exists():
-                duplicates.append(serial_val)
-                continue
-            ProductSerial.objects.create(
-                serial_number=serial_val,
-                purchase_detail=purchase_detail_obj,
-                product_store=product_store_obj,
-                status='C'
-            )
-            saved += 1
+        with transaction.atomic():
+            for product_serial_obj, new_val in updates_to_apply:
+                product_serial_obj.serial_number = new_val
+                product_serial_obj.save(update_fields=['serial_number'])
+                updated += 1
+            for serial_val in serials_requested:
+                qs = ProductSerial.objects.filter(serial_number=serial_val)
+                if updated_ids:
+                    qs = qs.exclude(id__in=updated_ids)
+                if qs.exists():
+                    duplicates.append(serial_val)
+                    continue
+                ProductSerial.objects.create(
+                    serial_number=serial_val,
+                    purchase_detail=purchase_detail_obj,
+                    product_store=product_store_obj,
+                    status='C'
+                )
+                saved += 1
 
-        message = 'Series guardadas correctamente.'
+        if not saved and not updated:
+            if duplicates:
+                response = JsonResponse({
+                    'error': 'LA(S) SERIE(S) YA EXISTEN EN LA BASE DE DATOS: ' + ', '.join(duplicates)
+                })
+                response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+                return response
+            response = JsonResponse({'error': 'NO HAY SERIES NUEVAS NI MODIFICACIONES PARA GUARDAR'})
+            response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+            return response
+
+        parts = []
+        if saved:
+            parts.append('Series nuevas guardadas: ' + str(saved))
+        if updated:
+            parts.append('Series modificadas: ' + str(updated))
+        message = '. '.join(parts) + '.' if parts else 'Series guardadas correctamente.'
         if duplicates:
             message += ' Series duplicadas omitidas: ' + ', '.join(duplicates)
-        return JsonResponse({'message': message, 'saved': saved}, status=HTTPStatus.OK)
+        return JsonResponse({'message': message, 'saved': saved, 'updated': updated}, status=HTTPStatus.OK)
+
+
+def update_serial_purchase(request):
+    if request.method != 'GET':
+        return JsonResponse({'error': 'Error de petición.'}, status=HTTPStatus.BAD_REQUEST)
+
+    serial_id = request.GET.get('id', '')
+    new_val = str(request.GET.get('serial', '')).strip()
+    purchase_detail_id = request.GET.get('purchase_detail', '')
+
+    if not serial_id:
+        response = JsonResponse({'error': 'NO SE INDICO LA SERIE A MODIFICAR'})
+        response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+        return response
+    if not new_val:
+        response = JsonResponse({'error': 'LA SERIE MODIFICADA NO PUEDE ESTAR VACIA'})
+        response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+        return response
+
+    try:
+        filters = {'id': int(serial_id)}
+        if purchase_detail_id:
+            filters['purchase_detail_id'] = int(purchase_detail_id)
+        product_serial_obj = ProductSerial.objects.get(**filters)
+    except (ProductSerial.DoesNotExist, ValueError, TypeError):
+        response = JsonResponse({'error': 'LA SERIE A MODIFICAR NO EXISTE'})
+        response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+        return response
+
+    if product_serial_obj.status != 'C':
+        response = JsonResponse({
+            'error': 'SOLO SE PUEDEN MODIFICAR SERIES CON ESTADO COMPRADO. '
+                     'LA SERIE ' + str(product_serial_obj.serial_number) + ' ESTA BLOQUEADA'
+        })
+        response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+        return response
+
+    current_val = str(product_serial_obj.serial_number or '').strip()
+    if new_val == current_val:
+        return JsonResponse({
+            'message': 'La serie no tiene cambios.',
+            'serial': current_val,
+            'changed': False,
+        }, status=HTTPStatus.OK)
+
+    if ProductSerial.objects.filter(serial_number=new_val).exclude(id=product_serial_obj.id).exists():
+        response = JsonResponse({
+            'error': 'LA SERIE ' + new_val + ' YA EXISTE EN LA BASE DE DATOS'
+        })
+        response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+        return response
+
+    product_serial_obj.serial_number = new_val
+    product_serial_obj.save(update_fields=['serial_number'])
+    return JsonResponse({
+        'message': 'Serie modificada correctamente.',
+        'serial': new_val,
+        'changed': True,
+    }, status=HTTPStatus.OK)
 
 
 def get_requirements_buys_list_approved(request):

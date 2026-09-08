@@ -5,6 +5,26 @@
 {% endblock title %}
 
 {% block body %}
+    <style>
+        .serial-edit {
+            border-color: #17a2b8;
+        }
+        .serial-locked {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
+        .badge-serial-c {
+            background: #17a2b8;
+            color: #fff;
+        }
+        .badge-serial-v {
+            background: #6c757d;
+            color: #fff;
+        }
+        .btn-save-one-serial {
+            padding: 0.2rem 0.55rem;
+        }
+    </style>
     <div class="container-fluid">
         <div class="card-header text-left mt-2 mb-1 p-1 bg-secondary">
             <div class="form-inline mt-1 mb-1 p-0">
@@ -31,13 +51,39 @@
         </div>
         <div class="table-responsive" id="table-list-purchase-store"></div>
     </div>
+
+    <div class="modal fade" id="modal-serial-purchase" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white py-2">
+                    <h5 class="modal-title roboto-condensed-regular">
+                        <i class="fas fa-qrcode"></i> AGREGAR SERIES A PRODUCTO
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body roboto-condensed-regular">
+                    <div class="form-group">
+                        <label class="font-weight-bold">PRODUCTO</label>
+                        <select id="id_product_serial" class="form-control">
+                            <option value="">Seleccione un producto</option>
+                        </select>
+                    </div>
+                    <div id="container-serial"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" id="btn-save-serial">Guardar series nuevas</button>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock body %}
 
 {% block extrajs %}
 
     <script type="text/javascript">
-
-        {#$('#puchase-data-grid').dataTable();#}
 
         $("#id_btn_show").click(function () {
             if ($("#id_date_initial").val() != '' && $("#id_date_final").val() != '') {
@@ -67,30 +113,6 @@
 
             }
         });
-
-        /*$(document).on('click', '.btn-show-detail', function () {
-            let search = $(this).attr('pk');
-            let _table = $(this).parent('td').parent('tr').next('tr').children('td.table-details-purchase');
-            $('#purchase-store-data-grid tbody tr td.table-details-purchase').parent('tr').slideUp(800);
-            $('#purchase-store-data-grid tbody tr td.table-details-purchase').empty();
-
-            $.ajax({
-                url: '/buys/get_details_by_purchase/',
-                async: true,
-                dataType: 'json',
-                type: 'GET',
-                //mando  id de la compra
-                data: {'ip': search},
-                // si va bien retorna la data
-                success: function (response) {
-
-                    _table.html(response.grid);
-                    _table.parent('tr').slideDown(1500);
-                },
-
-            });
-
-        });*/
 
         $(document).on('click', '.btn-show-detail', function () {
             let parent_id = $(this).attr('pk_parent');
@@ -128,6 +150,251 @@
         function closeDetail($td) {
             $td.parent('tr').slideUp("fast");
         }
+
+        function escapeSerialHtml(text) {
+            return $('<div>').text(text == null ? '' : String(text)).html();
+        }
+
+        function reloadProductSerials() {
+            $('#id_product_serial').trigger('change');
+        }
+
+        function serialValueExists(value, $exceptInput) {
+            let exists = false;
+            let compare = String(value || '').trim().toLowerCase();
+            $('#container-serial input.serial-edit, #container-serial input.serial-locked, #container-serial input.serial-new').each(function () {
+                if ($exceptInput && this === $exceptInput[0]) {
+                    return;
+                }
+                if (String($(this).val() || '').trim().toLowerCase() === compare && compare !== '') {
+                    exists = true;
+                    return false;
+                }
+            });
+            return exists;
+        }
+
+        let serialRequestPending = false;
+
+        $(document).off('click.serialPurchase', '.btn-serial-purchase')
+            .on('click.serialPurchase', '.btn-serial-purchase', function () {
+                let purchase_id = $(this).attr('purchase');
+                $('#id_product_serial').empty().append('<option value="">Cargando productos...</option>');
+                $('#container-serial').empty();
+                $('#modal-serial-purchase').modal('show');
+                $.ajax({
+                    url: '/buys/get_products_serial_purchase/',
+                    async: true,
+                    dataType: 'json',
+                    type: 'GET',
+                    data: {'purchase': purchase_id},
+                    contentType: 'application/json;charset=UTF-8',
+                    headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                    success: function (response) {
+                        let options = '<option value="">Seleccione un producto</option>';
+                        $.each(response.products, function (i, p) {
+                            options += '<option value="' + p.purchase_detail_id + '">' + p.name +
+                                ' [' + p.code + '] - Cantidad: ' + p.quantity + ' ' + p.unit + '</option>';
+                        });
+                        $('#id_product_serial').html(options);
+                    },
+                    error: function (jqXhr) {
+                        toastr.error((jqXhr.responseJSON && jqXhr.responseJSON.error) || 'Error al cargar productos', '¡MENSAJE!');
+                    }
+                });
+            });
+
+        $(document).off('change.serialPurchase', '#id_product_serial')
+            .on('change.serialPurchase', '#id_product_serial', function () {
+                let purchase_detail_id = $(this).val();
+                if (!purchase_detail_id) {
+                    $('#container-serial').empty();
+                    return;
+                }
+                $.ajax({
+                    url: '/buys/get_serials_by_detail/',
+                    async: true,
+                    dataType: 'json',
+                    type: 'GET',
+                    data: {'purchase_detail': purchase_detail_id},
+                    success: function (response) {
+                        let existing = response.serials;
+                        let quantity = parseInt(response.quantity);
+                        let remaining = quantity - existing.length;
+                        let html = '';
+                        if (existing.length) {
+                            html += '<div class="form-group">' +
+                                '<label class="font-weight-bold">SERIES REGISTRADAS</label>' +
+                                '<p class="text-muted small mb-2">Solo las series COMPRADAS (C) se pueden modificar. Use el ícono de guardar en cada fila. Las VENDIDAS (V) permanecen bloqueadas.</p>' +
+                                '<table class="table table-sm table-bordered mb-2"><thead>' +
+                                '<tr class="text-center bg-light"><th style="width:8%">#</th><th>Serie</th><th style="width:22%">Estado</th><th style="width:12%">Guardar</th></tr>' +
+                                '</thead><tbody>';
+                            $.each(existing, function (i, s) {
+                                let serialVal = escapeSerialHtml(s.serial);
+                                let isEditable = s.status_code === 'C' || s.editable === true;
+                                let inputHtml = isEditable
+                                    ? '<input type="text" class="form-control serial-edit" data-id="' + s.id +
+                                    '" data-original="' + serialVal + '" value="' + serialVal + '">'
+                                    : '<input type="text" class="form-control serial-locked" value="' + serialVal + '" readonly>';
+                                let statusBadge = isEditable
+                                    ? '<span class="badge badge-serial-c"><i class="fas fa-pen"></i> ' + s.status + '</span>'
+                                    : '<span class="badge badge-serial-v"><i class="fas fa-lock"></i> ' + s.status + '</span>';
+                                let saveBtn = isEditable
+                                    ? '<button type="button" class="btn btn-success btn-sm btn-save-one-serial" title="Guardar esta serie">' +
+                                    '<i class="fas fa-save"></i></button>'
+                                    : '<i class="fas fa-lock text-muted"></i>';
+                                html += '<tr><td class="text-center align-middle">' + (i + 1) + '</td>' +
+                                    '<td>' + inputHtml + '</td>' +
+                                    '<td class="text-center align-middle">' + statusBadge + '</td>' +
+                                    '<td class="text-center align-middle">' + saveBtn + '</td></tr>';
+                            });
+                            html += '</tbody></table></div>';
+                        }
+                        html += '<div class="form-group">' +
+                            '<label class="font-weight-bold">AGREGAR SERIES (' + remaining + ' pendientes)</label>';
+                        if (remaining > 0) {
+                            html += '<table class="table table-sm table-bordered"><tbody id="details-serial">';
+                            for (let i = 0; i < remaining; i++) {
+                                html += '<tr><td class="text-center align-middle">' + (existing.length + i + 1) + '</td>' +
+                                    '<td><input type="text" class="form-control serial-new" placeholder="Ingrese serie"></td></tr>';
+                            }
+                            html += '</tbody></table>';
+                        } else {
+                            html += '<p class="text-muted">No faltan series por ingresar.</p>';
+                        }
+                        html += '</div>';
+                        $('#container-serial').html(html);
+                    }
+                });
+            });
+
+        $(document).off('click.serialPurchase', '.btn-save-one-serial')
+            .on('click.serialPurchase', '.btn-save-one-serial', function (e) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                if (serialRequestPending) {
+                    return false;
+                }
+                let $btn = $(this);
+                let $input = $btn.closest('tr').find('.serial-edit');
+                let purchase_detail_id = $('#id_product_serial').val();
+                let serialId = $input.attr('data-id');
+                let val = String($input.val() || '').trim();
+                let original = String($input.attr('data-original') || '').trim();
+
+                if (!purchase_detail_id) {
+                    toastr.warning('Seleccione un producto', '¡ADVERTENCIA!');
+                    return false;
+                }
+                if (!val) {
+                    toastr.warning('La serie no puede quedar vacía', '¡ADVERTENCIA!');
+                    return false;
+                }
+                if (val === original) {
+                    toastr.info('Esta serie no tiene cambios', '¡MENSAJE!');
+                    return false;
+                }
+                if (serialValueExists(val, $input)) {
+                    toastr.warning('La serie ya está en el listado', '¡ADVERTENCIA!');
+                    return false;
+                }
+
+                serialRequestPending = true;
+                $btn.prop('disabled', true);
+                $.ajax({
+                    url: '/buys/update_serial_purchase/',
+                    async: true,
+                    dataType: 'json',
+                    type: 'GET',
+                    data: {
+                        'id': serialId,
+                        'serial': val,
+                        'purchase_detail': purchase_detail_id
+                    },
+                    contentType: 'application/json;charset=UTF-8',
+                    headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                    success: function (response) {
+                        toastr.success(response.message, '¡EXITOSO!');
+                        $input.attr('data-original', val);
+                    },
+                    error: function (jqXhr) {
+                        toastr.error((jqXhr.responseJSON && jqXhr.responseJSON.error) || 'No se pudo modificar la serie', '¡MENSAJE!');
+                    },
+                    complete: function () {
+                        serialRequestPending = false;
+                        $btn.prop('disabled', false);
+                    }
+                });
+            });
+
+        $(document).off('click.serialPurchase', '#btn-save-serial')
+            .on('click.serialPurchase', '#btn-save-serial', function (e) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                if (serialRequestPending) {
+                    return false;
+                }
+                let purchase_detail_id = $('#id_product_serial').val();
+                if (!purchase_detail_id) {
+                    toastr.warning('Seleccione un producto', '¡ADVERTENCIA!');
+                    return false;
+                }
+                let serials = [];
+                $('#container-serial .serial-new').each(function () {
+                    let val = $(this).val().trim();
+                    if (val) serials.push({'Serial': val});
+                });
+                if (!serials.length) {
+                    toastr.warning('Ingrese al menos una serie nueva', '¡ADVERTENCIA!');
+                    return false;
+                }
+                let visibleValues = [];
+                let hasDuplicates = false;
+                $('#container-serial input.serial-edit, #container-serial input.serial-locked, #container-serial input.serial-new').each(function () {
+                    let val = String($(this).val() || '').trim().toLowerCase();
+                    if (!val) return;
+                    if (visibleValues.indexOf(val) !== -1) {
+                        hasDuplicates = true;
+                        return false;
+                    }
+                    visibleValues.push(val);
+                });
+                if (hasDuplicates) {
+                    toastr.warning('Hay series duplicadas en el formulario', '¡ADVERTENCIA!');
+                    return false;
+                }
+
+                serialRequestPending = true;
+                $('#btn-save-serial').prop('disabled', true);
+                $.ajax({
+                    url: '/buys/save_serial_purchase/',
+                    async: true,
+                    dataType: 'json',
+                    type: 'GET',
+                    data: {
+                        'serials': JSON.stringify({
+                            'PurchaseDetail': purchase_detail_id,
+                            'Serials': serials,
+                            'UpdatedSerials': []
+                        })
+                    },
+                    contentType: 'application/json;charset=UTF-8',
+                    headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                    success: function (response, textStatus, xhr) {
+                        if (xhr.status === 200) {
+                            toastr.success(response.message, '¡EXITOSO!');
+                            reloadProductSerials();
+                        }
+                    },
+                    error: function (jqXhr) {
+                        toastr.error((jqXhr.responseJSON && jqXhr.responseJSON.error) || 'No se pudieron guardar las series', '¡MENSAJE!');
+                    },
+                    complete: function () {
+                        serialRequestPending = false;
+                        $('#btn-save-serial').prop('disabled', false);
+                    }
+                });
+            });
 
     </script>
 {% endblock extrajs %}
