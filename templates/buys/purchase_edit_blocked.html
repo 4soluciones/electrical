@@ -1,0 +1,37 @@
+{% extends 'home.html' %}
+{% block title %}
+    Compra no editable
+{% endblock title %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-warning shadow-sm m-3">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="mb-0"><i class="fas fa-lock"></i> Compra no editable</h5>
+                </div>
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                    <h5 class="mb-2">La compra <b>Nº {{ purchase.bill_number|upper }}</b> no se puede editar.</h5>
+                    {% if purchase.status == 'A' %}
+                        <p class="text-muted mb-1">
+                            La compra ya fue <b>asignada al almacén</b>: ya generó stock, movimientos de kardex y
+                            series con estado <b>COMPRADO</b>. Para corregirla deve registrar una
+                            <b>devolución de compra</b> y volver a registrarla.
+                        </p>
+                    {% else %}
+                        <p class="text-muted mb-1">
+                            La compra se encuentra <b>ANULADA</b>. Para registrarla nuevamente debe crear una
+                            nueva orden de compra.
+                        </p>
+                    {% endif %}
+                    <p class="mt-4 mb-0">
+                        <a href="{% url 'buys:get_purchase_list' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-arrow-left"></i> Volver al listado
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock body %}

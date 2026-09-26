@@ -6,7 +6,7 @@
 
 {% block body %}
 
-    <div class="card m-1 bg-light border-primary">
+    <div class="card m-1 border-primary">
         <div id="purchase-grid-list">{% include "buys/purchase_grid_list.html" %}</div>
         <div class="modal fade" id="assignment" tabindex="-1" role="dialog" aria-labelledby="ModalHelpTitle"
              aria-hidden="true"></div>
@@ -17,14 +17,62 @@
 
     <script type="text/javascript">
 
-        {#$('#puchase-data-grid').dataTable();#}
         $('#puchase-data-grid').DataTable({
             "language": {
                 "url": "//cdn.datatables.net/plug-ins/1.10.15/i18n/Spanish.json"
+            },
+            "order": [[3, "desc"]]
+        });
+
+        /* Inyectar contenido dentro de un .modal tiene dos trampas de Bootstrap 4.3.1:
+             1) show() cachea this._dialog = querySelector('.modal-dialog'); si se reemplaza el
+                innerHTML del .modal ese nodo queda huerfano y hide() anima un elemento
+                desconectado, por lo que la X y el boton Cerrar no cerraban nada.
+             2) modal('dispose') NO retira el .modal-backdrop del DOM, solo anula la referencia
+                (this._backdrop = null), ademas hace $(document).off('focusin.bs.modal') y mata el
+                focus-trap. Un backdrop huerfano deja la pantalla oscura e inservible.
+           Por eso el contenido se cambia siempre con el modal OCULTO, tras 'hidden.bs.modal',
+           que es cuando Bootstrap ya retiro el backdrop y la clase modal-open del body. */
+        function swapModalContent(html) {
+            let $modal = $('#assignment');
+            $modal.off('hidden.bs.modal.ocl');
+            let paint = function () {
+                /* Con el modal ya oculto dispose() es seguro: desenlaza los handlers
+                   focusin/resize que hide() deja puestos y descarta la instancia cacheada,
+                   de modo que el siguiente show() vuelva a leer el .modal-dialog nuevo. */
+                $modal.modal('dispose');
+                $modal.html(html).modal('show');
+            };
+            if ($modal.hasClass('show')) {
+                $modal.one('hidden.bs.modal.ocl', paint).modal('hide');
+            } else {
+                paint();
+            }
+        }
+
+        function closeAssignmentModal() {
+            let $modal = $('#assignment');
+            $modal.off('hidden.bs.modal.ocl');
+            $modal.modal('hide');
+        }
+
+        /* Red de seguridad: si quedara algun .modal-backdrop huerfano, la pagina quedaria
+           oscura y sin poder hacer clic. Se limpia en cuanto no queda ningun modal abierto. */
+        $(document).on('shown.bs.modal hidden.bs.modal', function () {
+            if ($('.modal.show').length === 0) {
+                if ($('.modal-backdrop').length) {
+                    $('.modal-backdrop').remove();
+                }
+                $('body').removeClass('modal-open').css('overflow', '');
             }
         });
+
         $(document).on('click', '.assignment-store', function () {
             let search = $(this).attr('pk');
+            swapModalContent('<div class="modal-dialog modal-xl"><div class="text-center p-5">' +
+                '<div class="spinner-border text-primary" role="status"></div>' +
+                '<p class="mt-3 mb-0">Cargando detalle de la compra...</p></div></div>');
+
             $.ajax({
                 url: '/buys/get_detail_purchase_store/',
                 dataType: 'json',
@@ -38,35 +86,29 @@
                 headers: {"X-CSRFToken": '{{ csrf_token }}'},
                 success: function (response, textStatus, xhr) {
                     if (xhr.status === 200) {
-                        $('#assignment').html(response.form);
-                        $('#assignment').modal('show');
-
+                        swapModalContent(response.form);
                     }
                 },
                 error: function (jqXhr, textStatus, xhr) {
-                    $('#assignment').html(jqXhr.form);
-                    toastr.error(jqXhr.responseJSON, '¡MENSAJE!');
-                }
-
-                /*
-                success: function (response) {
-                    console.log(response);
-                    if(response.success){
-                        $('#assignment').html(response.form);
-                        $('#assignment').modal('show');
+                    closeAssignmentModal();
+                    if (jqXhr.responseJSON && jqXhr.responseJSON.detalle) {
+                        toastr.error(jqXhr.responseJSON.detalle, '¡MENSAJE!');
+                    } else {
+                        toastr.error('NO SE PUDO OBTENER EL DETALLE DE LA COMPRA.', '¡MENSAJE!');
                     }
-                },
-                fail: function (response) {
-                    console.log(response)
-{#toastr.warning('NO CUENTA CON UN ALMACEN DE MERCADERIA');#}
-            }*/
+                }
             });
         });
+
         /*Boton anular*/
-        //Boton  validar requerimiento
         $(document).on('click', '.btn-annular', function () {
             let search = $(this).attr('pk');
-            let mensaje = confirm("¿Esta seguro de anular la compra?");
+            let mensaje = confirm(
+                "¿Esta seguro de anular la compra?\n\n" +
+                "Al anularla se ELIMINARÁN las series registradas en ella, para que puedan " +
+                "reutilizarse sin generar duplicados.\n\n" +
+                "La operación no se puede deshacer."
+            );
             if (mensaje) {
                 $.ajax({
                     url: '/buys/update_state_annular_purchase/',
@@ -77,10 +119,14 @@
                         toastr.success(response.message, '¡COMPRA ANULADA CORRECTAMENTE!');
                         setTimeout(() => {
                             location.reload();
-                        }, 500);
+                        }, 800);
                     },
-                    fail: function (response) {
-                        toastr.success(response.message, '¡PROBLEMAS AL ANULAR LA COMPRA!');
+                    error: function (jqXHR) {
+                        if (jqXHR.responseJSON && jqXHR.responseJSON.error) {
+                            toastr.error(jqXHR.responseJSON.error, '¡NO SE PUDO ANULAR!');
+                        } else {
+                            toastr.error('ERROR AL ANULAR LA COMPRA.', '¡CONTACTE CON SISTEMAS!');
+                        }
                     }
                 });
             }

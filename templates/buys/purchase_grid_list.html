@@ -1,94 +1,403 @@
 {% if purchases %}
-    <div class="card border-info m-3 roboto-condensed-regular">
-        <div class="card-header bg-info">
-            <form>
-                <div class="form-group row mt-3">
-                    <h4 class="card-title text-center text-white col-sm-10 roboto-condensed-regular font-weight-bold">LISTA DE COMPRAS REALIZADAS</h4>
-                    <button type="button"
-                            class="col-sm-1 btn btn-sm btn-outline-secondary font-weight-bold border-0 text-dark btn-block p-1"
-                            id="btn-type-change">Tipo de Cambio:
-                    </button>
-                    <div class="col-sm-1">
-                        <input type="text" class="form-control text-center font-weight-bold"
-                               id="type_change" readonly>
-                        <input type="hidden" class="form-control text-center font-weight-bold"
-                               id="type_change_value" readonly>
-                    </div>
+    <div class="oc-list">
+
+        <style>
+            .oc-list {
+                --ocl-p: #0d6e6e;
+                --ocl-pd: #0a5252;
+                --ocl-ink: #0f172a;
+                --ocl-body: #475569;
+                --ocl-muted: #94a3b8;
+                --ocl-line: #e5e9f0;
+                --ocl-ok: #059669;
+                --ocl-warn: #d97706;
+                --ocl-danger: #dc2626;
+                color: var(--ocl-body);
+                padding: 0 6px 30px;
+            }
+
+            .ocl-head {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 14px;
+                padding: 16px 20px;
+                border-radius: 14px 14px 0 0;
+                background: linear-gradient(120deg, #0b4f4f 0%, #0d6e6e 45%, #0f766e 70%, #155e75 100%);
+                color: #fff;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .ocl-head::after {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background: radial-gradient(400px 170px at 92% -40%, rgba(255, 255, 255, .2), transparent 70%);
+                pointer-events: none;
+            }
+
+            .ocl-head__lead {
+                display: flex;
+                align-items: center;
+                gap: 13px;
+                position: relative;
+                z-index: 2;
+            }
+
+            .ocl-head__icon {
+                display: grid;
+                place-items: center;
+                width: 42px;
+                height: 42px;
+                border-radius: 12px;
+                background: rgba(255, 255, 255, .15);
+                border: 1px solid rgba(255, 255, 255, .3);
+                font-size: 17px;
+            }
+
+            .ocl-head__eyebrow {
+                display: block;
+                font-size: 10.5px;
+                letter-spacing: .15em;
+                text-transform: uppercase;
+                color: rgba(255, 255, 255, .75);
+                font-weight: 700;
+            }
+
+            .ocl-head__title {
+                font-family: "Montserrat", sans-serif;
+                font-weight: 800;
+                font-size: 18px;
+                margin: 2px 0 0;
+                color: #fff;
+            }
+
+            .ocl-head__tools {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                position: relative;
+                z-index: 2;
+            }
+
+            .ocl-rate {
+                display: flex;
+                align-items: stretch;
+                height: 36px;
+                border-radius: 9px;
+                overflow: hidden;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, .14);
+            }
+
+            .ocl-rate__btn {
+                display: inline-flex;
+                align-items: center;
+                gap: 7px;
+                border: 0;
+                padding: 0 13px;
+                background: rgba(255, 255, 255, .16);
+                color: #fff;
+                font-size: 12px;
+                font-weight: 700;
+                cursor: pointer;
+            }
+
+            .ocl-rate__btn:hover {
+                background: rgba(255, 255, 255, .28);
+                color: #fff;
+            }
+
+            .ocl-rate__val {
+                width: 88px;
+                border: 0;
+                padding: 0 10px;
+                text-align: center;
+                font-weight: 800;
+                font-size: 13.5px;
+                color: var(--ocl-pd);
+                background: #fff;
+                outline: none;
+            }
+
+            .ocl-body {
+                background: #fff;
+                border: 1px solid var(--ocl-line);
+                border-top: 0;
+                border-radius: 0 0 14px 14px;
+                padding: 14px 12px;
+                box-shadow: 0 10px 26px rgba(15, 23, 42, .07);
+            }
+
+            .ocl-table {
+                font-size: 13px;
+                margin-bottom: 0 !important;
+            }
+
+            .ocl-table thead th {
+                padding: 10px 8px;
+                background: linear-gradient(180deg, #f1f5f9, #e8eef4);
+                color: #475569;
+                font-size: 10.5px;
+                font-weight: 800;
+                letter-spacing: .06em;
+                text-transform: uppercase;
+                text-align: center;
+                white-space: nowrap;
+                border-bottom: 2px solid #d8e0e8;
+            }
+
+            .ocl-table tbody td {
+                padding: 9px 8px;
+                vertical-align: middle;
+                border-bottom: 1px solid #eef2f6;
+            }
+
+            .ocl-table tbody tr:hover td {
+                background: #f0f9f8;
+            }
+
+            .ocl-table .ocl-id {
+                font-weight: 800;
+                color: var(--ocl-muted);
+            }
+
+            .ocl-table .ocl-doc {
+                font-weight: 800;
+                color: var(--ocl-ink);
+                letter-spacing: .03em;
+            }
+
+            .ocl-table .ocl-total {
+                font-weight: 800;
+                color: var(--ocl-pd);
+                white-space: nowrap;
+            }
+
+            .ocl-tag {
+                display: inline-block;
+                padding: 3px 10px;
+                border-radius: 20px;
+                font-size: 10.5px;
+                font-weight: 800;
+                letter-spacing: .05em;
+                text-transform: uppercase;
+            }
+
+            .ocl-tag--warn {
+                background: #fef3c7;
+                color: #92400e;
+                border: 1px solid #fcd34d;
+            }
+
+            .ocl-tag--ok {
+                background: #dcfce7;
+                color: #065f46;
+                border: 1px solid #86efac;
+            }
+
+            .ocl-tag--muted {
+                background: #f1f5f9;
+                color: #64748b;
+                border: 1px solid #e2e8f0;
+            }
+
+            .ocl-btn {
+                display: inline-flex;
+                align-items: center;
+                gap: 7px;
+                height: 32px;
+                padding: 0 13px;
+                border-radius: 8px;
+                border: 1px solid transparent;
+                font-size: 12.5px;
+                font-weight: 700;
+                cursor: pointer;
+                white-space: nowrap;
+            }
+
+            .ocl-btn--menu {
+                background: linear-gradient(180deg, #14907f, #0d6e6e);
+                color: #fff;
+                box-shadow: 0 1px 4px rgba(13, 110, 110, .28);
+            }
+
+            .ocl-btn--menu:hover {
+                background: linear-gradient(180deg, #17a08e, #0b6161);
+                color: #fff;
+            }
+
+            /* megamenu2.css impone .dropdown-item:focus/:hover { background-color:#313234 !important;
+               color:#fff }, lo que deja las opciones en negro sobre el menu blanco. Se anula con
+               !important y se fija el fondo del menu de forma explicita. */
+            .ocl-menu {
+                background: #fff;
+                border: 1px solid var(--ocl-line);
+                border-radius: 10px;
+                padding: 5px;
+                box-shadow: 0 12px 30px rgba(15, 23, 42, .16);
+                min-width: 190px;
+            }
+
+            .ocl-menu .dropdown-item {
+                display: flex;
+                align-items: center;
+                gap: 9px;
+                padding: 8px 11px;
+                border-radius: 7px;
+                font-size: 13px;
+                font-weight: 600;
+                color: var(--ocl-body);
+                background-color: transparent !important;
+                cursor: pointer;
+            }
+
+            .ocl-menu .dropdown-item:hover,
+            .ocl-menu .dropdown-item:focus {
+                background: #eef6f5 !important;
+                color: var(--ocl-pd);
+                outline: none;
+            }
+
+            .ocl-menu .dropdown-item:active {
+                background: #ddeee9 !important;
+                color: var(--ocl-pd);
+            }
+
+            .ocl-menu .dropdown-item i {
+                width: 15px;
+                text-align: center;
+                color: var(--ocl-p);
+            }
+
+            .ocl-menu .dropdown-item.is-danger:hover,
+            .ocl-menu .dropdown-item.is-danger:focus {
+                background: #fef2f2 !important;
+                color: var(--ocl-danger);
+            }
+
+            .ocl-menu .dropdown-item.is-danger:hover i,
+            .ocl-menu .dropdown-item.is-danger:focus i {
+                color: var(--ocl-danger);
+            }
+
+            .ocl-menu .dropdown-divider {
+                border-top: 1px solid var(--ocl-line);
+                margin: 4px 2px;
+            }
+
+            .ocl-empty {
+                padding: 34px 10px;
+                text-align: center;
+            }
+
+            .ocl-empty i {
+                font-size: 38px;
+                color: #cbd5e1;
+                margin-bottom: 10px;
+            }
+
+            .ocl-empty h5 {
+                font-family: "Montserrat", sans-serif;
+                font-weight: 800;
+                font-size: 15px;
+                color: var(--ocl-ink);
+            }
+
+            .ocl-empty p {
+                font-size: 13px;
+                color: var(--ocl-muted);
+                margin: 0;
+            }
+        </style>
+
+        <div class="ocl-head">
+            <div class="ocl-head__lead">
+                <span class="ocl-head__icon"><i class="fas fa-clipboard-list"></i></span>
+                <div>
+                    <span class="ocl-head__eyebrow">Compras sin almacén</span>
+                    <h4 class="ocl-head__title">Asignar compras al almacén</h4>
                 </div>
-            </form>
+            </div>
+            <div class="ocl-head__tools">
+                <div class="ocl-rate">
+                    <button type="button" class="ocl-rate__btn" id="btn-type-change">
+                        <i class="fas fa-exchange-alt"></i> Tipo de Cambio
+                    </button>
+                    <input type="text" class="ocl-rate__val" id="type_change" readonly>
+                    <input type="hidden" id="type_change_value" readonly>
+                </div>
+            </div>
         </div>
-    </div>
 
-    <div class="card-body roboto-condensed-regular">
-        <div class="table-responsive dataTables_wrapper ">
-            <table id="puchase-data-grid"
-                   class="table table-primary table-striped align-content-center table-bordered response"
-                   cellspacing="0" width="100%">
-                <thead>
-                <tr class="text-center bg-info text-white" style="height: 20px">
-                    <th>#</th>
-                    <th class="th-sm">Proveedor</th>
-                    <th class="th-sm">Numero comprobante</th>
-                    <th class="th-sm">Fecha compra</th>
-                    <th class="th-sm">Total</th>
-                    <th class="th-sm">Usuario</th>
-                    <th class="th-sm">Estado</th>
-                    <th class="th-sm">Accion</th>
-                </tr>
-                </thead>
-                <tbody>
-
-                {% for p in purchases %}
-                    <tr class="text-center ">
-                        <td>{{ p.id }}</td>
-                        <td>{{ p.supplier.name|upper }}</td>
-                        <td>{{ p.bill_number|upper }}</td>
-                        <td>{{ p.purchase_date|date:'d-m-Y' }}</td>
-                        <td>{% if p.check_dollar %}${% else %}S/{% endif %}{{ p.total_purchase|safe }}</td>
-                        <td>{{ p.user.worker_set.last.employee.names|upper }}</td>
-                        <td class="{% if p.status == 'S' %}  text-danger {% else %} text-success
-                            {% endif %} bg-white">{{ p.get_status_display }}</td>
-                        <td class="p-1">
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-success  dropdown-toggle"
-                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Action
-                                </button>
-                                <div class="dropdown-menu bg-secondary text-white font-italic">
-                                    <a class="dropdown-item assignment-store" pk="{{ p.id }}"><i
-                                            class="fas fa-file-upload"></i> Asignar almacen </a>
-                                    <a class="dropdown-item btn-update" pk="{{ p.id }}"><i
-                                            class="fas fa-edit pr-1"></i> Editar </a>
-                                    <a class="dropdown-item btn-annular" pk="{{ p.id }}"><i
-                                            class="fas fa-ban"></i> Anular </a>
-                                </div>
-                            </div>
-                        </td>
+        <div class="ocl-body">
+            <div class="table-responsive">
+                <table id="puchase-data-grid" class="table ocl-table align-middle" cellspacing="0" width="100%">
+                    <thead>
+                    <tr>
+                        <th style="width: 6%">#</th>
+                        <th>Proveedor</th>
+                        <th style="width: 14%">Nº comprobante</th>
+                        <th style="width: 11%">Fecha compra</th>
+                        <th style="width: 12%">Total</th>
+                        <th>Usuario</th>
+                        <th style="width: 12%">Estado</th>
+                        <th style="width: 14%">Acción</th>
                     </tr>
-                {% endfor %}
-                </tbody>
-                <tfoot>
-                <tr class="text-center bg-info text-white" style="height: 20px">
-                    <th>#</th>
-                    <th class="th-sm">Proveedor</th>
-                    <th class="th-sm">Numero comprobante</th>
-                    <th class="th-sm">Fecha compra</th>
-                    <th class="th-sm">Total</th>
-                    <th class="th-sm">Usuario</th>
-                    <th class="th-sm">Estado</th>
-                    <th class="th-sm">Accion</th>
-                </tr>
-                </tfoot>
-            </table>
+                    </thead>
+                    <tbody>
 
+                    {% for p in purchases %}
+                        <tr class="text-center">
+                            <td class="ocl-id">{{ p.id }}</td>
+                            <td class="text-left">{{ p.supplier.name|upper }}</td>
+                            <td class="ocl-doc">{{ p.bill_number|upper }}</td>
+                            <td>{{ p.purchase_date|date:'d-m-Y' }}</td>
+                            <td class="ocl-total">
+                                {% if p.check_dollar %}${% else %}S/{% endif %}{{ p.total_purchase|safe }}
+                            </td>
+                            <td class="text-left">{{ p.user.worker_set.last.employee.names|upper }}</td>
+                            <td>
+                                {% if p.status == 'S' %}
+                                    <span class="ocl-tag ocl-tag--warn">{{ p.get_status_display }}</span>
+                                {% else %}
+                                    <span class="ocl-tag ocl-tag--ok">{{ p.get_status_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <button type="button" class="ocl-btn ocl-btn--menu dropdown-toggle"
+                                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Acciones <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right ocl-menu">
+                                        <a class="dropdown-item assignment-store" pk="{{ p.id }}">
+                                            <i class="fas fa-warehouse"></i> Asignar almacén
+                                        </a>
+                                        <a class="dropdown-item btn-update" pk="{{ p.id }}">
+                                            <i class="fas fa-edit"></i> Editar compra
+                                        </a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item is-danger btn-annular" pk="{{ p.id }}">
+                                            <i class="fas fa-ban"></i> Anular compra
+                                        </a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
 
     </div>
-
-    <!-- Card -->
-    </div>
-
 
 {% else %}
-    <h1>No existen compras registradas</h1>
+    <div class="ocl-empty">
+        <i class="fas fa-clipboard-check"></i>
+        <h5>No hay compras pendientes de almacén</h5>
+        <p>Todas las compras registradas ya fueron asignadas a un almacén.</p>
+    </div>
 {% endif %}

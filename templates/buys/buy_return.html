@@ -840,14 +840,17 @@
             sum_table();
         });
 
-        /*function counterStrike() {
+        /* Se restore: counterStrike() se invoca al agregar y al eliminar filas
+           (lineas 717 y 821) y su definicion estaba comentada, lo que provocaba
+           ReferenceError y dejaba la numeracion sin renumerar. */
+        function counterStrike() {
             let l = 1;
             $('#details tr').each(function () {
                 $(this).attr('i', l);
                 $(this).children('td:nth-child(1)').text(l);
                 l++;
             });
-        }*/
+        }
 
         /*function counterStrike2() {
             let l = 1;

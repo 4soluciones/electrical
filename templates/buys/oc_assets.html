@@ -1,0 +1,2116 @@
+
+<style>
+        /* ============================================================
+           SISTEMA DE DISEÑO - ORDEN DE COMPRA
+           ============================================================ */
+        .oc-page {
+            --oc-brand: #1a77c8;
+            --oc-brand-d: #12589a;
+            --oc-brand-dd: #0d4076;
+            --oc-brand-l: #4a9be0;
+            --oc-brand-tint: #eaf3fc;
+            --oc-ink: #0f172a;
+            --oc-body: #475569;
+            --oc-muted: #94a3b8;
+            --oc-line: #e5e9f0;
+            --oc-ok: #059669;
+            --oc-warn: #d97706;
+            --oc-danger: #dc2626;
+            --oc-r: 14px;
+            --oc-r-sm: 9px;
+            --oc-sh: 0 1px 2px rgba(13, 64, 118, .10), 0 12px 30px rgba(13, 64, 118, .16);
+            --oc-sh-sm: 0 1px 2px rgba(15, 23, 42, .06);
+            color: var(--oc-body);
+            padding: 12px 8px 40px;
+        }
+
+        .oc-hide {
+            display: none !important;
+        }
+
+        .oc-spacer {
+            height: 10px;
+        }
+
+        /* ============================ HERO / CABECERA ============================ */
+        .oc-hero {
+            position: relative;
+            overflow: hidden;
+            border-radius: var(--oc-r);
+            background: linear-gradient(115deg, #0b3a6b 0%, #0d4076 30%, #12589a 62%, #1a77c8 100%);
+            box-shadow: 0 10px 30px rgba(13, 64, 118, .28);
+            margin-bottom: 14px;
+        }
+
+        .oc-hero::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(560px 240px at 90% -40%, rgba(255, 255, 255, .16), transparent 70%),
+                radial-gradient(340px 220px at 4% 140%, rgba(74, 155, 224, .30), transparent 70%);
+            pointer-events: none;
+        }
+
+        /* una sola fila: marca a la izquierda, controles a la derecha */
+        .oc-hero__bar {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 14px 18px;
+        }
+
+        .oc-hero__brand {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            min-width: 0;
+            flex: 1 1 auto;
+        }
+
+        .oc-hero__icon {
+            flex: 0 0 auto;
+            display: grid;
+            place-items: center;
+            width: 46px;
+            height: 46px;
+            border-radius: 13px;
+            background: rgba(255, 255, 255, .15);
+            border: 1px solid rgba(255, 255, 255, .30);
+            color: #fff;
+            font-size: 19px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25);
+        }
+
+        .oc-hero__txt {
+            min-width: 0;
+        }
+
+        .oc-hero__eyebrow {
+            display: block;
+            font-size: 10px;
+            letter-spacing: .16em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, .74);
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .oc-hero__title {
+            font-family: "Montserrat", sans-serif;
+            font-weight: 800;
+            font-size: clamp(15px, 2.1vw, 21px);
+            line-height: 1.15;
+            margin: 2px 0 0;
+            color: #fff;
+            letter-spacing: -.01em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .oc-hero__controls {
+            flex: 0 0 auto;
+            display: flex;
+            align-items: stretch;
+            gap: 10px;
+        }
+
+        .oc-hero__sub {
+            position: relative;
+            z-index: 2;
+            margin: 0;
+            padding: 0 18px 13px 18px;
+            font-size: 12.5px;
+            color: rgba(255, 255, 255, .84);
+        }
+
+        .oc-hero__sub i {
+            margin-right: 6px;
+            opacity: .8;
+        }
+
+        /* ============================ BOTONES ============================ */
+        .oc-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            height: 38px;
+            padding: 0 15px;
+            border-radius: 10px;
+            border: 1px solid transparent;
+            font-size: 13.5px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: transform .12s ease, box-shadow .12s ease, background .12s ease, color .12s ease;
+        }
+
+        .oc-btn:focus {
+            outline: none;
+        }
+
+        .oc-btn:active {
+            transform: translateY(1px);
+        }
+
+        .oc-btn--lg {
+            height: 44px;
+            padding: 0 26px;
+            font-size: 15px;
+            border-radius: 11px;
+        }
+
+        .oc-btn--light {
+            background: rgba(255, 255, 255, .96);
+            color: var(--oc-brand-dd);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .16);
+        }
+
+        .oc-btn--light:hover {
+            background: #fff;
+            color: var(--oc-brand);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, .22);
+        }
+
+        .oc-btn--accent {
+            background: #fff;
+            color: var(--oc-brand-d);
+            border-color: rgba(255, 255, 255, .85);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .18);
+        }
+
+        .oc-btn--accent:hover {
+            background: var(--oc-brand-l);
+            color: #fff;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, .24);
+        }
+
+        .oc-btn--white {
+            background: #fff;
+            color: var(--oc-body);
+            border-color: #dbe2ea;
+            box-shadow: var(--oc-sh-sm);
+        }
+
+        .oc-btn--white:hover {
+            background: var(--oc-brand-tint);
+            color: var(--oc-brand-dd);
+            border-color: #bcd9f3;
+        }
+
+        /* accion principal (boton Guardar) */
+        .oc-btn--primary {
+            background: linear-gradient(180deg, #2b8ae0, var(--oc-brand) 60%, var(--oc-brand-d));
+            color: #fff;
+            border-color: var(--oc-brand-d);
+            box-shadow: 0 2px 8px rgba(13, 64, 118, .3);
+        }
+
+        .oc-btn--primary:hover {
+            background: linear-gradient(180deg, #3d95e6, #1a77c8 60%, #1464ac);
+            color: #fff;
+            box-shadow: 0 6px 18px rgba(13, 64, 118, .38);
+        }
+
+        .oc-btn--primary:focus {
+            box-shadow: 0 0 0 3px rgba(26, 119, 200, .3);
+        }
+
+        /* boton "+" de las cuotas (input-group) */
+        .oc-btn-add {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 38px;
+            min-width: 42px;
+            padding: 0 14px;
+            border: 0;
+            border-radius: 0 var(--oc-r-sm) var(--oc-r-sm) 0;
+            background: var(--oc-brand-d);
+            color: #fff;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .oc-btn-add:hover {
+            background: var(--oc-brand-dd);
+        }
+
+        .oc-btn[disabled] {
+            opacity: .65;
+            pointer-events: none;
+        }
+
+        /* ============================ TIPO DE CAMBIO ============================ */
+        .oc-rate {
+            display: flex;
+            align-items: stretch;
+            height: 38px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .16);
+        }
+
+        .oc-rate__btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            border: 0;
+            padding: 0 13px;
+            background: rgba(255, 255, 255, .16);
+            color: #fff;
+            font-size: 12.5px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .oc-rate__btn:hover {
+            background: rgba(255, 255, 255, .28);
+            color: #fff;
+        }
+
+        .oc-rate__val {
+            width: 84px;
+            min-width: 0;
+            border: 0;
+            padding: 0 8px;
+            text-align: center;
+            font-weight: 800;
+            font-size: 14px;
+            color: var(--oc-brand-dd);
+            background: #fff;
+            outline: none;
+        }
+
+        /* ============================ SWITCH ============================ */
+        .oc-switch {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            height: 38px;
+            padding: 0 13px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, .16);
+            border: 1px solid rgba(255, 255, 255, .30);
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .oc-switch input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .oc-switch__track {
+            position: relative;
+            display: block;
+            width: 38px;
+            height: 20px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, .34);
+            transition: background .18s ease;
+            flex: 0 0 auto;
+        }
+
+        .oc-switch__thumb {
+            position: absolute;
+            top: 2.5px;
+            left: 2.5px;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .3);
+            transition: transform .18s ease;
+        }
+
+        .oc-switch input:checked + .oc-switch__track {
+            background: #34d399;
+        }
+
+        .oc-switch input:checked + .oc-switch__track .oc-switch__thumb {
+            transform: translateX(18px);
+        }
+
+        .oc-switch input:focus + .oc-switch__track {
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, .4);
+        }
+
+        .oc-switch__label {
+            color: #fff;
+            font-size: 12.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .03em;
+        }
+
+        /* ============================ CARDS (solo la cabecera en azul) ============================ */
+        .oc-card {
+            background: #fff;
+            border: 1px solid var(--oc-line);
+            border-top: 3px solid var(--oc-brand);
+            border-radius: var(--oc-r);
+            box-shadow: var(--oc-sh);
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        .oc-card__head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 10px 18px;
+            background: linear-gradient(180deg, #2b8ae0, var(--oc-brand) 55%, var(--oc-brand-d));
+            border-bottom: 1px solid var(--oc-brand-d);
+        }
+
+        .oc-card__title {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin: 0;
+            font-family: "Montserrat", sans-serif;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: .02em;
+            text-transform: uppercase;
+            color: #fff;
+            min-width: 0;
+            text-shadow: 0 1px 1px rgba(13, 64, 118, .3);
+        }
+
+        .oc-card__title i {
+            color: #fff;
+            font-size: 15px;
+        }
+
+        .oc-card__hint {
+            font-size: 11.5px;
+            color: rgba(255, 255, 255, .9);
+            white-space: nowrap;
+        }
+
+        .oc-card__hint b {
+            color: #fff;
+        }
+
+        .oc-card__actions {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+
+        .oc-card__body {
+            padding: 16px 18px 18px;
+        }
+
+        .oc-card__body--flush {
+            padding: 12px;
+        }
+
+        .oc-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            height: 30px;
+            padding: 0 12px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, .18);
+            border: 1px solid rgba(255, 255, 255, .38);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        /* superficie clara para la tabla */
+        .oc-surface {
+            background: #fff;
+            border: 1px solid var(--oc-line);
+            border-radius: 11px;
+            overflow: hidden;
+        }
+
+        .oc-subcard {
+            background: #fff;
+            border: 1px solid var(--oc-line);
+            border-radius: var(--oc-r-sm);
+            overflow: hidden;
+        }
+
+        .oc-subcard__head {
+            padding: 9px 14px;
+            background: var(--oc-brand-tint);
+            border-bottom: 1px solid #d7e7f7;
+        }
+
+        .oc-subcard__title {
+            margin: 0;
+            font-size: 12.5px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            color: var(--oc-brand-d);
+        }
+
+        .oc-subcard__title i {
+            margin-right: 6px;
+        }
+
+        /* ============================ CAMPOS (2 filas compactas) ============================ */
+        .oc-row {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 10px 12px;
+            align-items: start;
+        }
+
+        .oc-row--pago {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            gap: 10px 12px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--oc-line);
+        }
+
+        .oc-row--pago .oc-cell {
+            flex: 1 1 130px;
+            grid-column: auto;
+            min-width: 120px;
+        }
+
+        .oc-row--pago .oc-cell--pay {
+            flex: 1 1 140px;
+        }
+
+        .oc-row--pago .oc-cell--dues {
+            flex: 2 1 190px;
+        }
+
+        .oc-row--pago .oc-cell--ctx {
+            flex: 1 1 150px;
+        }
+
+        /* los botones viven en la MISMA fila, siempre pegados a la derecha */
+        .oc-row--pago .oc-cell--actions {
+            flex: 0 0 auto;
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .oc-cell--actions .oc-btn {
+            height: 36px;
+            white-space: nowrap;
+        }
+
+        .oc-row--pago .oc-cell--actions .oc-btn--primary {
+            padding: 0 20px;
+        }
+
+        .oc-cell {
+            grid-column: span 2;
+            min-width: 0;
+        }
+
+        .oc-cell--2 {
+            grid-column: span 2;
+        }
+
+        .oc-cell--3 {
+            grid-column: span 3;
+        }
+
+        .oc-cell--4 {
+            grid-column: span 4;
+        }
+
+        .oc-cell > label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 10.5px;
+            font-weight: 800;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            color: #64748b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .oc-cell > label b {
+            color: var(--oc-danger);
+        }
+
+        .oc-cell .form-control {
+            height: 36px;
+            border-radius: var(--oc-r-sm);
+            border: 1px solid #dbe2ea;
+            font-size: 13px;
+            color: var(--oc-ink);
+            box-shadow: none;
+            padding: 3px 9px;
+        }
+
+        .oc-cell .form-control:focus {
+            border-color: var(--oc-brand-l);
+            box-shadow: 0 0 0 3px rgba(26, 119, 200, .16);
+        }
+
+        .oc-cell .form-control:read-only:not([type="date"]) {
+            background: #f4f7fa;
+            color: #475569;
+            border-style: dashed;
+        }
+
+        .oc-cell select.form-control {
+            cursor: pointer;
+        }
+
+        .oc-hint {
+            display: block;
+            margin-top: 3px;
+            font-size: 10px;
+            color: var(--oc-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .oc-hint.is-ok {
+            color: var(--oc-ok);
+        }
+
+        .oc-input {
+            position: relative;
+        }
+
+        .oc-input__icon {
+            position: absolute;
+            left: 11px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--oc-brand);
+            font-size: 13px;
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        .oc-input--icon .form-control {
+            padding-left: 32px;
+        }
+
+        .oc-input.is-resolved .oc-input__icon {
+            color: var(--oc-ok);
+        }
+
+        /* ============================ ACCIONES ============================ */
+        /* ============================ TABLA ============================ */
+        .oc-table-wrap {
+            padding: 0;
+        }
+
+        .oc-table {
+            margin-bottom: 0 !important;
+            font-size: 13px;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .oc-thead th.oc-th {
+            padding: 10px 7px;
+            background: linear-gradient(180deg, #1a77c8, #1464ac);
+            color: #fff;
+            font-size: 10.5px;
+            font-weight: 800;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            text-align: center;
+            white-space: nowrap;
+            border: 0;
+            border-right: 1px solid rgba(255, 255, 255, .16);
+        }
+
+        .oc-thead th.oc-th:last-child {
+            border-right: 0;
+        }
+
+        .oc-thead th.oc-th small {
+            font-size: 9px;
+            font-weight: 600;
+            opacity: .78;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+        .oc-thead th.oc-th--wide {
+            min-width: 340px;
+            width: 30%;
+            text-align: left;
+            padding-left: 14px;
+        }
+
+        .oc-thead th.oc-th--num {
+            width: 3%;
+        }
+
+        /* Cantidad: columna mas estrecha (antes ocupaba 10%) */
+        .oc-thead th.oc-th--qty {
+            width: 8%;
+        }
+
+        .oc-table tbody tr.item-row > td.item-quantity {
+            padding: 6px 3px !important;
+        }
+
+        .oc-table tbody tr.item-row > td.item-quantity .input-group {
+            flex-wrap: nowrap;
+        }
+
+        .oc-table tbody tr.item-row > td.item-quantity input.quantity-product {
+            min-width: 0;
+            padding-left: 4px;
+            padding-right: 4px;
+            text-align: center;
+        }
+
+        .oc-series {
+            padding: 0 7px;
+            font-size: 10px;
+        }
+
+        .oc-thead th.oc-th--pct {
+            width: 58px;
+            background: linear-gradient(180deg, #b45309, #92400e);
+        }
+
+        .oc-thead th.oc-th--money {
+            background: linear-gradient(180deg, #0e7490, #0c5f77);
+        }
+
+        .oc-thead th.oc-th--act {
+            width: 54px;
+        }
+
+        .oc-table tbody tr.item-row > td.oc-td {
+            padding: 6px 5px;
+        }
+
+        .oc-table tbody tr.item-row > td {
+            padding: 6px 5px;
+            background: #fff;
+            border-bottom: 1px solid var(--oc-line);
+            vertical-align: middle;
+        }
+
+        .oc-table tbody tr.item-row:nth-of-type(even) > td {
+            background: #f6fafe;
+        }
+
+        .oc-table tbody tr.item-row:hover > td {
+            background: #eaf4fd;
+        }
+
+        .oc-td--num {
+            font-weight: 800;
+            color: var(--oc-muted);
+            font-size: 13px;
+        }
+
+        .oc-td--center {
+            text-align: center;
+        }
+
+        .oc-td--left {
+            text-align: left;
+        }
+
+        .oc-td--act {
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .oc-td--money, .oc-td--total {
+            background-image: linear-gradient(180deg, rgba(15, 118, 110, .05), rgba(15, 118, 110, .05)) !important;
+        }
+
+        .oc-td--total .form-control {
+            font-weight: 800;
+            color: var(--oc-brand-dd);
+        }
+
+        .oc-table .form-control {
+            height: 34px;
+            border-radius: 8px;
+            border: 1px solid #dde4ec;
+            font-size: 13px;
+            padding: 3px 8px;
+            color: var(--oc-ink);
+            box-shadow: none;
+            background-color: #fff;
+        }
+
+        .oc-table .form-control::placeholder {
+            color: #c3ccd8;
+        }
+
+        .oc-table .form-control:focus {
+            border-color: var(--oc-brand-l);
+            box-shadow: 0 0 0 3px rgba(26, 119, 200, .18);
+            background-color: #fff;
+        }
+
+        .oc-table .form-control:read-only {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .oc-table .input-group .form-control {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .oc-series {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            height: 34px;
+            padding: 0 9px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .02em;
+            color: #92400e;
+            background: #fef3c7;
+            border: 1px solid #fcd34d;
+            border-left: 0;
+            border-radius: 0 8px 8px 0 !important;
+            white-space: nowrap;
+        }
+
+        .oc-series:hover {
+            color: #78350f;
+            background: #fde68a;
+            border-color: #f59e0b;
+        }
+
+        .oc-btn-del {
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            display: inline-grid;
+            place-items: center;
+            border-radius: 8px;
+            border: 1px solid #fecaca;
+            background: #fef2f2;
+            color: var(--oc-danger);
+            font-size: 12px;
+        }
+
+        .oc-btn-del:hover {
+            background: var(--oc-danger);
+            border-color: var(--oc-danger);
+            color: #fff;
+        }
+
+        /* ============================ AUTOCOMPLETE ============================ */
+        .oc-search {
+            position: relative;
+        }
+
+        .oc-search__icon {
+            position: absolute;
+            left: 11px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9aa8b8;
+            font-size: 12.5px;
+            pointer-events: none;
+            z-index: 4;
+        }
+
+        .oc-search .product-table {
+            padding-left: 31px;
+            padding-right: 30px;
+        }
+
+        .oc-search__clear {
+            position: absolute;
+            right: 6px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 4;
+            display: none;
+            place-items: center;
+            width: 20px;
+            height: 20px;
+            padding: 0;
+            border: 0;
+            border-radius: 50%;
+            background: #dbe3ec;
+            color: #64748b;
+            font-size: 10px;
+            cursor: pointer;
+        }
+
+        .oc-search__clear:hover {
+            background: var(--oc-danger);
+            color: #fff;
+        }
+
+        .oc-search.has-value .oc-search__clear {
+            display: grid;
+        }
+
+        /* position:fixed -> no lo recorta el contenedor .table-responsive */
+        .oc-search__panel {
+            position: fixed;
+            z-index: 1080;
+            min-width: 280px;
+            background: #fff;
+            border: 1px solid #dbe4ee;
+            border-radius: 12px;
+            box-shadow: 0 18px 44px rgba(13, 64, 118, .22);
+            overflow: hidden;
+        }
+
+        .oc-search__panel[hidden] {
+            display: none;
+        }
+
+        .oc-search__list {
+            list-style: none;
+            margin: 0;
+            padding: 5px;
+            max-height: 46vh;
+            overflow-y: auto;
+        }
+
+        .oc-opt {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            border-radius: 9px;
+            cursor: pointer;
+            transition: background .1s ease;
+        }
+
+        .oc-opt:hover,
+        .oc-opt.is-active {
+            background: var(--oc-brand-tint);
+        }
+
+        .oc-opt.is-active {
+            box-shadow: inset 0 0 0 1px var(--oc-brand-l);
+        }
+
+        .oc-opt__icon {
+            flex: 0 0 auto;
+            display: grid;
+            place-items: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 9px;
+            background: linear-gradient(150deg, #1a77c8, #12589a);
+            color: #fff;
+            font-size: 12px;
+        }
+
+        .oc-opt__body {
+            min-width: 0;
+            flex: 1 1 auto;
+        }
+
+        .oc-opt__name {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--oc-ink);
+            line-height: 1.25;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .oc-opt__name mark {
+            background: #fef08a;
+            color: #78350f;
+            border-radius: 3px;
+            padding: 0 1px;
+        }
+
+        .oc-opt__meta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+            margin-top: 2px;
+            font-size: 11px;
+            color: #64748b;
+        }
+
+        .oc-opt__tag {
+            display: inline-block;
+            padding: 1px 7px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: .03em;
+            text-transform: uppercase;
+            background: #eef2f7;
+            color: #475569;
+        }
+
+        .oc-opt__tag--unit {
+            background: #e0f2fe;
+            color: #075985;
+        }
+
+        .oc-opt__tag--code {
+            background: #f1f5f9;
+            color: #64748b;
+            font-family: monospace;
+            text-transform: none;
+        }
+
+        .oc-opt__tag--stock {
+            background: #dcfce7;
+            color: #065f46;
+        }
+
+        .oc-opt__tag--stock.is-low {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .oc-opt__price {
+            flex: 0 0 auto;
+            text-align: right;
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--oc-brand-dd);
+        }
+
+        .oc-opt__price small {
+            display: block;
+            font-size: 9.5px;
+            font-weight: 700;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            color: #94a3b8;
+        }
+
+        .oc-opt--msg {
+            display: block;
+            padding: 16px 12px;
+            text-align: center;
+            cursor: default;
+            font-size: 12.5px;
+            color: #64748b;
+        }
+
+        .oc-opt--msg:hover {
+            background: none;
+            box-shadow: none;
+        }
+
+        .oc-opt--msg i {
+            display: block;
+            font-size: 22px;
+            color: #cbd5e1;
+            margin-bottom: 6px;
+        }
+
+        .oc-opt--msg.is-error i {
+            color: #fca5a5;
+        }
+
+        .oc-opt--msg b {
+            color: var(--oc-ink);
+        }
+
+        .oc-search__foot {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 6px 10px;
+            background: #f7fafd;
+            border-top: 1px solid #e8eef5;
+            font-size: 10.5px;
+            color: #94a3b8;
+        }
+
+        .oc-search__keys kbd {
+            display: inline-block;
+            min-width: 17px;
+            margin: 0 1px;
+            padding: 1px 4px;
+            border: 1px solid #d3dce6;
+            border-bottom-width: 2px;
+            border-radius: 4px;
+            background: #fff;
+            font-family: inherit;
+            font-size: 9.5px;
+            font-weight: 800;
+            color: #64748b;
+            text-align: center;
+        }
+
+        .oc-search__count {
+            font-weight: 800;
+            color: #64748b;
+            white-space: nowrap;
+        }
+
+        /* ============================ EDITOR: PANEL DE SERIES ============================ */
+        .oc-serial-box {
+            margin: 6px 10px 10px;
+            border: 1px dashed #cbd5e1;
+            border-radius: 10px;
+            background: #fff;
+            overflow: hidden;
+        }
+
+        .oc-serial-box__head-static {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 7px 10px;
+            background: #fef3c7;
+            border-bottom: 1px solid #fde68a;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            color: #92400e;
+        }
+
+        .oc-serial-table {
+            width: 100%;
+            font-size: 12.5px;
+            margin: 0;
+        }
+
+        .oc-serial-table td {
+            padding: 3px 8px;
+            border: 0;
+            border-bottom: 1px solid #eef2f6;
+            background: #fff;
+        }
+
+        .oc-serial-table tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .oc-serial-table .form-control.serial {
+            height: 30px;
+            font-size: 12.5px;
+            letter-spacing: .04em;
+        }
+
+        .oc-serial-table .oc-btn-del {
+            width: 26px;
+            height: 26px;
+            font-size: 11px;
+        }
+
+        .oc-btn-mini {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            height: 24px;
+            padding: 0 9px;
+            border-radius: 6px;
+            border: 1px solid transparent;
+            font-size: 10.5px;
+            font-weight: 800;
+            letter-spacing: .03em;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        .oc-btn-mini--add {
+            background: #dcfce7;
+            color: #065f46;
+            border-color: #86efac;
+        }
+
+        .oc-btn-mini--add:hover {
+            background: #bbf7d0;
+            color: #065f46;
+        }
+
+        .oc-btn-mini--clear {
+            background: #fee2e2;
+            color: #991b1b;
+            border-color: #fecaca;
+        }
+
+        .oc-btn-mini--clear:hover {
+            background: #fecaca;
+            color: #7f1d1d;
+        }
+
+        /* contador de series dentro del boton */
+        .oc-series .series-count {
+            display: inline-grid;
+            place-items: center;
+            min-width: 17px;
+            height: 17px;
+            padding: 0 4px;
+            margin-left: 3px;
+            border-radius: 10px;
+            background: #fff;
+            color: #92400e;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .oc-series.btn-series-toggle[aria-expanded="true"] {
+            background: #fde68a;
+            border-color: #f59e0b;
+        }
+
+        /* ============================ EDITOR: CABECERA ============================ */
+        .oc-hero--edit {
+            background: linear-gradient(115deg, #0b3a6b 0%, #12589a 45%, #1a77c8 100%);
+        }
+
+        .oc-badge-info {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            height: 38px;
+            padding: 0 14px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, .16);
+            border: 1px solid rgba(255, 255, 255, .30);
+            color: #fff;
+            font-size: 12.5px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .oc-switch--static {
+            cursor: default;
+        }
+
+        .oc-switch--static input {
+            pointer-events: none;
+        }
+
+        /* ============================ SERIALES ============================ */
+        .oc-table tbody tr.product-serial > td {
+            padding: 0 !important;
+            background: #f7fafd;
+            border-bottom: 1px solid var(--oc-line);
+        }
+
+        .oc-table tbody tr.product-serial .card {
+            margin: 6px 10px 10px;
+            border: 1px dashed #cbd5e1;
+            border-radius: 10px;
+            background: #fff;
+        }
+
+        .oc-table tbody tr.product-serial .card-header {
+            background: #fef3c7;
+            border-bottom: 1px solid #fde68a;
+            border-radius: 10px 10px 0 0;
+            padding: 0;
+        }
+
+        .oc-table tbody tr.product-serial .btn-link {
+            display: block;
+            width: 100%;
+            padding: 7px 10px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            color: #92400e;
+        }
+
+        .oc-table tbody tr.product-serial .btn-link:hover {
+            text-decoration: none;
+            color: #78350f;
+        }
+
+        .oc-table tbody tr.product-serial table {
+            font-size: 12.5px;
+        }
+
+        .oc-table tbody tr.product-serial td {
+            padding: 4px 8px !important;
+            border: 0 !important;
+            background: #fff !important;
+        }
+
+        .oc-table tbody tr.product-serial .form-control.serial {
+            height: 30px;
+            font-size: 12.5px;
+            letter-spacing: .04em;
+        }
+
+        /* ============================ TOTALES ============================ */
+        .oc-tfoot-lead {
+            padding: 12px 8px !important;
+            background: #f6fafe;
+            border-top: 2px solid var(--oc-line);
+            border-bottom: 0;
+            vertical-align: middle;
+        }
+
+        .oc-tfoot-sum {
+            padding: 9px 10px !important;
+            background: linear-gradient(180deg, #f4f9fe, #e9f2fb);
+            border-top: 2px solid var(--oc-line);
+            border-bottom: 0;
+        }
+
+        .oc-igv {
+            margin: 0 !important;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 13px;
+            border-radius: 20px;
+            background: #fff;
+            border: 1px solid #dbe4ee;
+        }
+
+        .oc-igv .form-check-input {
+            margin-top: 0;
+            cursor: pointer;
+        }
+
+        .oc-igv .form-check-label {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: var(--oc-body);
+            margin: 0;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .oc-totals thead th.oc-totals__th {
+            padding: 5px 7px;
+            font-size: 9.5px;
+            font-weight: 800;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            color: #64748b;
+            text-align: center;
+            border: 0;
+            border-bottom: 1px solid #dbe4ee;
+        }
+
+        .oc-totals tbody td {
+            padding: 6px 7px 1px;
+            border: 0 !important;
+            background: transparent !important;
+            text-align: center;
+        }
+
+        .oc-totals .form-control {
+            height: 36px;
+            font-size: 14.5px;
+            font-weight: 800;
+            text-align: right;
+            border-radius: 9px;
+            border: 1px solid #dde4ec;
+            color: var(--oc-brand-dd);
+            background: #fff;
+            box-shadow: none;
+        }
+
+        .oc-totals .foot-document .form-control {
+            color: #fff;
+            background: linear-gradient(180deg, #2b8ae0, var(--oc-brand));
+            border-color: var(--oc-brand-d);
+        }
+
+        .oc-totals .foot-document .change-money {
+            color: rgba(255, 255, 255, .78);
+        }
+
+        .oc-totals .input-icon > i {
+            color: #94a3b8;
+        }
+
+        /* ============================ SIMBOLO DE MONEDA DENTRO DEL INPUT ============================
+           El <i class="change-money"> se posiciona sobre el input y hay que reservar
+           el hueco con padding-left. Estas reglas van al final y con mas especificidad
+           que ".oc-table .form-control" / ".oc-totals .form-control", que si no
+           sobrescriben el padding y el simbolo se sale del campo. */
+        .input-icon {
+            position: relative;
+            display: block;
+        }
+
+        .input-icon > i {
+            position: absolute;
+            display: block;
+            top: 50%;
+            left: 0;
+            width: 27px;
+            transform: translateY(-50%);
+            pointer-events: none;
+            text-align: center;
+            font-style: normal;
+            font-size: 11px;
+            font-weight: 800;
+            color: #94a3b8;
+        }
+
+        .oc-table .input-icon > input,
+        .oc-totals .input-icon > input,
+        .input-icon > input {
+            padding-left: 28px;
+            padding-right: 9px;
+        }
+
+        .oc-totals .input-icon > input {
+            padding-left: 30px;
+        }
+
+        .oc-totals .input-icon > i {
+            width: 29px;
+            font-size: 12px;
+        }
+
+        .input-icon-right > i {
+            right: 0;
+            left: auto;
+        }
+
+        .input-icon-right > input {
+            padding-left: 9px;
+            padding-right: 28px;
+        }
+
+        /* ============================ OVERLAY ============================ */
+        .oc-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            background: rgba(234, 243, 252, .74);
+            backdrop-filter: blur(1.5px);
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 12vh;
+        }
+
+        /* ============================ RESPONSIVE ============================ */
+        /* laptops: se ocultan los textos de los controles para no romper la fila */
+        @media (max-width: 1399px) {
+            .oc-rate__label {
+                display: none;
+            }
+
+            .oc-rate__val {
+                width: 76px;
+            }
+        }
+
+        @media (max-width: 1199px) {
+            .oc-btn__label {
+                display: none;
+            }
+
+            .oc-btn--light,
+            .oc-btn--accent {
+                width: 40px;
+                padding: 0;
+            }
+
+            .oc-switch__label {
+                font-size: 11.5px;
+            }
+        }
+
+        @media (max-width: 991px) {
+            .oc-hero__bar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 11px;
+            }
+
+            .oc-hero__controls {
+                width: 100%;
+            }
+
+            .oc-hero__controls > * {
+                flex: 1 1 0;
+            }
+
+            .oc-btn--light,
+            .oc-btn--accent {
+                width: auto;
+            }
+
+            .oc-rate__label {
+                display: inline;
+            }
+
+            .oc-rate {
+                flex: 1 1 0;
+            }
+
+            .oc-rate__val {
+                flex: 1 1 auto;
+                width: auto;
+            }
+
+            .oc-hero__sub {
+                display: none;
+            }
+
+            /* tablet: los campos pasan a 2 columnas */
+            .oc-cell,
+            .oc-cell--2,
+            .oc-cell--3,
+            .oc-cell--4 {
+                grid-column: span 6;
+            }
+
+            /* los botones pasan a su propia linea, a lo ancho */
+            .oc-row--pago .oc-cell--actions {
+                flex: 1 1 100%;
+                margin-left: 0;
+            }
+
+            .oc-row--pago .oc-cell--actions .oc-btn {
+                flex: 1 1 0;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .oc-page {
+                padding: 8px 6px 30px;
+            }
+
+            .oc-hero__bar {
+                padding: 12px 13px;
+            }
+
+            .oc-hero__icon {
+                width: 40px;
+                height: 40px;
+                font-size: 17px;
+            }
+
+            .oc-hero__controls {
+                flex-wrap: wrap;
+            }
+
+            .oc-hero__controls > * {
+                flex: 1 1 calc(50% - 5px);
+            }
+
+            .oc-rate {
+                order: 3;
+                flex: 1 1 100%;
+            }
+
+            .oc-card__head {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+                padding: 11px 13px;
+            }
+
+            .oc-card__actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .oc-card__hint {
+                display: none;
+            }
+
+            .oc-card__body {
+                padding: 13px;
+            }
+
+            .oc-card__body--flush {
+                padding: 8px;
+            }
+
+            .oc-table {
+                font-size: 12.5px;
+            }
+
+            .oc-table .form-control {
+                height: 32px;
+                font-size: 12.5px;
+            }
+
+            .oc-search__panel {
+                max-width: calc(100vw - 16px);
+            }
+        }
+
+        @media (max-width: 575px) {
+            .oc-row {
+                gap: 10px;
+            }
+
+            .oc-cell,
+            .oc-cell--2,
+            .oc-cell--3,
+            .oc-cell--4 {
+                grid-column: span 12;
+            }
+
+            .oc-row--pago .oc-cell {
+                flex: 1 1 100%;
+                min-width: 0;
+            }
+
+            .oc-row--pago .oc-cell--actions .oc-btn {
+                padding: 0 10px;
+            }
+
+            .oc-switch__label {
+                font-size: 11px;
+            }
+
+            .oc-search__foot {
+                display: none;
+            }
+        }
+</style>
+
+<script type="text/javascript">
+    /* ------------------------------------------------------------------
+       Convierte a numero aceptando coma o punto decimal y valores vacios.
+       ------------------------------------------------------------------ */
+        function toNum(valor, porDefecto) {
+                let _v = (valor === undefined || valor === null) ? '' : String(valor).trim();
+                if (_v === '') {
+                    return (porDefecto === undefined) ? 0 : porDefecto;
+                }
+                _v = _v.replace(/\s/g, '').replace(',', '.');
+                let _n = Number(_v);
+                return isNaN(_n) ? ((porDefecto === undefined) ? 0 : porDefecto) : _n;
+            }
+    
+            function counterStrike2() {
+                let l = 1;
+                $('#details-table tr.item-row').each(function () {
+                    $(this).attr('i', l);
+                    $(this).children('td:nth-child(1)').text(l);
+                    l++;
+                });
+    
+            }
+    
+            function updateRowsCount() {
+                let _n = $("#id_detail_data_grid tbody#details-table tr.item-row").length;
+                let _chip = $('#oc-rows-count');
+                if (_chip.length) {
+                    _chip.html('<i class="fas fa-layer-group"></i> ' + _n + (_n === 1 ? ' ítem' : ' ítems'));
+                }
+            }
+    
+            function calculate_total(_tr) {
+    
+                let $quantity = Number(_tr.find('td.item-quantity div.input-group input.quantity-product').val());
+                let $price_unit = Number(_tr.find('td.item-price input.price-unit-product').val());
+                let $d1_val = Number(_tr.find('td.item-discount1 input.discount1').val() || 0);
+                let $d2_val = Number(_tr.find('td.item-discount2 input.discount2').val() || 0);
+                let $d3_val = Number(_tr.find('td.item-discount3 input.discount3').val() || 0);
+                let $d4_val = Number(_tr.find('td.item-discount4 input.discount4').val() || 0);
+    
+                let d1, d2, d3, d4, d1p, d2p, d3p, d4p, amount;
+    
+                if (isNaN($quantity)) $quantity = 0;
+                if (isNaN($price_unit)) $price_unit = 0;
+    
+                amount = $quantity * $price_unit
+    
+                d1 = amount - [(amount * $d1_val) / 100]
+                d2 = d1 - [(d1 * $d2_val) / 100]
+                d3 = d2 - [(d2 * $d3_val) / 100]
+                d4 = d3 - [(d3 * $d4_val) / 100]
+    
+                d1p = $price_unit - [($price_unit * $d1_val) / 100]
+                d2p = d1p - [(d1p * $d2_val) / 100]
+                d3p = d2p - [(d2p * $d3_val) / 100]
+                d4p = d3p - [(d3p * $d4_val) / 100]
+    
+                _tr.find('td.item-price').attr('price-unit-with-discount', d4p.toFixed(2))
+                _tr.find('td.total-row input.total-detail').val(d4.toFixed(2))
+            }
+    
+            function sum_table() {
+                let igv = 0;
+                let base = 0;
+                let sum_total = 0;
+                let total_freight = 0;
+                let total_document = 0;
+                let _total;
+    
+                $("#id_detail_data_grid tbody#details-table tr.item-row").each(function () {
+                    let td_total = Number($(this).find("td.total-row input.total-detail").val());
+                    if (!isNaN(td_total)) {
+                        sum_total = sum_total + td_total
+                    }
+                });
+    
+                let _check_igv = $("#id_detail_data_grid tfoot tr input.check-igv")
+    
+                if (_check_igv.is(':checked')) {
+                    base = sum_total / 1.18
+                    igv = sum_total - base
+                    _total = base + igv
+                    total_document = _total + total_freight
+    
+                } else {
+                    base = sum_total
+                    igv = sum_total * 0.18
+                    _total = base + igv
+                    total_document = _total + total_freight
+                }
+    
+                $("#id_detail_data_grid tfoot tr input.total-foot-base").val(base.toFixed(2));
+                $("#id_detail_data_grid tfoot tr input.total-foot-igv").val(igv.toFixed(2));
+                $("#id_detail_data_grid tfoot tr input.total-foot-total").val(_total.toFixed(2));
+                $("#id_detail_data_grid tfoot tr input.total-foot-freight").val(total_freight.toFixed(2));
+                $("#id_detail_data_grid tfoot tr input.total-foot-document").val(total_document.toFixed(2));
+            }
+    
+
+    /* ------------------------------------------------------------------
+       Buscador / autocomplete de productos.
+       ------------------------------------------------------------------ */
+        const ProductSearch = (function () {
+                const MIN_CHARS = 2;
+                const DEBOUNCE_MS = 180;
+                const MAX_HEIGHT = 340;
+                let uid = 0;
+    
+                function esc(value) {
+                    return String(value === undefined || value === null ? '' : value)
+                        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                }
+    
+                function highlight(text, terms) {
+                    let html = esc(text);
+                    terms.forEach(function (term) {
+                        if (!term) {
+                            return;
+                        }
+                        let pattern = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                        html = html.replace(new RegExp('(' + pattern + ')', 'ig'), '<mark>$1</mark>');
+                    });
+                    return html;
+                }
+    
+                /* El estado guarda NODOS DOM (no objetos jQuery): asi los metodos
+                   de jQuery nunca se invocan sobre un elemento nativo. */
+                function store(input) {
+                    if (!input) {
+                        return null;
+                    }
+                    if (!input._ocAc) {
+                        const box = input.closest('.oc-search');
+                        if (!box) {
+                            return null;
+                        }
+                        input._ocAc = {
+                            node: input,
+                            box: box,
+                            panel: box.querySelector('.oc-search__panel'),
+                            list: box.querySelector('.oc-search__list'),
+                            count: box.querySelector('.oc-search__count'),
+                            items: [],
+                            active: -1,
+                            term: '',
+                            timer: null,
+                            token: 0,
+                            req: null
+                        };
+                    }
+                    return input._ocAc;
+                }
+    
+                function value(ac) {
+                    return $.trim(ac.node.value || '');
+                }
+    
+                function isOpen(ac) {
+                    return !!(ac && ac.panel && !ac.panel.hidden);
+                }
+    
+                function place(ac) {
+                    if (!isOpen(ac)) {
+                        return;
+                    }
+                    const rect = ac.box.getBoundingClientRect();
+                    const width = Math.max(rect.width, 300);
+                    const below = window.innerHeight - rect.bottom;
+                    const maxH = Math.min(MAX_HEIGHT, Math.max(160, below - 16));
+    
+                    ac.panel.style.width = width + 'px';
+                    ac.panel.style.maxHeight = (maxH + 78) + 'px';
+                    ac.panel.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - width - 8)) + 'px';
+    
+                    if (below < 190 && rect.top > 200) {
+                        ac.panel.style.top = 'auto';
+                        ac.panel.style.bottom = (window.innerHeight - rect.top + 4) + 'px';
+                    } else {
+                        ac.panel.style.bottom = 'auto';
+                        ac.panel.style.top = (rect.bottom + 4) + 'px';
+                    }
+                    ac.list.style.maxHeight = maxH + 'px';
+                }
+    
+                function close(ac) {
+                    if (!ac || !ac.panel) {
+                        return;
+                    }
+                    ac.panel.hidden = true;
+                    ac.node.setAttribute('aria-expanded', 'false');
+                    ac.node.removeAttribute('aria-activedescendant');
+                    ac.items = [];
+                    ac.active = -1;
+                    ac.count.textContent = '';
+                }
+    
+                function setActive(ac, index) {
+                    if (!ac.items.length) {
+                        return;
+                    }
+                    if (index < 0) {
+                        index = ac.items.length - 1;
+                    }
+                    if (index > ac.items.length - 1) {
+                        index = 0;
+                    }
+                    ac.active = index;
+    
+                    Array.prototype.forEach.call(ac.list.children, function (node, i) {
+                        node.classList.toggle('is-active', i === index);
+                        node.setAttribute('aria-selected', i === index ? 'true' : 'false');
+                    });
+    
+                    const node = ac.list.children[index];
+                    if (node) {
+                        node.scrollIntoView({block: 'nearest'});
+                        ac.node.setAttribute('aria-activedescendant', node.id);
+                    }
+                }
+    
+                function move(ac, delta) {
+                    if (!isOpen(ac) || !ac.items.length) {
+                        return false;
+                    }
+                    setActive(ac, ac.active + delta);
+                    return true;
+                }
+    
+                function message(ac, icon, title, hint, isError) {
+                    ac.list.innerHTML =
+                        '<li class="oc-opt--msg' + (isError ? ' is-error' : '') + '">' +
+                        '<i class="' + icon + '"></i>' +
+                        '<b>' + esc(title) + '</b>' +
+                        (hint ? '<br>' + esc(hint) : '') +
+                        '</li>';
+                    ac.items = [];
+                    ac.active = -1;
+                    ac.node.removeAttribute('aria-activedescendant');
+                    ac.count.textContent = '';
+                    place(ac);
+                }
+    
+                function render(ac, list, term) {
+                    const terms = term.trim().split(/\s+/).filter(Boolean);
+                    ac.items = list;
+                    ac.term = term;
+    
+                    if (!list.length) {
+                        message(ac, 'fa-search', 'Sin resultados',
+                            'No se encontraron productos para "' + term.trim() + '".', true);
+                        return;
+                    }
+    
+                    let html = '';
+                    list.forEach(function (item, i) {
+                        const stock = (item.stock === null || item.stock === undefined || item.stock === '') ? 0 : item.stock;
+                        const stockNum = Number(stock);
+                        const price = (item.price_purchase !== undefined && item.price_purchase !== '')
+                            ? item.price_purchase : null;
+                        html += '<li class="oc-opt product-item" id="oc-opt-' + (++uid) + '" role="option"' +
+                            ' aria-selected="false" data-index="' + i + '"' +
+                            ' data-id="' + esc(item.id) + '"' +
+                            ' data-brand="' + esc(item.brand) + '"' +
+                            ' data-unit="' + esc(item.unit) + '"' +
+                            ' data-unit-id="' + esc(item.unit_id) + '"' +
+                            ' data-barcode="' + esc(item.barcode) + '">' +
+                            '<span class="oc-opt__icon"><i class="fas fa-box"></i></span>' +
+                            '<span class="oc-opt__body">' +
+                            '<span class="oc-opt__name" title="' + esc(item.name) + '">' + highlight(item.name, terms) + '</span>' +
+                            '<span class="oc-opt__meta">' +
+                            (item.brand ? '<span class="oc-opt__tag">' + highlight(item.brand, terms) + '</span>' : '') +
+                            (item.unit ? '<span class="oc-opt__tag oc-opt__tag--unit">' + esc(item.unit) + '</span>' : '') +
+                            (item.barcode ? '<span class="oc-opt__tag oc-opt__tag--code">' + esc(item.barcode) + '</span>' : '') +
+                            '<span class="oc-opt__tag oc-opt__tag--stock' +
+                            (isNaN(stockNum) || stockNum <= 0 ? ' is-low' : '') + '">Stock ' + esc(stock) + '</span>' +
+                            '</span>' +
+                            '</span>' +
+                            (price !== null
+                                ? '<span class="oc-opt__price">S/ ' + esc(price) + '<small>Compra</small></span>'
+                                : '') +
+                            '</li>';
+                    });
+                    ac.list.innerHTML = html;
+                    ac.count.textContent = list.length + (list.length === 1 ? ' resultado' : ' resultados')
+                        + (list.length >= 25 ? ' (refine la búsqueda)' : '');
+                    place(ac);
+                    setActive(ac, 0);
+                }
+    
+                function apply(ac, index) {
+                    const item = ac.items[index];
+                    if (!item) {
+                        return false;
+                    }
+                    const $row = $(ac.node).closest('tr.item-row');
+                    const $serialRow = $row.next('tr.product-serial');
+    
+                    $row.attr('product', item.id).attr('unit_id', item.unit_id);
+                    $serialRow.attr('product', item.id).attr('unit_id', item.unit_id);
+    
+                    ac.node.value = item.name;
+                    ac.box.classList.add('has-value');
+                    $row.find('td.brand input.brand-product').val(item.brand);
+                    $row.find('td.unit input.unit-product').val(item.unit);
+                    $row.find('td.item-code-bar input.code-bar').val(item.barcode);
+    
+                    close(ac);
+                    $row.find('td.item-quantity input.quantity-product').trigger('focus');
+                    return true;
+                }
+    
+                function search(ac) {
+                    const term = value(ac);
+                    if (term.length < MIN_CHARS) {
+                        close(ac);
+                        if (term.length) {
+                            message(ac, 'fa-keyboard', 'Continúe escribiendo',
+                                'Ingrese al menos ' + MIN_CHARS + ' caracteres para buscar.');
+                        }
+                        return;
+                    }
+    
+                    const token = ++ac.token;
+                    if (ac.req && typeof ac.req.abort === 'function') {
+                        ac.req.abort();
+                    }
+    
+                    ac.panel.hidden = false;
+                    ac.node.setAttribute('aria-expanded', 'true');
+                    // No se pinta "cargando" si ya hay resultados visibles: se siente mas rapido.
+                    if (!ac.items.length) {
+                        message(ac, 'fa-spinner fa-spin', 'Buscando productos...', '');
+                    }
+    
+                    ac.req = $.ajax({
+                        url: '/buys/get_product_by_criteria_table/',
+                        dataType: 'json',
+                        type: 'GET',
+                        data: {'value': term, 'format': 'autocomplete'},
+                        contentType: 'application/json;charset=UTF-8',
+                        headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                        success: function (response) {
+                            if (token !== ac.token) {
+                                return;
+                            }
+                            const list = (response && response.productList) ? response.productList : [];
+                            if (!list.length && response && response.message) {
+                                message(ac,
+                                    response.message === 'Producto deshabilitado'
+                                        ? 'fa-ban' : 'fa-search',
+                                    response.message,
+                                    response.hint || ('No se encontraron productos para "' + term + '".'),
+                                    response.message === 'Producto deshabilitado');
+                                return;
+                            }
+                            render(ac, list, term);
+                        },
+                        error: function (jqXHR, textStatus) {
+                            if (textStatus === 'abort' || token !== ac.token) {
+                                return;
+                            }
+                            message(ac, 'fa-triangle-exclamation', 'Error al buscar',
+                                'No se pudo consultar el catálogo. Intente nuevamente.', true);
+                        }
+                    });
+                }
+    
+                function schedule(ac) {
+                    clearTimeout(ac.timer);
+                    ac.timer = setTimeout(function () {
+                        search(ac);
+                    }, DEBOUNCE_MS);
+                }
+    
+                /* ---------------------------- eventos ---------------------------- */
+                /* focusin (no focus): focus no hace bubble y delega de forma
+                   inconsistente entre navegadores. */
+                $(document).on('focusin', '.product-table', function () {
+                    const ac = store(this);
+                    if (!ac) {
+                        return;
+                    }
+                    if (!$(ac.node).closest('tr.item-row').attr('product')) {
+                        ac.node.value = '';
+                    }
+                    ac.box.classList.toggle('has-value', value(ac).length > 0);
+                });
+    
+                $(document).on('input', '.product-table', function () {
+                    const ac = store(this);
+                    if (!ac) {
+                        return;
+                    }
+                    ac.box.classList.toggle('has-value', value(ac).length > 0);
+                    schedule(ac);
+                });
+    
+                $(document).on('keydown', '.product-table', function (e) {
+                    const ac = store(this);
+                    if (!ac) {
+                        return;
+                    }
+    
+                    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                        // delta -1 en flecha arriba: si esta en el primero salta al ultimo
+                        if (move(ac, e.key === 'ArrowDown' ? 1 : -1)) {
+                            e.preventDefault();
+                        }
+                        return;
+                    }
+    
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        clearTimeout(ac.timer);
+                        if (isOpen(ac) && ac.items.length) {
+                            apply(ac, ac.active < 0 ? 0 : ac.active);
+                        } else if (value(ac).length >= MIN_CHARS) {
+                            search(ac);
+                        }
+                        return;
+                    }
+    
+                    if (e.key === 'Escape') {
+                        if (isOpen(ac)) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            close(ac);
+                        }
+                        return;
+                    }
+    
+                    if (e.key === 'Tab') {
+                        close(ac);
+                    }
+                });
+    
+                // mousedown -> evita que el input pierda el foco antes del click
+                $(document).on('mousedown', '.oc-search__panel', function (e) {
+                    e.preventDefault();
+                });
+    
+                $(document).on('click', '.oc-opt', function () {
+                    const input = $(this).closest('.oc-search').find('.product-table')[0];
+                    const ac = store(input);
+                    if (!ac) {
+                        return;
+                    }
+                    apply(ac, parseInt($(this).attr('data-index'), 10));
+                });
+    
+                $(document).on('click', '.oc-search__clear', function () {
+                    const $box = $(this).closest('.oc-search');
+                    const ac = store($box.find('.product-table')[0]);
+                    if (!ac) {
+                        return;
+                    }
+                    const $row = $(ac.node).closest('tr.item-row');
+    
+                    ac.node.value = '';
+                    ac.box.classList.remove('has-value');
+                    $row.attr('product', '').attr('unit_id', '');
+                    $row.next('tr.product-serial').attr('product', '').attr('unit_id', '').empty();
+                    close(ac);
+                    ac.node.focus();
+                });
+    
+                // clic fuera -> cierra
+                $(document).on('click', function (e) {
+                    if ($(e.target).closest('.oc-search').length) {
+                        return;
+                    }
+                    document.querySelectorAll('.oc-search__panel').forEach(function (panel) {
+                        if (!panel.hidden) {
+                            const input = panel.closest('.oc-search').querySelector('.product-table');
+                            close(store(input));
+                        }
+                    });
+                });
+    
+                /* el panel es position:fixed -> hay que reposicionarlo al hacer scroll.
+                   jQuery 3 registra sus listeners en fase de captura, por lo que
+                   $(document).on('scroll') ya recibe el scroll de cualquier
+                   contenedor descendiente (no hace falta el 3.er argumento). */
+                function reposition() {
+                    document.querySelectorAll('.product-table').forEach(function (input) {
+                        if (input._ocAc) {
+                            place(input._ocAc);
+                        }
+                    });
+                }
+                $(window).on('scroll', reposition);
+                $(window).on('resize', reposition);
+                $(document).on('scroll', reposition);
+    
+                return {
+                    closeAll: function () {
+                        document.querySelectorAll('.product-table').forEach(function (input) {
+                            if (input._ocAc) {
+                                close(input._ocAc);
+                            }
+                        });
+                    },
+                    closeFor: function (row) {
+                        const input = $(row).find('.product-table')[0];
+                        if (input) {
+                            close(store(input));
+                        }
+                    },
+                    refresh: reposition
+                };
+            })();
+    
+</script>

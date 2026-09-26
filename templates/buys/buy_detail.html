@@ -1,168 +1,134 @@
-<div class="table-responsive dataTables_wrapper roboto-condensed-regular">
+<div class="oc-table-wrap">
     <table id="id_detail_data_grid"
-           class="table table-hover table-sm align-content-center table-bordered mb-0"
+           class="table oc-table align-middle"
            cellspacing="0" style="width: 100%;">
-        <thead>
-        <tr class="text-center text-white" style="background: #1a77c8">
-            <th scope="col" class="align-middle font-weight-normal" style="width: 3%;">Nº</th>
-            <th scope="col" class="align-middle font-weight-normal" style="width: 7%;">Codigo de barras</th>
-            <th scope="col" class="align-middle font-weight-normal" style="width: 27%;">Descripción de Artículo</th>
-            {#            <th scope="col" class="align-middle font-weight-normal" style="width: 8%;">Marca</th>#}
-            <th scope="col" class="align-middle font-weight-normal" style="width: 10%;">Cantidad</th>
-            <th scope="col" class="align-middle font-weight-normal" style="width: 8%;">Unidad Medida</th>
-            <th scope="col" class="align-middle font-weight-normal" style="width: 8%; background-color: #7ea0ef">Valor Unit. (Sin IGV)</th>
-            <th scope="col" class="align-middle font-weight-normal" style="width: 7%;">Prec. Unit. (Con IGV)</th>
-            <th scope="col" class="align-middle font-weight-normal" style="width: 5%;">%Dto.1</th>
-            <th scope="col" class="align-middle font-weight-normal" style="width: 5%;">%Dto.2</th>
-            <th scope="col" class="align-middle font-weight-normal" style="width: 5%;">%Dto.3</th>
-            <th scope="col" class="align-middle font-weight-normal" style="width: 5%;">%Dto.4</th>
-            <th scope="col" class="align-middle font-weight-normal" style="width: 6%;">Importe</th>
-            {#            <th scope="col" class="align-middle font-weight-normal" style="width: 3%;">Afecta Kardex</th>#}
-            <th scope="col" class="align-middle font-weight-normal" style="width: 4%;">Eliminar</th>
+        <thead class="oc-thead">
+        <tr>
+            <th scope="col" class="oc-th oc-th--num">Nº</th>
+            <th scope="col" class="oc-th">Codigo de barras</th>
+            <th scope="col" class="oc-th oc-th--wide">Descripción de Artículo</th>
+            <th scope="col" class="oc-th oc-th--qty">Cantidad</th>
+            <th scope="col" class="oc-th">Unidad Medida</th>
+            <th scope="col" class="oc-th oc-th--money">Valor Unit.<br><small>(Sin IGV)</small></th>
+            <th scope="col" class="oc-th oc-th--money">Prec. Unit.<br><small>(Con IGV)</small></th>
+            <th scope="col" class="oc-th oc-th--pct">%Dto.1</th>
+            <th scope="col" class="oc-th oc-th--pct">%Dto.2</th>
+            <th scope="col" class="oc-th oc-th--pct">%Dto.3</th>
+            <th scope="col" class="oc-th oc-th--pct">%Dto.4</th>
+            <th scope="col" class="oc-th oc-th--money">Importe</th>
+            <th scope="col" class="oc-th oc-th--act">Eliminar</th>
         </tr>
         </thead>
         <tbody id="details-table">
 
         <tr class="text-center item-row" product="" unit_id="">
-            <td class="item-numero align-middle text-center">1</td>
-            <td class="item-code-bar align-middle text-center">
-                <input type="text" aria-label="..."
-                       class="form-control text-center text-uppercase code-bar" autocomplete="off">
+            <td class="item-numero oc-td oc-td--num align-middle text-center">1</td>
+            <td class="item-code-bar oc-td oc-td--center align-middle text-center">
+                <input type="text" aria-label="Codigo de barras"
+                       class="form-control text-center text-uppercase code-bar" autocomplete="off"
+                       placeholder="Escanear / digitar">
             </td>
-            <td class="align-middle text-left product-item-table">
-                {#                <div class="btn-group">#}
-                <input type="text"
-                       class="form-control text-uppercase product-table dropdown-toggle"
-                       data-toggle="dropdown" aria-expanded="false"
-                       placeholder="Ingrese producto...">
-                <div class="dropdown-menu"></div>
-                {#                </div>#}
-            </td>
-            {#            <td class="align-middle brand">#}
-            {#                <input type="text" class="form-control text-center text-uppercase brand-product" id="brand_id"#}
-            {#                       name="brand" readonly>#}
-            {#            </td>#}
-            <td class="align-middle item-quantity">
-                {#                <input type="text" class="form-control text-center quantity-product text-uppercase" placeholder="0">#}
-                <div class="input-group">
-                    <input type="text" class="form-control text-center quantity-product text-uppercase" placeholder="0">
-                    <div class="input-group-append">
-                        <button type="button" class="btn btn-warning btn-sm add-serial"> Series</button>
+            <td class="oc-td oc-td--left align-middle text-left product-item-table">
+                <div class="oc-search">
+                    <i class="oc-search__icon fas fa-search"></i>
+                    <input type="text" class="form-control text-uppercase product-table"
+                           role="combobox" aria-autocomplete="list" aria-expanded="false"
+                           autocomplete="off" autocorrect="off" spellcheck="false"
+                           placeholder="Buscar por nombre, marca o código...">
+                    <button type="button" class="oc-search__clear" tabindex="-1" title="Limpiar búsqueda">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="oc-search__panel" hidden>
+                        <ul class="oc-search__list" role="listbox" aria-label="Resultados de productos"></ul>
+                        <div class="oc-search__foot">
+                            <span class="oc-search__keys">
+                                <kbd>&uarr;</kbd><kbd>&darr;</kbd> navegar
+                                <kbd>Enter</kbd> elegir
+                                <kbd>Esc</kbd> cerrar
+                            </span>
+                            <span class="oc-search__count"></span>
+                        </div>
                     </div>
                 </div>
             </td>
-            <td class="align-middle unit">
-                <input type="text" class="form-control text-center text-uppercase unit-product" id="unit_product_id"
-                       name="unit-product" readonly>
-                {#                <select class="form-control unit-product" id="id_unit_product" name="unit_product" required>#}
-                {#                    <option value="0"> Seleccione</option>#}
-                {#                    {% for u in unitmeasurement_obj %}#}
-                {#                            <option value="{{ u.id }}">{{ u.name }}</option>#}
-                {#                    {% endfor %}#}
-                {#                </select>#}
+            <td class="item-quantity oc-td oc-td--center align-middle">
+                <div class="input-group">
+                    <input type="text" class="form-control text-center quantity-product text-uppercase" placeholder="0">
+                    <div class="input-group-append">
+                        <button type="button" class="btn oc-series add-serial" title="Registrar series del producto">
+                            <i class="fas fa-barcode"></i> Series
+                        </button>
+                    </div>
+                </div>
             </td>
-            <td class="item-value-price text-right align-middle">
+            <td class="unit oc-td oc-td--center align-middle">
+                <input type="text" class="form-control text-center text-uppercase unit-product" id="unit_product_id"
+                       name="unit-product" readonly placeholder="—">
+            </td>
+            <td class="item-value-price oc-td oc-td--money text-right align-middle">
                 <div class="input-icon">
                     <input type="text" class="form-control text-right text-uppercase value-unit-product"
                            placeholder="0.00">
                     <i class="change-money">S/</i>
                 </div>
             </td>
-            <td class="item-price text-right align-middle" price-unit-with-discount="">
+            <td class="item-price oc-td oc-td--money text-right align-middle" price-unit-with-discount="">
                 <div class="input-icon">
                     <input type="text" class="form-control text-right text-uppercase price-unit-product"
                            placeholder="0.00">
                     <i class="change-money">S/</i>
                 </div>
             </td>
-            <td class="item-discount1 text-right align-middle">
+            <td class="item-discount1 oc-td oc-td--money text-right align-middle">
                 <input type="text" class="form-control text-right text-uppercase discount1" placeholder="0.00">
             </td>
-            <td class="item-discount2 text-right align-middle">
+            <td class="item-discount2 oc-td oc-td--money text-right align-middle">
                 <input type="text" class="form-control text-right text-uppercase discount2" placeholder="0.00">
             </td>
-            <td class="item-discount3 text-right align-middle">
+            <td class="item-discount3 oc-td oc-td--money text-right align-middle">
                 <input type="text" class="form-control text-right text-uppercase discount3" placeholder="0.00">
             </td>
-            <td class="item-discount4 text-right align-middle">
+            <td class="item-discount4 oc-td oc-td--money text-right align-middle">
                 <input type="text" class="form-control text-right text-uppercase discount4" placeholder="0.00">
             </td>
-            <td class="item-total text-right align-middle total-row">
+            <td class="item-total oc-td oc-td--total text-right align-middle total-row">
                 <div class="input-icon">
                     <input type="text" class="form-control text-right text-uppercase total-detail" placeholder="0.00">
                     <i class="change-money">S/</i>
                 </div>
             </td>
-            {#            <td class="item-check text-center align-middle">#}
-            {#                <div class="form-check">#}
-            {#                    <input class="form-check-input position-static check-kardex" type="checkbox" value="" checked>#}
-            {#                </div>#}
-            {#            </td>#}
-            <td class="align-middle">
-                {#                                <button type="button" onclick="deleteItem(  id_product  )" class="btn btn-danger delete-detail"><i#}
-                {#                                        class="fa fa-trash"></i></button>#}
+            <td class="oc-td oc-td--act align-middle">
+                <button type="button" class="btn oc-btn-del delete-detail" title="Eliminar detalle">
+                    <i class="fa fa-trash"></i>
+                </button>
             </td>
         </tr>
-        <tr class="product-serial">
-{#            <td class="text-right align-middle" colspan="2"></td>#}
-{#            <td class="text-right align-middle">#}
-{#                <div id="accordion">#}
-{#                    <div class="card">#}
-{#                        <div class="card-header p-0" id="heading-{{ c.id }}">#}
-{#                            <h5 class="mb-0 text-center">#}
-{#                                <button class="btn btn-link collapsed text-dark roboto-condensed-regular font-weight-bold"#}
-{#                                        data-toggle="collapse" style="font-size: 11px"#}
-{#                                        data-target="#collapse-{{ c.id }}" aria-expanded="false"#}
-{#                                        aria-controls="collapse-{{ c.id }}">#}
-{#                                    Seriales <i class="fas fa-sort-down"></i>#}
-{#                                </button>#}
-{#                            </h5>#}
-{#                        </div>#}
-{#                        <div id="collapse-{{ c.id }}" class="collapse" aria-labelledby="heading-{{ c.id }}"#}
-{#                             data-parent="#accordion">#}
-{#                            <div class="card-body p-0">#}
-{#                                <table class="table table-sm align-content-center table-bordered mb-0">#}
-{#                                    <tbody id="details-serial">#}
-{#                                    <tr>#}
-{#                                        <td class="text-right align-middle text-center">1</td>#}
-{#                                        <td class="text-right align-middle">#}
-{#                                            <input type="text" class="form-control" placeholder="..." aria-label=""#}
-{#                                                   aria-describedby="basic-addon1">#}
-{#                                        </td>#}
-{#                                    </tr>#}
-{#                                    </tbody>#}
-{#                                </table>#}
-{#                            </div>#}
-{#                        </div>#}
-{#                    </div>#}
-{#                </div>#}
-{#            </td>#}
-        </tr>
+        <tr class="product-serial"></tr>
 
         </tbody>
 
         <tfoot id="details-table-foot">
-
         <tr>
-            <td class="border-0" colspan="3"></td>
-
-            <td class="border td-table-foot" colspan="11">
-                <div class="form-check mt-5">
+            <td class="oc-tfoot-lead" colspan="3">
+                <div class="form-check oc-igv">
                     <input class="form-check-input check-igv" type="checkbox" value="" id="check_igv" checked>
                     <label class="form-check-label" for="check_igv">
-                        INCLUYE IGV
+                        Los precios ingresados <b>incluyen IGV</b>
                     </label>
                 </div>
-                <table class="table table-hover table-sm align-content-center table-bordered mt-3 table-foot"
-                       cellspacing="0" style="width: 100%;" id="id_detail_data_foot">
+            </td>
 
+            <td class="oc-tfoot-sum td-table-foot" colspan="10">
+                <table id="id_detail_data_foot" class="oc-totals" cellspacing="0" style="width: 100%;">
                     <thead>
-                    <tr class="text-center text-white" style="background: #1a77c8">
-                        <th scope="col" class="align-middle font-weight-normal" style="width: 20%;">Base Imponible</th>
-                        <th scope="col" class="align-middle font-weight-normal" style="width: 20%;">IGV (18%)</th>
-                        <th scope="col" class="align-middle font-weight-normal" style="width: 20%;">Importe Total</th>
-                        {#                        <th scope="col" class="align-middle font-weight-normal" style="width: 20%;">Flete</th>#}
-                        <th scope="col" class="align-middle font-weight-normal" style="width: 20%;">Total Documento</th>
+                    <tr>
+                        <th scope="col" class="oc-totals__th">Base Imponible</th>
+                        <th scope="col" class="oc-totals__th">IGV (18%)</th>
+                        <th scope="col" class="oc-totals__th">Importe Total</th>
+                        <th scope="col" class="oc-totals__th">Total Documento</th>
+                        <th scope="col" class="oc-totals__th oc-hide">Flete</th>
+                    </tr>
+                    </thead>
                     <tbody id="table-detail-foot">
                     <tr class="text-center">
                         <td class="foot-base">
@@ -186,18 +152,18 @@
                                        placeholder="0.00"><i class="change-money">S/</i>
                             </div>
                         </td>
-                        {#                        <td class="foot-freight">#}
-                        {#                            <div class="input-icon">#}
-                        {#                                <input type="text" class="form-control text-right text-uppercase total-foot-freight"#}
-                        {#                                       placeholder="0.00">#}
-                        {#                                <i class="change-money font-weight-lighter">S/</i>#}
-                        {#                            </div>#}
-                        {#                        </td>#}
                         <td class="foot-document">
                             <div class="input-icon">
-                                <input type="text" class="form-control text-right text-uppercase total-foot-document"
-                                       placeholder="0.00">
-                                <i class="change-money font-weight-lighter">S/</i>
+                                <input type="text"
+                                       class="form-control text-right text-uppercase total-foot-document"
+                                       placeholder="0.00"><i class="change-money">S/</i>
+                            </div>
+                        </td>
+                        <td class="foot-freight oc-hide">
+                            <div class="input-icon">
+                                <input type="text"
+                                       class="form-control text-right text-uppercase total-foot-freight"
+                                       value="0.00"><i class="change-money">S/</i>
                             </div>
                         </td>
                     </tr>

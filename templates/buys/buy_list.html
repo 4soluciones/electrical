@@ -1,167 +1,81 @@
 {% extends 'home.html' %}
 {% block title %}
-    Compras
+    Nueva Orden de Compra
 {% endblock title %}
 
 {% block body %}
-    <div class="col-sm-12 col-sm-12 col-lg-12 pt-3 roboto-condensed-regular">
-        <div class="card">
-            <div class="card-header pt-0">
-                <div class="row" style="background: #1a77c8">
-                    <div class="col-sm-8 col-md-8 col-lg-8">
-                        <div class="row p-2">
-                            <div class="col-sm-3 col-md-3 col-lg-3">
-                                <h4 class="montserrat text-white font-weight-bold mt-4 mb-0"><label>NUEVA
-                                    COMPRA:</label>
-                                </h4>
-                            </div>
+    <div class="oc-page roboto-condensed-regular">
 
-                            <div class="col-sm-2 col-md-2 col-lg-2 mb-3">
-                                <button type="button" onclick="showModalView('new_provider')"
-                                        class="btn btn-sm btn-secondary btn-block mt-3 mb-0 col-sm-12 col-md-12 col-lg-12">
-                                    Nuevo Proveedor
-                                </button>
-
-                            </div>
-
-                            <div class="col-sm-3 col-md-3 col-lg-3 mt-3">
-                                <form>
-                                    <div class="form-group row">
-                                        <button type="button"
-                                                class="col-sm-5 btn btn-sm btn-outline-secondary border-0 text-white btn-block p-1"
-                                                id="btn-type-change">Tipo de Cambio:
-                                        </button>
-                                        <div class="col-sm-7">
-                                            <input type="text" class="form-control text-center font-weight-bold"
-                                                   id="type_change" readonly>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-
-                            <div class="col-sm-2 col-md-2 col-lg-2">
-                                <div class="form-check mt-4">
-                                    <input class="form-check-input check-dollar" type="checkbox" value=""
-                                           id="check_dollar">
-                                    <label class="form-check-label text-white" for="check_dollar">
-                                        COMPRA EN DOLARES
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
-                        {#                            <div class="col-sm-3 col-md-3 col-lg-3">#}
-                        {#                                <div class="form-check mt-4">#}
-                        {#                                    <input class="form-check-input check-dollar" type="checkbox" value=""#}
-                        {#                                           id="check_dollar">#}
-                        {#                                    <label class="form-check-label text-white" for="check_dollar">#}
-                        {#                                        COMPRA EN DOLARES#}
-                        {#                                    </label>#}
-                        {#                                </div>#}
-                        {#                            </div>#}
-
-                    </div>
-
-
-                </div>
-                <div class="col-sm-4 col-md-4 col-lg-4">
-                    <div class="row">
-                        {#                            <div class="col-sm-4 col-md-4 col-lg-4">#}
-                        {#                                <label>Tipo de Cambio</label>#}
-                        {#                                <input type="text" class="form-control text-uppercase" id="id_ruc_provider"#}
-                        {#                                       name="ruc_provider"#}
-                        {#                                       placeholder="Ingrese RUC"#}
-                        {#                                       size="11"#}
-                        {#                                       value="" required>#}
-                        {##}
-                        {#                            </div>#}
-                        {##}
-                        {#                                <form>#}
-                        {#                                    <div class="form-group row mt-3">#}
-                        {#                                        <label for="type_change" class="col-sm-5 col-form-label">Tipo de Cambio:</label>#}
-                        {#                                        <button type="button"#}
-                        {#                                                class="col-sm-5 btn btn-sm btn-outline-secondary border-0 text-white btn-block p-1"#}
-                        {#                                                id="btn-type-change">Tipo de Cambio:#}
-                        {#                                        </button>#}
-                        {#                                        <div class="col-sm-7">#}
-                        {#                                            <input type="text" class="form-control text-center font-weight-bold"#}
-                        {#                                                   id="type_change" readonly>#}
-                        {#                                        </div>#}
-                        {#                                    </div>#}
-                        {#                                </form>#}
-                        {#                            </div>#}
-                        {#                            <div class="col-sm-4 col-md-4 col-lg-4">#}
-                        {#                                <div class="form-check mt-4">#}
-                        {#                                    <input class="form-check-input check-dollar" type="checkbox" value=""#}
-                        {#                                           id="check_dollar">#}
-                        {#                                    <label class="form-check-label text-white" for="check_dollar">#}
-                        {#                                        COMPRA EN DOLARES#}
-                        {#                                    </label>#}
-                        {#                                </div>#}
-                        {#                            </div>#}
-
+        {# ============================ ENCABEZADO ============================ #}
+        <section class="oc-hero">
+            <div class="oc-hero__bar">
+                <div class="oc-hero__brand">
+                    <span class="oc-hero__icon"><i class="fas fa-file-invoice-dollar"></i></span>
+                    <div class="oc-hero__txt">
+                        <span class="oc-hero__eyebrow">Módulo de Compras</span>
+                        <h1 class="oc-hero__title">Nueva Orden de Compra</h1>
                     </div>
                 </div>
 
+                <div class="oc-hero__controls">
+                    <button type="button" onclick="showModalView('new_provider')" class="oc-btn oc-btn--light"
+                            title="Registrar un proveedor nuevo">
+                        <i class="fas fa-user-plus"></i><span class="oc-btn__label">Nuevo Proveedor</span>
+                    </button>
+
+                    <div class="oc-rate" role="group" aria-label="Tipo de cambio">
+                        <button type="button" id="btn-type-change" class="oc-rate__btn" title="Actualizar tipo de cambio">
+                            <i class="fas fa-exchange-alt"></i><span class="oc-rate__label">Tipo de Cambio</span>
+                        </button>
+                        <input type="text" class="oc-rate__val" id="type_change" readonly value="&mdash;"
+                               aria-label="Tipo de cambio">
+                    </div>
+
+                    <label class="oc-switch" for="check_dollar" title="Marque si la compra est&aacute; denominada en d&oacute;lares">
+                        <input class="check-dollar" type="checkbox" value="" id="check_dollar">
+                        <span class="oc-switch__track"><span class="oc-switch__thumb"></span></span>
+                        <span class="oc-switch__label">Compra en <b>dólares</b></span>
+                    </label>
+                </div>
             </div>
-            <div class="card-body p-0">
-                <div class="row border">
-                    <div class="col-sm-12 col-md-12 col-lg-12 border-right">
-                        {% include "buys/buy_register.html" %}
-                    </div>
-                    {#                        <div class="col-sm-5 col-md-5 col-lg-5">#}
-                    {#                            <div class="card">#}
-                    {#                                <div class="card-header">#}
-                    {#                                    <div class="row">#}
-                    {#                                        <div class="col-sm-9 col-md-9 col-lg-9">#}
-                    {#                                            DETALLE DE DOCUMENTOS DE FLETE#}
-                    {#                                        </div>#}
-                    {#                                    </div>#}
-                    {#                                </div>#}
-                    {#                                <div class="card-body">#}
-                    {#                                    {% include "buys/buys_freight.html" %}#}
-                    {#                                </div>#}
-                    {#                            </div>#}
-                    {#                        </div>#}
-                </div>
 
+        </section>
+
+        {# ============================ DATOS DEL DOCUMENTO ============================ #}
+        <section class="oc-card">
+            <div class="oc-card__head">
+                <h2 class="oc-card__title"><i class="fas fa-file-invoice"></i> Datos del documento</h2>
+                <span class="oc-card__hint">Campos con <b>*</b> obligatorios</span>
             </div>
-        </div>
+            <div class="oc-card__body">
+                {% include "buys/buy_register.html" %}
+            </div>
+        </section>
+
+        {# ============================ DETALLE DE LA COMPRA ============================ #}
+        <section class="oc-card">
+            <div class="oc-card__head">
+                <h2 class="oc-card__title"><i class="fas fa-list-alt"></i> Detalle de la compra</h2>
+                <div class="oc-card__actions">
+                    <span class="oc-chip" id="oc-rows-count">0 ítems</span>
+                    <button type="button" id="btn-add-new-detail" class="oc-btn oc-btn--accent">
+                        <i class="fas fa-plus"></i><span class="oc-btn__label">Agregar Detalle</span>
+                    </button>
+                </div>
+            </div>
+            <div class="oc-card__body oc-card__body--flush">
+                <div class="oc-surface">
+                    <div class="table-responsive" id="render-table">
+                        {% include "buys/buy_detail.html" %}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="oc-spacer"></div>
     </div>
 
-    <div class="col-sm-12 col-md-12 col-lg-12 pt-1 roboto-condensed-regular">
-        <div class="card">
-            {#                <div class="card-header">#}
-
-            {#                    <div class="row p-1">#}
-            {##}
-            {#                        <div class="col-sm-3 col-md-3 col-lg-3 text-center">#}
-            {#                            <div class="card border-0 pt-2">#}
-            {#                                <div class="card-body align-middle p-0 bg-light">#}
-            {#                                    <h6>DETALLES DE LA COMPRA:</h6>#}
-            {#                                </div>#}
-            {#                            </div>#}
-            {#                        </div>#}
-            {#                        <div class="col-sm-1 col-md-1 col-lg-1">#}
-            {#                            <button type="button" id="btn-add-new-detail"#}
-            {#                                    class="btn btn-sm btn-success btn-block" style="width: 60%"><i#}
-            {#                                    class="fas fa-plus"></i>#}
-            {#                            </button>#}
-            {#                        </div>#}
-            {##}
-            {#                    </div>#}
-            {#                </div>#}
-
-            <div class="card-body pt-2">
-
-                <div class="table-responsive" id="render-table">
-                    {% include "buys/buy_detail.html" %}
-                </div>
-            </div>
-        </div>
-    </div>
-
-
+    {# ============================ MODALES ============================ #}
     <div class="modal fade" id="modal-updetail" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle"
          aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
@@ -178,33 +92,10 @@
         </div>
     </div>
 
-
-    <div class="card-body">
-        <div id="product-grid-list"></div>
-    </div>
     <div class="modal fade bd-example-modal-lg" id="add-modal" tabindex="-1" role="dialog"
          aria-labelledby="exampleModalLabel" aria-hidden="true"></div>
 
-
-    <div class="mr-3 ml-0" style="
-            display: none;
-            position: absolute;
-            top: 83px;
-            left: 0px;
-            background: #e9ecef;
-            opacity: 0.5;
-            width: 100%;
-            {#height: 46em;#}
-            !important;bottom: 560px;
-            padding-right: 65em;
-            padding-top: 2em;" id="loading-666">
-
-    </div>
-
-
-
     <div class="modal" id="modal-debs" tabindex="-1" role="dialog">
-
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header pb-2 pt-2">
@@ -220,41 +111,9 @@
         </div>
     </div>
 
+    <div class="oc-overlay" id="loading-666" style="display: none;"></div>
 
-
-    <style>
-
-        .input-icon {
-            position: relative;
-        }
-
-        .input-icon > i {
-        {#content: "$";#} position: absolute;
-            display: block;
-            transform: translate(0, -50%);
-            top: 50%;
-            pointer-events: none;
-            width: 25px;
-            text-align: center;
-            font-style: normal;
-        }
-
-        .input-icon > input {
-            padding-left: 25px;
-            padding-right: 8px;
-        }
-
-        .input-icon-right > i {
-            right: 0;
-        }
-
-        .input-icon-right > input {
-            padding-left: 0;
-            padding-right: 25px;
-            text-align: right;
-        }
-    </style>
-
+    {% include "buys/oc_assets.html" %}
 {% endblock body %}
 
 
@@ -274,8 +133,6 @@
             '</div>' +
             '</div>';
 
-        $("#id_ruc_provider").attr('maxlength', 11);
-
 
         let array_units = [
             {% for u in unitmeasurement_obj %}
@@ -292,6 +149,14 @@
         {% for u in unitmeasurement_obj %}
             textOption += `<option value="{{ u.id }}">{{ u.name }}</option>`
         {% endfor %}
+
+
+        /* ================================================================
+           AUTOCOMPLETE DE PRODUCTOS
+           - Debounce + peticion al backend
+           - Navegacion con flechas, seleccion con Enter, cierre con Esc
+           - Panel posicionado con position:fixed (no lo recorta la tabla)
+           ================================================================ */
 
 
         $(document).on('click', '#check_dollar', function (e) {
@@ -317,11 +182,7 @@
                 headers: {"X-CSRFToken": '{{ csrf_token }}'},
                 success: function (response, textStatus, xhr) {
                     if (xhr.status === 200) {
-                        {#toastr.success(response.message, '¡Bien hecho!');#}
-                        {#console.log(response)#}
-                        _input_type_change.val('$' + response.sell);
-                        {#_provider.attr('provider', response.pk);#}
-                        {#$('#loading-666').hide();#}
+                        _input_type_change.val(response.sell);
                     }
                 },
                 error: function (jqXhr, textStatus, xhr) {
@@ -334,7 +195,6 @@
                             console.log(" STATUS: " + xhr + " " + textStatus);
                         }
                     }
-                    {#$('#loading-666').hide();#}
                 },
             });
             return false;
@@ -365,15 +225,21 @@
                     success: function (response, textStatus, xhr) {
                         if (xhr.status === 200) {
                             toastr.success(response.message, '¡Bien hecho!');
-                            //console.log(response)
                             _provider.val(response.result);
                             _provider.attr('provider', response.pk);
+                            _provider.closest('.oc-input').addClass('is-resolved');
+                            $('#provider-hint').text('Proveedor validado con el RUC ingresado.')
+                                .addClass('is-ok');
                             $('#loading-666').hide();
                         }
                     },
                     error: function (jqXhr, textStatus, xhr) {
                         if (jqXhr.status === 500) {
                             toastr.error(jqXhr.responseJSON.error, 'Mensaje');
+                            _provider.val('').attr('provider', '');
+                            _provider.closest('.oc-input').removeClass('is-resolved');
+                            $('#provider-hint').text('Se completa automáticamente al buscar el RUC')
+                                .removeClass('is-ok');
                         } else {
                             if (textStatus === 'timeout') {
                                 toastr.error('Failed from timeout', 'Mensaje');
@@ -391,9 +257,6 @@
         $('#id_proveedor').select2({
             theme: 'bootstrap4',
         });
-        {#$('#id_producto').select2({#}
-        {#    theme: 'bootstrap4',#}
-        {# });#}
         $("#btn-new").click(function () {
             limper_form();
         });
@@ -414,16 +277,35 @@
             });
         }
 
-        function limper_form(request) {
+        function limper_form() {
             $('#id_fechacompra').val('');
-            $("#id_factura").val('');
-            $('#id_proveedor option').removeAttr('selected');
-            $('#id_proveedor option:first').attr('selected', 'selected');
-            $('#id_proveedor').trigger('change');
-            $('#id_detail_data_grid tbody#details').empty();
+            $('#id_factura').val('');
+            $('#id_ruc_provider').val('');
+            $('#id_provider').val('').attr('provider', '').removeClass('is-valid');
+            $('#id_provider').closest('.oc-input').removeClass('is-resolved');
+            $('#provider-hint').text('Se completa automáticamente al buscar el RUC').removeClass('is-ok');
+            $('#amount-due').val('');
+            $('#payment_type').val('0').trigger('change');
+            $('#details-dues').empty();
+            ProductSearch.closeAll();
+
+            // limpia la fila base
+            let _base = $('#id_detail_data_grid tbody#details-table tr.item-row').first();
+            _base.attr('product', '').attr('unit_id', '');
+            _base.find('input').val('');
+            _base.find('.oc-search').removeClass('has-value');
+            _base.next('tr.product-serial').attr('product', '').attr('unit_id', '').empty();
+
+            // elimina las filas agregadas con "Agregar Detalle"
+            $('#id_detail_data_grid tbody#details-table tr.item-row').not(':first').remove();
+            $('#id_detail_data_grid tbody#details-table tr.product-serial').not(':first').remove();
+
+            counterStrike2();
+            sum_table();
+            updateRowsCount();
         }
 
-        function limper(request) {
+        function limper() {
             $('#id_cantidad').val('');
             $('#id_preciounitario').val('');
             $('#id_import').val('');
@@ -431,9 +313,6 @@
             $('#id_producto option:first').attr('selected', 'selected');
             $('#id_producto').trigger('change');
             $("#id_unidad").empty().append('<option>Seleccione</option>');
-
-            {#$('#id_producto option[value=0]').attr('selected','selected');#}
-            {#$('#id_unidad option[value=0]').attr('selected','selected');#}
         }
 
         $('#id_import').keyup(function () {
@@ -482,12 +361,10 @@
                     '<td class="align-middle"> ' + '<button type="button" onclick="deleteItem(' + id_product + ')" class="btn btn-success delete-detail"><i class="fa fa-trash"></i></button>' + '</td>' +
                     '</tr>'
                 );
-                //$index++;
                 limper()
                 counterStrike()
                 toastr.info('Producto agregado correctamente');
             } else {
-                {#toastr.succes('info messages');#}
                 toastr.warning('Por favor, complete todo los campos!');
             }
         });
@@ -497,6 +374,9 @@
             let type_bill = $('#id_type_bill').val();
             let correlative = $('#id_factura').val();
             let _flag_stock = true
+            if (!supplier || isNaN(parseInt(supplier))) {
+                return _flag_stock;
+            }
             await $.ajax({
                 url: '/buys/check_purchase/',
                 dataType: 'json',
@@ -507,9 +387,6 @@
                     'correlative': correlative
                 },
                 success: function (response, textStatus, xhr) {
-                    {#console.log(response)#}
-                    {#console.log(textStatus)#}
-                    {#console.log(xhr)#}
                     if (response.success) {
                         _flag_stock = response.flag;
                     }
@@ -521,11 +398,90 @@
             return _flag_stock
         }
 
+        /**
+         * Valida el detalle antes de enviar la compra.
+         * Evita guardar compras con filas incompletas (producto sin seleccionar,
+         * cantidad/precio en cero), que antes provocaban errores 500 en el servidor.
+         */
+        function validatePurchaseDetails() {
+            let _rows = $("#id_detail_data_grid tbody#details-table tr.item-row");
+            let _provider = $('#id_provider').attr("provider");
+
+            if (!_provider || isNaN(parseInt(_provider))) {
+                toastr.error('DEBE BUSCAR EL PROVEEDOR POR SU RUC (pulse Enter) ANTES DE GUARDAR.', '¡PROVEEDOR INVÁLIDO!');
+                $('#id_ruc_provider').focus();
+                return false;
+            }
+            if (!$('#id_factura').val()) {
+                toastr.error('INGRESE EL NÚMERO DEL DOCUMENTO.', '¡CAMPO OBLIGATORIO!');
+                $('#id_factura').focus();
+                return false;
+            }
+            if (_rows.length === 0) {
+                toastr.error("PARA REALIZAR LA COMPRA AGREGUE AL MENOS UN PRODUCTO.", '¡ADVERTENCIA!');
+                return false;
+            }
+
+            let _ok = true;
+            _rows.each(function () {
+                if (!_ok) {
+                    return;
+                }
+                let _n = $(this).children('td:nth-child(1)').text();
+                let _product = $(this).attr('product');
+                let _quantity = Number($(this).find('td.item-quantity input.quantity-product').val());
+                let _price = Number($(this).find('td.item-price input.price-unit-product').val());
+                let _unit = $(this).attr('unit_id');
+
+                if (!_product || _product === '') {
+                    toastr.error('FILA ' + _n + ': SELECCIONE UN PRODUCTO.', '¡DETALLE INCOMPLETO!');
+                    _ok = false;
+                    return;
+                }
+                if (!_unit || _unit === '') {
+                    toastr.error('FILA ' + _n + ': EL PRODUCTO NO TIENE UNIDAD DE MEDIDA ASIGNADA.', '¡DETALLE INCOMPLETO!');
+                    _ok = false;
+                    return;
+                }
+                if (isNaN(_quantity) || _quantity <= 0) {
+                    toastr.error('FILA ' + _n + ': INGRESE UNA CANTIDAD MAYOR QUE CERO.', '¡DETALLE INCOMPLETO!');
+                    _ok = false;
+                    return;
+                }
+                if (isNaN(_price) || _price <= 0) {
+                    toastr.error('FILA ' + _n + ': INGRESE EL PRECIO UNITARIO.', '¡DETALLE INCOMPLETO!');
+                    _ok = false;
+                    return;
+                }
+
+                // validacion de series: no repetidas y no exceden la cantidad comprada
+                let _serials = [];
+                $(this).next('tr.product-serial').find('input.serial').each(function () {
+                    let _s = ($(this).val() || '').trim().toUpperCase();
+                    if (_s) {
+                        _serials.push(_s);
+                    }
+                });
+                let _unique = $.unique(_serials);
+                if (_unique.length !== _serials.length) {
+                    toastr.error('FILA ' + _n + ': HAY SERIES REPETIDAS DENTRO DEL MISMO PRODUCTO.', '¡SERIES DUPLICADAS!');
+                    _ok = false;
+                    return;
+                }
+                if (_serials.length > Math.ceil(_quantity)) {
+                    toastr.error('FILA ' + _n + ': INGRESE ' + Math.ceil(_quantity) + ' SERIES O MENOS (CANTIDAD COMPRADA: ' + _quantity + ').', '¡SERIES DUPLICADAS!');
+                    _ok = false;
+                }
+            });
+            return _ok;
+        }
+
         $('#purchase-form').submit(async function (event) {
             event.preventDefault();
+            ProductSearch.closeAll();
 
             if ($('#payment_type').val() === '0') {
-                toastr.warning('¡Selecione el tipo de pago!', 'Mensaje');
+                toastr.warning('¡Seleccione el tipo de pago!', 'Mensaje');
                 return false;
             }
             let _flag_duplicate = await checkDuplicatePurchase()
@@ -534,24 +490,26 @@
                 return false;
             }
 
+            if (!validatePurchaseDetails()) {
+                return false;
+            }
+
             if ($("#id_detail_data_grid tbody#details-table tr.item-row").length > 0 && $('.product-table').val() !== '') {
                 let table_foot = $("#id_detail_data_grid tfoot#details-table-foot tr td.td-table-foot").find("#id_detail_data_foot tbody#table-detail-foot tr")
                 let Detail_purchase = {
                     "Invoice": $('#id_factura').val(),
-                    {#"ProviderId": $('#id_proveedor').val(),#}
                     "ProviderId": $('#id_provider').attr("provider"),
                     "Date": $('#id_fechacompra').val(),
                     "Type_Bill": $('#id_type_bill').val(),
                     "Type_Pay": $('#payment_type').val(),
-                    "Base_Total": Number(table_foot.find("td.foot-base input.total-foot-base").val()),
-                    "Igv_Total": Number(table_foot.find("td.foot-igv input.total-foot-igv").val()),
-                    "Import_Total": Number(table_foot.find("td.foot-total input.total-foot-total").val()),
-                    "TotalFreight": Number(table_foot.find("td.foot-freight input.total-foot-freight").val()),
-                    "Total_Document": Number(table_foot.find("td.foot-document input.total-foot-document").val()),
+                    "Base_Total": Number(table_foot.find("td.foot-base input.total-foot-base").val() || 0),
+                    "Igv_Total": Number(table_foot.find("td.foot-igv input.total-foot-igv").val() || 0),
+                    "Import_Total": Number(table_foot.find("td.foot-total input.total-foot-total").val() || 0),
+                    "TotalFreight": Number(table_foot.find("td.foot-freight input.total-foot-freight").val() || 0),
+                    "Total_Document": Number(table_foot.find("td.foot-document input.total-foot-document").val() || 0),
                     "Check_Igv": ($("#id_detail_data_grid tfoot#details-table-foot tr td.td-table-foot").find("div.form-check input.check-igv").is(':checked')) ? 1 : 0,
                     "Check_Dollar": ($("#check_dollar").is(':checked')) ? 1 : 0,
                     "Details": [],
-                    //"Freight": [],
                     "Dues": [],
                 };
                 $("#id_detail_data_grid tbody#details-table tr.item-row").each(function () {
@@ -561,12 +519,12 @@
                         "Quantity": $(this).find("td.item-quantity input.quantity-product").val(),
                         "Unit": $(this).attr('unit_id'),
                         "Price": Number($(this).find("td.item-price input.price-unit-product").val()),
-                        "Price_Unit_Discount": Number($(this).find("td.item-price").attr("price-unit-with-discount")),
-                        "Dto1": Number($(this).find("td.item-discount1 input.discount1").val()),
-                        "Dto2": Number($(this).find("td.item-discount2 input.discount2").val()),
-                        "Dto3": Number($(this).find("td.item-discount3 input.discount3").val()),
-                        "Dto4": Number($(this).find("td.item-discount4 input.discount4").val()),
-                        "Total": Number($(this).find("td.item-total input.total-detail").val()),
+                        "Price_Unit_Discount": Number($(this).find("td.item-price").attr("price-unit-with-discount") || 0),
+                        "Dto1": Number($(this).find("td.item-discount1 input.discount1").val() || 0),
+                        "Dto2": Number($(this).find("td.item-discount2 input.discount2").val() || 0),
+                        "Dto3": Number($(this).find("td.item-discount3 input.discount3").val() || 0),
+                        "Dto4": Number($(this).find("td.item-discount4 input.discount4").val() || 0),
+                        "Total": Number($(this).find("td.item-total input.total-detail").val() || 0),
                         "Check_kardex": ($(this).find("td.item-check div.form-check input.check-kardex").is(':checked')) ? 1 : 0,
                         "Serials": []
                     };
@@ -579,16 +537,6 @@
 
                     Detail_purchase.Details.push(detailObj);
                 });
-                /*$("#id_freight_data_grid tbody#details-freight tr").each(function () {
-                    let detailFreight = {
-                        "DocumentFreight": $(this).find("td.document-freight input.document-freight-input").val(),
-                        "SerialFreight": $(this).find("td.serial-freight input.serial-freight-input").val(),
-                        "NumberFreight": $(this).find("td.number-freight input.number-freight-input").val(),
-                        "DateFreight": $(this).find("td.date-freight input.date-freight-input").val(),
-                        "TotalFreight": Number($(this).find("td.total-freight input.total-freight-input").val()),
-                    }
-                    Detail_purchase.Freight.push(detailFreight);
-                });*/
                 $("#id_debs_grid tbody#details-dues tr").each(function () {
                     let dataDues = {
                         "amountDue": $(this).find("td.amount-due").text().replace('S/ ', '')
@@ -596,8 +544,10 @@
                     Detail_purchase.Dues.push(dataDues)
 
                 });
-                //console.log(Detail_purchase)
-                //console.log(JSON.stringify(Detail_purchase))
+
+                let _btn = $('#btn-save');
+                _btn.prop('disabled', true).find('i').removeClass('fa-check-circle').addClass('fa-spinner fa-spin');
+
                 $.ajax({
                     url: '/buys/save_purchase/',
                     async: true,
@@ -615,7 +565,12 @@
                         }
                     },
                     error: function (jqXhr, textStatus, xhr) {
-                        toastr.error("ERROR. ", '¡INCONCEBIBLE!');
+                        _btn.prop('disabled', false).find('i').removeClass('fa-spinner fa-spin').addClass('fa-check-circle');
+                        if (jqXhr.responseJSON && jqXhr.responseJSON.error) {
+                            toastr.error(jqXhr.responseJSON.error, '¡NO SE PUDO GUARDAR!');
+                        } else {
+                            toastr.error("ERROR. ", '¡INCONCEBIBLE!');
+                        }
                     }
                 });
 
@@ -653,28 +608,25 @@
             }
         })
 
-        //Bonton eliminar fila
+        //Boton eliminar fila
         function deleteItem($id) {
             $('#details').find("tr[i=" + $id + "]").remove();
             counterStrike();
         }
         $(document).on('click', '.delete-detail', function (e) {
+            ProductSearch.closeFor($(this).closest('tr.item-row'));
             let product = $(this).closest('td').parent('tr').attr('product');
-            if (product){
+            if (product) {
                 $('#details-table').find("tr[product=" + product + "]").remove();
-            }
-            else{
+            } else {
                 $(this).closest('td').parent('tr').next('tr.product-serial').remove();
                 $(this).closest('td').parent('tr').remove();
             }
             counterStrike2();
+            sum_table();
+            updateRowsCount();
         });
-        /*function deleteItem2(btn) {
-            //btn.parentNode.parentNode.remove();
-            let product = btn.closest('td').parent('tr').attr('product')
-            $('#details-table').find("tr[product=" + product + "]").remove();
-            counterStrike2();
-        }*/
+
 
         // reasigna numero de fila a los detalles
         function counterStrike() {
@@ -687,113 +639,6 @@
 
         }
 
-        function counterStrike2() {
-            let l = 1;
-            $('#details-table tr.item-row').each(function () {
-                $(this).attr('i', l);
-                $(this).children('td:nth-child(1)').text(l);
-                l++;
-            });
-
-        }
-
-        $(document).on('focusin', '.product-table', function (e) {
-            // $(this).parent('td').find('div.dropdown-menu').removeClass('show')
-            $(this).parent('td').find('div.dropdown-menu').css({
-                'background-color': 'transparent',
-                'border': 'transparent',
-                {#'margin-top': '10px'#}
-            })
-            $(this).val(' ');
-            $('#id_unit_product').val('0')
-        });
-
-
-        $(document).on('keypress', '.product-table', function (e) {
-
-            $(this).parent('td').find('div.dropdown-menu').empty()
-
-            if (e.keyCode === 13) {
-
-                e.preventDefault()
-
-                $(this).trigger("enterKey");
-                let _product_name = $(this).val();
-                // let _td = $(this).parent('div.btn-group').parent('td')
-                let _td = $(this).parent('td')
-                let _menu = _td.find('.dropdown-menu')
-
-                if (_product_name.length > 3) {
-
-                    $.ajax({
-                        url: '/buys/get_product_by_criteria_table/',
-                        async: true,
-                        dataType: 'json', // for response
-                        type: 'GET',
-                        data: {
-                            'value': _product_name,
-                        },
-                        contentType: 'application/json;charset=UTF-8',
-                        headers: {"X-CSRFToken": '{{ csrf_token }}'},
-                        success: function (response, textStatus, xhr) {
-                            if (xhr.status === 200) {
-                                let list = response.productList;
-                                _menu.css({'background-color': '#fff', 'border': '1px solid rgba(0,0,0,.15)'})
-                                for (let i = 0; i < list.length; i++) {
-                                    _menu.append(`<a class="dropdown-item product-item" barcode="${list[i].barcode}" unit_name="${list[i].unit}" brand="${list[i].brand}" unit_id="${list[i].unit_id}" href="#" data-id="${list[i].id}">${list[i].name} - ${list[i].brand}</a>`)
-                                }
-
-                            }
-                        },
-                        error: function (jqXhr, textStatus, xhr) {
-                            if (jqXhr.status === 500) {
-                                toastr.error(jqXhr.responseJSON.error, 'Mensaje');
-                            } else {
-                                if (textStatus === 'timeout') {
-                                    toastr.error('Failed from timeout', 'Mensaje');
-                                } else {
-                                    console.log(" STATUS: " + xhr + " " + textStatus);
-                                }
-                            }
-                        }
-                    });
-                } else {
-                    toastr.warning('Para la busqueda ingrese minimo 3 caracteres', 'Error de llenado');
-                    return false;
-                }
-            }
-        });
-
-
-        $(document).on('click', '.product-item', function (e) {
-
-            let _product_id = $(this).attr('data-id');
-            let _unit_id = $(this).attr('unit_id');
-            let _barcode = $(this).attr('barcode');
-            let _product_name = $(this).text();
-            let _tr = $(this).parent('div.dropdown-menu').parent('td').parent('tr');
-            let _next_tr = _tr.next('tr')
-            let _td = $(this).parent('div.dropdown-menu').parent('td');
-            let _select = _td.find('select.unit-product');
-            let _brand_product = $(this).attr('brand');
-            let _unit_product = $(this).attr('unit_name');
-            //$('.product-table').val(_product_name)
-
-            _tr.attr('product', _product_id)
-            _next_tr.attr('product', _product_id)
-            _td.find('input.product-table').val(_product_name)
-            _tr.find('td.brand input.brand-product').val(_brand_product)
-            _tr.find('td.unit input.unit-product').val(_unit_product)
-            _tr.find('td.item-code-bar input.code-bar').val(_barcode)
-
-            _tr.attr('unit_id', _unit_id)
-            _next_tr.attr('unit_id', _unit_id)
-
-            {#get_units_by_product(_product_id, _tr)#}
-
-            $(this).parent('div.dropdown-menu').empty()
-            $(this).parent('div.dropdown-menu').addClass('hide')
-        });
 
         function get_units_by_product($product_id, _tr) {
 
@@ -828,92 +673,93 @@
 
             $('#id_detail_data_grid > tbody').append(
                 '<tr class="text-center item-row" product="" unit_id="">' +
-                '<td class="item-numero align-middle">' + '</td>' +
-                '<td class="item-code-bar align-middle text-center">' +
-                '<input type="text" class="form-control text-center text-uppercase code-bar" autocomplete="off"' + '</td>' +
-                '<td class="align-middle text-left product-item-table">' +
-                '<input type="text" class="form-control text-uppercase product-table dropdown-toggle" ' +
-                '               data-toggle="dropdown" aria-expanded="false" placeholder="Ingrese producto...">' + '<div class="dropdown-menu"></div>' + '</td>' +
-                /*'<td class="align-middle brand">' +
-                '<input type="text" class="form-control text-center text-uppercase brand-product" id="brand_id" name="brand" readonly>' + '</td>' +*/
-                '<td class="align-middle item-quantity">' +
-                /*'<input type="text" class="form-control text-center quantity-product text-uppercase" placeholder="0">' + */
+                '<td class="item-numero oc-td oc-td--num align-middle">' + '</td>' +
+                '<td class="item-code-bar oc-td oc-td--center align-middle text-center">' +
+                '<input type="text" class="form-control text-center text-uppercase code-bar" autocomplete="off" placeholder="Escanear">' + '</td>' +
+                '<td class="oc-td oc-td--left align-middle text-left product-item-table">' +
+                '<div class="oc-search">' +
+                '<i class="oc-search__icon fas fa-search"></i>' +
+                '<input type="text" class="form-control text-uppercase product-table" ' +
+                'role="combobox" aria-autocomplete="list" aria-expanded="false" autocomplete="off" ' +
+                'autocorrect="off" spellcheck="false" placeholder="Buscar por nombre, marca o código...">' +
+                '<button type="button" class="oc-search__clear" tabindex="-1" title="Limpiar búsqueda"><i class="fas fa-times"></i></button>' +
+                '<div class="oc-search__panel" hidden>' +
+                '<ul class="oc-search__list" role="listbox" aria-label="Resultados de productos"></ul>' +
+                '<div class="oc-search__foot">' +
+                '<span class="oc-search__keys"><kbd>&uarr;</kbd><kbd>&darr;</kbd> navegar ' +
+                '<kbd>Enter</kbd> elegir <kbd>Esc</kbd> cerrar</span>' +
+                '<span class="oc-search__count"></span>' +
+                '</div>' +
+                '</div>' +
+                '</div>' + '</td>' +
+                '<td class="item-quantity oc-td oc-td--center align-middle">' +
                 '<div class="input-group">' +
                 '<input type="text" class="form-control text-center quantity-product text-uppercase" placeholder="0">' +
                 '<div class="input-group-append">' +
-                '<button type="button" class="btn btn-warning btn-sm add-serial"> Series</button>' +
+                '<button type="button" class="btn oc-series add-serial" title="Registrar series del producto"> <i class="fas fa-barcode"></i> Series</button>' +
                 '</div>' +
                 '</div>' +
                 '</td>' +
-                /*'<td class="align-middle unit">' +
-                '<select class="form-control unit-product" id="id_unit_product" name="unit_product" required>' +
-                '<option value="0"> Seleccione</option>'+ textOption + '</td>' +*/
-                '<td class="align-middle unit">' +
-                '<input type="text" class="form-control text-center text-uppercase unit-product" readonly>' + '</td>' +
-                '<td class="item-value-price text-right align-middle">' + '<div class="input-icon">' +
-                '<input type="text" class="form-control text-right text-uppercase value-unit-product" placeholder="0.00">' + '<i class="change-money">' + _val_money + '</i>' + '</div>' + '</td>' +
-                '<td class="item-price text-right align-middle" price-unit-with-discount="">' + '<div class="input-icon">' +
-                '<input type="text" class="form-control text-right text-uppercase price-unit-product" placeholder="0.00">' + '<i class="change-money">' + _val_money + '</i>' + '</div>' + '</td>' +
-                '<td class="item-discount1 text-right align-middle">' +
-                '<input type="text" class="form-control text-right text-uppercase discount1" placeholder="0.00">' + '</td>' +
-                '<td class="item-discount2 text-right align-middle">' +
-                '<input type="text" class="form-control text-right text-uppercase discount2" placeholder="0.00">' + '</td>' +
-                '<td class="item-discount3 text-right align-middle">' +
-                '<input type="text" class="form-control text-right text-uppercase discount3" placeholder="0.00">' + '</td>' +
-                '<td class="item-discount4 text-right align-middle">' +
-                '<input type="text" class="form-control text-right text-uppercase discount4" placeholder="0.00">' + '</td>' +
-                '<td class="item-total text-right align-middle total-row">' + '<div class="input-icon">' +
-                '<input type="text" class="form-control text-right text-uppercase total-detail" placeholder="0.00">' + '<i class="change-money">' + _val_money + '</i>' + '</div>' + '</td>' +
-                /*'<td class="item-check text-center align-middle">' +
-                '<div class="form-check">' + '<input class="form-check-input position-static check-kardex" type="checkbox" value="" checked> ' + '</div>' +
-                '</td>' +*/
-                '<td class="align-middle"> ' + '<button type="button" class="btn btn-danger delete-detail"><i class="fa fa-trash"></i></button>' + '</td>' +
+                '<td class="unit oc-td oc-td--center align-middle">' +
+                '<input type="text" class="form-control text-center text-uppercase unit-product" readonly placeholder="—">' + '</td>' +
+                '<td class="item-value-price oc-td oc-td--money text-right align-middle">' + '<div class="input-icon">' +
+                '<input type="text" class="form-control text-right text-uppercase value-unit-product" placeholder="0.00">' + '<i class="change-money">' + _val_money + '</i></div>' + '</td>' +
+                '<td class="item-price oc-td oc-td--money text-right align-middle" price-unit-with-discount="">' + '<div class="input-icon">' +
+                '<input type="text" class="form-control text-right text-uppercase price-unit-product" placeholder="0.00">' + '<i class="change-money">' + _val_money + '</i></div>' + '</td>' +
+                '<td class="item-discount1 oc-td oc-td--money text-right align-middle">' +
+                '<input type="text" class="form-control text-right text-uppercase discount1" placeholder="0.00">' +
+                '</td>' +
+                '<td class="item-discount2 oc-td oc-td--money text-right align-middle">' +
+                '<input type="text" class="form-control text-right text-uppercase discount2" placeholder="0.00">' +
+                '</td>' +
+                '<td class="item-discount3 oc-td oc-td--money text-right align-middle">' +
+                '<input type="text" class="form-control text-right text-uppercase discount3" placeholder="0.00">' +
+                '</td>' +
+                '<td class="item-discount4 oc-td oc-td--money text-right align-middle">' +
+                '<input type="text" class="form-control text-right text-uppercase discount4" placeholder="0.00">' +
+                '</td>' +
+                '<td class="item-total oc-td oc-td--total text-right align-middle total-row">' + '<div class="input-icon">' +
+                '<input type="text" class="form-control text-right text-uppercase total-detail" placeholder="0.00">' + '<i class="change-money">' + _val_money + '</i></div>' + '</td>' +
+                '<td class="oc-td oc-td--act align-middle"> ' + '<button type="button" class="btn oc-btn-del delete-detail" title="Eliminar detalle"><i class="fa fa-trash"></i></button>' + '</td>' +
                 '</tr>' +
-                '<tr class="product-serial"product="" unit_id="">' + '</tr>'
+                '<tr class="product-serial" product="" unit_id=""></tr>'
             );
             counterStrike2()
+            updateRowsCount();
         });
 
-        /*$(document).on('keyup', '#id_total_freight', function () {
-            sum_table()
-        });*/
-
-        $(document).on('keyup', '.total-detail', function () {
-            let _tr = $(this).parent('div').parent('td').parent('tr')
-            {#let _tr = $("#id_detail_data_grid tbody#details-table tr")#}
-            let _total = Number(_tr.find('td.total-row div.input-icon input.total-detail').val());
-            let _quantity = Number(_tr.find('td.item-quantity div.input-group input.quantity-product').val())
-            {#console.log('_total',_total)#}
-            {#console.log('_quantity',_quantity)#}
-            let price_unit = _total / _quantity
-            {#console.log(price_unit)#}
-
-            _tr.find('td.item-price div.input-icon input.price-unit-product').val(Number(price_unit).toFixed(2));
+        function _recalcTotal(_tr) {
             calculate_total(_tr)
             sum_table()
+        }
+
+        $(document).on('keyup input', '.total-detail', function () {
+            let _tr = $(this).parent('div').parent('td').parent('tr')
+            let _total = Number(_tr.find('td.total-row div.input-icon input.total-detail').val());
+            let _quantity = Number(_tr.find('td.item-quantity div.input-group input.quantity-product').val())
+            let price_unit = _total / _quantity
+
+            if (isFinite(price_unit) && !isNaN(price_unit)) {
+                _tr.find('td.item-price div.input-icon input.price-unit-product').val(Number(price_unit).toFixed(2));
+            }
+            _recalcTotal(_tr)
         });
 
-        $(document).on('keyup', '.quantity-product', function () {
+        $(document).on('keyup input', '.quantity-product', function () {
 
             let _tr = $(this).closest('td').parent('tr')
             let _quantity = Number(_tr.find('td.item-quantity div.input-group input.quantity-product').val())
             let _price_unit = Number(_tr.find('td.item-price div.input-icon input.price-unit-product').val())
             let _total = Number(_tr.find('td.total-row div.input-icon input.total-detail').val());
 
-            {#console.log("_tr", _tr.find('td.item-price div.input-icon input.price-unit-product'))#}
-            {#console.log("_quantity", _quantity)#}
-            {#console.log("_price_unit", _price_unit)#}
-            {#console.log("_total", _total)#}
-
             if (_quantity !== 0 && _price_unit !== 0) {
                 _total = _quantity * _price_unit
                 _tr.find('td.item-total div.input-icon input.total-detail').val(Number(_total).toFixed(2));
             }
-            calculate_total(_tr)
-            sum_table()
+            _recalcTotal(_tr)
         });
 
-        $(document).on('keyup', '.value-unit-product', function () {
+        $(document).on('keyup input', '.value-unit-product', function () {
 
             let _tr = $(this).parent('div').parent('td').parent('tr')
             let _value_unit = $(this).val();
@@ -924,30 +770,22 @@
             if (_value_unit !== '') {
                 let _p_unit = parseFloat(_value_unit) * 1.18
                 _price_unit.val(_p_unit.toFixed(4));
-                /*console.log("_quantity", _quantity)
-                console.log("_price_unit", _price_unit)
-                console.log("_total", _total)*/
                 if (_quantity !== 0 && _price_unit.val() !== 0) {
                     _total = _quantity * _price_unit.val()
                     _tr.find('td.item-total div.input-icon input.total-detail').val(Number(_total).toFixed(2));
                 }
-                calculate_total(_tr)
-                sum_table()
+                _recalcTotal(_tr)
             } else {
                 _price_unit.val('');
             }
         });
 
-        $(document).on('keyup', '.price-unit-product', function () {
+        $(document).on('keyup input', '.price-unit-product', function () {
 
             let _tr = $(this).parent('div').parent('td').parent('tr')
             let _quantity = Number(_tr.find('td.item-quantity div.input-group input.quantity-product').val())
             let _price_unit = Number(_tr.find('td.item-price div.input-icon input.price-unit-product').val())
             let _total = Number(_tr.find('td.total-row div.input-icon input.total-detail').val());
-
-            {#console.log("_quantity", _quantity)#}
-            {#console.log("_price_unit", _price_unit)#}
-            {#console.log("_total", _total)#}
 
             if (_quantity !== 0 && _price_unit !== 0) {
                 let value_unit = _tr.find('td.item-value-price div.input-icon input.value-unit-product');
@@ -956,104 +794,22 @@
                 _total = _quantity * _price_unit
                 _tr.find('td.item-total div.input-icon input.total-detail').val(Number(_total).toFixed(2));
             }
-            calculate_total(_tr)
-            sum_table()
+            _recalcTotal(_tr)
         });
 
-        $(document).on('input', '.discount1, .discount2, .discount3, .discount4', function (e) {
+        $(document).on('input keyup', '.discount1, .discount2, .discount3, .discount4', function (e) {
 
             let _tr = $(this).parent('td').parent('tr')
-            calculate_total(_tr)
+            _recalcTotal(_tr)
+        });
+
+
+
+        $(document).on('change', '#id_detail_data_grid tfoot tr input.check-igv', function (e) {
             sum_table()
         });
 
-        function calculate_total(_tr) {
-
-            let $quantity = Number(_tr.find('td.item-quantity div.input-group input.quantity-product').val());
-            let $price_unit = Number(_tr.find('td.item-price input.price-unit-product').val());
-            // let $price_unit;
-            let $d1_val = Number(_tr.find('td.item-discount1 input.discount1').val());
-            let $d2_val = Number(_tr.find('td.item-discount2 input.discount2').val());
-            let $d3_val = Number(_tr.find('td.item-discount3 input.discount3').val());
-            let $d4_val = Number(_tr.find('td.item-discount4 input.discount4').val());
-            let $total = Number(_tr.find('td.total-row input.total-detail').val());
-
-            let d1, d2, d3, d4, d1p, d2p, d3p, d4p, amount, $totalTemp
-
-            $price_unit = Number(_tr.find('td.item-price input.price-unit-product').val());
-            amount = $quantity * $price_unit
-
-            if ($d1_val === 0 && $d2_val === 0 && $d3_val === 0 && $d4_val === 0) {
-                d1 = amount - [(amount * $d1_val) / 100]
-                d2 = d1 - [(d1 * $d2_val) / 100]
-                d3 = d2 - [(d2 * $d3_val) / 100]
-                d4 = d3 - [(d3 * $d4_val) / 100]
-
-                d1p = $price_unit - [($price_unit * $d1_val) / 100]
-                d2p = d1p - [(d1p * $d2_val) / 100]
-                d3p = d2p - [(d2p * $d3_val) / 100]
-                d4p = d3p - [(d3p * $d4_val) / 100]
-
-                _tr.find('td.item-price').attr('price-unit-with-discount', d4p.toFixed(2))
-                _tr.find('td.total-row input.total-detail').val(d4.toFixed(2))
-                //console.log('en el if', d4p)
-            } else {
-                d1 = amount - [(amount * $d1_val) / 100]
-                d2 = d1 - [(d1 * $d2_val) / 100]
-                d3 = d2 - [(d2 * $d3_val) / 100]
-                d4 = d3 - [(d3 * $d4_val) / 100]
-
-                d1p = $price_unit - [($price_unit * $d1_val) / 100]
-                d2p = d1p - [(d1p * $d2_val) / 100]
-                d3p = d2p - [(d2p * $d3_val) / 100]
-                d4p = d3p - [(d3p * $d4_val) / 100]
-
-                _tr.find('td.item-price').attr('price-unit-with-discount', d4p.toFixed(2))
-                //console.log('fuera', d4p)
-
-                _tr.find('td.total-row input.total-detail').val(d4.toFixed(2))
-            }
-
-        }
-
-        function sum_table() {
-            let igv = 0;
-            let base = 0;
-            let sum_total = 0;
-            let total_freight = 0;
-            let total_document = 0;
-            let _total;
-
-            {#total_freight = Number($("#id_freight_data_grid tbody#details-freight tr input#id_total_freight").val());#}
-
-            $("#id_detail_data_grid tbody#details-table tr.item-row").each(function () {
-                let td_total = Number($(this).find("td.total-row input.total-detail").val());
-                sum_total = sum_total + td_total
-            });
-
-            let _check_igv = $("#id_detail_data_grid tfoot tr input.check-igv")
-
-            if (_check_igv.is(':checked')) {
-                base = sum_total / 1.18
-                igv = sum_total - base
-                _total = base + igv
-                total_document = _total + total_freight
-
-            } else {
-                base = sum_total
-                igv = sum_total * 0.18
-                _total = base + igv
-                total_document = _total + total_freight
-            }
-
-            $("#id_detail_data_grid tfoot tr input.total-foot-base").val(base.toFixed(2));
-            $("#id_detail_data_grid tfoot tr input.total-foot-igv").val(igv.toFixed(2));
-            $("#id_detail_data_grid tfoot tr input.total-foot-total").val(_total.toFixed(2));
-            {#$("#id_detail_data_grid tfoot tr input.total-foot-freight").val(total_freight.toFixed(2));#}
-            $("#id_detail_data_grid tfoot tr input.total-foot-document").val(total_document.toFixed(2));
-        }
-
-        $(document).on('change', '#id_detail_data_grid tfoot tr input.check-igv', function (e) {
+        $(document).on('change', '.discount1, .discount2, .discount3, .discount4', function (e) {
             sum_table()
         });
 
@@ -1063,7 +819,6 @@
             if (type_pay === 'L') {
                 $('.dues').removeClass('d-none');
                 $('.table-dues').removeClass('d-none');
-                {#$('#modal-debs').modal('show');#}
             } else {
                 $('.dues').addClass('d-none');
                 $('.table-dues').addClass('d-none');
@@ -1075,25 +830,16 @@
 
             let _amount_due = $('#amount-due').val();
 
-            /*$('#id_debs_grid').append('<tbody />');
-
-            for (let i = 0; i < _quantity_debs; i++) {
-                $('#id_debs_grid tbody').append(
-                    '<tr>' +
-                    '<td class="align-middle text-center">' + count + '</td>' +
-                    '<td class="align-middle text-center">' +
-                    '<input type="text" class="form-control text-right text-uppercase debt" placeholder="0.00">' + '</td>' +
-                    '</td>' +
-                    '</tr>'
-                );
-                count++;
-            }*/
+            if (_amount_due === '' || isNaN(Number(_amount_due))) {
+                toastr.warning('INGRESE EL MONTO DE LA CUOTA.', '¡ADVERTENCIA!');
+                return false;
+            }
 
             $('#id_debs_grid > tbody').append(
                 '<tr class="text-center">' +
                 '<td class="align-middle text-center due-count">' + '</td>' +
                 '<td class="align-middle text-center amount-due">' + 'S/ ' + _amount_due + '</td>' +
-                '<td class="align-middle"> ' + '<button type="button" onclick="deletedues(this)" class="btn btn-danger delete-detail" style="font-size: 0.6em"><i class="fa fa-trash" style="font-size: 1.5em"></i></button>' + '</td>' +
+                '<td class="align-middle"> ' + '<button type="button" onclick="deletedues(this)" class="btn oc-btn-del delete-due" title="Eliminar cuota"><i class="fa fa-trash"></i></button>' + '</td>' +
                 '</tr>'
             );
             counterStrikedebs()
@@ -1140,11 +886,16 @@
                         headers: {"X-CSRFToken": '{{ csrf_token }}'},
                         success: function (response, textStatus, xhr) {
                             if (response.success === true) {
+                                ProductSearch.closeFor(_tr);
                                 _tr.attr('product', response.product_id);
+                                _tr.next('tr.product-serial').attr('product', response.product_id);
                                 _tr.find('td.product-item-table input.product-table').val(response.product_name);
+                                _tr.find('td.product-item-table').closest('.oc-search')
+                                    .addClass('has-value');
                                 _tr.find('td.brand input.brand-product').val(response.brand);
                                 _tr.find('td.unit input.unit-product').val(response.unit);
                                 _tr.attr('unit_id', response.unit_id);
+                                _tr.next('tr.product-serial').attr('unit_id', response.unit_id);
                             }
                             if (response.success === false) {
                                 toastr.error(response.message, '¡Mensaje!');
@@ -1169,11 +920,11 @@
             let _quantity = $(this).parent('div.input-group-append').siblings('input.quantity-product');
             let _tr = $(this).closest('td.item-quantity').parent('tr').next('tr.product-serial');
 
-            if (productID.length === 0) {
+            if (!productID || productID.length === 0) {
                 toastr.warning('Favor buscar un producto antes de ingresar las Series', 'Error de llenado');
                 return false;
             }
-            if (_quantity.val().length === 0) {
+            if (_quantity.val().length === 0 || Number(_quantity.val()) <= 0) {
                 toastr.warning('Ingrese una cantidad', 'Error de llenado');
                 return false;
             }
@@ -1184,13 +935,12 @@
                 serials += '<tr>' +
                     '<td class="text-right align-middle text-center">' + _number + '</td>' +
                     '<td class="text-right align-middle item-serial">' +
-                    '<input type="text" class="form-control serial" placeholder="..." aria-label="" aria-describedby="basic-addon1">' +
+                    '<input type="text" class="form-control serial" placeholder="Ingrese la serie...">' +
                     '</td>' +
                     '</tr>';
             }
             _tr.append(
-                '<td class="text-right align-middle" colspan="2"></td>' +
-                '<td class="text-right align-middle">' +
+                '<td class="text-right align-middle" colspan="13">' +
                 '<div id="accordion">' +
                 '<div class="card">' +
                 '<div class="card-header p-0" id="heading-' + productID + '">' +
@@ -1205,7 +955,7 @@
                 '<div id="collapse-' + productID + '" class="collapse" aria-labelledby="heading-' + productID + '" data-parent="#accordion">' +
                 '<div class="card-body p-0">' +
                 '<table class="table table-sm align-content-center table-bordered mb-0">' +
-                '<tbody id="details-serial-' + productID + '"">' +
+                '<tbody id="details-serial-' + productID + '">' +
                 serials +
                 '</tbody>' +
                 '</table>' +
@@ -1223,13 +973,16 @@
             if (e.key === 'Enter') {
                 e.preventDefault();
                 let $currentInput = $(this);
-                let currentValue = $currentInput.val();
+                let currentValue = ($currentInput.val() || '').trim();
                 let $previousInput = $currentInput.closest('tr').prev('tr').find('input.serial');
-                let tbodyId = $currentInput.closest('tbody').attr('id');
+                let tbodyId = $currentInput.closest('tbody').attr('id') || '';
                 let $productId = tbodyId.split('-').pop();
                 let $nextInput = $currentInput.closest('tr').next('tr').find('input.serial');
 
-                if ($previousInput.length && currentValue === $previousInput.val()) {
+                if (currentValue === '') {
+                    return;
+                }
+                if ($previousInput.length && currentValue.toUpperCase() === ($previousInput.val() || '').trim().toUpperCase()) {
                     toastr.warning('El valor ingresado es igual al anterior. Por favor, ingrese un valor diferente.');
                     $currentInput.val('');
                     return;
@@ -1251,13 +1004,17 @@
 
             let _flag_serial = true
 
+            if (!serial || !$.trim(serial)) {
+                return false;
+            }
+
             await $.ajax({
                 url: '/buys/check_serial/',
                 async: true,
                 dataType: 'json', // for response
                 type: 'GET',
                 data: {
-                    'serial': serial,
+                    'serial': $.trim(serial),
                     'product': $productId,
                 },
                 contentType: 'application/json;charset=UTF-8',
@@ -1275,6 +1032,12 @@
 
         }
 
+
+        $(document).ready(function () {
+            counterStrike2();
+            updateRowsCount();
+            sum_table();
+        });
 
     </script>
 

@@ -1,204 +1,401 @@
 {% extends 'home.html' %}
 {% block title %}
-    Editar Compra
+    Editar Orden de Compra
 {% endblock title %}
 
 {% block body %}
-
     {% if purchase %}
-        <div class="col-sm-12 col-sm-12 col-lg-12 pt-3 roboto-condensed-regular">
-            <div class="card">
-                <div class="card-header pt-0">
-                    <div class="row" style="background: #f1a7a7">
-                        <div class="col-sm-6 col-md-6 col-lg-6">
-                            <div class="row p-2">
-                                <div class="col-sm-8 col-md-8 col-lg-8">
-                                    <h4 class="montserrat text-dark font-weight-bold mt-3 mb-0">
-                                        <label>EDITAR COMPRA NRO:</label>
-                                        <label>{{ purchase.bill_number }}</label>
-                                        <input type="hidden" id="purchase_id" value="{{ purchase.id }}">
-                                    </h4>
+        <div class="oc-page roboto-condensed-regular">
+
+            {# ============================ ENCABEZADO ============================ #}
+            <section class="oc-hero oc-hero--edit">
+                <div class="oc-hero__bar">
+                    <div class="oc-hero__brand">
+                        <span class="oc-hero__icon"><i class="fas fa-file-edit"></i></span>
+                        <div class="oc-hero__txt">
+                            <span class="oc-hero__eyebrow">Módulo de Compras</span>
+                            <h1 class="oc-hero__title">Editar Orden de Compra Nº {{ purchase.bill_number|upper }}</h1>
+                        </div>
+                    </div>
+
+                    <div class="oc-hero__controls">
+                        {% if purchase.check_dollar %}
+                            <label class="oc-switch oc-switch--static" for="check_dollar">
+                                <input class="check-dollar" type="checkbox" value="" id="check_dollar" checked>
+                                <span class="oc-switch__track"><span class="oc-switch__thumb"></span></span>
+                                <span class="oc-switch__label">Compra en <b>dólares</b></span>
+                            </label>
+                        {% else %}
+                            <label class="oc-switch oc-switch--static" for="check_soles">
+                                <input type="checkbox" value="" id="check_soles" checked>
+                                <span class="oc-switch__track"><span class="oc-switch__thumb"></span></span>
+                                <span class="oc-switch__label">Compra en <b>soles</b></span>
+                            </label>
+                        {% endif %}
+
+                        <span class="oc-badge-info">
+                            <i class="fas fa-calendar-alt"></i> {{ purchase.purchase_date|date:"d-m-Y" }}
+                        </span>
+
+                        <span class="oc-badge-info">
+                            {% if purchase.status == 'S' %}
+                                <i class="fas fa-clock"></i> Sin almacén
+                            {% elif purchase.status == 'A' %}
+                                <i class="fas fa-warehouse"></i> En almacén
+                            {% else %}
+                                <i class="fas fa-ban"></i> Anulada
+                            {% endif %}
+                        </span>
+
+                        <button type="button" class="oc-btn oc-btn--light" id="btn-print-edit"
+                                onclick="window.open('/buys/get_purchase_list/', '_self')" title="Volver al listado">
+                            <i class="fas fa-arrow-left"></i><span class="oc-btn__label">Volver</span>
+                        </button>
+                    </div>
+                </div>
+                <p class="oc-hero__sub">
+                    <i class="fas fa-circle-info"></i>
+                    Los cambios solo se aplican a compras que aún no han ingresado al almacén. Las series ya
+                    vendidas o en stock no se pueden modificar.
+                </p>
+            </section>
+
+            {# ============================ DATOS DEL DOCUMENTO ============================ #}
+            <section class="oc-card">
+                <div class="oc-card__head">
+                    <h2 class="oc-card__title"><i class="fas fa-file-invoice"></i> Datos del documento</h2>
+                    <span class="oc-card__hint">Compra Nº <b>{{ purchase.bill_number|upper }}</b></span>
+                </div>
+                <div class="oc-card__body">
+                    <form id="purchase-form" method="POST" autocomplete="off">
+                        {% csrf_token %}
+                        <input type="hidden" id="purchase_id" value="{{ purchase.id }}">
+
+                        {# -------- FILA 1 -------- #}
+                        <div class="oc-row">
+                            <div class="oc-cell oc-cell--2">
+                                <label for="id_ruc_provider">RUC <b>*</b></label>
+                                <div class="oc-input oc-input--icon">
+                                    <i class="fas fa-id-card oc-input__icon"></i>
+                                    <input type="text" class="form-control text-uppercase" id="id_ruc_provider"
+                                           name="ruc_provider" placeholder="RUC" size="11" maxlength="11"
+                                           value="{{ purchase.supplier.ruc|upper }}" required>
                                 </div>
-                                <div class="col-sm-4 col-md-4 col-lg-4">
-                                    <button type="button" onclick="showModalView('new_provider')"
-                                            class="btn btn-sm btn-secondary btn-block mt-3 mb-0 col-sm-12 col-md-12 col-lg-12">
-                                        Nuevo Proveedor
-                                    </button>
+                                <small class="oc-hint">Enter para buscar</small>
+                            </div>
+
+                            <div class="oc-cell oc-cell--3">
+                                <label for="id_provider">Proveedor <b>*</b></label>
+                                <div class="oc-input oc-input--icon">
+                                    <i class="fas fa-building oc-input__icon"></i>
+                                    <input type="text" class="form-control text-uppercase"
+                                           provider="{{ purchase.supplier.id }}" id="id_provider"
+                                           name="provide" placeholder="Razón social"
+                                           value="{{ purchase.supplier.business_name|upper }}" required>
+                                </div>
+                                <small class="oc-hint is-ok" id="provider-hint">
+                                    <i class="fas fa-check-circle"></i> Proveedor validado
+                                </small>
+                            </div>
+
+                            <div class="oc-cell oc-cell--2">
+                                <label for="id_fechacompra">Fecha <b>*</b></label>
+                                <div class="oc-input oc-input--icon">
+                                    <i class="far fa-calendar oc-input__icon"></i>
+                                    <input type="date" class="form-control" id="id_fechacompra"
+                                           name="fechacompra"
+                                           value="{{ purchase.purchase_date|date:"Y-m-d" }}" required>
+                                </div>
+                            </div>
+
+                            <div class="oc-cell oc-cell--2">
+                                <label for="id_type_bill">Tipo doc.</label>
+                                <div class="oc-input">
+                                    <select id="id_type_bill" name="type_bill" class="form-control">
+                                        {% for valor, texto in tipo_bill_choices %}
+                                            <option value="{{ valor }}"
+                                                    {% if purchase.type_bill == valor %}selected{% endif %}>{{ texto }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="oc-cell oc-cell--3">
+                                <label for="id_factura">Nº de documento <b>*</b></label>
+                                <div class="oc-input oc-input--icon">
+                                    <i class="fas fa-hashtag oc-input__icon"></i>
+                                    <input type="text" class="form-control text-uppercase" id="id_factura"
+                                           name="factura" placeholder="F001-000123"
+                                           value="{{ purchase.bill_number|upper }}" required>
                                 </div>
                             </div>
                         </div>
+
+                        {# -------- FILA 2 -------- #}
+                        <div class="oc-row oc-row--pago">
+                            <div class="oc-cell oc-cell--pay">
+                                <label for="payment_type">Tipo de pago</label>
+                                <div class="oc-input">
+                                    <select id="payment_type" class="form-control text-uppercase">
+                                        <option value="0">Seleccione</option>
+                                        {% for valor, texto in tipo_pay_choices %}
+                                            <option value="{{ valor }}"
+                                                    {% if purchase.type_pay == valor %}selected{% endif %}>{{ texto }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="oc-cell oc-cell--dues dues d-none">
+                                <label for="amount-due">Monto de la cuota</label>
+                                <div class="input-group">
+                                    <input type="number" step="0.01" class="form-control text-right" placeholder="0.00"
+                                           aria-label="Monto de la cuota" aria-describedby="add-dues" id="amount-due">
+                                    <div class="input-group-append">
+                                        <button class="btn oc-btn-add" type="button" id="add-dues" title="Agregar cuota">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="oc-cell oc-cell--ctx">
+                                <label for="id_user">Responsable</label>
+                                <div class="oc-input oc-input--icon">
+                                    <i class="fas fa-user-tie oc-input__icon"></i>
+                                    <input type="text" class="form-control" id="id_user" name="user" readonly
+                                           value="{{ purchase.user.worker_set.last.employee.paternal_last_name|upper }}">
+                                </div>
+                            </div>
+
+                            <div class="oc-cell oc-cell--ctx">
+                                <label for="id_user_branch">Sucursal</label>
+                                <div class="oc-input oc-input--icon">
+                                    <i class="fas fa-building oc-input__icon"></i>
+                                    <input type="text" class="form-control" id="id_user_branch" name="user_branch" readonly
+                                           value="{{ purchase.subsidiary.name|upper }}">
+                                </div>
+                            </div>
+
+                            <div class="oc-cell oc-cell--actions">
+                                <button type="button" id="btn-new" class="oc-btn oc-btn--white" title="Descartar los cambios">
+                                    <i class="fas fa-undo"></i> Restablecer
+                                </button>
+                                <button type="submit" id="btn-save" class="oc-btn oc-btn--primary" title="Guardar los cambios">
+                                    <i class="fas fa-check-circle"></i> Guardar Cambios
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="row p-2 table-dues d-none">
+                            <div class="col-12">
+                                <div class="oc-subcard">
+                                    <div class="oc-subcard__head">
+                                        <h3 class="oc-subcard__title"><i class="fas fa-calendar-alt"></i> Plan de cuotas / letras</h3>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table id="id_debs_grid" class="table oc-table align-middle mb-0" cellspacing="0">
+                                            <thead class="oc-thead">
+                                            <tr>
+                                                <th scope="col" class="oc-th oc-th--pct">Nº cuota</th>
+                                                <th scope="col" class="oc-th">Monto</th>
+                                                <th scope="col" class="oc-th oc-th--act">Eliminar</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody id="details-dues">
+                                            {% for du in purchase.purchasedues_set.all %}
+                                                <tr class="text-center" due_id="{{ du.id }}">
+                                                    <td class="align-middle text-center due-count">{{ forloop.counter }}</td>
+                                                    <td class="align-middle text-center amount-due">S/ {{ du.due|floatformat:-2 }}</td>
+                                                    <td class="align-middle text-center">
+                                                        <button type="button" onclick="deleteDues(this, {{ du.id }})"
+                                                                class="oc-btn-del delete-due" title="Eliminar cuota">
+                                                            <i class="fa fa-trash"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            {# ============================ DETALLE ============================ #}
+            <section class="oc-card">
+                <div class="oc-card__head">
+                    <h2 class="oc-card__title"><i class="fas fa-list-alt"></i> Detalle de la compra</h2>
+                    <div class="oc-card__actions">
+                        <span class="oc-chip" id="oc-rows-count">0 ítems</span>
+                        <button type="button" id="btn-add-new-detail" class="oc-btn oc-btn--accent">
+                            <i class="fas fa-plus"></i><span class="oc-btn__label">Agregar Detalle</span>
+                        </button>
                     </div>
-                    <div class="card-body p-0">
-                        <div class="row border">
-                            <div class="col-sm-12 col-md-12 col-lg-12 border-right">
-                                <form id="purchase-form" action="{% url 'buys:save_purchase' %}" method="POST">
-                                    {% csrf_token %}
-                                    <div class="row p-1">
-                                        <div class="col-sm-3 col-md-3 col-lg-3">
-                                            <label>RUC Proveedor</label>
-                                            <input type="text" class="form-control text-uppercase" id="id_ruc_provider"
-                                                   name="ruc_provider"
-                                                   placeholder="Ingrese RUC"
-                                                   size="11"
-                                                   value="{{ purchase.supplier.ruc }}" required>
-
-                                        </div>
-                                        <div class="col-sm-6 col-md-6 col-lg-6"><label>Proveedor</label>
-                                            <input type="text" class="form-control text-uppercase"
-                                                   provider="{{ purchase.supplier.id }}"
-                                                   id="id_provider"
-                                                   name="provide"
-                                                   placeholder="Proveedor"
-                                                   value="{{ purchase.supplier.business_name|upper }}">
-                                        </div>
-
-                                        <div class="col-sm-3 col-md-3 col-lg-3"><label>Fecha</label>
-                                            <input type="date" class="form-control" id="id_fechacompra"
-                                                   name="fechacompra"
-                                                   placeholder="Fecha compra"
-                                                   value="{{ purchase.purchase_date|date:"Y-m-d" }}">
-                                        </div>
-                                    </div>
-                                    <div class="row p-1">
-                                        <div class="col-sm-2 col-md-2 col-lg-2 pr-1">
-                                            <label>Responsable</label>
-                                            <input type="text" class="form-control" id="id_user"
-                                                   name="user"
-                                                   placeholder="" readonly
-                                                   value="{{ purchase.user.worker_set.last.employee.paternal_last_name|upper }}">
-                                        </div>
-
-                                        <div class="col-sm-2 col-md-2 col-lg-2 pl-1 pr-1">
-                                            <label>Sucursal</label>
-                                            <input type="text" class="form-control" id="id_user"
-                                                   name="user"
-                                                   placeholder="" readonly
-                                                   value="{{ purchase.subsidiary.name|upper }}">
-
-                                        </div>
-
-                                        <div class="col-sm-2 col-md-2 col-lg-2 pl-1 pr-1">
-                                            <label>Tipo doc.</label>
-                                            <select id="id_type_bill" name="type_bill" class="form-control">
-                                                {% if purchase.type_bill == 'T' %}
-                                                    <option selected value="T">TICKET</option>
-                                                    <option value="B">BOLETA</option>
-                                                    <option value="F">FACTURA</option>
-                                                {% elif purchase.type_bill == 'F' %}
-                                                    <option selected value="F">FACTURA</option>
-                                                    <option value="T">TICKET</option>
-                                                    <option value="B">BOLETA</option>
-                                                {% elif purchase.type_bill == 'B' %}
-                                                    <option selected value="B">BOLETA</option>
-                                                    <option value="T">TICKET</option>
-                                                    <option value="F">FACTURA</option>
-                                                {% endif %}
-                                            </select>
-
-                                        </div>
-
-                                        <div class="col-sm-2 col-md-2 col-lg-2 pr-1 pl-1">
-                                            <label>Numero doc.</label>
-                                            <input type="text" class="form-control text-uppercase" id="id_factura"
-                                                   name="factura"
-                                                   placeholder="Numero factura"
-                                                   value="{{ purchase.bill_number }}">
-                                        </div>
-
-                                        <div class="col-sm-2 col-md-2 col-lg-2 pr-1 pl-1">
-                                            <label>Tipo de pago</label>
-                                            <select id="payment_type" class="form-control text-uppercase">
-                                                <option value="0">Seleccione</option>
-                                                {% if purchase.type_pay == 'E' %}
-                                                    <option selected value="E">EFECTIVO</option>
-                                                    <option value="D">DEPOSITO</option>
-                                                    <option value="C">CREDITO</option>
-                                                    <option value="L">LETRAS</option>
-                                                    <option value="EC">EN CARTERA</option>
-                                                {% endif %}
-                                                {% if purchase.type_pay == 'D' %}
-                                                    <option selected value="D">DEPOSITO</option>
-                                                    <option value="E">EFECTIVO</option>
-                                                    <option value="C">CREDITO</option>
-                                                    <option value="L">LETRAS</option>
-                                                    <option value="EC">EN CARTERA</option>
-                                                {% endif %}
-                                                {% if purchase.type_pay == 'C' %}
-                                                    <option selected value="C">CREDITO</option>
-                                                    <option value="D">DEPOSITO</option>
-                                                    <option value="E">EFECTIVO</option>
-                                                    <option value="L">LETRAS</option>
-                                                    <option value="EC">EN CARTERA</option>
-                                                {% endif %}
-                                                {% if purchase.type_pay == 'L' %}
-                                                    <option selected value="L">LETRAS</option>
-                                                    <option value="D">DEPOSITO</option>
-                                                    <option value="C">CREDITO</option>
-                                                    <option value="E">EFECTIVO</option>
-                                                    <option value="EC">EN CARTERA</option>
-                                                {% endif %}
-                                                {% if purchase.type_pay == 'EC' %}
-                                                    <option selected value="EC">EN CARTERA</option>
-                                                    <option value="D">DEPOSITO</option>
-                                                    <option value="C">CREDITO</option>
-                                                    <option value="E">EFECTIVO</option>
-                                                    <option value="L">LETRAS</option>
-                                                {% endif %}
-                                            </select>
-                                        </div>
-
-                                        <div class="col-sm-2 col-md-2 col-lg-2 pr-1 pl-1 dues d-none">
-                                            <label>Monto:</label>
-                                            <div class="input-group">
-                                                <input type="number" class="form-control text-right"
-                                                       placeholder="INGRESE MONTO"
-                                                       aria-label="Recipient's username" aria-describedby="add-dues"
-                                                       id="amount-due">
-                                                <button class="btn btn-outline-success" type="button" id="add-dues">+
+                </div>
+                <div class="oc-card__body oc-card__body--flush">
+                    <div class="oc-surface">
+                        <div class="table-responsive" id="render-table">
+                            <div class="oc-table-wrap">
+                                <table id="id_detail_data_grid" class="table oc-table align-middle" cellspacing="0"
+                                       style="width: 100%;">
+                                    <thead class="oc-thead">
+                                    <tr>
+                                        <th scope="col" class="oc-th oc-th--num">Nº</th>
+                                        <th scope="col" class="oc-th">Codigo de barras</th>
+                                        <th scope="col" class="oc-th oc-th--wide">Descripción de Artículo</th>
+                                        <th scope="col" class="oc-th oc-th--qty">Cantidad</th>
+                                        <th scope="col" class="oc-th">Unidad Medida</th>
+                                        <th scope="col" class="oc-th oc-th--money">Valor Unit.<br><small>(Sin IGV)</small></th>
+                                        <th scope="col" class="oc-th oc-th--money">Prec. Unit.<br><small>(Con IGV)</small></th>
+                                        <th scope="col" class="oc-th oc-th--pct">%Dto.1</th>
+                                        <th scope="col" class="oc-th oc-th--pct">%Dto.2</th>
+                                        <th scope="col" class="oc-th oc-th--pct">%Dto.3</th>
+                                        <th scope="col" class="oc-th oc-th--pct">%Dto.4</th>
+                                        <th scope="col" class="oc-th oc-th--money">Importe</th>
+                                        <th scope="col" class="oc-th oc-th--act">Eliminar</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="details-table">
+                                    {% for pd in purchase.purchasedetail_set.all %}
+                                        <tr class="item-row" product="{{ pd.product.id }}" unit_id="{{ pd.unit.id }}"
+                                            pd_id="{{ pd.id }}">
+                                            <td class="item-numero oc-td oc-td--num align-middle text-center">{{ forloop.counter }}</td>
+                                            <td class="item-code-bar oc-td oc-td--center align-middle text-center">
+                                                <input type="text" class="form-control text-center text-uppercase code-bar"
+                                                       autocomplete="off" placeholder="Escanear"
+                                                       value="{{ pd.product.barcode|default_if_none:'' }}">
+                                            </td>
+                                            <td class="oc-td oc-td--left align-middle text-left product-item-table">
+                                                <div class="oc-search">
+                                                    <i class="oc-search__icon fas fa-search"></i>
+                                                    <input type="text" class="form-control text-uppercase product-table"
+                                                           role="combobox" aria-autocomplete="list" aria-expanded="false"
+                                                           autocomplete="off" autocorrect="off" spellcheck="false"
+                                                           value="{{ pd.product.name }}"
+                                                           placeholder="Buscar por nombre, marca o código...">
+                                                    <button type="button" class="oc-search__clear" tabindex="-1"
+                                                            title="Limpiar búsqueda">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                    <div class="oc-search__panel" hidden>
+                                                        <ul class="oc-search__list" role="listbox"
+                                                           aria-label="Resultados de productos"></ul>
+                                                        <div class="oc-search__foot">
+                                                            <span class="oc-search__keys">
+                                                                <kbd>&uarr;</kbd><kbd>&darr;</kbd> navegar
+                                                                <kbd>Enter</kbd> elegir
+                                                                <kbd>Esc</kbd> cerrar
+                                                            </span>
+                                                            <span class="oc-search__count"></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="item-quantity oc-td oc-td--center align-middle">
+                                                <div class="input-group">
+                                                    <input type="text"
+                                                           class="form-control text-center quantity-product text-uppercase"
+                                                           placeholder="0" value="{{ pd.quantity|floatformat:0 }}">
+                                                    <div class="input-group-append">
+                                                        <button type="button"
+                                                                class="btn oc-series btn-series-toggle"
+                                                                data-toggle="collapse"
+                                                                data-target="#collapse-serials-{{ pd.id }}"
+                                                                aria-expanded="false"
+                                                                aria-controls="collapse-serials-{{ pd.id }}"
+                                                                title="Agregar, modificar o gestionar series">
+                                                            <i class="fas fa-barcode"></i> Series
+                                                            <span class="series-count">{{ pd.productserial_set.all|length }}</span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="unit oc-td oc-td--center align-middle">
+                                                <input type="text" class="form-control text-center text-uppercase unit-product"
+                                                       readonly placeholder="—" value="{{ pd.unit.name }}">
+                                            </td>
+                                            <td class="item-value-price oc-td oc-td--money text-right align-middle">
+                                                <div class="input-icon">
+                                                    <input type="text" class="form-control text-right text-uppercase value-unit-product"
+                                                           placeholder="0.00" value="{{ pd.price_unit|floatformat:-4 }}">
+                                                    <i class="change-money">{% if purchase.check_dollar %}${% else %}S/{% endif %}</i>
+                                                </div>
+                                            </td>
+                                            <td class="item-price oc-td oc-td--money text-right align-middle"
+                                                price-unit-with-discount="{{ pd.price_unit_discount|floatformat:-2 }}">
+                                                <div class="input-icon">
+                                                    <input type="text" class="form-control text-right text-uppercase price-unit-product"
+                                                           placeholder="0.00" value="{{ pd.price_unit|floatformat:-2 }}">
+                                                    <i class="change-money">{% if purchase.check_dollar %}${% else %}S/{% endif %}</i>
+                                                </div>
+                                            </td>
+                                            <td class="item-discount1 oc-td oc-td--money text-right align-middle">
+                                                <input type="text" class="form-control text-right text-uppercase discount1"
+                                                       placeholder="0.00" value="{{ pd.discount_one|floatformat:-2 }}">
+                                            </td>
+                                            <td class="item-discount2 oc-td oc-td--money text-right align-middle">
+                                                <input type="text" class="form-control text-right text-uppercase discount2"
+                                                       placeholder="0.00" value="{{ pd.discount_two|floatformat:-2 }}">
+                                            </td>
+                                            <td class="item-discount3 oc-td oc-td--money text-right align-middle">
+                                                <input type="text" class="form-control text-right text-uppercase discount3"
+                                                       placeholder="0.00" value="{{ pd.discount_three|floatformat:-2 }}">
+                                            </td>
+                                            <td class="item-discount4 oc-td oc-td--money text-right align-middle">
+                                                <input type="text" class="form-control text-right text-uppercase discount4"
+                                                       placeholder="0.00" value="{{ pd.discount_four|floatformat:-2 }}">
+                                            </td>
+                                            <td class="item-total oc-td oc-td--total text-right align-middle total-row">
+                                                <div class="input-icon">
+                                                    <input type="text" class="form-control text-right text-uppercase total-detail"
+                                                           placeholder="0.00" value="{{ pd.total_detail|floatformat:-2 }}">
+                                                    <i class="change-money">{% if purchase.check_dollar %}${% else %}S/{% endif %}</i>
+                                                </div>
+                                            </td>
+                                            <td class="oc-td oc-td--act align-middle">
+                                                <button type="button" onclick="deleteItem(this)"
+                                                        class="oc-btn-del delete-detail"
+                                                        title="Eliminar detalle">
+                                                    <i class="fa fa-trash"></i>
                                                 </button>
-                                            </div>
-                                        </div>
+                                            </td>
+                                        </tr>
 
-                                    </div>
-
-                                    <div class="row p-2 table-dues d-none">
-
-                                        <div class="col-sm-8 col-md-8 col-lg-8 pr-1 pl-1"></div>
-                                        <div class="col-sm-4 col-md-4 col-lg-4 pr-1 pl-1">
-
-                                            <div class="table-responsive">
-                                                <div class="table-responsive dataTables_wrapper roboto-condensed-regular">
-
-                                                    <table id="id_debs_grid"
-                                                           class="table table-hover table-sm align-content-center table-bordered mb-0"
-                                                           cellspacing="0" style="width: 100%;">
-                                                        <thead>
-                                                        <tr class="text-center text-white text-uppercase"
-                                                            style="background: #1a77c8">
-                                                            <th scope="col" class="align-middle font-weight-normal"
-                                                                style="width: 5%;">Nº cuotas
-                                                            </th>
-                                                            <th scope="col" class="align-middle font-weight-normal"
-                                                                style="width: 20%;">Monto
-                                                            </th>
-                                                            <th scope="col" class="align-middle font-weight-normal"
-                                                                style="width: 5%;">Eliminar
-                                                            </th>
-                                                        </tr>
-                                                        </thead>
-                                                        <tbody id="details-dues">
-                                                        {% for du in purchase.purchasedues_set.all %}
-                                                            <tr class="text-center" due_id="{{ du.id }}">
-                                                                <td class="align-middle text-center due-count">{{ forloop.counter }}</td>
-                                                                <td class="align-middle text-center amount-due">
-                                                                    S/ {{ du.due|safe }}</td>
-                                                                <td class="align-middle">
+                                        <tr class="product-serial" data-pd-id="{{ pd.id }}">
+                                            <td colspan="13">
+                                                <div id="collapse-serials-{{ pd.id }}" class="collapse oc-serial-box">
+                                                    <div class="oc-serial-box__head-static">
+                                                        <span><i class="fas fa-barcode"></i> Series del producto</span>
+                                                        <span class="d-flex">
+                                                            <button type="button" class="oc-btn-mini oc-btn-mini--add btn-add-serial"
+                                                                    title="Agregar una serie">
+                                                                <i class="fas fa-plus"></i> Agregar
+                                                            </button>
+                                                            <button type="button" class="oc-btn-mini oc-btn-mini--clear btn-clear-serials"
+                                                                    title="Limpiar todas las series">
+                                                                <i class="fas fa-eraser"></i> Limpiar
+                                                            </button>
+                                                        </span>
+                                                    </div>
+                                                    <table class="oc-serial-table">
+                                                        <tbody id="details-serial-{{ pd.id }}">
+                                                        {% for s in pd.productserial_set.all %}
+                                                            <tr>
+                                                                <td class="text-center align-middle">{{ forloop.counter }}</td>
+                                                                <td class="item-serial align-middle">
+                                                                    <input type="text" class="form-control serial"
+                                                                           placeholder="Ingrese serie"
+                                                                           value="{{ s.serial_number }}">
+                                                                </td>
+                                                                <td class="text-center align-middle">
                                                                     <button type="button"
-                                                                            onclick="deleteDues(this, {{ du.id }})"
-                                                                            class="btn btn-danger delete-detail"
-                                                                            style="font-size: 0.6em">
-                                                                        <i class="fa fa-trash"
-                                                                           style="font-size: 1.5em"></i>
+                                                                            class="oc-btn-del btn-remove-serial"
+                                                                            title="Eliminar serie">
+                                                                        <i class="fa fa-trash"></i>
                                                                     </button>
                                                                 </td>
                                                             </tr>
@@ -206,972 +403,416 @@
                                                         </tbody>
                                                     </table>
                                                 </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+
+                                    <tfoot id="details-table-foot">
+                                    <tr>
+                                        <td class="oc-tfoot-lead" colspan="3">
+                                            <div class="form-check oc-igv">
+                                                <input class="form-check-input check-igv" type="checkbox" value=""
+                                                       id="check_igv" {% if purchase.check_igv %}checked{% endif %}>
+                                                <label class="form-check-label" for="check_igv">
+                                                    Los precios ingresados <b>incluyen IGV</b>
+                                                </label>
                                             </div>
-
-                                        </div>
-                                    </div>
-
-                                    <div class="row p-2">
-                                        <div class="col-sm-4 col-md-4 col-lg-4">
-                                            <button type="button" id="btn-new"
-                                                    class="btn btn-sm btn-secondary btn-block p-1">Nuevo
-                                            </button>
-                                        </div>
-
-                                        <div class="col-sm-4 col-md-4 col-lg-4">
-                                            <button type="submit" id="btn-save"
-                                                    class="btn btn-sm btn-primary btn-block p-1">Guardar
-                                            </button>
-                                        </div>
-
-                                        <div class="col-sm-4 col-md-4 col-lg-4">
-                                            <button type="button" id="btn-add-new-detail"
-                                                    class="btn btn-sm btn-success btn-block">Agregar Detalle +
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
+                                        </td>
+                                        <td class="oc-tfoot-sum td-table-foot" colspan="10">
+                                            <table id="id_detail_data_foot" class="oc-totals" cellspacing="0"
+                                                   style="width: 100%;">
+                                                <thead>
+                                                <tr>
+                                                    <th scope="col" class="oc-totals__th">Base Imponible</th>
+                                                    <th scope="col" class="oc-totals__th">IGV (18%)</th>
+                                                    <th scope="col" class="oc-totals__th">Importe Total</th>
+                                                    <th scope="col" class="oc-totals__th">Total Documento</th>
+                                                    <th scope="col" class="oc-totals__th oc-hide">Flete</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody id="table-detail-foot">
+                                                <tr class="text-center">
+                                                    <td class="foot-base">
+                                                        <div class="input-icon">
+                                                            <input type="text"
+                                                                   class="form-control text-right text-uppercase total-foot-base"
+                                                                   placeholder="0.00"
+                                                                   value="{{ purchase.base_total_purchase|floatformat:-2 }}">
+                                                            <i class="change-money">S/</i>
+                                                        </div>
+                                                    </td>
+                                                    <td class="foot-igv">
+                                                        <div class="input-icon">
+                                                            <input type="text"
+                                                                   class="form-control text-right text-uppercase total-foot-igv"
+                                                                   placeholder="0.00"
+                                                                   value="{{ purchase.igv_total_purchase|floatformat:-2 }}">
+                                                            <i class="change-money">S/</i>
+                                                        </div>
+                                                    </td>
+                                                    <td class="foot-total">
+                                                        <div class="input-icon">
+                                                            <input type="text"
+                                                                   class="form-control text-right text-uppercase total-foot-total"
+                                                                   placeholder="0.00"
+                                                                   value="{{ purchase.total_import|floatformat:-2 }}">
+                                                            <i class="change-money">S/</i>
+                                                        </div>
+                                                    </td>
+                                                    <td class="foot-document">
+                                                        <div class="input-icon">
+                                                            <input type="text"
+                                                                   class="form-control text-right text-uppercase total-foot-document"
+                                                                   placeholder="0.00"
+                                                                   value="{{ purchase.total_purchase|floatformat:-2 }}">
+                                                            <i class="change-money">S/</i>
+                                                        </div>
+                                                    </td>
+                                                    <td class="foot-freight oc-hide">
+                                                        <div class="input-icon">
+                                                            <input type="text"
+                                                                   class="form-control text-right text-uppercase total-foot-freight"
+                                                                   value="0.00">
+                                                            <i class="change-money">S/</i>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    </tfoot>
+                                </table>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
+
+            <div class="oc-spacer"></div>
         </div>
 
-        <div class="col-sm-12 col-md-12 col-lg-12 pt-1 roboto-condensed-regular">
-            <div class="card">
-                <div class="card-body pt-2">
-
-                    <div class="table-responsive" id="render-table">
-                        <div class="table-responsive dataTables_wrapper roboto-condensed-regular">
-                            <table id="id_detail_data_grid"
-                                   class="table table-hover table-sm align-content-center table-bordered mb-0"
-                                   cellspacing="0" style="width: 100%;">
-                                <thead>
-                                <tr class="text-center text-white" style="background: #1a77c8">
-                                    <th scope="col" class="align-middle font-weight-normal" style="width: 3%;">Nº</th>
-                                    <th scope="col" class="align-middle font-weight-normal" style="width: 38%;">
-                                        Descripción
-                                        de Artículo
-                                    </th>
-                                    <th scope="col" class="align-middle font-weight-normal" style="width: 8%;">Marca
-                                    </th>
-                                    <th scope="col" class="align-middle font-weight-normal" style="width: 5%;">
-                                        Cantidad
-                                    </th>
-                                    <th scope="col" class="align-middle font-weight-normal" style="width: 7%;">Unidad
-                                        Medida
-                                    </th>
-                                    <th scope="col" class="align-middle font-weight-normal" style="width: 6%;">Valor
-                                        Unitario
-                                    </th>
-                                    <th scope="col" class="align-middle font-weight-normal" style="width: 5%;">%Dto.1
-                                    </th>
-                                    <th scope="col" class="align-middle font-weight-normal" style="width: 5%;">%Dto.2
-                                    </th>
-                                    <th scope="col" class="align-middle font-weight-normal" style="width: 5%;">%Dto.3
-                                    </th>
-                                    <th scope="col" class="align-middle font-weight-normal" style="width: 5%;">%Dto.4
-                                    </th>
-                                    <th scope="col" class="align-middle font-weight-normal" style="width: 6%;">Importe
-                                    </th>
-                                    <th scope="col" class="align-middle font-weight-normal" style="width: 4%;">
-                                        Eliminar
-                                    </th>
-                                </tr>
-                                </thead>
-                                <tbody id="details-table">
-                                {% for pd in purchase.purchasedetail_set.all %}
-                                    <tr class="item-row" product="{{ pd.product.id }}" unit_id="{{ pd.unit.id }}"
-                                        pd_id="{{ pd.id }}">
-                                        <td class="item-numero align-middle text-center">{{ forloop.counter }}</td>
-                                        <td class="align-middle text-left product-item-table">
-                                            <input type="text"
-                                                   class="form-control text-uppercase product-table dropdown-toggle"
-                                                   data-toggle="dropdown" aria-expanded="false"
-                                                   placeholder="Ingrese producto..."
-                                                   value="{{ pd.product.name }}">
-                                            <div class="dropdown-menu"></div>
-                                        </td>
-                                        <td class="align-middle brand">
-                                            <input type="text"
-                                                   class="form-control text-center text-uppercase brand-product"
-                                                   id="brand_id"
-                                                   name="brand"
-                                                   value="{{ pd.product.product_brand.name }}"
-                                                   readonly>
-                                        </td>
-                                        <td class="align-middle item-quantity">
-                                            <div class="quantity-cell-wrapper">
-                                                <input type="text"
-                                                       class="form-control text-center quantity-product text-uppercase"
-                                                       placeholder="0"
-                                                       value="{{ pd.quantity|floatformat:0 }}">
-                                                <button type="button" class="btn btn-sm btn-outline-primary btn-series-toggle mt-1"
-                                                        data-toggle="collapse" data-target="#collapse-serials-{{ pd.id }}"
-                                                        aria-expanded="false" aria-controls="collapse-serials-{{ pd.id }}"
-                                                        title="Agregar, modificar o gestionar series">
-                                                    <i class="fa fa-barcode"></i> Series
-                                                    {% if pd.productserial_set.all %}
-                                                        <span class="badge badge-primary badge-pill ml-1 series-count">{{ pd.productserial_set.all|length }}</span>
-                                                    {% else %}
-                                                        <span class="badge badge-light badge-pill ml-1 series-count">0</span>
-                                                    {% endif %}
-                                                </button>
-                                            </div>
-                                        </td>
-                                        <td class="align-middle unit">
-                                            <input type="text"
-                                                   class="form-control text-center text-uppercase unit-product"
-                                                   id="unit_product_id"
-                                                   name="unit-product"
-                                                   value="{{ pd.unit.name }}"
-                                                   readonly>
-                                        </td>
-                                        <td class="item-price text-right align-middle"
-                                            price-unit-with-discount="{{ pd.price_unit_discount }}">
-                                            <div class="input-icon">
-                                                <input type="text"
-                                                       class="form-control text-right text-uppercase price-unit-product"
-                                                       placeholder="0.00"
-                                                       value="{{ pd.price_unit|floatformat:-2 }}">
-                                                <i class="change-money font-weight-lighter">S/</i>
-                                            </div>
-                                        </td>
-                                        <td class="item-discount1 text-right align-middle">
-                                            <input type="text" class="form-control text-right text-uppercase discount1"
-                                                   placeholder="0.00"
-                                                   value="{{ pd.discount_one|floatformat:-2 }}">
-                                        </td>
-                                        <td class="item-discount2 text-right align-middle">
-                                            <input type="text" class="form-control text-right text-uppercase discount2"
-                                                   placeholder="0.00"
-                                                   value="{{ pd.discount_two|floatformat:-2 }}">
-                                        </td>
-                                        <td class="item-discount3 text-right align-middle">
-                                            <input type="text" class="form-control text-right text-uppercase discount3"
-                                                   placeholder="0.00"
-                                                   value="{{ pd.discount_three|floatformat:-2 }}">
-                                        </td>
-                                        <td class="item-discount4 text-right align-middle">
-                                            <input type="text" class="form-control text-right text-uppercase discount4"
-                                                   placeholder="0.00"
-                                                   value="{{ pd.discount_four|floatformat:-2 }}">
-                                        </td>
-                                        <td class="item-total text-right align-middle total-row">
-                                            <div class="input-icon">
-                                                <input type="text"
-                                                       class="form-control text-right text-uppercase total-detail"
-                                                       placeholder="0.00"
-                                                       value="{{ pd.total_detail|floatformat:-2 }}">
-                                                <i class="change-money font-weight-lighter">S/</i>
-                                            </div>
-                                        </td>
-                                        <td class="align-middle text-center">
-                                            <button type="button" onclick="deleteItem(this)"
-                                                    pd_id="{{ pd.id }}"
-                                                    class="btn btn-danger delete-detail"><i
-                                                    class="fa fa-trash"></i></button>
-                                        </td>
-                                    </tr>
-                                    <tr class="product-serial" data-pd-id="{{ pd.id }}">
-                                        <td class="align-middle" colspan="2">
-                                            <div id="collapse-serials-{{ pd.id }}" class="collapse serial-panel"
-                                                 aria-labelledby="heading-serials-{{ pd.id }}">
-                                                <div class="card border-primary">
-                                                    <div class="card-header py-1 px-2 bg-light d-flex justify-content-between align-items-center">
-                                                        <span class="font-weight-bold" style="font-size: 12px;">
-                                                            <i class="fa fa-barcode text-primary mr-1"></i>Gestionar Series
-                                                        </span>
-                                                        <button type="button" class="btn btn-sm btn-warning btn-clear-serials mr-1"
-                                                                data-target="#details-serial-{{ pd.id }}"
-                                                                title="Limpiar todas las series para volver a ingresar">
-                                                            <i class="fa fa-eraser"></i> Limpiar
-                                                        </button>
-                                                    </div>
-                                                    <div class="card-body p-2">
-                                                        <table class="table table-sm table-bordered mb-0">
-                                                            <thead class="thead-light">
-                                                                <tr>
-                                                                    <th style="width: 10%;" class="text-center">Nº</th>
-                                                                    <th style="width: 75%;">Número de Serie</th>
-                                                                    <th style="width: 15%;" class="text-center">Acción</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody id="details-serial-{{ pd.id }}">
-                                                            {% for s in pd.productserial_set.all %}
-                                                                <tr>
-                                                                    <td class="text-center align-middle">{{ forloop.counter }}</td>
-                                                                    <td class="item-serial align-middle">
-                                                                        <input type="text" class="form-control form-control-sm serial"
-                                                                               placeholder="Ingrese serie"
-                                                                               value="{{ s.serial_number }}">
-                                                                    </td>
-                                                                    <td class="text-center align-middle">
-                                                                        <button type="button" class="btn btn-sm btn-outline-danger btn-remove-serial" title="Eliminar serie">
-                                                                            <i class="fa fa-trash"></i>
-                                                                        </button>
-                                                                    </td>
-                                                                </tr>
-                                                            {% endfor %}
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td colspan="9" class="border-0"></td>
-                                    </tr>
-                                {% endfor %}
-                                </tbody>
-
-                                <tfoot id="details-table-foot">
-                                <tr>
-                                    <td class="border-0" colspan="2"></td>
-
-                                    <td class="border td-table-foot" colspan="11">
-                                        <div class="form-check mt-5">
-                                            <input class="form-check-input check-igv"
-                                                   {% if purchase.check_igv %}checked{% endif %} type="checkbox"
-                                                   value=""
-                                                   id="check_igv">
-                                            <label class="form-check-label" for="check_igv">
-                                                INCLUYE IGV
-                                            </label>
-                                        </div>
-                                        <table class="table table-hover table-sm align-content-center table-bordered mt-3 "
-                                               cellspacing="0" style="width: 100%;" id="id_detail_data_foot">
-
-                                            <thead>
-                                            <tr class="text-center text-white" style="background: #1a77c8">
-                                                <th scope="col" class="align-middle font-weight-normal"
-                                                    style="width: 20%;">
-                                                    Base Imponible
-                                                </th>
-                                                <th scope="col" class="align-middle font-weight-normal"
-                                                    style="width: 20%;">
-                                                    IGV (18%)
-                                                </th>
-                                                <th scope="col" class="align-middle font-weight-normal"
-                                                    style="width: 20%;">
-                                                    Importe Total
-                                                </th>
-                                                {#                                                <th scope="col" class="align-middle font-weight-normal"#}
-                                                {#                                                    style="width: 20%;">#}
-                                                {#                                                    Flete#}
-                                                {#                                                </th>#}
-                                                <th scope="col" class="align-middle font-weight-normal"
-                                                    style="width: 20%;">
-                                                    Total Documento
-                                                </th>
-                                            <tbody id="table-detail-foot">
-                                            <tr class="text-center">
-                                                <td class="foot-base">
-                                                    <div class="input-icon">
-                                                        <input type="text"
-                                                               class="form-control text-right text-uppercase total-foot-base"
-                                                               placeholder="0.00"
-                                                               value="{{ purchase.base_total_purchase|floatformat:-2 }}">
-                                                        <i class="change-money">S/</i>
-                                                    </div>
-                                                </td>
-                                                <td class="foot-igv">
-                                                    <div class="input-icon">
-                                                        <input type="text"
-                                                               class="form-control text-right text-uppercase total-foot-igv"
-                                                               placeholder="0.00"
-                                                               value="{{ purchase.igv_total_purchase|floatformat:-2 }}">
-                                                        <i class="change-money">S/</i>
-                                                    </div>
-                                                </td>
-                                                <td class="foot-total">
-                                                    <div class="input-icon">
-                                                        <input type="text"
-                                                               class="form-control text-right text-uppercase total-foot-total"
-                                                               placeholder="0.00"
-                                                               value="{{ purchase.total_import|floatformat:-2 }}">
-                                                        <i class="change-money">S/</i>
-                                                    </div>
-                                                </td>
-                                                {#                                                <td class="foot-freight">#}
-                                                {#                                                    <div class="input-icon">#}
-                                                {#                                                        <input type="text"#}
-                                                {#                                                               class="form-control text-right text-uppercase total-foot-freight"#}
-                                                {#                                                               placeholder="0.00"#}
-                                                {#                                                               value="{{ purchase.total_freight|floatformat:-2 }}">#}
-                                                {#                                                        <i class="change-money">S/</i>#}
-                                                {#                                                    </div>#}
-                                                {#                                                </td>#}
-                                                <td class="foot-document">
-                                                    <div class="input-icon">
-                                                        <input type="text"
-                                                               class="form-control dollar text-right text-uppercase total-foot-document"
-                                                               placeholder="0.00"
-                                                               value="{{ purchase.total_purchase|floatformat:-2 }}">
-                                                        <i class="change-money">S/</i>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-        <div class="card-body">
-            <div id="product-grid-list"></div>
-        </div>
         <div class="modal fade bd-example-modal-lg" id="add-modal" tabindex="-1" role="dialog"
              aria-labelledby="exampleModalLabel" aria-hidden="true"></div>
+        <div class="oc-overlay" id="loading-666" style="display: none;"></div>
 
-
-        <div class="mr-3 ml-0" style="
-                display: none;
-                position: absolute;
-                top: 83px;
-                left: 0px;
-                background: #e9ecef;
-                opacity: 0.5;
-                width: 100%;
-                {#height: 46em;#}
-                !important;bottom: 560px;
-                padding-right: 65em;
-                padding-top: 2em;" id="loading-666">
-
-        </div>
+        {% include "buys/oc_assets.html" %}
     {% else %}
-        <div class="alert alert-info alert-dismissible fade show mt-3" role="alert">
-            <strong>Atencion!</strong> No existe la compra, favor de regresar y revisar de nuevo
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
+        <div class="card m-3">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                <h5 class="mb-2">No existe la compra</h5>
+                <p class="text-muted">La compra solicitada no existe o ya fue eliminada.</p>
+                <a href="{% url 'buys:get_purchase_list' %}" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-arrow-left"></i> Volver al listado
+                </a>
+            </div>
         </div>
-
     {% endif %}
-
-    <style>
-        .input-icon {
-            position: relative;
-        }
-
-        .input-icon > i {
-        {#content: "$";#} position: absolute;
-            display: block;
-            transform: translate(0, -50%);
-            top: 50%;
-            pointer-events: none;
-            width: 25px;
-            text-align: center;
-            font-style: normal;
-        }
-
-        .input-icon > input {
-            padding-left: 25px;
-            padding-right: 8px;
-        }
-
-        .input-icon-right > i {
-            right: 0;
-        }
-
-        .input-icon-right > input {
-            padding-left: 0;
-            padding-right: 25px;
-            text-align: right;
-        }
-
-        .quantity-cell-wrapper {
-            min-width: 110px;
-        }
-        .quantity-cell-wrapper .btn-series-toggle {
-            font-size: 0.75rem;
-            padding: 0.15rem 0.35rem;
-        }
-        .serial-panel .card {
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-        }
-    </style>
-
-
 {% endblock body %}
+
 
 {% block extrajs %}
     <script type="text/javascript">
 
-        loader = '<div class="container">' +
-            '<div class="row">' +
-            '<div class="col-md-12">' +
-            '<div class="loader">' +
+        loader = '<div class="container"><div class="row"><div class="col-md-12"><div class="loader">' +
             '<p><strong>Cargando Reniec/Sunat...</strong></p>' +
-            '<div class="loader-inner"></div>' +
-            '<div class="loader-inner"></div>' +
-            '<div class="loader-inner"></div>' +
-            '</div>' +
-            '</div>' +
-            '</div>' +
-            '</div>';
+            '<div class="loader-inner"></div><div class="loader-inner"></div><div class="loader-inner"></div>' +
+            '</div></div></div></div>';
 
-        $("#id_ruc_provider").attr('maxlength', 11);
-
-        $(document).ready(function () {
-            let _check = $("#check_dollar")
-            if (_check.is(':checked')) {
-                $(".change-money").text('$')
-            } else {
-                $(".change-money").text('S/')
+        /* ==================== BUSQUEDA DE PROVEEDOR POR RUC ==================== */
+        $(document).on('keypress', '#id_ruc_provider', function (e) {
+            if (e.keyCode !== 13) {
+                return;
             }
-            sum_table();
-        });
+            e.preventDefault();
+            let _ruc = $(this).val();
+            let _provider = $('#id_provider');
 
-        $(document).on('click', '#check_dollar', function (e) {
-            let _check = $(this);
-            if (_check.is(':checked')) {
-                $(".change-money").text('$')
-            } else {
-                $(".change-money").text('S/')
-            }
-        });
-
-        $(document).on('click', '#btn-type-change', function (e) {
-            let _input_type_change = $('#type_change')
+            $('#loading-666').html(loader).show();
 
             $.ajax({
-                url: '/buys/get_type_change/',
+                url: '/buys/get_provider_by_ruc/',
                 async: true,
-                dataType: 'json', // for response
+                dataType: 'json',
                 type: 'GET',
-                data: {},
+                data: {'ruc': _ruc},
                 contentType: 'application/json;charset=UTF-8',
                 headers: {"X-CSRFToken": '{{ csrf_token }}'},
                 success: function (response, textStatus, xhr) {
                     if (xhr.status === 200) {
-                        _input_type_change.val('$' + response.buy);
+                        toastr.success(response.message, '¡Bien hecho!');
+                        _provider.val(response.result);
+                        _provider.attr('provider', response.pk);
+                        _provider.closest('.oc-input').addClass('is-resolved');
                     }
                 },
-                error: function (jqXhr, textStatus, xhr) {
-                    if (jqXhr.status === 500) {
+                error: function (jqXhr) {
+                    if (jqXhr.status === 500 && jqXhr.responseJSON) {
                         toastr.error(jqXhr.responseJSON.error, 'Mensaje');
                     } else {
-                        if (textStatus === 'timeout') {
-                            toastr.error('Failed from timeout', 'Mensaje');
-                        } else {
-                            console.log(" STATUS: " + xhr + " " + textStatus);
-                        }
+                        toastr.error('No se pudo consultar el RUC.', 'Mensaje');
                     }
+                    _provider.val('').attr('provider', '');
+                    _provider.closest('.oc-input').removeClass('is-resolved');
                 },
+                complete: function () {
+                    $('#loading-666').hide();
+                }
             });
             return false;
         });
 
-
-        $("#btn-type-change").trigger('click');
-
-        $(document).on('keypress', '#id_ruc_provider', function (e) {
-
-            if (e.keyCode === 13) {
-
-                e.preventDefault()
-
-                $(this).trigger("enterKey");
-                let _ruc = $(this).val();
-                let _provider = $('#id_provider')
-
-                $('#loading-666').html(loader).show()
-
-                $.ajax({
-                    url: '/buys/get_provider_by_ruc/',
-                    async: true,
-                    dataType: 'json', // for response
-                    type: 'GET',
-                    data: {
-                        'ruc': _ruc,
-                    },
-                    contentType: 'application/json;charset=UTF-8',
-                    headers: {"X-CSRFToken": '{{ csrf_token }}'},
-                    success: function (response, textStatus, xhr) {
-                        if (xhr.status === 200) {
-                            toastr.success(response.message, '¡Bien hecho!');
-                            {#console.log(response)#}
-                            _provider.val(response.result);
-                            _provider.attr('provider', response.pk);
-                            $('#loading-666').hide();
-                        }
-                    },
-                    error: function (jqXhr, textStatus, xhr) {
-                        if (jqXhr.status === 500) {
-                            toastr.error(jqXhr.responseJSON.error, 'Mensaje');
-                        } else {
-                            if (textStatus === 'timeout') {
-                                toastr.error('Failed from timeout', 'Mensaje');
-                            } else {
-                                console.log(" STATUS: " + xhr + " " + textStatus);
-                            }
-                        }
-                        $('#loading-666').hide();
-                    },
-                });
-                return false;
-            }
-        });
-
-        $(document).on('focusin', '.product-table', function (e) {
-            // $(this).parent('td').find('div.dropdown-menu').removeClass('show')
-            $(this).parent('td').find('div.dropdown-menu').css({
-                'background-color': 'transparent',
-                'border': 'transparent',
-                {#'margin-top': '10px'#}
-            })
-            $(this).val(' ');
-            $('#id_unit_product').val('0')
-        });
-
-        $(document).on('keypress', '.product-table', function (e) {
-
-            $(this).parent('td').find('div.dropdown-menu').empty()
-
-            if (e.keyCode === 13) {
-
-                e.preventDefault()
-
-                $(this).trigger("enterKey");
-                let _product_name = $(this).val();
-                // let _td = $(this).parent('div.btn-group').parent('td')
-                let _td = $(this).parent('td')
-                let _menu = _td.find('.dropdown-menu')
-
-                if (_product_name.length > 3) {
-
-                    $.ajax({
-                        url: '/buys/get_product_by_criteria_table/',
-                        async: true,
-                        dataType: 'json', // for response
-                        type: 'GET',
-                        data: {
-                            'value': _product_name,
-                        },
-                        contentType: 'application/json;charset=UTF-8',
-                        headers: {"X-CSRFToken": '{{ csrf_token }}'},
-                        success: function (response, textStatus, xhr) {
-                            if (xhr.status === 200) {
-                                let list = response.productList;
-                                _menu.css({'background-color': '#fff', 'border': '1px solid rgba(0,0,0,.15)'})
-                                for (let i = 0; i < list.length; i++) {
-                                    _menu.append(`<a class="dropdown-item product-item" unit_name="${list[i].unit}" brand="${list[i].brand}" unit_id="${list[i].unit_id}" href="#" data-id="${list[i].id}">${list[i].name} - ${list[i].brand}</a>`)
-                                }
-                            }
-                        },
-                        error: function (jqXhr, textStatus, xhr) {
-                            if (jqXhr.status === 500) {
-                                toastr.error(jqXhr.responseJSON.error, 'Mensaje');
-                            } else {
-                                if (textStatus === 'timeout') {
-                                    toastr.error('Failed from timeout', 'Mensaje');
-                                } else {
-                                    console.log(" STATUS: " + xhr + " " + textStatus);
-                                }
-                            }
-                        }
-                    });
-                } else {
-                    toastr.warning('Para la busqueda ingrese minimo 3 caracteres', 'Error de llenado');
-                    return false;
-                }
-            }
-        });
-
-        $(document).on('click', '.product-item', function (e) {
-
-            let _product_id = $(this).attr('data-id');
-            let _unit_id = $(this).attr('unit_id');
-            let _product_name = $(this).text();
-            let _tr = $(this).parent('div.dropdown-menu').parent('td').parent('tr')
-            let _td = $(this).parent('div.dropdown-menu').parent('td')
-            let _select = _td.find('select.unit-product')
-            let _brand_product = $(this).attr('brand')
-            let _unit_product = $(this).attr('unit_name')
-            //$('.product-table').val(_product_name)
-
-            _tr.attr('product', _product_id)
-            _tr.attr('pd_id', NaN)
-            _td.find('input.product-table').val(_product_name)
-            _tr.find('td.brand input.brand-product').val(_brand_product)
-            _tr.find('td.unit input.unit-product').val(_unit_product)
-
-            _tr.attr('unit_id', _unit_id)
-            {#get_units_by_product(_product_id, _tr)#}
-
-            $(this).parent('div.dropdown-menu').empty()
-            $(this).parent('div.dropdown-menu').addClass('hide')
-        });
-
-        function get_units_by_product($product_id, _tr) {
-
-            let _select = _tr.find('td.unit #id_unit_product').val()
-            if ($product_id !== '0') {
-                $.ajax({
-                    url: '/buys/get_units_by_product/',
-                    async: true,
-                    dataType: 'json',
-                    type: 'GET',
-                    data: {'ip': $product_id},
-                    success: function (response) {
-                        let units = JSON.parse(response['units']);
-                        {#console.log(units)#}
-                        units.forEach(
-                            element =>
-                                _tr.find('td.unit input.unit-product').val(element[0])
-                        )
-                    },
-                });
-            }
+        /* ==================== SERIES DEL DETALLE ==================== */
+        function serieRowHtml(indice) {
+            return '<tr>' +
+                '<td class="text-center align-middle">' + indice + '</td>' +
+                '<td class="item-serial align-middle">' +
+                '<input type="text" class="form-control serial" placeholder="Ingrese serie">' +
+                '</td>' +
+                '<td class="text-center align-middle">' +
+                '<button type="button" class="oc-btn-del btn-remove-serial" title="Eliminar serie">' +
+                '<i class="fa fa-trash"></i></button></td></tr>';
         }
 
-        $(document).on('click', '#btn-add-new-detail', function () {
-
-            let _check = $("#check_dollar");
-            let _val_money = 'S/'
-
-            if (_check.is(':checked')) {
-                _val_money = '$'
-            }
-
-            let _collapseId = 'collapse-serials-new-' + Date.now();
-            let _detailsId = 'details-serial-new-' + Date.now();
-
-            $('#id_detail_data_grid > tbody').append(
-                '<tr class="item-row text-center" product="" unit_id="" pd_id="NaN">' +
-                '<td class="item-numero align-middle">' + '</td>' +
-                '<td class="align-middle text-left product-item-table">' +
-                '<input type="text" class="form-control text-uppercase product-table dropdown-toggle" ' +
-                '               data-toggle="dropdown" aria-expanded="false" placeholder="Ingrese producto...">' + '<div class="dropdown-menu"></div>' + '</td>' +
-                '<td class="align-middle brand">' +
-                '<input type="text" class="form-control text-center text-uppercase brand-product" id="brand_id" name="brand" readonly>' + '</td>' +
-                '<td class="align-middle item-quantity">' +
-                '<div class="quantity-cell-wrapper">' +
-                '<input type="text" class="form-control text-center quantity-product text-uppercase" placeholder="0">' +
-                '<button type="button" class="btn btn-sm btn-outline-primary btn-series-toggle mt-1" data-toggle="collapse" data-target="#' + _collapseId + '" title="Agregar, modificar o gestionar series">' +
-                '<i class="fa fa-barcode"></i> Series <span class="badge badge-light badge-pill ml-1 series-count">0</span></button>' +
-                '</div></td>' +
-                /*'<td class="align-middle unit">' +
-                '<select class="form-control unit-product" id="id_unit_product" name="unit_product" required>' +
-                '<option value="0"> Seleccione</option>'+ textOption + '</td>' +*/
-                '<td class="align-middle unit">' +
-                '<input type="text" class="form-control text-center text-uppercase unit-product" readonly>' + '</td>' +
-                '<td class="item-price text-right align-middle" price-unit-with-discount="">' + '<div class="input-icon">' +
-                '<input type="text" class="form-control text-right text-uppercase price-unit-product" placeholder="0.00">' + '<i class="change-money">' + _val_money + '</i>' + '</div>' + '</td>' +
-                '<td class="item-discount1 text-right align-middle">' +
-                '<input type="text" class="form-control text-right text-uppercase discount1" placeholder="0.00">' + '</td>' +
-                '<td class="item-discount2 text-right align-middle">' +
-                '<input type="text" class="form-control text-right text-uppercase discount2" placeholder="0.00">' + '</td>' +
-                '<td class="item-discount3 text-right align-middle">' +
-                '<input type="text" class="form-control text-right text-uppercase discount3" placeholder="0.00">' + '</td>' +
-                '<td class="item-discount4 text-right align-middle">' +
-                '<input type="text" class="form-control text-right text-uppercase discount4" placeholder="0.00">' + '</td>' +
-                '<td class="item-total text-right align-middle total-row">' + '<div class="input-icon">' +
-                '<input type="text" class="form-control text-right text-uppercase total-detail" placeholder="0.00">' + '<i class="change-money">' + _val_money + '</i>' + '</div>' + '</td>' +
-                '<td class="align-middle"> ' + '<button type="button" onclick="deleteItem2(this)" class="btn btn-danger delete-detail"><i class="fa fa-trash"></i></button>' + '</td>' +
-                '</tr>' +
-                '<tr class="product-serial" data-pd-id="new">' +
-                '<td class="align-middle" colspan="2">' +
-                '<div id="' + _collapseId + '" class="collapse serial-panel">' +
-                '<div class="card border-primary">' +
-                '<div class="card-header py-1 px-2 bg-light d-flex justify-content-between align-items-center">' +
-                '<span class="font-weight-bold" style="font-size: 12px;"><i class="fa fa-barcode text-primary mr-1"></i>Gestionar Series</span>' +
-                '<button type="button" class="btn btn-sm btn-success btn-add-serial" data-target="#' + _detailsId + '" title="Agregar nueva serie">' +
-                '<i class="fa fa-plus"></i> Agregar</button></div>' +
-                '<div class="card-body p-2">' +
-                '<table class="table table-sm table-bordered mb-0">' +
-                '<thead class="thead-light"><tr><th style="width:10%;" class="text-center">Nº</th><th style="width:75%;">Número de Serie</th><th style="width:15%;" class="text-center">Acción</th></tr></thead>' +
-                '<tbody id="' + _detailsId + '"></tbody></table></div></div></div></td>' +
-                '<td colspan="9" class="border-0"></td></tr>');
-            counterStrike2();
-            sum_table();
-        });
-
-        $(document).on('keyup', '#id_total_freight', function () {
-            sum_table()
-        });
-        $(document).on('keyup', '.total-detail', function () {
-            let _tr = $(this).parent('div').parent('td').parent('tr')
-            {#let _tr = $("#id_detail_data_grid tbody#details-table tr")#}
-            let _total = parseDecimal(_tr.find('td.total-row div.input-icon input.total-detail').val());
-            let _quantity = parseDecimal(_tr.find('td.item-quantity input.quantity-product').val())
-            {#console.log('_total', _total)#}
-            {#console.log('_quantity', _quantity)#}
-            let price_unit = _total / _quantity
-            {#console.log(price_unit)#}
-
-            _tr.find('td.item-price div.input-icon input.price-unit-product').val(Number(price_unit).toFixed(2));
-            calculate_total(_tr)
-            sum_table()
-        });
-
-        $(document).on('keyup', '.quantity-product', function () {
-
-            let _tr = $(this).closest('tr.item-row')
-            let _quantity = parseDecimal(_tr.find('td.item-quantity input.quantity-product').val())
-            let _price_unit = parseDecimal(_tr.find('td.item-price div.input-icon input.price-unit-product').val())
-            let _total = parseDecimal(_tr.find('td.total-row div.input-icon input.total-detail').val())
-
-            /*console.log("_tr", _tr.find('td.item-price div.input-icon input.price-unit-product'))
-            console.log("_quantity", _quantity)
-            console.log("_price_unit", _price_unit)
-            console.log("_total", _total)*/
-
-            if (_quantity !== 0 && _price_unit !== 0) {
-                _total = _quantity * _price_unit
-                _tr.find('td.item-total div.input-icon input.total-detail').val(Number(_total).toFixed(2));
-            }
-            calculate_total(_tr)
-            sum_table()
-        });
-
-        $(document).on('keyup', '.price-unit-product', function () {
-
-            let _tr = $(this).parent('div').parent('td').parent('tr')
-            let _quantity = parseDecimal(_tr.find('td.item-quantity input.quantity-product').val())
-            let _price_unit = parseDecimal(_tr.find('td.item-price div.input-icon input.price-unit-product').val())
-            let _total = parseDecimal(_tr.find('td.total-row div.input-icon input.total-detail').val())
-
-            {#console.log("_quantity", _quantity)#}
-            {#console.log("_price_unit", _price_unit)#}
-            {#console.log("_total", _total)#}
-
-            if (_quantity !== 0 && _price_unit !== 0) {
-                _total = _quantity * _price_unit
-                _tr.find('td.item-total div.input-icon input.total-detail').val(Number(_total).toFixed(2));
-            }
-            calculate_total(_tr)
-            sum_table()
-        });
-
-        $(document).on('input', '.discount1, .discount2, .discount3, .discount4', function (e) {
-
-            let _tr = $(this).parent('td').parent('tr')
-            calculate_total(_tr)
-            sum_table()
-        });
-
-        function calculate_total(_tr) {
-
-            let $quantity = parseDecimal(_tr.find('td.item-quantity input.quantity-product').val());
-            let $price_unit = parseDecimal(_tr.find('td.item-price input.price-unit-product').val());
-            let $d1_val = parseDecimal(_tr.find('td.item-discount1 input.discount1').val());
-            let $d2_val = parseDecimal(_tr.find('td.item-discount2 input.discount2').val());
-            let $d3_val = parseDecimal(_tr.find('td.item-discount3 input.discount3').val());
-            let $d4_val = parseDecimal(_tr.find('td.item-discount4 input.discount4').val());
-            let $total = parseDecimal(_tr.find('td.total-row input.total-detail').val());
-
-            let d1, d2, d3, d4, d1p, d2p, d3p, d4p, amount, $totalTemp
-            amount = $quantity * $price_unit
-
-            if ($d1_val === 0 && $d2_val === 0 && $d3_val === 0 && $d4_val === 0) {
-                d4 = amount
-                d4p = $price_unit
-                _tr.find('td.item-price').attr('price-unit-with-discount', d4p.toFixed(2))
-                _tr.find('td.total-row input.total-detail, td.item-total input.total-detail').val(amount.toFixed(2))
-            } else {
-                d1 = amount - [(amount * $d1_val) / 100]
-                d2 = d1 - [(d1 * $d2_val) / 100]
-                d3 = d2 - [(d2 * $d3_val) / 100]
-                d4 = d3 - [(d3 * $d4_val) / 100]
-
-                d1p = $price_unit - [($price_unit * $d1_val) / 100]
-                d2p = d1p - [(d1p * $d2_val) / 100]
-                d3p = d2p - [(d2p * $d3_val) / 100]
-                d4p = d3p - [(d3p * $d4_val) / 100]
-
-                _tr.find('td.item-price').attr('price-unit-with-discount', d4p.toFixed(2))
-                {#console.log('fuera', d4p)#}
-
-                _tr.find('td.total-row input.total-detail').val(d4.toFixed(2))
-            }
-
-        }
-
-        function parseDecimal(val) {
-            if (val === undefined || val === null || val === '') return 0;
-            let s = String(val).trim().replace(',', '.');
-            let n = parseFloat(s);
-            return isNaN(n) ? 0 : n;
-        }
-
-        function sum_table() {
-            let igv = 0;
-            let base = 0;
-            let sum_total = 0;
-            let total_freight = 0;
-            let total_document = 0;
-            let _total;
-
-            $("#id_detail_data_grid tbody#details-table tr.item-row").each(function () {
-                let val = $(this).find("td.item-total input.total-detail, td.total-row input.total-detail").val();
-                sum_total += parseDecimal(val);
+        function updateSeriesCountAndNumbers($productSerialRow) {
+            let $itemRow = $productSerialRow.prev('tr.item-row');
+            let $tbody = $productSerialRow.find('tbody[id^="details-serial-"]');
+            let $inputs = $tbody.find('tr');
+            $inputs.each(function (i) {
+                $(this).find('td:first').text(i + 1);
             });
-
-            let _check_igv = $("#check_igv");
-
-            if (_check_igv.is(':checked')) {
-                base = sum_total / 1.18;
-                igv = sum_total - base;
-                _total = base + igv;
-                total_document = _total + total_freight;
-            } else {
-                base = sum_total;
-                igv = sum_total * 0.18;
-                _total = base + igv;
-                total_document = _total + total_freight;
-            }
-
-            $("#id_detail_data_foot input.total-foot-base").val(base.toFixed(2));
-            $("#id_detail_data_foot input.total-foot-igv").val(igv.toFixed(2));
-            $("#id_detail_data_foot input.total-foot-total").val(_total.toFixed(2));
-            $("#id_detail_data_foot input.total-foot-document").val(total_document.toFixed(2));
+            $itemRow.find('.series-count').text($inputs.length);
         }
 
-        $(document).on('change', '#check_igv', function (e) {
-            sum_table()
-        });
-
-        function deleteItem(btn) {
-            let _row = $(btn).closest('tr.item-row');
-            let _pd_id = _row.attr('pd_id');
-            _row.next('tr.product-serial').remove();
-            _row.remove();
-            if (_pd_id && _pd_id !== 'NaN' && !isNaN(parseInt(_pd_id))) {
-                deleteProduct(parseInt(_pd_id));
-            }
-            counterStrike2();
-            sum_table();
-        }
-
-        function counterStrike2() {
-            let l = 1;
-            $('#details-table tr.item-row').each(function () {
-                $(this).attr('i', l);
-                $(this).children('td:nth-child(1)').text(l);
-                l++;
-            });
-        }
-
-        function deleteItem2(btn) {
-            let _row = $(btn).closest('tr.item-row');
-            _row.next('tr.product-serial').remove();
-            _row.remove();
-            counterStrike2();
-            sum_table();
-        }
-
+        /* Ajusta el numero de filas de serie a la cantidad comprada */
         function syncSeriesToQuantity($itemRow) {
-            let qty = parseInt($itemRow.find('td.item-quantity input.quantity-product').val()) || 0;
+            let qty = Math.ceil(toNum($itemRow.find('td.item-quantity input.quantity-product').val(), 0));
             let $serialRow = $itemRow.next('tr.product-serial');
             let $tbody = $serialRow.find('tbody[id^="details-serial-"]');
             let $rows = $tbody.find('tr');
-            let currentCount = $rows.length;
-            if (qty > currentCount) {
-                for (let i = currentCount; i < qty; i++) {
-                    $tbody.append(
-                        '<tr><td class="text-center align-middle">' + (i+1) + '</td>' +
-                        '<td class="item-serial align-middle"><input type="text" class="form-control form-control-sm serial" placeholder="Ingrese serie"></td>' +
-                        '<td class="text-center align-middle"><button type="button" class="btn btn-sm btn-outline-danger btn-remove-serial" title="Eliminar serie"><i class="fa fa-trash"></i></button></td></tr>'
-                    );
+            let actual = $rows.length;
+
+            if (qty > actual) {
+                for (let i = actual; i < qty; i++) {
+                    $tbody.append(serieRowHtml(i + 1));
                 }
-            } else if (qty < currentCount) {
+            } else if (qty < actual) {
                 $rows.slice(qty).remove();
             }
             updateSeriesCountAndNumbers($serialRow);
         }
 
-        $(document).on('show.bs.collapse', '.serial-panel', function () {
-            let $serialRow = $(this).closest('tr.product-serial');
-            let $itemRow = $serialRow.prev('tr.item-row');
-            syncSeriesToQuantity($itemRow);
+        $(document).on('show.bs.collapse', '.oc-serial-box', function () {
+            syncSeriesToQuantity($(this).closest('tr.product-serial').prev('tr.item-row'));
         });
 
-        $(document).on('click', '.btn-clear-serials', function (e) {
+        $(document).on('click', '.btn-add-serial', function () {
             let $panel = $(this).closest('tr.product-serial');
             let $tbody = $panel.find('tbody[id^="details-serial-"]');
-            $tbody.empty();
+            $tbody.append(serieRowHtml($tbody.find('tr').length + 1));
             updateSeriesCountAndNumbers($panel);
         });
 
-        $(document).on('click', '.btn-add-serial', function (e) {
-            let tbodyId = $(this).attr('data-target');
-            let $tbody = $(tbodyId);
-            let count = $tbody.find('tr').length + 1;
-            $tbody.append(
-                '<tr>' +
-                '<td class="text-center align-middle">' + count + '</td>' +
-                '<td class="item-serial align-middle">' +
-                '<input type="text" class="form-control form-control-sm serial" placeholder="Ingrese serie">' +
-                '</td>' +
-                '<td class="text-center align-middle">' +
-                '<button type="button" class="btn btn-sm btn-outline-danger btn-remove-serial" title="Eliminar serie">' +
-                '<i class="fa fa-trash"></i></button>' +
-                '</td>' +
-                '</tr>'
-            );
-            updateSeriesCountAndNumbers($(this).closest('tr.product-serial'));
-        });
-
-        $(document).on('click', '.btn-remove-serial', function (e) {
+        $(document).on('click', '.btn-remove-serial', function () {
             let $panel = $(this).closest('tr.product-serial');
             $(this).closest('tr').remove();
             updateSeriesCountAndNumbers($panel);
         });
 
-        function updateSeriesCountAndNumbers($productSerialRow) {
-            let $itemRow = $productSerialRow.prev('tr.item-row');
-            let $tbody = $productSerialRow.find('tbody[id^="details-serial-"]');
-            let count = $tbody.find('tr').length;
-            $tbody.find('tr').each(function (i) {
-                $(this).find('td:first').text(i + 1);
+        $(document).on('click', '.btn-clear-serials', function () {
+            let $panel = $(this).closest('tr.product-serial');
+            $panel.find('tbody[id^="details-serial-"] tr').remove();
+            updateSeriesCountAndNumbers($panel);
+        });
+
+        /* Enter sobre una serie: evita duplicados dentro de la misma fila y en el sistema */
+        $(document).on('keydown', 'input.serial', async function (e) {
+            if (e.key !== 'Enter') {
+                return;
+            }
+            e.preventDefault();
+            let $input = $(this);
+            let valor = ($input.val() || '').trim();
+            if (valor === '') {
+                return;
+            }
+            let $fila = $input.closest('tr');
+            let $tbody = $input.closest('tbody');
+
+            let repetida = false;
+            $tbody.find('input.serial').each(function () {
+                if (this !== $input[0] && (($(this).val() || '').trim().toUpperCase() === valor.toUpperCase())) {
+                    repetida = true;
+                }
             });
-            $itemRow.find('.series-count').text(count).toggleClass('badge-primary', count > 0).toggleClass('badge-light', count === 0);
+            if (repetida) {
+                toastr.error('LA SERIE ' + valor + ' YA ESTÁ INGRESADA EN ESTE PRODUCTO.', '¡SERIE DUPLICADA!');
+                $input.val('');
+                return;
+            }
+
+            let _flag = await checkSerialAjax(valor);
+            if (_flag === true) {
+                toastr.error('LA SERIE ' + valor + ' YA FUE REGISTRADA ANTERIORMENTE.', '¡SERIE DUPLICADA!');
+                $input.val('');
+                return;
+            }
+            let $siguiente = $fila.next('tr').find('input.serial');
+            if ($siguiente.length) {
+                $siguiente.trigger('focus');
+            }
+        });
+
+        async function checkSerialAjax(serial) {
+            try {
+                let r = await $.ajax({
+                    url: '/buys/check_serial/',
+                    dataType: 'json',
+                    type: 'GET',
+                    data: {'serial': serial},
+                    headers: {"X-CSRFToken": '{{ csrf_token }}'}
+                });
+                return !!(r && r.flag);
+            } catch (e) {
+                return false;
+            }
         }
 
-        function deleteProduct(detail_id) {
+        /* ==================== ALTA DE UN NUEVO DETALLE ==================== */
+        $(document).on('click', '#btn-add-new-detail', function () {
+            let _moneda = ($("#check_dollar").length && $("#check_dollar").is(':checked')) ? '$' : 'S/';
+            let _serieId = 'details-serial-new-' + Date.now();
 
+            $('#id_detail_data_grid > tbody').append(
+                '<tr class="item-row text-center" product="" unit_id="" pd_id="NaN">' +
+                '<td class="item-numero oc-td oc-td--num align-middle"></td>' +
+                '<td class="item-code-bar oc-td oc-td--center align-middle text-center">' +
+                '<input type="text" class="form-control text-center text-uppercase code-bar" autocomplete="off" placeholder="Escanear"></td>' +
+                '<td class="oc-td oc-td--left align-middle text-left product-item-table">' +
+                '<div class="oc-search">' +
+                '<i class="oc-search__icon fas fa-search"></i>' +
+                '<input type="text" class="form-control text-uppercase product-table" role="combobox" ' +
+                'aria-autocomplete="list" aria-expanded="false" autocomplete="off" autocorrect="off" ' +
+                'spellcheck="false" placeholder="Buscar por nombre, marca o código...">' +
+                '<button type="button" class="oc-search__clear" tabindex="-1" title="Limpiar búsqueda"><i class="fas fa-times"></i></button>' +
+                '<div class="oc-search__panel" hidden>' +
+                '<ul class="oc-search__list" role="listbox" aria-label="Resultados de productos"></ul>' +
+                '<div class="oc-search__foot">' +
+                '<span class="oc-search__keys"><kbd>&uarr;</kbd><kbd>&darr;</kbd> navegar <kbd>Enter</kbd> elegir <kbd>Esc</kbd> cerrar</span>' +
+                '<span class="oc-search__count"></span>' +
+                '</div></div></div></td>' +
+                '<td class="item-quantity oc-td oc-td--center align-middle">' +
+                '<div class="input-group">' +
+                '<input type="text" class="form-control text-center quantity-product text-uppercase" placeholder="0">' +
+                '<div class="input-group-append">' +
+                '<button type="button" class="btn oc-series btn-series-toggle" data-toggle="collapse" ' +
+                'data-target="#collapse-' + _serieId + '" title="Agregar, modificar o gestionar series">' +
+                '<i class="fas fa-barcode"></i> Series <span class="series-count">0</span></button>' +
+                '</div></div></td>' +
+                '<td class="unit oc-td oc-td--center align-middle">' +
+                '<input type="text" class="form-control text-center text-uppercase unit-product" readonly placeholder="—"></td>' +
+                '<td class="item-value-price oc-td oc-td--money text-right align-middle"><div class="input-icon">' +
+                '<input type="text" class="form-control text-right text-uppercase value-unit-product" placeholder="0.00">' +
+                '<i class="change-money">' + _moneda + '</i></div></td>' +
+                '<td class="item-price oc-td oc-td--money text-right align-middle" price-unit-with-discount=""><div class="input-icon">' +
+                '<input type="text" class="form-control text-right text-uppercase price-unit-product" placeholder="0.00">' +
+                '<i class="change-money">' + _moneda + '</i></div></td>' +
+                '<td class="item-discount1 oc-td oc-td--money text-right align-middle">' +
+                '<input type="text" class="form-control text-right text-uppercase discount1" placeholder="0.00"></td>' +
+                '<td class="item-discount2 oc-td oc-td--money text-right align-middle">' +
+                '<input type="text" class="form-control text-right text-uppercase discount2" placeholder="0.00"></td>' +
+                '<td class="item-discount3 oc-td oc-td--money text-right align-middle">' +
+                '<input type="text" class="form-control text-right text-uppercase discount3" placeholder="0.00"></td>' +
+                '<td class="item-discount4 oc-td oc-td--money text-right align-middle">' +
+                '<input type="text" class="form-control text-right text-uppercase discount4" placeholder="0.00"></td>' +
+                '<td class="item-total oc-td oc-td--total text-right align-middle total-row"><div class="input-icon">' +
+                '<input type="text" class="form-control text-right text-uppercase total-detail" placeholder="0.00">' +
+                '<i class="change-money">' + _moneda + '</i></div></td>' +
+                '<td class="oc-td oc-td--act align-middle">' +
+                '<button type="button" onclick="deleteItem(this)" class="oc-btn-del delete-detail" title="Eliminar detalle">' +
+                '<i class="fa fa-trash"></i></button></td>' +
+                '</tr>' +
+                '<tr class="product-serial" data-pd-id="new">' +
+                '<td colspan="13">' +
+                '<div id="collapse-' + _serieId + '" class="collapse oc-serial-box">' +
+                '<div class="oc-serial-box__head-static">' +
+                '<span><i class="fas fa-barcode"></i> Series del producto</span>' +
+                '<button type="button" class="oc-btn-mini oc-btn-mini--add btn-add-serial" title="Agregar una serie">' +
+                '<i class="fas fa-plus"></i> Agregar</button>' +
+                '</div>' +
+                '<table class="oc-serial-table"><tbody id="' + _serieId + '"></tbody></table>' +
+                '</div></td></tr>'
+            );
+            counterStrike2();
+            updateRowsCount();
+        });
+
+        /* ==================== ELIMINAR DETALLE ==================== */
+        function deleteItem(btn) {
+            let _row = $(btn).closest('tr.item-row');
+            let _pd_id = _row.attr('pd_id');
+            let _seriales = _row.next('tr.product-serial').find('input.serial').length;
+
+            if (_pd_id && _pd_id !== 'NaN' && !isNaN(parseInt(_pd_id))) {
+                if (!confirm("¿Eliminar este detalle de la compra?\n\nTambién se eliminarán sus "
+                    + _seriales + " serie(s) asociadas.")) {
+                    return false;
+                }
+                deleteProduct(parseInt(_pd_id), _row);
+                return false;
+            }
+            _row.next('tr.product-serial').remove();
+            _row.remove();
+            counterStrike2();
+            sum_table();
+            updateRowsCount();
+            return false;
+        }
+
+        function deleteProduct(detail_id, _row) {
             $.ajax({
                 url: '/buys/delete_item_product_buy/',
                 async: true,
-                dataType: 'json', // for response
+                dataType: 'json',
                 type: 'GET',
                 data: {'detail_id': detail_id},
                 contentType: 'application/json;charset=UTF-8',
                 headers: {"X-CSRFToken": '{{ csrf_token }}'},
-                success: function (response, textStatus, xhr) {
-                    if (xhr.status === 200) {
-                        {#toastr.success(response.message, '¡Mensaje!');#}
+                success: function (response) {
+                    if (_row) {
+                        _row.next('tr.product-serial').remove();
+                        _row.remove();
+                        counterStrike2();
+                        sum_table();
+                        updateRowsCount();
                     }
+                    toastr.success(response.message, '¡Detalle eliminado!');
+                    setTimeout(() => {
+                        window.open("/buys/get_purchase_list/", '_self');
+                    }, 900);
                 },
-                error: function (jqXhr, textStatus, xhr) {
-                    toastr.error(jqXhr.responseJSON.error, '¡ERROR!');
+                error: function (jqXhr) {
+                    if (jqXhr.responseJSON && jqXhr.responseJSON.error) {
+                        toastr.error(jqXhr.responseJSON.error, '¡NO SE PUDO ELIMINAR!');
+                    } else {
+                        toastr.error('ERROR AL ELIMINAR EL DETALLE.', '¡MENSAJE!');
+                    }
                 }
             });
         }
 
-        $(document).on('change', '#payment_type', function (e) {
-            let type_pay = $(this).val();
-            if (type_pay === 'L') {
+        /* ==================== CUOTAS ==================== */
+        $(document).on('change', '#payment_type', function () {
+            if ($(this).val() === 'L') {
                 $('.dues').removeClass('d-none');
                 $('.table-dues').removeClass('d-none');
-                {#$('#modal-debs').modal('show');#}
             } else {
                 $('.dues').addClass('d-none');
                 $('.table-dues').addClass('d-none');
-                {#$("#details-dues").empty();#}
             }
         });
-
-        $("#payment_type").trigger('change');
 
         function counterStrikedebs() {
             let l = 1;
@@ -1182,151 +823,331 @@
             });
         }
 
-        function deleteDues(btn, $due_id) {
-
-            if (!isNaN($due_id)) {
-                deleteDue($due_id)
+        function deleteDues(btn, due_id) {
+            if (!isNaN(due_id) && due_id !== null && due_id !== undefined) {
+                deleteDue(due_id);
             }
             btn.parentNode.parentNode.remove();
             counterStrikedebs();
         }
 
         function deleteDue(due_id) {
-
             $.ajax({
                 url: '/buys/delete_item_due/',
                 async: true,
-                dataType: 'json', // for response
+                dataType: 'json',
                 type: 'GET',
                 data: {'due_id': due_id},
                 contentType: 'application/json;charset=UTF-8',
                 headers: {"X-CSRFToken": '{{ csrf_token }}'},
-                success: function (response, textStatus, xhr) {
-                    if (xhr.status === 200) {
-                        {#toastr.success(response.message, '¡Mensaje!');#}
+                error: function (jqXhr) {
+                    if (jqXhr.responseJSON && jqXhr.responseJSON.error) {
+                        toastr.error(jqXhr.responseJSON.error, '¡MENSAJE!');
                     }
-                },
-                error: function (jqXhr, textStatus, xhr) {
-                    toastr.error(jqXhr.responseJSON.error, '¡ERROR!');
                 }
             });
         }
 
-        $(document).on('click', '#add-dues', function (e) {
-
-            let _amount_due = $('#amount-due').val();
-
+        $(document).on('click', '#add-dues', function () {
+            let _monto = $('#amount-due').val();
+            if (_monto === '' || isNaN(toNum(_monto, NaN))) {
+                toastr.warning('INGRESE EL MONTO DE LA CUOTA.', '¡ADVERTENCIA!');
+                return false;
+            }
             $('#id_debs_grid > tbody').append(
                 '<tr class="text-center" due_id="NaN">' +
-                '<td class="align-middle text-center due-count">' + '</td>' +
-                '<td class="align-middle text-center amount-due">' + 'S/ ' + _amount_due + '</td>' +
-                '<td class="align-middle"> ' + '<button type="button" onclick="deleteDues(this)" class="btn btn-danger delete-detail" style="font-size: 0.6em"><i class="fa fa-trash" style="font-size: 1.5em"></i></button>' + '</td>' +
+                '<td class="align-middle text-center due-count"></td>' +
+                '<td class="align-middle text-center amount-due">S/ ' + _monto + '</td>' +
+                '<td class="align-middle text-center">' +
+                '<button type="button" onclick="deleteDues(this, \'NaN\')" class="oc-btn-del delete-due" title="Eliminar cuota">' +
+                '<i class="fa fa-trash"></i></button></td>' +
                 '</tr>'
             );
-            counterStrikedebs()
+            counterStrikedebs();
             $('#amount-due').val('');
-
+            return false;
         });
 
-        $('#purchase-form').submit(function (event) {
-            event.preventDefault();
-
-            if ($("#id_detail_data_grid tbody#details-table tr.item-row").length > 0 && $('.product-table').val() !== '') {
-                let table_foot = $("#id_detail_data_grid tfoot#details-table-foot tr td.td-table-foot").find("#id_detail_data_foot tbody#table-detail-foot tr")
-                let Detail_purchase = {
-                    "Invoice": $('#id_factura').val(),
-                    "PurchaseId": $('#purchase_id').val(),
-                    "ProviderId": $('#id_provider').attr("provider"),
-                    "Date": $('#id_fechacompra').val(),
-                    "Type_Bill": $('#id_type_bill').val(),
-                    "Type_Pay": $('#payment_type').val(),
-                    "Base_Total": Number(table_foot.find("td.foot-base input.total-foot-base").val().replace(',', '.')),
-                    "Igv_Total": Number(table_foot.find("td.foot-igv input.total-foot-igv").val().replace(',', '.')),
-                    "Import_Total": Number(table_foot.find("td.foot-total input.total-foot-total").val().replace(',', '.')),
-                    //"TotalFreight": Number(table_foot.find("td.foot-freight input.total-foot-freight").val().replace(',', '.')),
-                    "Total_Document": Number(table_foot.find("td.foot-document input.total-foot-document").val().replace(',', '.')),
-                    "Check_Igv": ($("#id_detail_data_grid tfoot#details-table-foot tr td.td-table-foot").find("div.form-check input.check-igv").is(':checked')) ? 1 : 0,
-                    "Check_Dollar": ($("#check_dollar").is(':checked')) ? 1 : 0,
-                    "Details": [],
-                    "Freight": [],
-                    "Dues": [],
-                };
-                $("#id_detail_data_grid tbody#details-table tr.item-row").each(function () {
-                    let productID = $(this).attr('product')
-                    let detailObj = {
-                        "ProductDetail": $(this).attr('pd_id'),
-                        "Product": productID,
-                        "Quantity": $(this).find("td.item-quantity input.quantity-product").val(),
-                        "Unit": $(this).attr('unit_id'),
-                        "Price": Number($(this).find("td.item-price input.price-unit-product").val().replace(',', '.')),
-                        "Price_Unit_Discount": Number($(this).find("td.item-price").attr("price-unit-with-discount").replace(',', '.')),
-                        "Dto1": Number($(this).find("td.item-discount1 input.discount1").val().replace(',', '.')),
-                        "Dto2": Number($(this).find("td.item-discount2 input.discount2").val().replace(',', '.')),
-                        "Dto3": Number($(this).find("td.item-discount3 input.discount3").val().replace(',', '.')),
-                        "Dto4": Number($(this).find("td.item-discount4 input.discount4").val().replace(',', '.')),
-                        "Total": Number($(this).find("td.item-total input.total-detail").val().replace(',', '.')),
-                        "Check_kardex": 1,
-                        "Serials": []
-                    };
-                    $(this).next('tr.product-serial').find('tbody[id^="details-serial-"] tr').each(function () {
-                        let serialVal = $(this).find('td.item-serial input.serial').val();
-                        if (serialVal && String(serialVal).trim() !== '') {
-                            detailObj.Serials.push({"Serial": String(serialVal).trim()});
-                        }
-                    });
-                    Detail_purchase.Details.push(detailObj);
-                });
-                /*$("#id_freight_data_grid tbody#details-freight tr").each(function () {
-                    let detailFreight = {
-                        "DocumentFreight": $(this).find("td.document-freight input.document-freight-input").val(),
-                        "SerialFreight": $(this).find("td.serial-freight input.serial-freight-input").val(),
-                        "NumberFreight": $(this).find("td.number-freight input.number-freight-input").val(),
-                        "DateFreight": $(this).find("td.date-freight input.date-freight-input").val(),
-                        "TotalFreight": Number($(this).find("td.total-freight input.total-freight-input").val()),
-                    }
-                    Detail_purchase.Freight.push(detailFreight);
-                });*/
-                $("#id_debs_grid tbody#details-dues tr").each(function () {
-                    let dataDues = {
-                        "amountId": $(this).attr('due_id'),
-                        "amountDue": $(this).find("td.amount-due").text().replace('S/ ', ''),
-                    }
-                    Detail_purchase.Dues.push(dataDues)
-
-                });
-                console.log(Detail_purchase)
-                {#console.log(JSON.stringify(Detail_purchase))#}
-
-                $.ajax({
-                    url: '/buys/save_update_purchase/',
-                    async: true,
-                    dataType: 'json', // for response
-                    type: 'GET',
-                    data: {
-                        'purchase': JSON.stringify(Detail_purchase),
-                        'purchase_id': $('#purchase_id').val(),
-                    },
-                    contentType: 'application/json;charset=UTF-8',
-                    headers: {"X-CSRFToken": '{{ csrf_token }}'},
-                    success: function (response, textStatus, xhr) {
-                        if (xhr.status === 200) {
-                            toastr.success(response.message, '¡COMPRA ACTUALIZADA CORRECTAMENTE!');
-                            setTimeout(() => {
-                                window.open("/buys/get_purchase_list/", '_self');
-                            }, 1000);
-                        }
-                    },
-                    error: function (jqXhr, textStatus, xhr) {
-                        toastr.error("ERROR. ", '¡INCONCEBIBLE!');
-                    }
-                });
-
-            } else {
-                toastr.warning("PARA REALIZAR LA COMPRA AGREGUE AL MENOS UN PRODUCTO. ", '¡ADVERTENCIA!');
-                return false;
+        /* ==================== RESTABLECER ==================== */
+        $(document).on('click', '#btn-new', function () {
+            if (confirm("¿Descartar todos los cambios y recargar la compra?")) {
+                window.location.reload();
             }
         });
 
-    </script>
+        /* ==================== RECALCULOS ==================== */
+        function _recalc(_tr) {
+            calculate_total(_tr);
+            sum_table();
+        }
 
+        $(document).on('keyup input', '.total-detail', function () {
+            let _tr = $(this).parent('div').parent('td').parent('tr');
+            let _total = toNum($(this).val());
+            let _quantity = toNum(_tr.find('td.item-quantity div.input-group input.quantity-product').val());
+            if (_quantity > 0) {
+                _tr.find('td.item-price div.input-icon input.price-unit-product').val((_total / _quantity).toFixed(2));
+            }
+            _recalc(_tr);
+        });
+
+        $(document).on('keyup input', '.quantity-product', function () {
+            let _tr = $(this).closest('td').parent('tr');
+            let _quantity = toNum($(this).val());
+            let _price = toNum(_tr.find('td.item-price div.input-icon input.price-unit-product').val());
+            if (_quantity !== 0 && _price !== 0) {
+                _tr.find('td.item-total div.input-icon input.total-detail').val((_quantity * _price).toFixed(2));
+            }
+            _recalc(_tr);
+        });
+
+        $(document).on('keyup input', '.value-unit-product', function () {
+            let _tr = $(this).parent('div').parent('td').parent('tr');
+            let _valor = ($(this).val() || '').trim();
+            if (_valor === '') {
+                return;
+            }
+            let _price = toNum(_valor) * 1.18;
+            _tr.find('td.item-price div.input-icon input.price-unit-product').val(_price.toFixed(4));
+            let _quantity = toNum(_tr.find('td.item-quantity div.input-group input.quantity-product').val());
+            if (_quantity !== 0) {
+                _tr.find('td.item-total div.input-icon input.total-detail').val((_quantity * _price).toFixed(2));
+            }
+            _recalc(_tr);
+        });
+
+        $(document).on('keyup input', '.price-unit-product', function () {
+            let _tr = $(this).parent('div').parent('td').parent('tr');
+            let _quantity = toNum(_tr.find('td.item-quantity div.input-group input.quantity-product').val());
+            let _price = toNum($(this).val());
+            if (_quantity !== 0 && _price !== 0) {
+                _tr.find('td.item-value-price div.input-icon input.value-unit-product').val((_price / 1.18).toFixed(4));
+                _tr.find('td.item-total div.input-icon input.total-detail').val((_quantity * _price).toFixed(2));
+            }
+            _recalc(_tr);
+        });
+
+        $(document).on('input keyup', '.discount1, .discount2, .discount3, .discount4', function () {
+            _recalc($(this).parent('td').parent('tr'));
+        });
+
+        $(document).on('change', '#id_detail_data_grid tfoot tr input.check-igv', function () {
+            sum_table();
+        });
+
+        $(document).on('keypress', '.code-bar', function (e) {
+            if (e.keyCode !== 13) {
+                return;
+            }
+            e.preventDefault();
+            let _code = $(this).val();
+            let _tr = $(this).parent('td').parent('tr');
+            if (_code.length <= 3) {
+                toastr.warning('INGRESE UN CÓDIGO DE BARRAS VÁLIDO.', 'Error de llenado');
+                return false;
+            }
+            $.ajax({
+                url: '/buys/get_product_by_code_bar/',
+                async: true,
+                dataType: 'json',
+                type: 'GET',
+                data: {'code_bar': _code},
+                contentType: 'application/json;charset=UTF-8',
+                headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                success: function (response) {
+                    if (response.success === true) {
+                        ProductSearch.closeFor(_tr);
+                        _tr.attr('product', response.product_id);
+                        _tr.attr('unit_id', response.unit_id);
+                        _tr.attr('pd_id', 'NaN');
+                        _tr.next('tr.product-serial').attr('data-pd-id', 'new');
+                        _tr.find('td.product-item-table input.product-table').val(response.product_name);
+                        _tr.find('td.product-item-table').closest('.oc-search').addClass('has-value');
+                        _tr.find('td.unit input.unit-product').val(response.unit);
+                    } else {
+                        toastr.error(response.message, '¡Mensaje!');
+                    }
+                },
+                error: function () {
+                    toastr.error('NO SE PUDO CONSULTAR EL CÓDIGO DE BARRAS.', '¡Mensaje!');
+                }
+            });
+            return false;
+        });
+
+        /* ==================== VALIDACION Y GUARDADO ==================== */
+        function validateEditDetails() {
+            let _rows = $("#id_detail_data_grid tbody#details-table tr.item-row");
+            let _provider = $('#id_provider').attr("provider");
+
+            if (!_provider || isNaN(parseInt(_provider))) {
+                toastr.error('EL PROVEEDOR NO ESTÁ VALIDADO. VUELVA A BUSCARLO POR SU RUC.', '¡PROVEEDOR INVÁLIDO!');
+                return false;
+            }
+            if (!$('#id_factura').val()) {
+                toastr.error('INGRESE EL NÚMERO DEL DOCUMENTO.', '¡CAMPO OBLIGATORIO!');
+                $('#id_factura').focus();
+                return false;
+            }
+            if (_rows.length === 0) {
+                toastr.error("AGREGUE AL MENOS UN PRODUCTO AL DETALLE.", '¡ADVERTENCIA!');
+                return false;
+            }
+
+            let _ok = true;
+            _rows.each(function () {
+                if (!_ok) {
+                    return;
+                }
+                let _n = $(this).children('td:nth-child(1)').text();
+                let _product = $(this).attr('product');
+                let _unit = $(this).attr('unit_id');
+                let _quantity = toNum($(this).find('td.item-quantity input.quantity-product').val());
+                let _price = toNum($(this).find('td.item-price input.price-unit-product').val());
+
+                if (!_product || _product === '') {
+                    toastr.error('FILA ' + _n + ': SELECCIONE UN PRODUCTO.', '¡DETALLE INCOMPLETO!');
+                    _ok = false;
+                    return;
+                }
+                if (!_unit || _unit === '') {
+                    toastr.error('FILA ' + _n + ': EL PRODUCTO NO TIENE UNIDAD DE MEDIDA ASIGNADA.', '¡DETALLE INCOMPLETO!');
+                    _ok = false;
+                    return;
+                }
+                if (_quantity <= 0) {
+                    toastr.error('FILA ' + _n + ': INGRESE UNA CANTIDAD MAYOR QUE CERO.', '¡DETALLE INCOMPLETO!');
+                    _ok = false;
+                    return;
+                }
+                if (_price <= 0) {
+                    toastr.error('FILA ' + _n + ': INGRESE EL PRECIO UNITARIO.', '¡DETALLE INCOMPLETO!');
+                    _ok = false;
+                    return;
+                }
+
+                let _seriales = [];
+                $(this).next('tr.product-serial').find('input.serial').each(function () {
+                    let _s = ($(this).val() || '').trim().toUpperCase();
+                    if (_s) {
+                        _seriales.push(_s);
+                    }
+                });
+                if ($.unique(_seriales).length !== _seriales.length) {
+                    toastr.error('FILA ' + _n + ': HAY SERIES REPETIDAS EN ESTE PRODUCTO.', '¡SERIES DUPLICADAS!');
+                    _ok = false;
+                    return;
+                }
+                if (_seriales.length > Math.ceil(_quantity)) {
+                    toastr.error('FILA ' + _n + ': INGRESE ' + Math.ceil(_quantity)
+                        + ' SERIES O MENOS (CANTIDAD: ' + _quantity + ').', '¡SERIES DUPLICADAS!');
+                    _ok = false;
+                }
+            });
+            return _ok;
+        }
+
+        $('#purchase-form').submit(function (event) {
+            event.preventDefault();
+            ProductSearch.closeAll();
+
+            if (!validateEditDetails()) {
+                return false;
+            }
+
+            let table_foot = $("#id_detail_data_grid tfoot#details-table-foot tr td.td-table-foot")
+                .find("#id_detail_data_foot tbody#table-detail-foot tr");
+
+            let Detail_purchase = {
+                "Invoice": $('#id_factura').val(),
+                "PurchaseId": $('#purchase_id').val(),
+                "ProviderId": $('#id_provider').attr("provider"),
+                "Date": $('#id_fechacompra').val(),
+                "Type_Bill": $('#id_type_bill').val(),
+                "Type_Pay": $('#payment_type').val(),
+                "Base_Total": toNum(table_foot.find("td.foot-base input.total-foot-base").val()),
+                "Igv_Total": toNum(table_foot.find("td.foot-igv input.total-foot-igv").val()),
+                "Import_Total": toNum(table_foot.find("td.foot-total input.total-foot-total").val()),
+                "Total_Document": toNum(table_foot.find("td.foot-document input.total-foot-document").val()),
+                "Check_Igv": ($("#id_detail_data_grid tfoot#details-table-foot tr td.td-table-foot")
+                    .find("div.form-check input.check-igv").is(':checked')) ? 1 : 0,
+                "Check_Dollar": ($("#check_dollar").length && $("#check_dollar").is(':checked')) ? 1 : 0,
+                "Details": [],
+                "Freight": [],
+                "Dues": [],
+            };
+
+            $("#id_detail_data_grid tbody#details-table tr.item-row").each(function () {
+                let detailObj = {
+                    "ProductDetail": $(this).attr('pd_id'),
+                    "Product": $(this).attr('product'),
+                    "Quantity": toNum($(this).find("td.item-quantity input.quantity-product").val()),
+                    "Unit": $(this).attr('unit_id'),
+                    "Price": toNum($(this).find("td.item-price input.price-unit-product").val()),
+                    "Price_Unit_Discount": toNum($(this).find("td.item-price").attr("price-unit-with-discount")),
+                    "Dto1": toNum($(this).find("td.item-discount1 input.discount1").val()),
+                    "Dto2": toNum($(this).find("td.item-discount2 input.discount2").val()),
+                    "Dto3": toNum($(this).find("td.item-discount3 input.discount3").val()),
+                    "Dto4": toNum($(this).find("td.item-discount4 input.discount4").val()),
+                    "Total": toNum($(this).find("td.item-total input.total-detail").val()),
+                    "Check_kardex": 1,
+                    "Serials": []
+                };
+                $(this).next('tr.product-serial').find('tbody[id^="details-serial-"] tr').each(function () {
+                    let serialVal = ($(this).find('td.item-serial input.serial').val() || '').trim();
+                    if (serialVal !== '') {
+                        detailObj.Serials.push({"Serial": serialVal});
+                    }
+                });
+                Detail_purchase.Details.push(detailObj);
+            });
+
+            $("#id_debs_grid tbody#details-dues tr").each(function () {
+                let _monto = toNum($(this).find("td.amount-due").text().replace('S/', '').trim());
+                Detail_purchase.Dues.push({
+                    "amountId": $(this).attr('due_id'),
+                    "amountDue": _monto
+                });
+            });
+
+            let _btn = $('#btn-save');
+            _btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Guardando...');
+
+            $.ajax({
+                url: '/buys/save_update_purchase/',
+                async: true,
+                dataType: 'json',
+                type: 'GET',
+                data: {
+                    'purchase': JSON.stringify(Detail_purchase),
+                    'purchase_id': $('#purchase_id').val(),
+                },
+                contentType: 'application/json;charset=UTF-8',
+                headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                success: function (response) {
+                    toastr.success(response.message, '¡COMPRA ACTUALIZADA CORRECTAMENTE!');
+                    setTimeout(() => {
+                        window.open("/buys/get_purchase_list/", '_self');
+                    }, 1000);
+                },
+                error: function (jqXhr) {
+                    _btn.prop('disabled', false).html('<i class="fas fa-check-circle"></i> Guardar Cambios');
+                    if (jqXhr.responseJSON && jqXhr.responseJSON.error) {
+                        toastr.error(jqXhr.responseJSON.error, '¡NO SE PUDO ACTUALIZAR!');
+                    } else {
+                        toastr.error("ERROR AL GUARDAR LOS CAMBIOS.", '¡INCONCEBIBLE!');
+                    }
+                }
+            });
+            return false;
+        });
+
+        $(document).ready(function () {
+            counterStrike2();
+            updateRowsCount();
+            sum_table();
+            $('#payment_type').trigger('change');
+        });
+
+    </script>
 {% endblock extrajs %}

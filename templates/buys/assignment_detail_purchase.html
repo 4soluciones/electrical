@@ -1,294 +1,737 @@
 <div class="modal-dialog modal-xl" role="document">
 
-    <div class="modal-content">
+    <style>
+        .ocx {
+            --ocx-p: #0d6e6e;
+            --ocx-pd: #0a5252;
+            --ocx-pl: #14b8a6;
+            --ocx-ink: #0f172a;
+            --ocx-body: #475569;
+            --ocx-muted: #94a3b8;
+            --ocx-line: #e5e9f0;
+            --ocx-ok: #059669;
+            --ocx-warn: #d97706;
+            --ocx-danger: #dc2626;
+            color: var(--ocx-body);
+        }
 
-        <div class="modal-header text-center">
-            <div class="row col-8">
-                <div class="col-6 text-left">
-                    <h5 class="modal-title font-weight-bold roboto-condensed-regular">ASIGNAR ALMACEN:</h5>
-                </div>
-                <div class="col-6">
-                    <h4 class="modal-title roboto-condensed-regular font-weight-bold"> COMPRA
-                        Nº: {{ purchase.bill_number|upper }}</h4>
-                </div>
+        .ocx-head {
+            position: relative;
+            background: linear-gradient(120deg, #0b4f4f 0%, #0d6e6e 45%, #0f766e 70%, #155e75 100%);
+            color: #fff;
+            padding: 16px 22px;
+            border-radius: .3rem .3rem 0 0;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .ocx-head::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(420px 180px at 90% -40%, rgba(255, 255, 255, .2), transparent 70%);
+            pointer-events: none;
+        }
+
+        .ocx-head__icon {
+            position: relative;
+            z-index: 2;
+            display: grid;
+            place-items: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 13px;
+            background: rgba(255, 255, 255, .15);
+            border: 1px solid rgba(255, 255, 255, .3);
+            font-size: 18px;
+        }
+
+        .ocx-head__txt {
+            position: relative;
+            z-index: 2;
+            flex: 1 1 240px;
+        }
+
+        .ocx-head__eyebrow {
+            display: block;
+            font-size: 10.5px;
+            letter-spacing: .16em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, .75);
+            font-weight: 700;
+        }
+
+        .ocx-head__title {
+            font-family: "Montserrat", sans-serif;
+            font-weight: 800;
+            font-size: 19px;
+            margin: 2px 0 0;
+            color: #fff;
+        }
+
+        .ocx-badge {
+            position: relative;
+            z-index: 2;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            height: 30px;
+            padding: 0 13px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, .17);
+            border: 1px solid rgba(255, 255, 255, .32);
+            font-size: 11.5px;
+            font-weight: 800;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+        }
+
+        .ocx-head__close {
+            position: relative;
+            z-index: 2;
+            background: rgba(255, 255, 255, .16);
+            border: 1px solid rgba(255, 255, 255, .3);
+            color: #fff;
+            opacity: 1;
+            width: 32px;
+            height: 32px;
+            border-radius: 9px;
+            line-height: 1;
+            font-size: 20px;
+        }
+
+        .ocx-head__close:hover {
+            background: rgba(255, 255, 255, .3);
+            color: #fff;
+        }
+
+        .ocx-body {
+            padding: 18px 20px;
+            background: #f8fafc;
+        }
+
+        /* --- KPIs --- */
+        .ocx-kpis {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .ocx-kpi {
+            flex: 1 1 150px;
+            background: #fff;
+            border: 1px solid var(--ocx-line);
+            border-radius: 11px;
+            padding: 10px 14px;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, .05);
+        }
+
+        .ocx-kpi__lbl {
+            display: block;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--ocx-muted);
+        }
+
+        .ocx-kpi__val {
+            display: block;
+            font-size: 17px;
+            font-weight: 800;
+            color: var(--ocx-ink);
+            margin-top: 2px;
+        }
+
+        .ocx-kpi--ok .ocx-kpi__val {
+            color: var(--ocx-pd);
+        }
+
+        .ocx-kpi--cur {
+            background: linear-gradient(135deg, #0d6e6e, #0f766e);
+            border-color: #0b5f5f;
+        }
+
+        .ocx-kpi--cur .ocx-kpi__lbl {
+            color: rgba(255, 255, 255, .7);
+        }
+
+        .ocx-kpi--cur .ocx-kpi__val {
+            color: #fff;
+        }
+
+        /* --- destino --- */
+        .ocx-dest {
+            background: #fff;
+            border: 1px solid var(--ocx-line);
+            border-left: 3px solid var(--ocx-pl);
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+        }
+
+        .ocx-dest__title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11.5px;
+            font-weight: 800;
+            letter-spacing: .09em;
+            text-transform: uppercase;
+            color: var(--ocx-muted);
+            margin-bottom: 9px;
+        }
+
+        .ocx-dest__title i {
+            color: var(--ocx-p);
+        }
+
+        .ocx-dest__row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .ocx-dest__store {
+            flex: 1 1 280px;
+            min-width: 220px;
+        }
+
+        .ocx-dest__store .form-control {
+            height: 42px;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 9px;
+            border: 1px solid #dbe2ea;
+            box-shadow: none;
+            color: var(--ocx-ink);
+        }
+
+        .ocx-dest__store .form-control:focus {
+            border-color: var(--ocx-pl);
+            box-shadow: 0 0 0 3px rgba(20, 184, 166, .16);
+        }
+
+        .ocx-cur {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            height: 42px;
+            padding: 0 15px;
+            border-radius: 9px;
+            border: 1px solid var(--ocx-line);
+            background: #f1f5f9;
+            font-size: 12.5px;
+            font-weight: 800;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            color: var(--ocx-body);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .ocx-cur input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .ocx-cur__track {
+            position: relative;
+            width: 38px;
+            height: 20px;
+            border-radius: 20px;
+            background: #cbd5e1;
+            transition: background .18s;
+            flex: 0 0 auto;
+        }
+
+        .ocx-cur__thumb {
+            position: absolute;
+            top: 2.5px;
+            left: 2.5px;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .28);
+            transition: transform .18s;
+        }
+
+        .ocx-cur input:checked + .ocx-cur__track {
+            background: var(--ocx-pl);
+        }
+
+        .ocx-cur input:checked + .ocx-cur__track .ocx-cur__thumb {
+            transform: translateX(18px);
+        }
+
+        .ocx-cur input:focus + .ocx-cur__track {
+            box-shadow: 0 0 0 3px rgba(20, 184, 166, .3);
+        }
+
+        .ocx-warn, .ocx-info {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            padding: 9px 13px;
+            border-radius: 9px;
+            font-size: 12.5px;
+            line-height: 1.4;
+        }
+
+        .ocx-warn {
+            background: #fffbeb;
+            border: 1px solid #fcd34d;
+            color: #92400e;
+        }
+
+        .ocx-info {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1e40af;
+        }
+
+        .ocx-warn i, .ocx-info i {
+            margin-top: 2px;
+            flex: 0 0 auto;
+        }
+
+        /* --- tabla --- */
+        .ocx-table {
+            margin-bottom: 0 !important;
+            font-size: 13px;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: #fff;
+        }
+
+        .ocx-table thead th {
+            padding: 10px 7px;
+            background: linear-gradient(180deg, #0f766e, #0b5f5f);
+            color: rgba(255, 255, 255, .95);
+            font-size: 10.5px;
+            font-weight: 800;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            text-align: center;
+            white-space: nowrap;
+            border: 0;
+            border-right: 1px solid rgba(255, 255, 255, .1);
+        }
+
+        .ocx-table thead th:last-child {
+            border-right: 0;
+        }
+
+        .ocx-table thead th small {
+            font-size: 9px;
+            font-weight: 600;
+            opacity: .72;
+            text-transform: none;
+        }
+
+        .ocx-table thead th.ocx-th--pct {
+            background: linear-gradient(180deg, #92400e, #78350f);
+        }
+
+        .ocx-table thead th.ocx-th--wide {
+            min-width: 240px;
+        }
+
+        .ocx-table thead th.ocx-th--money {
+            background: linear-gradient(180deg, #0e7490, #0f5f75);
+        }
+
+        .ocx-table tbody tr.item-row > td {
+            padding: 8px 7px;
+            border-bottom: 1px solid var(--ocx-line);
+            vertical-align: middle;
+            background: #fff;
+        }
+
+        .ocx-table tbody tr.item-row:nth-of-type(even) > td {
+            background: #fbfdfe;
+        }
+
+        .ocx-table tbody tr.item-row:hover > td {
+            background: #f0f9f8;
+        }
+
+        .ocx-qty {
+            display: inline-block;
+            min-width: 44px;
+            padding: 3px 9px;
+            border-radius: 7px;
+            background: #cde8ec;
+            color: #0c4a6e;
+            font-weight: 800;
+            font-size: 15px;
+        }
+
+        .ocx-money {
+            background-image: linear-gradient(180deg, rgba(15, 118, 110, .045), rgba(15, 118, 110, .045)) !important;
+        }
+
+        .ocx-final {
+            display: block;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-weight: 800;
+            color: #065f46;
+        }
+
+        .ocx-final--usd {
+            background: #e0f2fe;
+        }
+
+        .ocx-final--pen {
+            background: #dcfce7;
+        }
+
+        /* --- series --- */
+        .ocx-table tbody tr.product-serial > td {
+            padding: 0 !important;
+            background: #f8fafc;
+            border-bottom: 1px solid var(--ocx-line);
+        }
+
+        .ocx-serial-box {
+            margin: 8px 12px 12px;
+            border: 1px dashed #cbd5e1;
+            border-radius: 10px;
+            background: #fff;
+            overflow: hidden;
+        }
+
+        .ocx-serial-box__head {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 7px 10px;
+            background: #fef3c7;
+            border: 0;
+            color: #92400e;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .07em;
+            text-transform: uppercase;
+        }
+
+        .ocx-serial-box__head:hover {
+            background: #fde68a;
+            color: #78350f;
+            text-decoration: none;
+        }
+
+        .ocx-serial-box__head[aria-expanded="true"] i.fa-sort-down {
+            transform: rotate(180deg);
+        }
+
+        .ocx-serial-box__head i.fa-sort-down {
+            transition: transform .18s;
+        }
+
+        .ocx-serial-box table {
+            font-size: 12.5px;
+            margin: 0;
+        }
+
+        .ocx-serial-box table td {
+            padding: 3px 8px;
+            border: 0;
+            border-bottom: 1px solid #eef2f6;
+        }
+
+        .ocx-serial-box table tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .ocx-serial-box .form-control {
+            height: 30px;
+            font-size: 12.5px;
+            letter-spacing: .05em;
+            border-radius: 7px;
+            background: #f8fafc;
+        }
+
+        /* --- footer --- */
+        .ocx-foot {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 14px 20px;
+            background: #fff;
+            border-top: 1px solid var(--ocx-line);
+        }
+
+        .ocx-foot__note {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            font-size: 12px;
+            color: var(--ocx-muted);
+            max-width: 620px;
+        }
+
+        .ocx-foot__note i {
+            color: var(--ocx-pl);
+            font-size: 14px;
+        }
+
+        .ocx-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            height: 40px;
+            padding: 0 18px;
+            border-radius: 10px;
+            border: 1px solid transparent;
+            font-size: 13.5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform .12s, box-shadow .12s, background .12s;
+            white-space: nowrap;
+        }
+
+        .ocx-btn:active {
+            transform: translateY(1px);
+        }
+
+        .ocx-btn--ghost {
+            background: #fff;
+            color: var(--ocx-body);
+            border-color: var(--ocx-line);
+        }
+
+        .ocx-btn--ghost:hover {
+            background: #f8fafc;
+            color: var(--ocx-ink);
+        }
+
+        .ocx-btn--primary {
+            background: linear-gradient(180deg, #14907f, var(--ocx-p));
+            color: #fff;
+            box-shadow: 0 2px 6px rgba(13, 110, 110, .28);
+        }
+
+        .ocx-btn--primary:hover {
+            background: linear-gradient(180deg, #17a08e, #0b6161);
+            color: #fff;
+            box-shadow: 0 6px 16px rgba(13, 110, 110, .32);
+        }
+
+        .ocx-btn[disabled] {
+            opacity: .6;
+            pointer-events: none;
+        }
+
+        /* --- simbolo de moneda --- */
+        .ocx .input-icon {
+            position: relative;
+            display: inline-block;
+            min-width: 62px;
+        }
+
+        .ocx .input-icon > i {
+            position: absolute;
+            display: block;
+            transform: translate(0, -50%);
+            top: 50%;
+            pointer-events: none;
+            width: 25px;
+            text-align: center;
+            font-style: normal;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--ocx-muted);
+        }
+    </style>
+
+    <div class="modal-content ocx">
+
+        <div class="ocx-head">
+            <span class="ocx-head__icon"><i class="fas fa-warehouse"></i></span>
+            <div class="ocx-head__txt">
+                <span class="ocx-head__eyebrow">Ingreso de mercadería</span>
+                <h4 class="ocx-head__title">Asignar productos al almacén</h4>
             </div>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span class="ocx-badge">
+                <i class="fas fa-receipt"></i> Compra Nº {{ purchase.bill_number|upper }}
+            </span>
+            <button type="button" class="close ocx-head__close" data-dismiss="modal" data-target="#assignment" aria-label="Cerrar">
                 <span aria-hidden="true">&times;</span>
             </button>
             <input type="hidden" id="id_compra" value="{{ purchase.id }}">
         </div>
 
-        <form action="" method="POST">
-            {% csrf_token %}
-            <div class="modal-body">
-                <div class="row roboto-condensed-regular mb-3">
-                    <div class="col-sm-2 text-center">
-                        <label class="align-middle font-weight-bold text-uppercase text-dark mt-2">
-                            Fecha: {{ purchase.purchase_date|date:"d-m-Y" }}
-                        </label>
-                    </div>
-                    <div class="col-sm-4">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <label class="input-group-text font-weight-bold" for="id_almacen">Almacen
-                                    destino:</label>
-                            </div>
-                            <select class="form-control font-weight-bold" id="id_almacen" name="almacen" required>
-                                {% for a in subsidiary_stores.all %}
-                                    {% if subsidiary_stores.id == a.id %}
-                                        <option value="{{ a.id }}">{{ a.name }}</option>
-                                    {% else %}
-                                        <option value="{{ a.id }}">{{ a.name }}</option>
-                                    {% endif %}
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-sm-3 mt-2 text-center">
-                        {% if purchase.check_dollar %}
-                            <div class="form-check">
-                                <input class="form-check-input check-dollar"
-                                       type="checkbox" value="" id="check_dollar" checked
-                                       style=" transform: scale(1.6);">
-                                <label class="form-check-label font-weight-bold" for="check_dollar"
-                                       style="background: #c7d6ee">
-                                    COMPRA EN DOLARES
-                                </label>
-                            </div>
-                        {% else %}
-                            <div class="form-check">
-                                <input class="form-check-input check-soles"
-                                       type="checkbox" value="" id="check_soles" checked
-                                       style=" transform: scale(1.5);">
-                                <label class="form-check-label font-weight-bold" for="check_soles">
-                                    COMPRA EN SOLES
-                                </label>
-                            </div>
-                        {% endif %}
-                    </div>
-                    {#                    <div class="col-sm-3 text-right mt-2">#}
-                    {#                        <input type="hidden" id="freight" value="{{ purchase.total_freight|safe }}">#}
-                    {#                        <label class="align-middle font-weight-bold text-uppercase text-dark">#}
-                    {#                            Total Flete: S/ {{ purchase.total_freight|safe }}#}
-                    {#                        </label>#}
-                    {#                    </div>#}
+        <div class="ocx-body">
+            <div class="ocx-kpis">
+                <div class="ocx-kpi">
+                    <span class="ocx-kpi__lbl">Fecha de compra</span>
+                    <span class="ocx-kpi__val">{{ purchase.purchase_date|date:"d-m-Y" }}</span>
                 </div>
-                {#                <table class="table roboto-condensed-regular" id="table-header" style="width: 100%;">#}
-                {#                    <tr>#}
-                {#                        <td style="width: 16%; font-size: 15px" class="align-middle font-weight-bold text-uppercase">#}
-                {#                            Fecha:&nbsp; {{ purchase.purchase_date|date:"d-m-Y" }}</td>#}
-                {#                        <td style="width: 10%; font-size: 12px" class="align-middle font-weight-bold text-uppercase">#}
-                {#                            Almacen destino:#}
-                {#                        </td>#}
-                {#                        <td style="width: 14%" class="align-middle">#}
-                {#                            <select class="form-control font-weight-bold" id="id_almacen" name="almacen" required>#}
-                {#                                {% for a in subsidiary_stores.all %}#}
-                {#                                    {% if subsidiary_stores.id == a.id %}#}
-                {#                                        <option value="{{ a.id }}">{{ a.name }}</option>#}
-                {#                                    {% else %}#}
-                {#                                        <option value="{{ a.id }}">{{ a.name }}</option>#}
-                {#                                    {% endif %}#}
-                {#                                {% endfor %}#}
-                {#                            </select>#}
-                {#                        </td>#}
-                {#                        <td style="width: 15%" class="align-middle">#}
-                {#                            {% if purchase.check_dollar %}#}
-                {#                                <div class="form-check">#}
-                {#                                    <input class="form-check-input check-dollar"#}
-                {#                                           type="checkbox" value="" id="check_dollar" checked#}
-                {#                                           style=" transform: scale(1.6);">#}
-                {#                                    <label class="form-check-label font-weight-bold" for="check_dollar"#}
-                {#                                           style="background: #c7d6ee">#}
-                {#                                        COMPRA EN DOLARES#}
-                {#                                    </label>#}
-                {#                                </div>#}
-                {##}
-                {#                            {% else %}#}
-                {#                                <div class="form-check">#}
-                {#                                    <input class="form-check-input check-soles"#}
-                {#                                           type="checkbox" value="" id="check_soles" checked#}
-                {#                                           style=" transform: scale(1.5);">#}
-                {#                                    <label class="form-check-label font-weight-bold" for="check_soles">#}
-                {#                                        COMPRA EN SOLES#}
-                {#                                    </label>#}
-                {#                                </div>#}
-                {##}
-                {#                            {% endif %}#}
-                {##}
-                {#                        </td>#}
-                {#                        <td style="width: 15%" class="align-middle text-uppercase text-right font-weight-bold">#}
-                {#                            {% if purchase.check_dollar %}#}
-                {#                                <label class="form-check-label font-weight-bold" style="background: #c7d6ee">#}
-                {#                                    Tipo de cambio: {{ type_change }}#}
-                {#                                </label>#}
-                {#                            {% endif %}#}
-                {#                        </td>#}
-                {##}
-                {#                        <td style="width: 10%" class="align-middle text-uppercase text-right font-weight-bold pr-0">#}
-                {#                            Total#}
-                {#                            Flete:#}
-                {#                        </td>#}
-                {#                        <td style="width: 6%" class=" item-freight align-middle text-right font-weight-bold pl-0"#}
-                {#                            freight="{{ purchase.total_freight|safe }}">#}
-                {#                            S/ {{ purchase.total_freight|safe }}#}
-                {#                            <input type="text" class="form-control text-center" id="id_freight" value="S/ {{ purchase.total_freight|safe }}">#}
-                {#                        </td>#}
-                {#                    </tr>#}
-                {#                </table>#}
-                <table class="table table-bordered table-striped align-content-center response table-sm roboto-condensed-regular">
+                <div class="ocx-kpi">
+                    <span class="ocx-kpi__lbl">Ítems</span>
+                    <span class="ocx-kpi__val">{{ purchase.purchasedetail_set.count }}</span>
+                </div>
+                <div class="ocx-kpi">
+                    <span class="ocx-kpi__lbl">Base imponible</span>
+                    <span class="ocx-kpi__val">{% if purchase.check_dollar %}${% else %}S/{% endif %}{{ purchase.base_total_purchase|safe }}</span>
+                </div>
+                <div class="ocx-kpi ocx-kpi--cur">
+                    <span class="ocx-kpi__lbl">Total del documento</span>
+                    <span class="ocx-kpi__val">{% if purchase.check_dollar %}${% else %}S/{% endif %}{{ purchase.total_purchase|safe }}</span>
+                </div>
+            </div>
+
+            <div class="ocx-dest">
+                <div class="ocx-dest__title">
+                    <i class="fas fa-map-marker-alt"></i> Destino de la mercadería
+                </div>
+                <div class="ocx-dest__row">
+                    <div class="ocx-dest__store">
+                        <select class="form-control" id="id_almacen" name="almacen" required>
+                            <option value="">Seleccione el almacén de destino...</option>
+                            {% for a in subsidiary_stores.all %}
+                                <option value="{{ a.id }}">{{ a.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    {% if purchase.check_dollar %}
+                        <label class="ocx-cur" for="check_dollar">
+                            <input class="form-check-input check-dollar" type="checkbox" value="" id="check_dollar" checked>
+                            <span class="ocx-cur__track"><span class="ocx-cur__thumb"></span></span>
+                            <span><i class="fas fa-dollar-sign"></i> Compra en dólares</span>
+                        </label>
+                    {% else %}
+                        <label class="ocx-cur" for="check_soles">
+                            <input class="form-check-input check-soles" type="checkbox" value="" id="check_soles" checked>
+                            <span class="ocx-cur__track"><span class="ocx-cur__thumb"></span></span>
+                            <span><i class="fas fa-coins"></i> Compra en soles</span>
+                        </label>
+                    {% endif %}
+                </div>
+
+                {% if not type_change_valido %}
+                    <div class="ocx-warn mt-3">
+                        <i class="fas fa-triangle-exclamation"></i>
+                        <span>No se pudo obtener el tipo de cambio, se usó el valor <b>{{ type_change }}</b> para
+                            convertir a soles. Verifique el valor antes de asignar al almacén.</span>
+                    </div>
+                {% elif purchase.check_dollar %}
+                    <div class="ocx-info mt-3">
+                        <i class="fas fa-circle-info"></i>
+                        <span>Tipo de cambio aplicado: <b>S/ {{ type_change }}</b> por dólar. El valor unitario
+                            con descuento se valued en soles para el kardex y el stock.</span>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="table-responsive">
+                <table class="table ocx-table align-middle">
                     <thead>
-                    <tr class="text-white text-center bg-info">
-                        {#                        <th class="align-middle">Código</th>#}
-                        <th class="align-middle" style="width: 25%">Producto</th>
-                        {#                        <th class="align-middle">Marca</th>#}
-                        <th class="align-middle" style="width: 10%">Cantidad</th>
-                        <th class="align-middle" style="width: 5%">Unidad</th>
-                        <th class="align-middle" style="width: 10%; background-color: #7ea0ef">Valor Unit.<br>(Sn IGV)</th>
-                        <th class="align-middle" style="width: 10%">Price Unit.<br>(Con IGV)</th>
-                        <th class="align-middle" style="width: 5%">%Dto.1</th>
-                        <th class="align-middle" style="width: 5%">%Dto.2</th>
-                        <th class="align-middle" style="width: 5%">%Dto.3</th>
-                        <th class="align-middle" style="width: 5%">%Dto.4</th>
-                        <th class="align-middle" style="width: 10%">Importe</th>
-                        <th class="align-middle" style="width: 10%">Val. Unit. Dto.</th>
-                        {#                        {% if not purchase.check_dollar %}#}
-                        {#                            <th>Val. Unit. Dto. (IGV) + FLETE</th>#}
-                        {#                        {% endif %}#}
-                        {#                        {% if purchase.check_dollar %}#}
-                        {#                            <th>Val. Unit. Dto. (IGV) en SOLES</th>#}
-                        {#                            <th>Val. Unit. Dto. (IGV) + FLETE en SOLES</th>#}
-                        {#                        {% endif %}#}
-                        {#                        <th>Cambiar Precio</th>#}
-                        <!--<th>Almacen</th>-->
+                    <tr>
+                        <th class="ocx-th--wide" style="width: 24%">Producto</th>
+                        <th style="width: 8%">Cantidad</th>
+                        <th style="width: 7%">Unidad</th>
+                        <th class="ocx-th--money" style="width: 10%">Valor Unit.<br><small>(Sin IGV)</small></th>
+                        <th class="ocx-th--money" style="width: 10%">Precio Unit.<br><small>(Con IGV)</small></th>
+                        <th class="ocx-th--pct" style="width: 5%">%Dto.1</th>
+                        <th class="ocx-th--pct" style="width: 5%">%Dto.2</th>
+                        <th class="ocx-th--pct" style="width: 5%">%Dto.3</th>
+                        <th class="ocx-th--pct" style="width: 5%">%Dto.4</th>
+                        <th class="ocx-th--money" style="width: 10%">Importe</th>
+                        <th class="ocx-th--money" style="width: 11%">Valor Unit. Dto.</th>
+                        {% if purchase.check_dollar %}
+                            <th class="ocx-th--money" style="width: 12%">Valor Unit. Dto.<br><small>(en soles)</small></th>
+                        {% endif %}
                     </tr>
                     </thead>
                     <tbody id="details">
                     {% for d in dictionary %}
                         {% for p in d.purchase_detail_set %}
                             <tr class="item-row" product="{{ p.product_id }}" purchase_detail="{{ p.id }}">
-                                {#                                <td class="text-center">{{ p.product_code }}</td>#}
-                                <td>{{ p.product }}</td>
-                                {#                                <td class="text-center">{{ p.product_brand }}</td>#}
-                                <td class="item-quantity text-center font-weight-bold" style="font-size: 18px; background-color: #cde8ec">{{ p.quantity|safe|floatformat:0 }}</td>
-                                <td class="item-unit text-center" pu="{{ p.unit_id }}">{{ p.unit_name }}</td>
-                                <td class="value-price text-right">
-                                    <div class="input-icon">
-                                        <i class="change-money">S/</i>
-                                        {{ p.value_unit|safe }}
-                                    </div>
-                                </td>
-                                <td class="item-price text-right" price_unit="{{ p.price_unit|safe }}">
-                                    <div class="input-icon">
-                                        <i class="change-money">S/</i>
-                                        {{ p.price_unit|safe }}
-                                    </div>
-                                </td>
-                                <td class="item-discount1 text-right">{{ p.discount_one|safe }}</td>
-                                <td class="item-discount2 text-right">{{ p.discount_two|safe }}</td>
-                                <td class="item-discount3 text-right">{{ p.discount_three|safe }}</td>
-                                <td class="item-discount4 text-right">{{ p.discount_four|safe }}</td>
-                                <td class="text-center">
-                                    <div class="input-icon">
-                                        <i class="change-money">S/</i>
-                                        {{ p.multiplicate|safe }}
-                                    </div>
-                                </td>
-                                <td class="item-price-unit-discount text-center font-weight-bold" {% if d.check_igv %}
-                                    price_unit_d="{{ p.price_unit_discount|safe }}" {% else %}
-                                    price_unit_d="{{ p.price_unit_discount_with_igv|safe }}"{% endif %}
-                                        {% if purchase.check_dollar %} style="background: #c7d6ee" {% else %}
-                                    style="background: #00e25b" {% endif %} >
-                                    {% if d.check_igv %}
-                                        <div class="input-icon">
-                                            <i class="change-money">S/</i>
-                                            {{ p.price_unit_discount|safe }}
-                                        </div>
-                                    {% else %}
-                                        <div class="input-icon">
-                                            <i class="change-money">S/</i>
-                                            {{ p.price_unit_discount_with_igv|safe }}
-                                        </div>
+                                <td class="text-left">
+                                    <span class="font-weight-bold">{{ p.product }}</span>
+                                    {% if p.product_code %}
+                                        <br><small class="text-muted">{{ p.product_code }}</small>
                                     {% endif %}
-
                                 </td>
-                                {#                                {% if not purchase.check_dollar %}#}
-                                {#                                    <td class="item-price-unit-discount-plus-freight text-center font-weight-bold"#}
-                                {#                                        price_unit_plus_freight="{{ p.price_unit_discount_plus_freight|safe }}">#}
-                                {#                                        <div class="input-icon" >#}
-                                {#                                            <i class="change-money">S/</i>#}
-                                {#                                            {{ p.price_unit_discount_plus_freight|safe }}#}
-                                {#                                        </div>#}
-                                {#                                    </td>#}
-                                {#                                {% endif %}#}
-                                {#                                {% if purchase.check_dollar %}#}
-                                {#                                    <td class="item-price-unit-igv-change text-center font-weight-bold"#}
-                                {#                                        price_unit_igv_change="{{ p.price_unit_discount_with_igv_money_change|safe }}"#}
-                                {#                                        style="background: #00e25b">#}
-                                {#                                        <i class="" >S/</i>#}
-                                {#                                        {{ p.price_unit_discount_with_igv_money_change|safe }}#}
-                                {#                                    </td>#}
-                                {##}
-                                {#                                    <td class="item-price-unit-igv-change-plus-freight text-center font-weight-bold"#}
-                                {#                                        price_unit_igv_change_plus_freight="{{ p.price_unit_discount_with_igv_money_change_freight|safe }}"#}
-                                {#                                        style="background: #00e25b">#}
-                                {#                                        <i class="" >S/</i>#}
-                                {#                                        {{ p.price_unit_discount_with_igv_money_change_freight|safe }}#}
-                                {#                                    </td>#}
-                                {#                                {% endif %}#}
-
-                                {#                                <td class="item-check text-center align-middle" style=" transform: scale(1.6);">#}
-                                {#                                    <div class="form-check">#}
-                                {#                                        <input class="form-check-input position-static check-kardex" type="checkbox"#}
-                                {#                                               value="" checked>#}
-                                {#                                    </div>#}
-                                {#                                </td>#}
-                                <!--<td class="item-store">
-                                <select  class="form-control form-control-sm">
-                                    <option selected value="0">seleccione</option>
-{#                                    {% for a in subsidiary_stores %}#}
-{#                                        <option value="{{ a.id }}">{{ a.name }}</option>#}
-{#                                    {% endfor %}#}
-                                </select>
-                            </td>-->
+                                <td class="item-quantity text-center">
+                                    <span class="ocx-qty">{{ p.quantity|safe|floatformat:0 }}</span>
+                                </td>
+                                <td class="item-unit text-center" pu="{{ p.unit_id }}">{{ p.unit_name }}</td>
+                                <td class="ocx-money text-right">
+                                    <span class="input-icon"><i class="change-money">S/</i>{{ p.value_unit|safe }}</span>
+                                </td>
+                                <td class="item-price ocx-money text-right" price_unit="{{ p.price_unit|safe }}">
+                                    <span class="input-icon"><i class="change-money">S/</i>{{ p.price_unit|safe }}</span>
+                                </td>
+                                <td class="item-discount1 ocx-money text-right">{{ p.discount_one|safe }}</td>
+                                <td class="item-discount2 ocx-money text-right">{{ p.discount_two|safe }}</td>
+                                <td class="item-discount3 ocx-money text-right">{{ p.discount_three|safe }}</td>
+                                <td class="item-discount4 ocx-money text-right">{{ p.discount_four|safe }}</td>
+                                <td class="ocx-money text-center">
+                                    <span class="input-icon"><i class="change-money">S/</i>{{ p.multiplicate|safe }}</span>
+                                </td>
+                                <td class="item-price-unit-discount text-center"
+                                    price_unit_d="{% if d.check_igv %}{{ p.price_unit_discount|safe }}{% else %}{{ p.price_unit_discount_with_igv|safe }}{% endif %}">
+                                    <span class="ocx-final {% if purchase.check_dollar %}ocx-final--usd{% else %}ocx-final--pen{% endif %}">
+                                        {% if d.check_igv %}
+                                            <span class="input-icon"><i class="change-money">S/</i>{{ p.price_unit_discount|safe }}</span>
+                                        {% else %}
+                                            <span class="input-icon"><i class="change-money">S/</i>{{ p.price_unit_discount_with_igv|safe }}</span>
+                                        {% endif %}
+                                    </span>
+                                </td>
+                                {% if purchase.check_dollar %}
+                                    <td class="item-price-unit-igv-change ocx-money text-center"
+                                        price_unit_igv_change="{{ p.price_unit_discount_with_igv_money_change|safe }}">
+                                        <span class="ocx-final ocx-final--pen">
+                                            <span class="input-icon"><i class="change-money">S/</i>{{ p.price_unit_discount_with_igv_money_change|safe }}</span>
+                                        </span>
+                                    </td>
+                                {% endif %}
                             </tr>
                             {% if p.serials %}
                                 <tr class="product-serial">
-                                    <td class="text-right align-middle">
-                                        <div id="accordion-{{ p.product_id }}">
-                                            <div class="card">
-                                                <div class="card-header p-0" id="heading-{{ p.product_id }}">
-                                                    <h5 class="mb-0 text-center">
-                                                        <button class="btn btn-link collapsed text-dark roboto-condensed-regular font-weight-bold"
-                                                                type="button"
-                                                                data-toggle="collapse"
-                                                                data-target="#collapse-{{ p.product_id }}"
-                                                                aria-expanded="false"
-                                                                aria-controls="collapse-{{ p.product_id }}"
-                                                                style="font-size: 11px;">
-                                                            Seriales <i class="fas fa-sort-down"></i>
-                                                        </button>
-                                                    </h5>
-                                                </div>
-                                                <div id="collapse-{{ p.product_id }}" class="collapse"
-                                                     aria-labelledby="heading-{{ p.product_id }}"
-                                                     data-parent="#accordion-{{ p.product_id }}">
-                                                    <div class="card-body p-0">
-                                                        <table class="table table-sm align-content-center table-bordered mb-0">
-                                                            <tbody id="details-serial">
-                                                            {% for s in p.serials %}
-                                                                <tr>
-                                                                    <td class="text-right align-middle text-center">{{ forloop.counter }}</td>
-                                                                    <td class="text-right align-middle">
-                                                                        <input type="text" class="form-control" readonly
-                                                                               aria-label="" value="{{ s.serial }}"
-                                                                               aria-describedby="basic-addon1">
-                                                                    </td>
-                                                                </tr>
-                                                            {% endfor %}
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                </div>
+                                    <td colspan="{% if purchase.check_dollar %}12{% else %}11{% endif %}">
+                                        <div class="ocx-serial-box">
+                                            <button class="ocx-serial-box__head" type="button"
+                                                    data-toggle="collapse"
+                                                    data-target="#collapse-serial-{{ p.id }}"
+                                                    aria-expanded="true"
+                                                    aria-controls="collapse-serial-{{ p.id }}">
+                                                <i class="fas fa-barcode"></i>
+                                                Series registradas ({{ p.serials|length }})
+                                                <i class="fas fa-sort-down"></i>
+                                            </button>
+                                            <div id="collapse-serial-{{ p.id }}" class="collapse show">
+                                                <table>
+                                                    <tbody id="details-serial">
+                                                    {% for s in p.serials %}
+                                                        <tr>
+                                                            <td class="text-center" style="width: 46px">{{ forloop.counter }}</td>
+                                                            <td>
+                                                                <input type="text" class="form-control" readonly
+                                                                       value="{{ s.serial }}">
+                                                            </td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                    </tbody>
+                                                </table>
                                             </div>
                                         </div>
                                     </td>
@@ -298,93 +741,130 @@
                     {% endfor %}
                     </tbody>
                 </table>
-            </div><!-- modal-body -->
-
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                <button id="assignment-changes" type="button" class="btn btn-primary">Asignar Productos</button>
             </div>
+        </div>
 
-        </form>
+        <div class="ocx-foot">
+            <div class="ocx-foot__note">
+                <i class="fas fa-circle-info"></i>
+                <span>Al confirmar se generará el stock en el almacén, el movimiento de kardex y las series pasarán a
+                    estado <b>COMPRADO</b>.</span>
+            </div>
+            <div class="d-flex" style="gap:10px">
+                <button type="button" class="ocx-btn ocx-btn--ghost" data-dismiss="modal" data-target="#assignment">Cerrar</button>
+                <button id="assignment-changes" type="button" class="ocx-btn ocx-btn--primary">
+                    <i class="fas fa-warehouse"></i> Asignar Productos
+                </button>
+            </div>
+        </div>
 
     </div>
 </div>
 
 <script type="text/javascript">
 
-    $(document).ready(function () {
-        let _check = $("#check_dollar")
-        if (_check.is(':checked')) {
+    $(function () {
+        let _check = $("#check_dollar");
+        if (_check.length && _check.is(':checked')) {
             $(".change-money").text('$')
         } else {
             $(".change-money").text('S/')
         }
+
+        // Si la sucursal tiene un solo almacen de mercaderia se preselecciona
+        // para evitar un clic adicional; si hay varios, el usuario debe elegir.
+        let _stores = $('#id_almacen option[value!=""]');
+        if (!_stores.filter(':selected').length && _stores.length === 1) {
+            _stores.prop('selected', true);
+        }
+        $('#id_almacen').on('change', function () {
+            $(this).toggleClass('is-valid', !!$(this).val());
+        });
+
+        // El collapse de series abre plegado salvo el primer producto.
+        $('.ocx-serial-box__head').each(function (index) {
+            if (index > 0) {
+                $(this).attr('aria-expanded', 'false').addClass('collapsed');
+                $(this).siblings('.collapse').removeClass('show');
+            }
+        });
     });
 
 
     $('#assignment-changes').click(function () {
-        let mensaje = confirm("¿Esta seguro de asignar al almacen seleccionado?");
-        if (mensaje) {
-            if ($('#id_compra').val() !== '') {
-                if ($('#id_almacen').val() > 0) {
-                    let details_purchase = {
-                        "Details": [],
-                        "Purchase": $('#id_compra').val(),
-                        "id_almacen": $('#id_almacen').val(),
-                        "CheckDollar": ($("#check_dollar").is(':checked')) ? 1 : 0,
-                        "CheckSoles": ($("#check_soles").is(':checked')) ? 1 : 0,
-                        "Freight": Number($("#table-header tr td.item-freight").attr('freight'))
-                    };
-                    $("#details tr.item-row").each(function () {
-                        var detailObj = {
-                            "PurchaseDetail": $(this).attr('purchase_detail'),
-                            "Product": $(this).attr('product'),
-                            "Quantity": $(this).find("td.item-quantity").text(),
-                            "Unit": $(this).find("td.item-unit").attr('pu'),
-                            "PriceUnit": $(this).find("td.item-price").attr('price_unit'),
-                            "PriceUnitDiscount": $(this).find("td.item-price-unit-discount").attr('price_unit_d'),
-                            "PriceUnitDiscountPlusFreight": Number($(this).find("td.item-price-unit-discount-plus-freight").attr('price_unit_plus_freight')),
-                            "PriceUnitIgvMoneyChange": Number($(this).find("td.item-price-unit-igv-change").attr('price_unit_igv_change')),
-                            "PriceUnitIgvMoneyChangePlusFreight": Number($(this).find("td.item-price-unit-igv-change-plus-freight").attr('price_unit_igv_change_plus_freight')),
-                            "Check": ($(this).find("td.item-check div.form-check input.check-kardex").is(':checked')) ? 1 : 0,
-                            //"Store": $(this).find("td.item-store select").val(),
-                        };
-                        details_purchase.Details.push(detailObj);
-                    });
-                    //console.log(details_purchase);
-                    $.ajax({
-                        url: '/buys/save_detail_purchase_store/',
-                        async: true,
-                        dataType: 'json', // for response
-                        type: 'GET',
-                        data: {'details_purchase': JSON.stringify(details_purchase)},
-                        contentType: 'application/json;charset=UTF-8',
-                        headers: {"X-CSRFToken": '{{ csrf_token }}'},
-                        success: function (response, textStatus, xhr) {
-                            if (xhr.status === 200) {
-                                toastr.success(response.message, '¡EXITOSO!');
-                                $('#assignment').modal('hide');
-                                setTimeout(() => {
-                                    location.reload();
-                                }, 800);
-                            }
-                        },
-                        error: function (jqXhr, textStatus, xhr) {
-                            //$('#assignment').modal('hide');
-                            toastr.error(jqXhr.statusText, '¡CONTACTE CON SISTEMAS!');
-                            toastr.error(jqXhr.responseJSON.error, '¡MENSAJE!');
-                        }
-                    });
-
-                } else {
-                    toastr.warning("SELECCIONE EL ALMACEN DE DESTINO. ", '¡ADVERTENCIA!');
-                    return false;
-                }
-            } else {
-                toastr.warning("NO SE LOGRO SELECCIONAR LA COMPRA ", '¡ADVERTENCIA!');
-                return false;
-            }
+        if (!$('#id_almacen').val()) {
+            toastr.warning("SELECCIONE EL ALMACEN DE DESTINO. ", '¡ADVERTENCIA!');
+            $('#id_almacen').focus();
+            return false;
         }
+        if ($('#id_compra').val() === '') {
+            toastr.warning("NO SE LOGRO SELECCIONAR LA COMPRA ", '¡ADVERTENCIA!');
+            return false;
+        }
+        if ($("#details tr.item-row").length === 0) {
+            toastr.warning("LA COMPRA NO TIENE DETALLES PARA ASIGNAR. ", '¡ADVERTENCIA!');
+            return false;
+        }
+
+        let mensaje = confirm("¿Esta seguro de asignar al almacen seleccionado?");
+        if (!mensaje) {
+            return false;
+        }
+
+        let details_purchase = {
+            "Details": [],
+            "Purchase": $('#id_compra').val(),
+            "id_almacen": $('#id_almacen').val(),
+            "CheckDollar": ($("#check_dollar").is(':checked')) ? 1 : 0,
+            "CheckSoles": ($("#check_soles").is(':checked')) ? 1 : 0,
+            "Freight": 0
+        };
+        $("#details tr.item-row").each(function () {
+            var detailObj = {
+                "PurchaseDetail": $(this).attr('purchase_detail'),
+                "Product": $(this).attr('product'),
+                "Quantity": $(this).find("td.item-quantity").text().trim(),
+                "Unit": $(this).find("td.item-unit").attr('pu'),
+                "PriceUnit": $(this).find("td.item-price").attr('price_unit'),
+                "PriceUnitDiscount": $(this).find("td.item-price-unit-discount").attr('price_unit_d'),
+                "PriceUnitDiscountPlusFreight": 0,
+                "PriceUnitIgvMoneyChange": Number($(this).find("td.item-price-unit-igv-change").attr('price_unit_igv_change') || 0),
+                "PriceUnitIgvMoneyChangePlusFreight": 0,
+                "Check": 0,
+            };
+            details_purchase.Details.push(detailObj);
+        });
+
+        let _btn = $(this).prop('disabled', true).find('i').removeClass('fa-warehouse').addClass('fa-spinner fa-spin');
+
+        $.ajax({
+            url: '/buys/save_detail_purchase_store/',
+            async: true,
+            dataType: 'json', // for response
+            type: 'GET',
+            data: {'details_purchase': JSON.stringify(details_purchase)},
+            contentType: 'application/json;charset=UTF-8',
+            headers: {"X-CSRFToken": '{{ csrf_token }}'},
+            success: function (response, textStatus, xhr) {
+                if (xhr.status === 200) {
+                    toastr.success(response.message, '¡EXITOSO!');
+                    $('#assignment').modal('hide');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 800);
+                }
+            },
+            error: function (jqXhr, textStatus, xhr) {
+                $(_btn).prop('disabled', false).find('i').removeClass('fa-spinner fa-spin').addClass('fa-warehouse');
+                if (jqXhr.responseJSON && jqXhr.responseJSON.error) {
+                    toastr.error(jqXhr.responseJSON.error, '¡MENSAJE!');
+                } else if (jqXhr.responseJSON && jqXhr.responseJSON.detalle) {
+                    toastr.error(jqXhr.responseJSON.detalle, '¡MENSAJE!');
+                } else {
+                    toastr.error(jqXhr.statusText, '¡CONTACTE CON SISTEMAS!');
+                }
+            }
+        });
     })
 
 </script>
