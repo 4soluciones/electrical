@@ -248,4 +248,10 @@ urlpatterns = [
     # Product Serials
     path('get_product_serials/', login_required(get_product_serials), name='get_product_serials'),
 
+    # Reporte ventas por producto
+    path('report_product_sales/', login_required(report_product_sales), name='report_product_sales'),
+    path('get_report_product_sales/', login_required(get_report_product_sales), name='get_report_product_sales'),
+    path('search_products_for_sales_report/', login_required(search_products_for_sales_report),
+         name='search_products_for_sales_report'),
+
 ]

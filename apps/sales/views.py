@@ -7894,3 +7894,311 @@ def get_product_serials(request):
             })
     
     return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+
+def _user_display_name(user):
+    if not user:
+        return 'N/A'
+    workers = list(user.worker_set.all())
+    if workers:
+        employee = workers[-1].employee
+        if employee and employee.names:
+            return employee.names
+    full_name = user.get_full_name()
+    return full_name.strip() if full_name else user.username
+
+
+def _order_document_info(order):
+    voucher_labels = dict(Order.VOUCHER_CHOICES)
+    try:
+        bill = order.orderbill
+    except OrderBill.DoesNotExist:
+        bill = None
+
+    if bill:
+        if bill.type == '1':
+            voucher_type = 'FACTURA'
+        elif bill.type == '2':
+            voucher_type = 'BOLETA'
+        else:
+            voucher_type = voucher_labels.get(order.voucher_type, order.voucher_type or 'OTRO')
+        serial = bill.serial or ''
+        number = str(bill.n_receipt).zfill(8) if bill.n_receipt else ''
+        return voucher_type, serial, number
+
+    voucher_type = voucher_labels.get(order.voucher_type, order.get_voucher_type_display())
+    serial = order.subsidiary.serial if order.subsidiary and order.subsidiary.serial else ''
+    if order.correlative:
+        number = str(order.correlative).zfill(8)
+    elif order.correlative_sale:
+        number = str(order.correlative_sale).zfill(8)
+    else:
+        number = ''
+    return voucher_type, serial, number
+
+
+def search_products_for_sales_report(request):
+    if request.method != 'GET':
+        return JsonResponse({'error': 'Método no permitido'}, status=HTTPStatus.METHOD_NOT_ALLOWED)
+
+    term = (request.GET.get('term') or '').strip()
+    if len(term) < 2:
+        return JsonResponse({'products': []}, status=HTTPStatus.OK)
+
+    query = Q()
+    for token in term.split():
+        query &= (
+            Q(name__icontains=token) |
+            Q(code__icontains=token) |
+            Q(barcode__icontains=token) |
+            Q(name_search__icontains=token) |
+            Q(product_brand__name__icontains=token)
+        )
+
+    products = Product.objects.filter(
+        query, is_enabled=True
+    ).select_related('product_brand')[:15]
+
+    data = [{
+        'id': p.id,
+        'name': p.name,
+        'code': p.code or '',
+        'brand': p.product_brand.name if p.product_brand else '',
+        'is_serial': bool(p.is_serial),
+    } for p in products]
+
+    return JsonResponse({'products': data}, status=HTTPStatus.OK)
+
+
+def report_product_sales(request):
+    today = datetime.now().date()
+    return render(request, 'sales/report_product_sales.html', {
+        'formatdate': today.strftime('%Y-%m-%d'),
+        'end_date': today.strftime('%Y-%m-%d'),
+    })
+
+
+def get_report_product_sales(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Método no permitido'}, status=HTTPStatus.METHOD_NOT_ALLOWED)
+
+    start_date_raw = request.POST.get('start-date')
+    end_date_raw = request.POST.get('end-date')
+    product_id = request.POST.get('product-id')
+
+    if not product_id:
+        return JsonResponse({'error': 'Seleccione un producto para generar el reporte.'}, status=HTTPStatus.BAD_REQUEST)
+    if not start_date_raw or not end_date_raw:
+        return JsonResponse({'error': 'Seleccione el rango de fechas.'}, status=HTTPStatus.BAD_REQUEST)
+
+    try:
+        start_date = datetime.strptime(start_date_raw, '%Y-%m-%d').date()
+        end_date = datetime.strptime(end_date_raw, '%Y-%m-%d').date()
+        product_id = int(product_id)
+    except (ValueError, TypeError):
+        return JsonResponse({'error': 'Parámetros de búsqueda inválidos.'}, status=HTTPStatus.BAD_REQUEST)
+
+    if start_date > end_date:
+        return JsonResponse({'error': 'La fecha inicial no puede ser mayor a la fecha final.'}, status=HTTPStatus.BAD_REQUEST)
+
+    try:
+        product_obj = Product.objects.select_related('product_brand').get(pk=product_id)
+    except Product.DoesNotExist:
+        return JsonResponse({'error': 'El producto seleccionado no existe.'}, status=HTTPStatus.NOT_FOUND)
+
+    date_filter = (
+        Q(order__create_at__date__range=[start_date, end_date]) |
+        Q(order__issue_date__range=[start_date, end_date])
+    )
+
+    credit_note_details_qs = CreditNoteDetail.objects.filter(
+        product_id=product_id,
+        credit_note__status__in=['E', 'P'],
+    ).select_related('unit', 'credit_note').prefetch_related(
+        Prefetch(
+            'creditnotedetailserial_set',
+            queryset=CreditNoteDetailSerial.objects.select_related('product_serial')
+        )
+    )
+
+    details = OrderDetail.objects.filter(
+        date_filter,
+        product_id=product_id,
+        order__type='V',
+        order__status__in=['P', 'C', 'A'],
+    ).select_related(
+        'order',
+        'order__client',
+        'order__user',
+        'order__orderbill',
+        'order__subsidiary',
+        'unit',
+        'product',
+    ).prefetch_related(
+        Prefetch(
+            'productserial_set',
+            queryset=ProductSerial.objects.only(
+                'id', 'serial_number', 'status', 'order_detail_id'
+            ).order_by('serial_number')
+        ),
+        Prefetch(
+            'order__user__worker_set',
+            queryset=Worker.objects.select_related('employee')
+        ),
+        Prefetch(
+            'order__creditnote_set',
+            queryset=CreditNote.objects.filter(
+                status__in=['E', 'P']
+            ).prefetch_related(
+                Prefetch('creditnotedetail_set', queryset=credit_note_details_qs)
+            )
+        ),
+    ).order_by('order__issue_date', 'order__create_at', 'order_id')
+
+    def _credit_note_serials(cn_detail):
+        serials = []
+        for item in cn_detail.creditnotedetailserial_set.all():
+            product_serial = item.product_serial
+            if product_serial and product_serial.serial_number:
+                serials.append(product_serial.serial_number)
+        return serials
+
+    def _append_credit_note_row(cn_detail, order_obj):
+        note = cn_detail.credit_note
+        quantity = cn_detail.quantity or decimal.Decimal('0')
+        price = cn_detail.price_unit or decimal.Decimal('0')
+        subtotal = cn_detail.total if cn_detail.total else (quantity * price)
+        serials = _credit_note_serials(cn_detail)
+        rows.append({
+            'order_id': order_obj.id if order_obj else (note.order_id if note else None),
+            'row_type': 'credit_note',
+            'voucher_type': 'NOTA DE CRÉDITO',
+            'serial': note.serial or '—',
+            'number': str(note.correlative).zfill(8) if note and note.correlative else '—',
+            'client': order_obj.client.names if order_obj and order_obj.client else 'SIN CLIENTE',
+            'user': _user_display_name(order_obj.user) if order_obj else 'N/A',
+            'total': note.note_total or subtotal,
+            'date': note.issue_date if note else None,
+            'serials': serials,
+            'serials_count': len(serials),
+            'quantity': quantity,
+            'price': price,
+            'subtotal': subtotal,
+            'unit': cn_detail.unit.name if cn_detail.unit else '',
+            'missing_serials': bool(product_obj.is_serial) and len(serials) == 0,
+            'status': 'CN',
+            'status_label': 'ANULACIÓN',
+        })
+
+    rows = []
+    total_quantity = decimal.Decimal('0')
+    total_subtotal = decimal.Decimal('0')
+    total_serials = 0
+    details_without_serials = 0
+    sales_count = 0
+    cancelled_count = 0
+    credit_note_count = 0
+    shown_cn_detail_ids = set()
+
+    for detail in details:
+        order = detail.order
+        is_cancelled = order.status == 'A'
+        sale_date = order.issue_date or (order.create_at.date() if order.create_at else None)
+        voucher_type, serial, number = _order_document_info(order)
+        serials = [
+            s.serial_number for s in detail.productserial_set.all()
+            if s.serial_number
+        ]
+        quantity = detail.quantity_sold or decimal.Decimal('0')
+        price = detail.price_unit or decimal.Decimal('0')
+        subtotal = quantity * price
+        missing_serials = bool(product_obj.is_serial) and (not is_cancelled) and len(serials) == 0
+
+        if missing_serials:
+            details_without_serials += 1
+
+        if is_cancelled:
+            cancelled_count += 1
+        else:
+            sales_count += 1
+            total_quantity += quantity
+            total_subtotal += subtotal
+            total_serials += len(serials)
+
+        rows.append({
+            'order_id': order.id,
+            'row_type': 'sale',
+            'voucher_type': voucher_type,
+            'serial': serial or '—',
+            'number': number or '—',
+            'client': order.client.names if order.client else 'SIN CLIENTE',
+            'user': _user_display_name(order.user),
+            'total': order.total or decimal.Decimal('0'),
+            'date': sale_date,
+            'serials': serials,
+            'serials_count': len(serials),
+            'quantity': quantity,
+            'price': price,
+            'subtotal': subtotal,
+            'unit': detail.unit.name if detail.unit else '',
+            'missing_serials': missing_serials,
+            'status': order.status,
+            'status_label': 'ANULADA' if is_cancelled else 'VIGENTE',
+        })
+
+        for note in order.creditnote_set.all():
+            for cn_detail in note.creditnotedetail_set.all():
+                if cn_detail.id in shown_cn_detail_ids:
+                    continue
+                shown_cn_detail_ids.add(cn_detail.id)
+                credit_note_count += 1
+                _append_credit_note_row(cn_detail, order)
+
+    extra_cn_details = CreditNoteDetail.objects.filter(
+        product_id=product_id,
+        credit_note__status__in=['E', 'P'],
+        credit_note__issue_date__range=[start_date, end_date],
+    ).exclude(
+        id__in=shown_cn_detail_ids
+    ).select_related(
+        'credit_note',
+        'credit_note__order',
+        'credit_note__order__client',
+        'credit_note__order__user',
+        'unit',
+    ).prefetch_related(
+        Prefetch(
+            'creditnotedetailserial_set',
+            queryset=CreditNoteDetailSerial.objects.select_related('product_serial')
+        ),
+        Prefetch(
+            'credit_note__order__user__worker_set',
+            queryset=Worker.objects.select_related('employee')
+        ),
+    ).order_by('credit_note__issue_date', 'id')
+
+    for cn_detail in extra_cn_details:
+        credit_note_count += 1
+        _append_credit_note_row(cn_detail, cn_detail.credit_note.order if cn_detail.credit_note else None)
+
+    context = {
+        'rows': rows,
+        'product': product_obj,
+        'start_date': start_date,
+        'end_date': end_date,
+        'sales_count': sales_count,
+        'cancelled_count': cancelled_count,
+        'credit_note_count': credit_note_count,
+        'total_quantity': total_quantity,
+        'total_subtotal': total_subtotal,
+        'total_serials': total_serials,
+        'details_without_serials': details_without_serials,
+        'has_serials': bool(product_obj.is_serial),
+    }
+
+    grid_html = render_to_string('sales/report_product_sales_grid.html', context, request=request)
+    return JsonResponse({
+        'grid': grid_html,
+        'sales_count': len(rows),
+        'has_serials': bool(product_obj.is_serial),
+    }, status=HTTPStatus.OK)

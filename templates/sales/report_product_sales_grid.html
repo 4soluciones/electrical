@@ -1,0 +1,289 @@
+<style>
+    .ps-report .ps-kpi {
+        border: 1px solid #e4e9f0;
+        border-radius: .5rem;
+        background: #fff;
+        padding: .75rem .9rem;
+        height: 100%;
+    }
+
+    .ps-report .ps-kpi-label {
+        font-size: .7rem;
+        text-transform: uppercase;
+        letter-spacing: .4px;
+        color: #6c757d;
+        margin-bottom: .15rem;
+    }
+
+    .ps-report .ps-kpi-value {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #1e3a5f;
+        margin: 0;
+    }
+
+    .ps-report .ps-table-wrap {
+        max-height: 62vh;
+        overflow: auto;
+        border: 1px solid #dee2e6;
+        border-radius: .5rem;
+        background: #fff;
+    }
+
+    .ps-report table {
+        margin-bottom: 0 !important;
+        font-size: .82rem;
+    }
+
+    .ps-report thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: #1e3a5f;
+        color: #fff;
+        text-align: center;
+        text-transform: uppercase;
+        font-size: .7rem;
+        letter-spacing: .4px;
+        vertical-align: middle !important;
+        white-space: nowrap;
+        border-color: rgba(255, 255, 255, .15) !important;
+    }
+
+    .ps-report tbody tr:hover {
+        background-color: #eef4fa;
+    }
+
+    .ps-report tbody tr.ps-row-cancelled {
+        background-color: #f8d7da;
+    }
+
+    .ps-report tbody tr.ps-row-cancelled:hover {
+        background-color: #f1c0c4;
+    }
+
+    .ps-report tbody tr.ps-row-credit-note {
+        background-color: #fff3cd;
+    }
+
+    .ps-report tbody tr.ps-row-credit-note:hover {
+        background-color: #ffe8a3;
+    }
+
+    .ps-report .ps-serial-badge {
+        display: inline-block;
+        background: #e8f5ee;
+        color: #1e6b3a;
+        border: 1px solid #b7dfc4;
+        border-radius: .25rem;
+        padding: .08rem .4rem;
+        font-size: .7rem;
+        font-weight: 600;
+        margin: .08rem .12rem .08rem 0;
+        font-family: Consolas, Monaco, monospace;
+    }
+
+    .ps-report .ps-money {
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .ps-report th.ps-col-qty,
+    .ps-report td.ps-col-qty {
+        min-width: 120px;
+        width: 10%;
+        white-space: nowrap;
+        padding-left: .75rem;
+        padding-right: .75rem;
+    }
+
+    .ps-report th.ps-col-price,
+    .ps-report td.ps-col-price {
+        min-width: 130px;
+        width: 11%;
+        white-space: nowrap;
+        padding-left: .75rem;
+        padding-right: .75rem;
+    }
+
+    .ps-report tfoot td {
+        background: #f4f7fb;
+        font-weight: 700;
+        color: #1e3a5f;
+    }
+
+    @media (max-width: 575.98px) {
+        .ps-report .ps-table-wrap { max-height: none; }
+    }
+</style>
+
+<div class="ps-report">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3">
+        <div>
+            <h6 class="mb-1 font-weight-bold text-uppercase" style="color:#1e3a5f;">
+                {{ product.name }}
+            </h6>
+            <small class="text-muted">
+                {% if product.code %}Código {{ product.code }} · {% endif %}
+                {% if product.product_brand %}{{ product.product_brand.name }} · {% endif %}
+                {{ start_date|date:"d/m/Y" }} — {{ end_date|date:"d/m/Y" }}
+                · {% if has_serials %}Producto con control de series{% else %}Producto sin series{% endif %}
+            </small>
+        </div>
+        {% if rows %}
+            <button type="button" id="btn_export_excel_product_sales" class="btn btn-success text-nowrap mt-2 mt-md-0">
+                <i class="fas fa-file-excel mr-1"></i> Exportar Excel
+            </button>
+        {% endif %}
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-6 col-lg-3 mb-2">
+            <div class="ps-kpi">
+                <div class="ps-kpi-label">Ventas vigentes</div>
+                <p class="ps-kpi-value">{{ sales_count }}</p>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3 mb-2">
+            <div class="ps-kpi">
+                <div class="ps-kpi-label">Anuladas / N. crédito</div>
+                <p class="ps-kpi-value">{{ cancelled_count }} / {{ credit_note_count }}</p>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3 mb-2">
+            <div class="ps-kpi">
+                <div class="ps-kpi-label">Cantidad vendida</div>
+                <p class="ps-kpi-value">{{ total_quantity|floatformat:2 }}</p>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3 mb-2">
+            <div class="ps-kpi">
+                <div class="ps-kpi-label">Subtotal producto</div>
+                <p class="ps-kpi-value">S/ {{ total_subtotal|floatformat:2 }}</p>
+            </div>
+        </div>
+    </div>
+
+    {% if has_serials and details_without_serials %}
+        <div class="alert alert-warning py-2 px-3 mb-3" role="alert">
+            <i class="fas fa-exclamation-triangle mr-1"></i>
+            Este producto controla series, pero <strong>{{ details_without_serials }}</strong>
+            venta{{ details_without_serials|pluralize }} no tiene series registradas.
+        </div>
+    {% elif not has_serials %}
+        <div class="alert alert-info py-2 px-3 mb-3" role="alert">
+            <i class="fas fa-info-circle mr-1"></i>
+            El producto no maneja números de serie. El reporte muestra cantidad, precio y subtotal de cada venta.
+        </div>
+    {% endif %}
+
+    {% if rows %}
+        <div class="input-group mb-2">
+            <div class="input-group-prepend">
+                <span class="input-group-text bg-white border-right-0"><i class="fas fa-filter text-muted"></i></span>
+            </div>
+            <input id="myInputProductSales" type="text" class="form-control border-left-0"
+                   placeholder="Filtrar por comprobante, cliente, usuario o serie...">
+        </div>
+
+        <div class="ps-table-wrap">
+            <table class="table table-sm table-hover roboto-condensed-regular" id="table-product-sales">
+                <thead>
+                <tr>
+                    <th>Tipo de comprobante</th>
+                    <th>Serie</th>
+                    <th>Número</th>
+                    <th>Cliente</th>
+                    <th>Usuario</th>
+                    <th>Total</th>
+                    <th>Fecha</th>
+                    <th>Series vendidas</th>
+                    <th class="ps-col-qty">Cantidad</th>
+                    <th class="ps-col-price">Precio</th>
+                    <th>Subtotal</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for r in rows %}
+                    <tr class="{% if r.status == 'A' %}ps-row-cancelled{% elif r.row_type == 'credit_note' %}ps-row-credit-note{% endif %}">
+                        <td class="align-middle text-center text-nowrap">
+                            {% if r.voucher_type == 'FACTURA' %}
+                                <span class="badge badge-pill badge-warning">{{ r.voucher_type }}</span>
+                            {% elif r.voucher_type == 'BOLETA' %}
+                                <span class="badge badge-pill badge-info">{{ r.voucher_type }}</span>
+                            {% elif r.voucher_type == 'NOTA DE CRÉDITO' %}
+                                <span class="badge badge-pill badge-danger">{{ r.voucher_type }}</span>
+                            {% else %}
+                                <span class="badge badge-pill badge-secondary">{{ r.voucher_type }}</span>
+                            {% endif %}
+                            {% if r.status == 'A' %}
+                                <div><span class="badge badge-danger mt-1">ANULADA</span></div>
+                            {% elif r.row_type == 'credit_note' %}
+                                <div><span class="badge badge-warning mt-1">ANULACIÓN</span></div>
+                            {% endif %}
+                        </td>
+                        <td class="align-middle text-center font-weight-bold">{{ r.serial }}</td>
+                        <td class="align-middle text-center">{{ r.number }}</td>
+                        <td class="align-middle">{{ r.client|upper }}</td>
+                        <td class="align-middle">{{ r.user|upper }}</td>
+                        <td class="align-middle text-right ps-money">S/ {{ r.total|floatformat:2 }}</td>
+                        <td class="align-middle text-center text-nowrap">{{ r.date|date:"d/m/Y" }}</td>
+                        <td class="align-middle">
+                            {% if r.serials %}
+                                {% for s in r.serials %}
+                                    <span class="ps-serial-badge">{{ s }}</span>
+                                {% endfor %}
+                            {% elif r.missing_serials %}
+                                <span class="badge badge-danger">Sin series registradas</span>
+                            {% elif r.status == 'A' %}
+                                <span class="text-muted">Serie liberada por anulación</span>
+                            {% else %}
+                                <span class="text-muted">No aplica</span>
+                            {% endif %}
+                        </td>
+                        <td class="align-middle text-center ps-col-qty">{{ r.quantity|floatformat:2 }}{% if r.unit %} {{ r.unit }}{% endif %}</td>
+                        <td class="align-middle text-right ps-col-price">S/ {{ r.price|floatformat:2 }}</td>
+                        <td class="align-middle text-right ps-money text-primary">S/ {{ r.subtotal|floatformat:2 }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+                <tfoot>
+                <tr>
+                    <td colspan="7" class="text-right">TOTALES (VENTAS VIGENTES)</td>
+                    <td class="text-center">{{ total_serials }} serie{{ total_serials|pluralize }}</td>
+                    <td class="text-center ps-col-qty">{{ total_quantity|floatformat:2 }}</td>
+                    <td class="ps-col-price"></td>
+                    <td class="text-right">S/ {{ total_subtotal|floatformat:2 }}</td>
+                </tr>
+                </tfoot>
+            </table>
+        </div>
+    {% else %}
+        <div class="text-center text-muted py-5">
+            <i class="fas fa-inbox mb-2" style="font-size:2rem;opacity:.35;"></i>
+            <p class="mb-0">No hay ventas de este producto en el rango de fechas seleccionado.</p>
+        </div>
+    {% endif %}
+</div>
+
+<script type="text/javascript">
+    $("#myInputProductSales").on("keyup", function () {
+        const value = $(this).val().toLowerCase();
+        $("#table-product-sales tbody tr").filter(function () {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+        });
+    });
+
+    $("#btn_export_excel_product_sales").click(function () {
+        $("#table-product-sales").table2excel({
+            exclude: ".noExl",
+            name: "Ventas por producto",
+            filename: "Reporte_Ventas_Producto",
+            fileext: ".xls",
+            preserveColors: true,
+            exclude_img: true,
+            exclude_links: true,
+            exclude_inputs: true
+        });
+    });
+</script>

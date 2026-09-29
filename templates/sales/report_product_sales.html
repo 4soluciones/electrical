@@ -1,0 +1,326 @@
+{% extends 'home.html' %}
+
+{% block title %}
+    Reporte | Ventas por Producto
+{% endblock title %}
+
+{% block body %}
+<style>
+    .ps-page-card {
+        border: 0;
+        border-radius: .75rem;
+        overflow: hidden;
+    }
+
+    .ps-page-header {
+        background: linear-gradient(90deg, #1e3a5f 0%, #25628f 100%);
+        color: #fff;
+        padding: 1rem 1.25rem;
+    }
+
+    .ps-page-header h5 {
+        font-weight: 600;
+        letter-spacing: .3px;
+    }
+
+    .ps-page-header small {
+        color: rgba(255, 255, 255, .75);
+    }
+
+    .ps-filter-label {
+        font-size: .78rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        color: #6c757d;
+        margin-bottom: .15rem;
+        display: block;
+    }
+
+    .ps-search-wrap {
+        position: relative;
+    }
+
+    .ps-search-results {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 30;
+        background: #fff;
+        border: 1px solid #d5dbe3;
+        border-radius: .4rem;
+        max-height: 280px;
+        overflow-y: auto;
+        margin-top: .2rem;
+    }
+
+    .ps-search-item {
+        display: block;
+        width: 100%;
+        text-align: left;
+        background: #fff;
+        border: 0;
+        border-bottom: 1px solid #f1f3f5;
+        padding: .55rem .75rem;
+        cursor: pointer;
+    }
+
+    .ps-search-item:hover,
+    .ps-search-item.active {
+        background: #eef4fa;
+    }
+
+    .ps-search-item:last-child {
+        border-bottom: 0;
+    }
+
+    .ps-selected-chip {
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        background: #eef4fa;
+        border: 1px solid #c5d4e3;
+        border-radius: .4rem;
+        padding: .45rem .7rem;
+        margin-top: .4rem;
+    }
+
+    .ps-selected-chip.visible {
+        display: flex;
+    }
+
+    .ps-loading-overlay {
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        min-height: 200px;
+        background: rgba(255, 255, 255, .85);
+        z-index: 10;
+        padding-top: 5rem;
+        border-radius: .25rem;
+    }
+</style>
+
+<div class="container-fluid roboto-condensed-regular py-3 px-2 px-md-4">
+    <div class="card shadow-sm ps-page-card">
+        <div class="card-body p-0">
+            <div class="ps-page-header d-flex flex-column flex-sm-row justify-content-between align-items-sm-center">
+                <div>
+                    <h5 class="mb-0 text-white"><i class="fas fa-barcode mr-2"></i>Reporte de Ventas por Producto</h5>
+                    <small>Consulta fechas, comprobantes y series vendidas de un producto en un rango de fechas.</small>
+                </div>
+                <i class="fas fa-boxes d-none d-sm-block" style="font-size:2rem;opacity:.35;"></i>
+            </div>
+
+            <div class="p-3 position-relative">
+                <form id="search-form-product-sales" method="POST" autocomplete="off">
+                    {% csrf_token %}
+                    <input type="hidden" name="product-id" id="product-id" value="">
+                    <div class="form-row align-items-end">
+                        <div class="col-12 col-md-6 col-lg-4 mb-2">
+                            <label class="ps-filter-label" for="product-search">Producto</label>
+                            <div class="ps-search-wrap">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
+                                    </div>
+                                    <input type="text" class="form-control" id="product-search"
+                                           placeholder="Buscar por nombre, código o marca..." autocomplete="off">
+                                </div>
+                                <div class="ps-search-results" id="product-search-results"></div>
+                            </div>
+                            <div class="ps-selected-chip" id="selected-product-chip">
+                                <div class="pr-2">
+                                    <div class="font-weight-bold mb-0" id="selected-product-name" style="font-size:.85rem;"></div>
+                                    <small class="text-muted" id="selected-product-meta"></small>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-light border" id="btn-clear-product" title="Quitar producto">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3 col-lg-2 mb-2">
+                            <label class="ps-filter-label" for="id-start-date">Fecha inicial</label>
+                            <input type="date" class="form-control" id="id-start-date" name="start-date" value="{{ formatdate }}">
+                        </div>
+                        <div class="col-6 col-md-3 col-lg-2 mb-2">
+                            <label class="ps-filter-label" for="id-end-date">Fecha final</label>
+                            <input type="date" class="form-control" id="id-end-date" name="end-date" value="{{ end_date }}">
+                        </div>
+                        <div class="col-12 col-md-12 col-lg-4 mb-2">
+                            <button type="submit" class="btn btn-primary btn-block" id="btn-search-product-sales">
+                                <i class="fas fa-search mr-1"></i> Generar reporte
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <hr class="my-3">
+
+                <div class="ps-loading-overlay" id="loading-product-sales">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary mb-2" role="status">
+                            <span class="sr-only">Cargando...</span>
+                        </div>
+                        <p class="text-muted mb-0">Consultando ventas del producto...</p>
+                    </div>
+                </div>
+
+                <div id="product-sales-grid-list">
+                    <div class="text-center text-muted py-5">
+                        <i class="fas fa-barcode mb-2" style="font-size:2rem;opacity:.35;"></i>
+                        <p class="mb-0">Seleccione un producto y un rango de fechas para consultar las ventas.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock body %}
+
+{% block extrajs %}
+<script type="text/javascript">
+    $(function () {
+        let searchTimer = null;
+        let activeIndex = -1;
+
+        function hideResults() {
+            $('#product-search-results').hide().empty();
+            activeIndex = -1;
+        }
+
+        function selectProduct(item) {
+            $('#product-id').val(item.id);
+            $('#product-search').val(item.name);
+            $('#selected-product-name').text(item.name);
+            let meta = [];
+            if (item.code) meta.push('Cód. ' + item.code);
+            if (item.brand) meta.push(item.brand);
+            meta.push(item.is_serial ? 'Con series' : 'Sin series');
+            $('#selected-product-meta').text(meta.join(' · '));
+            $('#selected-product-chip').addClass('visible');
+            hideResults();
+        }
+
+        function renderResults(products) {
+            const $box = $('#product-search-results');
+            if (!products.length) {
+                $box.html('<div class="px-3 py-2 text-muted small">Sin coincidencias</div>').show();
+                return;
+            }
+            let html = '';
+            products.forEach(function (p, idx) {
+                html += '<button type="button" class="ps-search-item" data-index="' + idx + '">' +
+                    '<div class="font-weight-bold" style="font-size:.85rem;">' + $('<div>').text(p.name).html() + '</div>' +
+                    '<small class="text-muted">' +
+                    (p.code ? 'Cód. ' + $('<div>').text(p.code).html() + ' · ' : '') +
+                    $('<div>').text(p.brand || 'Sin marca').html() +
+                    ' · ' + (p.is_serial ? 'Con series' : 'Sin series') +
+                    '</small></button>';
+            });
+            $box.html(html).show();
+            $box.find('.ps-search-item').on('click', function () {
+                const index = $(this).data('index');
+                selectProduct(products[index]);
+            });
+        }
+
+        $('#product-search').on('input', function () {
+            const term = $(this).val().trim();
+            $('#product-id').val('');
+            $('#selected-product-chip').removeClass('visible');
+            clearTimeout(searchTimer);
+            if (term.length < 2) {
+                hideResults();
+                return;
+            }
+            searchTimer = setTimeout(function () {
+                $.ajax({
+                    url: '/sales/search_products_for_sales_report/',
+                    type: 'GET',
+                    data: {term: term},
+                    success: function (response) {
+                        renderResults(response.products || []);
+                    }
+                });
+            }, 220);
+        });
+
+        $('#product-search').on('keydown', function (e) {
+            const $items = $('#product-search-results .ps-search-item');
+            if (!$items.length) return;
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                activeIndex = (activeIndex + 1) % $items.length;
+                $items.removeClass('active').eq(activeIndex).addClass('active');
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                activeIndex = (activeIndex - 1 + $items.length) % $items.length;
+                $items.removeClass('active').eq(activeIndex).addClass('active');
+            } else if (e.key === 'Enter' && activeIndex >= 0) {
+                e.preventDefault();
+                $items.eq(activeIndex).trigger('click');
+            } else if (e.key === 'Escape') {
+                hideResults();
+            }
+        });
+
+        $(document).on('click', function (e) {
+            if (!$(e.target).closest('.ps-search-wrap').length) {
+                hideResults();
+            }
+        });
+
+        $('#btn-clear-product').on('click', function () {
+            $('#product-id').val('');
+            $('#product-search').val('').focus();
+            $('#selected-product-chip').removeClass('visible');
+        });
+
+        $('#search-form-product-sales').on('submit', function (event) {
+            event.preventDefault();
+            if (!$('#product-id').val()) {
+                toastr.warning('Seleccione un producto de la lista de sugerencias.', 'Atención');
+                $('#product-search').focus();
+                return false;
+            }
+            if (!$('#id-start-date').val() || !$('#id-end-date').val()) {
+                toastr.warning('Indique el rango de fechas.', 'Atención');
+                return false;
+            }
+
+            let $btn = $('#btn-search-product-sales');
+            $btn.attr('disabled', true).find('i').addClass('fa-spin');
+            $('#loading-product-sales').show();
+
+            $.ajax({
+                url: '/sales/get_report_product_sales/',
+                type: 'POST',
+                data: new FormData(this),
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    $('#product-sales-grid-list').html(response.grid);
+                    if (response.sales_count === 0) {
+                        toastr.info('No se encontraron ventas del producto en el rango seleccionado.', 'Consulta');
+                    }
+                },
+                error: function (jqXhr) {
+                    const msg = (jqXhr.responseJSON && jqXhr.responseJSON.error) ? jqXhr.responseJSON.error : 'No se pudo generar el reporte.';
+                    toastr.error(msg, 'Error');
+                },
+                complete: function () {
+                    $('#loading-product-sales').hide();
+                    $btn.removeAttr('disabled').find('i').removeClass('fa-spin');
+                }
+            });
+        });
+    });
+</script>
+{% endblock extrajs %}

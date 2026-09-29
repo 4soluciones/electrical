@@ -24,40 +24,29 @@
             "order": [[3, "desc"]]
         });
 
-        /* Inyectar contenido dentro de un .modal tiene dos trampas de Bootstrap 4.3.1:
-             1) show() cachea this._dialog = querySelector('.modal-dialog'); si se reemplaza el
-                innerHTML del .modal ese nodo queda huerfano y hide() anima un elemento
-                desconectado, por lo que la X y el boton Cerrar no cerraban nada.
-             2) modal('dispose') NO retira el .modal-backdrop del DOM, solo anula la referencia
-                (this._backdrop = null), ademas hace $(document).off('focusin.bs.modal') y mata el
-                focus-trap. Un backdrop huerfano deja la pantalla oscura e inservible.
-           Por eso el contenido se cambia siempre con el modal OCULTO, tras 'hidden.bs.modal',
-           que es cuando Bootstrap ya retiro el backdrop y la clase modal-open del body. */
-        function swapModalContent(html) {
-            let $modal = $('#assignment');
-            $modal.off('hidden.bs.modal.ocl');
-            let paint = function () {
-                /* Con el modal ya oculto dispose() es seguro: desenlaza los handlers
-                   focusin/resize que hide() deja puestos y descarta la instancia cacheada,
-                   de modo que el siguiente show() vuelva a leer el .modal-dialog nuevo. */
-                $modal.modal('dispose');
-                $modal.html(html).modal('show');
-            };
-            if ($modal.hasClass('show')) {
-                $modal.one('hidden.bs.modal.ocl', paint).modal('hide');
-            } else {
-                paint();
-            }
+        /* El modal de asignacion se abre con UNA sola llamada a show() y con el contenido ya
+           dentro. Antes se abria primero con un spinner y luego se reinyectaba el html, lo que
+           rompia por las trampas de Bootstrap 4.3.1:
+             1) show() cachea this._dialog = querySelector('.modal-dialog') y hace
+                $(document).on('focusin.bs.modal'). Reemplazar el innerHTML del .modal deja ese
+                nodo huerfano (hide() animaba un elemento desconectado, por eso la X y el boton
+                Cerrar no hacian nada) y deja el foco atrapado.
+             2) modal('dispose') NO retira el .modal-backdrop del DOM, solo pone this._backdrop
+                = null, y ademas hace $(document).off('focusin.bs.modal'): la pantalla queda
+                oscura e inservible.
+             3) show()/hide() tienen guarda _isTransitioning. La clase .show no se escribe hasta
+                que termina el fade del backdrop (~150 ms) y _isTransitioning dura ~450 ms, asi
+                que decidir con hasClass('show') es una carrera: con el servidor rapido la
+                respuesta entra DENTRO de esa ventana y se tomaba la rama equivocada.
+           Con un unico show() no hay ninguna de las tres: no hace falta dispose(), _dialog nunca
+           queda huerfano y el aviso de carga se muestra con toastr, no con un modal aparte. */
+        function openAssignmentModal(html) {
+            $('#assignment').html(html).modal('show');
         }
 
-        function closeAssignmentModal() {
-            let $modal = $('#assignment');
-            $modal.off('hidden.bs.modal.ocl');
-            $modal.modal('hide');
-        }
-
-        /* Red de seguridad: si quedara algun .modal-backdrop huerfano, la pagina quedaria
-           oscura y sin poder hacer clic. Se limpia en cuanto no queda ningun modal abierto. */
+        /* Red de seguridad: si quedara algun .modal-backdrop huerfano (por un excepcion de
+           Bootstrap o por un .show anulado), la pagina quedaria oscura y sin poder hacer clic.
+           Se limpia en cuanto no queda ningun modal abierto. */
         $(document).on('shown.bs.modal hidden.bs.modal', function () {
             if ($('.modal.show').length === 0) {
                 if ($('.modal-backdrop').length) {
@@ -69,9 +58,8 @@
 
         $(document).on('click', '.assignment-store', function () {
             let search = $(this).attr('pk');
-            swapModalContent('<div class="modal-dialog modal-xl"><div class="text-center p-5">' +
-                '<div class="spinner-border text-primary" role="status"></div>' +
-                '<p class="mt-3 mb-0">Cargando detalle de la compra...</p></div></div>');
+            let $button = $(this).prop('disabled', true);
+            toastr.info('Cargando detalle de la compra...', 'ESPERE');
 
             $.ajax({
                 url: '/buys/get_detail_purchase_store/',
@@ -85,17 +73,22 @@
                 contentType: 'application/json;charset=UTF-8',
                 headers: {"X-CSRFToken": '{{ csrf_token }}'},
                 success: function (response, textStatus, xhr) {
-                    if (xhr.status === 200) {
-                        swapModalContent(response.form);
+                    if (xhr.status === 200 && response && response.form) {
+                        openAssignmentModal(response.form);
+                    } else {
+                        toastr.error('NO SE PUDO OBTENER EL DETALLE DE LA COMPRA.', '¡MENSAJE!');
                     }
                 },
                 error: function (jqXhr, textStatus, xhr) {
-                    closeAssignmentModal();
+                    $('#assignment').modal('hide');
                     if (jqXhr.responseJSON && jqXhr.responseJSON.detalle) {
                         toastr.error(jqXhr.responseJSON.detalle, '¡MENSAJE!');
                     } else {
                         toastr.error('NO SE PUDO OBTENER EL DETALLE DE LA COMPRA.', '¡MENSAJE!');
                     }
+                },
+                complete: function () {
+                    $button.prop('disabled', false);
                 }
             });
         });
