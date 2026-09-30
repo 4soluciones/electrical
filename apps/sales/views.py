@@ -5319,138 +5319,150 @@ def get_dict_order_quotation(order_set):
     return tpl.render(context)
 
 
+def _restore_inventory_and_serials_on_cancel(order_obj, subsidiary_obj):
+    """
+    Devuelve series a disponibles y revierte el kardex de la venta una sola vez.
+    Evita doble ingreso de stock si la anulación se dispara más de una vez.
+    """
+    ProductSerial.objects.filter(order_detail__order=order_obj).update(
+        order_detail=None,
+        status='C',
+    )
+    order_obj.orderdetail_set.update(status='A')
+
+    for d in order_obj.orderdetail_set.select_related('product', 'unit').all():
+        unit_name = d.unit.name if d.unit else ''
+        if unit_name == 'ZZ':
+            continue
+
+        already_returned = Kardex.objects.filter(
+            order_detail=d,
+            operation='E',
+            credit_note_detail__isnull=True,
+            purchase_detail__isnull=True,
+        ).exists()
+        if already_returned:
+            continue
+
+        sale_output = (
+            Kardex.objects.filter(order_detail=d, operation='S')
+            .order_by('id')
+            .last()
+        )
+        if sale_output and sale_output.product_store_id:
+            kardex_input(
+                product_store_id=sale_output.product_store_id,
+                price_unit=d.price_unit,
+                quantity_purchased=sale_output.quantity,
+                order_detail_obj=d,
+            )
+            continue
+
+        try:
+            product_store_obj = ProductStore.objects.get(
+                product_id=d.product_id,
+                subsidiary_store__subsidiary=subsidiary_obj,
+                subsidiary_store__category='V',
+            )
+        except ProductStore.DoesNotExist:
+            continue
+
+        kardex_input(
+            product_store_id=product_store_obj.id,
+            price_unit=d.price_unit,
+            quantity_purchased=d.quantity_sold,
+            order_detail_obj=d,
+        )
+
+
+def _sales_list_grid_response(subsidiary_obj, start_date, end_date, message):
+    if start_date == end_date:
+        orders = Order.objects.filter(
+            create_at__date=start_date,
+            subsidiary=subsidiary_obj,
+            type='V',
+            status__in=['P', 'A'],
+        ).order_by('id')
+    else:
+        orders = Order.objects.filter(
+            create_at__date__range=[start_date, end_date],
+            subsidiary=subsidiary_obj,
+            type='V',
+            status__in=['P', 'A'],
+        ).order_by('id')
+
+    if not orders:
+        data = {'error': "No hay encomiendas registradas"}
+        response = JsonResponse(data)
+        response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+        return response
+
+    return JsonResponse({
+        'grid': get_dict_order_queries(orders, start_date, end_date, is_pdf=False, is_unit=False),
+        'message': message,
+    }, status=HTTPStatus.OK)
+
+
 def cancel_order(request):
-    if request.method == 'GET':
-        start_date = str(request.GET.get('start-date'))
-        end_date = str(request.GET.get('end-date'))
+    if request.method != 'GET':
+        return JsonResponse({'error': 'Método no permitido'}, status=HTTPStatus.METHOD_NOT_ALLOWED)
+
+    start_date = str(request.GET.get('start-date'))
+    end_date = str(request.GET.get('end-date'))
+    try:
         order_id = int(request.GET.get('pk', ''))
+    except (TypeError, ValueError):
+        return JsonResponse({'error': 'Orden inválida'}, status=HTTPStatus.BAD_REQUEST)
 
-        user_id = request.user.id
-        user_obj = User.objects.get(id=user_id)
-        subsidiary_obj = get_subsidiary_by_user(user_obj)
+    user_obj = User.objects.get(id=request.user.id)
+    subsidiary_obj = get_subsidiary_by_user(user_obj)
 
-        order_obj = Order.objects.get(pk=order_id)
+    try:
+        with transaction.atomic():
+            order_obj = Order.objects.select_for_update().get(pk=order_id)
 
-        type_bill = 'T'
-        order_bill_set = OrderBill.objects.filter(order=order_id)
+            if order_obj.status == 'A':
+                return JsonResponse({
+                    'error': 'La orden ya fue anulada. No se puede anular nuevamente.',
+                }, status=HTTPStatus.CONFLICT)
 
-        if order_bill_set.exists():
-            order_bill_obj = order_bill_set.first()
-            if order_bill_obj.type == '1':
-                type_bill = 'F'
-            elif order_bill_obj.type == '2':
-                type_bill = 'B'
+            if CreditNote.objects.filter(order=order_obj, status__in=['E', 'P']).exists():
+                return JsonResponse({
+                    'error': 'La orden tiene notas de crédito. No se puede anular.',
+                }, status=HTTPStatus.CONFLICT)
 
-        if type_bill == 'F' or type_bill == 'B':
-            # r = send_cancel_bill_nubefact(order_id)
-            # enlace = r.get('enlace')
-            # code = r.get('codigo')
-            # if enlace or code:
-            r = annul_invoice(order_id)
-            success = r.get('success')
-            if success:
-                for d in order_obj.orderdetail_set.all():
-                    _product_id = d.product.id
-                    product_obj = Product.objects.get(id=int(_product_id))
-                    _unit = d.unit.id
-                    unit_obj = Unit.objects.get(id=int(_unit))
-                    _quantity_sold = d.quantity_sold
-                    _price_unit = d.price_unit
-                    _subtotal = d.quantity_sold * d.price_unit
-                    product_detail_obj = ProductDetail.objects.get(product=product_obj, unit=unit_obj)
-                    if product_detail_obj.unit.name != 'ZZ':
-                        _minimum_quantity = product_detail_obj.quantity_minimum
+            type_bill = 'T'
+            order_bill_obj = OrderBill.objects.filter(order=order_obj).first()
+            if order_bill_obj:
+                if order_bill_obj.type == '1':
+                    type_bill = 'F'
+                elif order_bill_obj.type == '2':
+                    type_bill = 'B'
 
-                        product_store_obj = ProductStore.objects.get(product__id=_product_id,
-                                                                     subsidiary_store__subsidiary=subsidiary_obj,
-                                                                     subsidiary_store__category='V')
+            if type_bill in ('F', 'B'):
+                r = annul_invoice(order_id)
+                if not r.get('success'):
+                    return JsonResponse({
+                        'error': "Error de anulación en sunat, "
+                                 "Si es BOLETA ELECTRONICA, se debe esperar minimo 24 horas"
+                    }, status=HTTPStatus.INTERNAL_SERVER_ERROR)
+                order_bill_obj.status = 'A'
+                order_bill_obj.save(update_fields=['status'])
 
-                        product_serial_set = ProductSerial.objects.filter(order_detail=d,
-                                                                          product_store=product_store_obj)
-                        if product_serial_set.exists():
-                            for ps in product_serial_set:
-                                ps.order_detail = None
-                                ps.status = 'C'
-                                ps.save()
-
-                        kardex_input(product_store_id=product_store_obj.id, price_unit=_price_unit,
-                                     quantity_purchased=_quantity_sold,
-                                     order_detail_obj=d)
-
-                order_obj.status = 'A'
-                order_obj.save()
-                cash_obj = CashFlow.objects.filter(order=order_obj)
-                cash_obj.delete()
-
-            else:
-                data = {'error': "Error de anulación en sunat, "
-                                 "Si es BOLETA ELECTRONICA, se debe esperar minimo 24 horas"}
-                response = JsonResponse(data)
-                response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
-                return response
-
-        elif type_bill == 'T':
-
-            for d in order_obj.orderdetail_set.all():
-                _product_id = d.product.id
-                product_obj = Product.objects.get(id=int(_product_id))
-                _unit = d.unit.id
-                unit_obj = Unit.objects.get(id=int(_unit))
-                _quantity_sold = d.quantity_sold
-                _price_unit = d.price_unit
-                _subtotal = d.quantity_sold * d.price_unit
-
-                product_detail_obj = ProductDetail.objects.get(product=product_obj, unit=unit_obj)
-                _minimum_quantity = product_detail_obj.quantity_minimum
-
-                product_store_obj = ProductStore.objects.get(product__id=_product_id,
-                                                             subsidiary_store__subsidiary=subsidiary_obj,
-                                                             subsidiary_store__category='V')
-
-                product_serial_set = ProductSerial.objects.filter(order_detail=d,
-                                                                  product_store=product_store_obj)
-                if product_serial_set.exists():
-                    for ps in product_serial_set:
-                        ps.order_detail = None
-                        ps.status = 'C'
-                        ps.save()
-
-                kardex_input(product_store_id=product_store_obj.id, price_unit=_price_unit,
-                             quantity_purchased=_quantity_sold,
-                             order_detail_obj=d)
+            _restore_inventory_and_serials_on_cancel(order_obj, subsidiary_obj)
 
             order_obj.status = 'A'
-            order_obj.save()
-            cash_obj = CashFlow.objects.filter(order=order_obj)
-            cash_obj.delete()
+            order_obj.save(update_fields=['status'])
+            CashFlow.objects.filter(order=order_obj).delete()
+    except Order.DoesNotExist:
+        return JsonResponse({'error': 'La orden no existe'}, status=HTTPStatus.NOT_FOUND)
 
-        if start_date == end_date:
-            orders = Order.objects.filter(create_at__date=start_date, subsidiary=subsidiary_obj,
-                                          type='V', status__in=['P', 'A']).order_by('id')
-        else:
-            orders = Order.objects.filter(create_at__date__range=[start_date, end_date], subsidiary=subsidiary_obj,
-                                          type='V', status__in=['P', 'A']).order_by('id')
-
-        if orders:
-            has_rows = True
-        else:
-            data = {'error': "No hay encomiendas registradas"}
-            response = JsonResponse(data)
-            response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
-            return response
-
-        return JsonResponse({
-            'grid': get_dict_order_queries(orders, start_date, end_date, is_pdf=False, is_unit=False),
-        }, status=HTTPStatus.OK)
-
-        # tpl = loader.get_template('sales/order_sales_grid_list.html')
-        # context = ({
-        #     'grid': get_dict_order_queries(orders, is_pdf=False, is_unit=False),
-        #     'has_rows': has_rows
-        # })
-        # return JsonResponse({
-        #     'grid': tpl.render(context, request),
-        # }, status=HTTPStatus.OK)
+    return _sales_list_grid_response(
+        subsidiary_obj,
+        start_date,
+        end_date,
+        'Orden anulada correctamente',
+    )
 
 
 def save_new_client_sale(request):
@@ -7937,6 +7949,104 @@ def _order_document_info(order):
     return voucher_type, serial, number
 
 
+def _purchase_document_info(purchase):
+    voucher_labels = dict(Purchase.TYPE_CHOICES)
+    voucher_type = voucher_labels.get(
+        purchase.type_bill,
+        purchase.get_type_bill_display() if purchase.type_bill else 'COMPRA'
+    )
+    bill = (purchase.bill_number or '').strip()
+    serial, number = '—', '—'
+    if bill:
+        if '-' in bill:
+            left, right = bill.rsplit('-', 1)
+            serial = left.strip() or '—'
+            number = right.strip() or '—'
+        else:
+            number = bill
+    return voucher_type, serial, number
+
+
+def _pick_kardex(kardex_list, operation=None):
+    items = list(kardex_list)
+    if operation:
+        for kardex in items:
+            if kardex.operation == operation:
+                return kardex
+    return items[0] if items else None
+
+
+def _kardex_stock_snapshot(kardex):
+    snapshot = {
+        'has_kardex': False,
+        'stock_prev': None,
+        'stock_post': None,
+        'kardex_qty': None,
+        'stock_negative': False,
+        'stock_return_prev': None,
+        'stock_return_post': None,
+        'stock_mismatch': False,
+        'stock_mismatch_reason': '',
+    }
+    if not kardex:
+        snapshot['stock_mismatch'] = True
+        snapshot['stock_mismatch_reason'] = 'Sin movimiento de kardex'
+        return snapshot
+
+    qty = kardex.quantity or decimal.Decimal('0')
+    remaining = kardex.remaining_quantity or decimal.Decimal('0')
+    if kardex.operation == 'S':
+        stock_prev = remaining + qty
+    else:
+        stock_prev = remaining - qty
+
+    negative = remaining < 0 or stock_prev < 0
+    snapshot.update({
+        'has_kardex': True,
+        'stock_prev': stock_prev,
+        'stock_post': remaining,
+        'kardex_qty': qty,
+        'stock_negative': negative,
+        'stock_mismatch': negative,
+        'stock_mismatch_reason': 'Saldo negativo en kardex' if negative else '',
+    })
+    return snapshot
+
+
+def _expected_kardex_quantity(sold_qty, unit_id, min_qty, qty_by_unit):
+    sent = qty_by_unit.get(unit_id) or decimal.Decimal('1')
+    sold_qty = decimal.Decimal(sold_qty or 0)
+    if min_qty > 1:
+        return sold_qty * min_qty
+    return sold_qty * min_qty * sent
+
+
+def _apply_qty_mismatch(snapshot, sold_qty, unit, min_qty, qty_by_unit):
+    if not snapshot.get('has_kardex'):
+        return snapshot
+    if unit and getattr(unit, 'name', '') == 'ZZ':
+        snapshot['stock_mismatch'] = False
+        snapshot['stock_mismatch_reason'] = ''
+        return snapshot
+
+    expected = _expected_kardex_quantity(
+        sold_qty, unit.id if unit else None, min_qty, qty_by_unit
+    )
+    kardex_qty = snapshot.get('kardex_qty')
+    if kardex_qty is None:
+        return snapshot
+    if decimal.Decimal(kardex_qty) != decimal.Decimal(expected):
+        snapshot['stock_mismatch'] = True
+        extra = 'Cantidad kardex ({0}) distinta a la venta ({1})'.format(
+            kardex_qty, expected
+        )
+        if snapshot['stock_mismatch_reason']:
+            snapshot['stock_mismatch_reason'] += ' · ' + extra
+        else:
+            snapshot['stock_mismatch_reason'] = extra
+    return snapshot
+
+
 def search_products_for_sales_report(request):
     if request.method != 'GET':
         return JsonResponse({'error': 'Método no permitido'}, status=HTTPStatus.METHOD_NOT_ALLOWED)
@@ -8011,6 +8121,18 @@ def get_report_product_sales(request):
         Q(order__issue_date__range=[start_date, end_date])
     )
 
+    kardex_stock_qs = Kardex.objects.only(
+        'id', 'operation', 'quantity', 'remaining_quantity',
+        'order_detail_id', 'credit_note_detail_id', 'product_store_id'
+    ).order_by('id')
+
+    product_presentations = list(ProductDetail.objects.filter(product_id=product_id))
+    qty_by_unit = {
+        pd.unit_id: pd.quantity_minimum or decimal.Decimal('1')
+        for pd in product_presentations
+    }
+    min_qty = min(qty_by_unit.values()) if qty_by_unit else decimal.Decimal('1')
+
     credit_note_details_qs = CreditNoteDetail.objects.filter(
         product_id=product_id,
         credit_note__status__in=['E', 'P'],
@@ -8018,7 +8140,8 @@ def get_report_product_sales(request):
         Prefetch(
             'creditnotedetailserial_set',
             queryset=CreditNoteDetailSerial.objects.select_related('product_serial')
-        )
+        ),
+        Prefetch('kardex_set', queryset=kardex_stock_qs),
     )
 
     details = OrderDetail.objects.filter(
@@ -8040,6 +8163,13 @@ def get_report_product_sales(request):
             queryset=ProductSerial.objects.only(
                 'id', 'serial_number', 'status', 'order_detail_id'
             ).order_by('serial_number')
+        ),
+        Prefetch(
+            'kardex_set',
+            queryset=Kardex.objects.only(
+                'id', 'operation', 'quantity', 'remaining_quantity',
+                'order_detail_id', 'credit_note_detail_id', 'product_store_id'
+            ).order_by('id')
         ),
         Prefetch(
             'order__user__worker_set',
@@ -8069,6 +8199,14 @@ def get_report_product_sales(request):
         price = cn_detail.price_unit or decimal.Decimal('0')
         subtotal = cn_detail.total if cn_detail.total else (quantity * price)
         serials = _credit_note_serials(cn_detail)
+        stock_info = _kardex_stock_snapshot(_pick_kardex(cn_detail.kardex_set.all(), 'E'))
+        if stock_info.get('has_kardex') and decimal.Decimal(stock_info.get('kardex_qty') or 0) != decimal.Decimal(quantity):
+            stock_info['stock_mismatch'] = True
+            extra = 'Cantidad kardex distinta a la nota de crédito'
+            if stock_info['stock_mismatch_reason']:
+                stock_info['stock_mismatch_reason'] += ' · ' + extra
+            else:
+                stock_info['stock_mismatch_reason'] = extra
         rows.append({
             'order_id': order_obj.id if order_obj else (note.order_id if note else None),
             'row_type': 'credit_note',
@@ -8088,6 +8226,8 @@ def get_report_product_sales(request):
             'missing_serials': bool(product_obj.is_serial) and len(serials) == 0,
             'status': 'CN',
             'status_label': 'ANULACIÓN',
+            'movement_label': 'NOTA DE CRÉDITO',
+            **stock_info,
         })
 
     rows = []
@@ -8113,6 +8253,32 @@ def get_report_product_sales(request):
         price = detail.price_unit or decimal.Decimal('0')
         subtotal = quantity * price
         missing_serials = bool(product_obj.is_serial) and (not is_cancelled) and len(serials) == 0
+
+        kardex_items = list(detail.kardex_set.all())
+        stock_info = _apply_qty_mismatch(
+            _kardex_stock_snapshot(_pick_kardex(kardex_items, 'S')),
+            quantity,
+            detail.unit,
+            min_qty,
+            qty_by_unit,
+        )
+        if is_cancelled:
+            return_kardex = _pick_kardex(kardex_items, 'E')
+            if return_kardex:
+                return_snap = _kardex_stock_snapshot(return_kardex)
+                stock_info['stock_return_prev'] = return_snap.get('stock_prev')
+                stock_info['stock_return_post'] = return_snap.get('stock_post')
+                if return_snap.get('stock_negative'):
+                    stock_info['stock_mismatch'] = True
+                    extra = 'Saldo negativo al anular'
+                    if stock_info['stock_mismatch_reason']:
+                        stock_info['stock_mismatch_reason'] += ' · ' + extra
+                    else:
+                        stock_info['stock_mismatch_reason'] = extra
+        elif detail.unit and detail.unit.name == 'ZZ':
+            stock_info['has_kardex'] = False
+            stock_info['stock_mismatch'] = False
+            stock_info['stock_mismatch_reason'] = ''
 
         if missing_serials:
             details_without_serials += 1
@@ -8144,6 +8310,8 @@ def get_report_product_sales(request):
             'missing_serials': missing_serials,
             'status': order.status,
             'status_label': 'ANULADA' if is_cancelled else 'VIGENTE',
+            'movement_label': 'VENTA',
+            **stock_info,
         })
 
         for note in order.creditnote_set.all():
@@ -8172,6 +8340,13 @@ def get_report_product_sales(request):
             queryset=CreditNoteDetailSerial.objects.select_related('product_serial')
         ),
         Prefetch(
+            'kardex_set',
+            queryset=Kardex.objects.only(
+                'id', 'operation', 'quantity', 'remaining_quantity',
+                'order_detail_id', 'credit_note_detail_id', 'product_store_id'
+            ).order_by('id')
+        ),
+        Prefetch(
             'credit_note__order__user__worker_set',
             queryset=Worker.objects.select_related('employee')
         ),
@@ -8181,18 +8356,125 @@ def get_report_product_sales(request):
         credit_note_count += 1
         _append_credit_note_row(cn_detail, cn_detail.credit_note.order if cn_detail.credit_note else None)
 
+    purchases_count = 0
+    purchase_quantity = decimal.Decimal('0')
+    purchase_subtotal = decimal.Decimal('0')
+
+    purchase_details = PurchaseDetail.objects.filter(
+        product_id=product_id,
+        purchase__purchase_date__range=[start_date, end_date],
+    ).select_related(
+        'purchase',
+        'purchase__supplier',
+        'purchase__user',
+        'unit',
+        'product',
+    ).prefetch_related(
+        Prefetch(
+            'productserial_set',
+            queryset=ProductSerial.objects.only(
+                'id', 'serial_number', 'status', 'purchase_detail_id'
+            ).order_by('serial_number')
+        ),
+        Prefetch(
+            'kardex_set',
+            queryset=Kardex.objects.only(
+                'id', 'operation', 'quantity', 'remaining_quantity',
+                'order_detail_id', 'credit_note_detail_id', 'purchase_detail_id',
+                'product_store_id'
+            ).order_by('id')
+        ),
+        Prefetch(
+            'purchase__user__worker_set',
+            queryset=Worker.objects.select_related('employee')
+        ),
+    ).order_by('purchase__purchase_date', 'purchase_id')
+
+    for purchase_detail in purchase_details:
+        purchase = purchase_detail.purchase
+        if not purchase:
+            continue
+        is_cancelled_purchase = purchase.status == 'N'
+        in_warehouse = purchase.status == 'A'
+        voucher_type, serial, number = _purchase_document_info(purchase)
+        serials = [
+            s.serial_number for s in purchase_detail.productserial_set.all()
+            if s.serial_number
+        ]
+        quantity = purchase_detail.quantity or decimal.Decimal('0')
+        price = purchase_detail.price_unit_discount or purchase_detail.price_unit or decimal.Decimal('0')
+        subtotal = purchase_detail.total_detail or (quantity * price)
+        missing_serials = bool(product_obj.is_serial) and in_warehouse and len(serials) == 0
+
+        stock_info = _kardex_stock_snapshot(_pick_kardex(purchase_detail.kardex_set.all(), 'E'))
+        if in_warehouse:
+            stock_info = _apply_qty_mismatch(
+                stock_info, quantity, purchase_detail.unit, min_qty, qty_by_unit
+            )
+        elif not stock_info.get('has_kardex'):
+            stock_info['stock_mismatch'] = False
+            stock_info['stock_mismatch_reason'] = ''
+
+        if missing_serials:
+            details_without_serials += 1
+
+        if is_cancelled_purchase:
+            cancelled_count += 1
+        else:
+            purchases_count += 1
+            purchase_quantity += quantity
+            purchase_subtotal += subtotal
+
+        status_label = 'ANULADA'
+        if not is_cancelled_purchase:
+            status_label = 'EN ALMACÉN' if in_warehouse else 'SIN ALMACÉN'
+
+        rows.append({
+            'order_id': purchase.id,
+            'row_type': 'purchase',
+            'voucher_type': voucher_type,
+            'serial': serial,
+            'number': number,
+            'client': purchase.supplier.name if purchase.supplier else 'SIN PROVEEDOR',
+            'user': _user_display_name(purchase.user),
+            'total': purchase.total_purchase or purchase.total_import or decimal.Decimal('0'),
+            'date': purchase.purchase_date,
+            'serials': serials,
+            'serials_count': len(serials),
+            'quantity': quantity,
+            'price': price,
+            'subtotal': subtotal,
+            'unit': purchase_detail.unit.name if purchase_detail.unit else '',
+            'missing_serials': missing_serials,
+            'status': purchase.status,
+            'status_label': status_label,
+            'movement_label': 'COMPRA',
+            **stock_info,
+        })
+
+    movement_rank = {'purchase': 0, 'sale': 1, 'credit_note': 2}
+    rows.sort(key=lambda r: (
+        r.get('date') or datetime.max.date(),
+        movement_rank.get(r.get('row_type'), 9),
+        r.get('order_id') or 0,
+    ))
+
     context = {
         'rows': rows,
         'product': product_obj,
         'start_date': start_date,
         'end_date': end_date,
         'sales_count': sales_count,
+        'purchases_count': purchases_count,
+        'purchase_quantity': purchase_quantity,
+        'purchase_subtotal': purchase_subtotal,
         'cancelled_count': cancelled_count,
         'credit_note_count': credit_note_count,
         'total_quantity': total_quantity,
         'total_subtotal': total_subtotal,
         'total_serials': total_serials,
         'details_without_serials': details_without_serials,
+        'stock_mismatch_count': sum(1 for r in rows if r.get('stock_mismatch')),
         'has_serials': bool(product_obj.is_serial),
     }
 

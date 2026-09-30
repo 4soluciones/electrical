@@ -1,7 +1,7 @@
 {% extends 'home.html' %}
 
 {% block title %}
-    Reporte | Ventas por Producto
+    Reporte | Movimientos del producto
 {% endblock title %}
 
 {% block body %}
@@ -111,8 +111,8 @@
         <div class="card-body p-0">
             <div class="ps-page-header d-flex flex-column flex-sm-row justify-content-between align-items-sm-center">
                 <div>
-                    <h5 class="mb-0 text-white"><i class="fas fa-barcode mr-2"></i>Reporte de Ventas por Producto</h5>
-                    <small>Consulta fechas, comprobantes y series vendidas de un producto en un rango de fechas.</small>
+                    <h5 class="mb-0 text-white"><i class="fas fa-exchange-alt mr-2"></i>Reporte de movimientos del producto</h5>
+                    <small>Control de compras, ventas, anulaciones y stock de un producto en un rango de fechas.</small>
                 </div>
                 <i class="fas fa-boxes d-none d-sm-block" style="font-size:2rem;opacity:.35;"></i>
             </div>
@@ -167,14 +167,14 @@
                         <div class="spinner-border text-primary mb-2" role="status">
                             <span class="sr-only">Cargando...</span>
                         </div>
-                        <p class="text-muted mb-0">Consultando ventas del producto...</p>
+                        <p class="text-muted mb-0">Consultando movimientos del producto...</p>
                     </div>
                 </div>
 
                 <div id="product-sales-grid-list">
                     <div class="text-center text-muted py-5">
-                        <i class="fas fa-barcode mb-2" style="font-size:2rem;opacity:.35;"></i>
-                        <p class="mb-0">Seleccione un producto y un rango de fechas para consultar las ventas.</p>
+                        <i class="fas fa-exchange-alt mb-2" style="font-size:2rem;opacity:.35;"></i>
+                        <p class="mb-0">Seleccione un producto y un rango de fechas para consultar compras y ventas.</p>
                     </div>
                 </div>
             </div>
@@ -308,7 +308,7 @@
                 success: function (response) {
                     $('#product-sales-grid-list').html(response.grid);
                     if (response.sales_count === 0) {
-                        toastr.info('No se encontraron ventas del producto en el rango seleccionado.', 'Consulta');
+                        toastr.info('No se encontraron movimientos del producto en el rango seleccionado.', 'Consulta');
                     }
                 },
                 error: function (jqXhr) {

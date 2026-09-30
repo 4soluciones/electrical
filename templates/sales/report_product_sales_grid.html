@@ -66,8 +66,12 @@
         background-color: #fff3cd;
     }
 
-    .ps-report tbody tr.ps-row-credit-note:hover {
-        background-color: #ffe8a3;
+    .ps-report tbody tr.ps-row-purchase {
+        background-color: #e8f6ee;
+    }
+
+    .ps-report tbody tr.ps-row-purchase:hover {
+        background-color: #d5eedd;
     }
 
     .ps-report .ps-serial-badge {
@@ -97,13 +101,23 @@
         padding-right: .75rem;
     }
 
-    .ps-report th.ps-col-price,
-    .ps-report td.ps-col-price {
-        min-width: 130px;
-        width: 11%;
+    .ps-report th.ps-col-stock,
+    .ps-report td.ps-col-stock {
+        min-width: 92px;
         white-space: nowrap;
-        padding-left: .75rem;
-        padding-right: .75rem;
+    }
+
+    .ps-report .ps-stock-warn {
+        color: #c0392b;
+        font-weight: 700;
+        background: #fdecea;
+    }
+
+    .ps-report .ps-stock-sub {
+        display: block;
+        font-size: .68rem;
+        color: #6c757d;
+        font-weight: 600;
     }
 
     .ps-report tfoot td {
@@ -138,42 +152,66 @@
     </div>
 
     <div class="row mb-3">
-        <div class="col-6 col-lg-3 mb-2">
+        <div class="col-6 col-md-4 col-lg-2 mb-2">
+            <div class="ps-kpi">
+                <div class="ps-kpi-label">Compras</div>
+                <p class="ps-kpi-value">{{ purchases_count }}</p>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2 mb-2">
+            <div class="ps-kpi">
+                <div class="ps-kpi-label">Cant. comprada</div>
+                <p class="ps-kpi-value">{{ purchase_quantity|floatformat:2 }}</p>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2 mb-2">
+            <div class="ps-kpi">
+                <div class="ps-kpi-label">Subtotal compras</div>
+                <p class="ps-kpi-value">S/ {{ purchase_subtotal|floatformat:2 }}</p>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2 mb-2">
             <div class="ps-kpi">
                 <div class="ps-kpi-label">Ventas vigentes</div>
                 <p class="ps-kpi-value">{{ sales_count }}</p>
             </div>
         </div>
-        <div class="col-6 col-lg-3 mb-2">
+        <div class="col-6 col-md-4 col-lg-2 mb-2">
             <div class="ps-kpi">
-                <div class="ps-kpi-label">Anuladas / N. crédito</div>
-                <p class="ps-kpi-value">{{ cancelled_count }} / {{ credit_note_count }}</p>
-            </div>
-        </div>
-        <div class="col-6 col-lg-3 mb-2">
-            <div class="ps-kpi">
-                <div class="ps-kpi-label">Cantidad vendida</div>
+                <div class="ps-kpi-label">Cant. vendida</div>
                 <p class="ps-kpi-value">{{ total_quantity|floatformat:2 }}</p>
             </div>
         </div>
-        <div class="col-6 col-lg-3 mb-2">
+        <div class="col-6 col-md-4 col-lg-2 mb-2">
             <div class="ps-kpi">
-                <div class="ps-kpi-label">Subtotal producto</div>
+                <div class="ps-kpi-label">Subtotal ventas</div>
                 <p class="ps-kpi-value">S/ {{ total_subtotal|floatformat:2 }}</p>
             </div>
         </div>
     </div>
+    <p class="small text-muted mb-3">
+        Anuladas: <strong>{{ cancelled_count }}</strong>
+        · Notas de crédito: <strong>{{ credit_note_count }}</strong>
+    </p>
 
     {% if has_serials and details_without_serials %}
         <div class="alert alert-warning py-2 px-3 mb-3" role="alert">
             <i class="fas fa-exclamation-triangle mr-1"></i>
             Este producto controla series, pero <strong>{{ details_without_serials }}</strong>
-            venta{{ details_without_serials|pluralize }} no tiene series registradas.
+            movimiento{{ details_without_serials|pluralize }} no tiene series registradas.
         </div>
     {% elif not has_serials %}
         <div class="alert alert-info py-2 px-3 mb-3" role="alert">
             <i class="fas fa-info-circle mr-1"></i>
-            El producto no maneja números de serie. El reporte muestra cantidad, precio y subtotal de cada venta.
+            El producto no maneja números de serie. El reporte muestra compras, ventas, cantidad, precio y stock.
+        </div>
+    {% endif %}
+
+    {% if stock_mismatch_count %}
+        <div class="alert alert-danger py-2 px-3 mb-3" role="alert">
+            <i class="fas fa-exclamation-circle mr-1"></i>
+            Se detectaron <strong>{{ stock_mismatch_count }}</strong> movimiento{{ stock_mismatch_count|pluralize }}
+            con desigualdad entre el movimiento y el kardex (saldo negativo, sin kardex o cantidad distinta).
         </div>
     {% endif %}
 
@@ -183,29 +221,41 @@
                 <span class="input-group-text bg-white border-right-0"><i class="fas fa-filter text-muted"></i></span>
             </div>
             <input id="myInputProductSales" type="text" class="form-control border-left-0"
-                   placeholder="Filtrar por comprobante, cliente, usuario o serie...">
+                   placeholder="Filtrar por compra, venta, comprobante, cliente, proveedor o serie...">
         </div>
 
         <div class="ps-table-wrap">
             <table class="table table-sm table-hover roboto-condensed-regular" id="table-product-sales">
                 <thead>
                 <tr>
+                    <th>Movimiento</th>
                     <th>Tipo de comprobante</th>
                     <th>Serie</th>
                     <th>Número</th>
-                    <th>Cliente</th>
+                    <th>Cliente / Proveedor</th>
                     <th>Usuario</th>
                     <th>Total</th>
                     <th>Fecha</th>
-                    <th>Series vendidas</th>
+                    <th>Series</th>
                     <th class="ps-col-qty">Cantidad</th>
+                    <th class="ps-col-stock">Stock ant.</th>
+                    <th class="ps-col-stock">Stock</th>
                     <th class="ps-col-price">Precio</th>
                     <th>Subtotal</th>
                 </tr>
                 </thead>
                 <tbody>
                 {% for r in rows %}
-                    <tr class="{% if r.status == 'A' %}ps-row-cancelled{% elif r.row_type == 'credit_note' %}ps-row-credit-note{% endif %}">
+                    <tr class="{% if r.row_type == 'purchase' and r.status != 'N' %}ps-row-purchase{% elif r.row_type == 'sale' and r.status == 'A' %}ps-row-cancelled{% elif r.row_type == 'purchase' and r.status == 'N' %}ps-row-cancelled{% elif r.row_type == 'credit_note' %}ps-row-credit-note{% endif %}">
+                        <td class="align-middle text-center text-nowrap">
+                            {% if r.row_type == 'purchase' %}
+                                <span class="badge badge-pill badge-success">COMPRA</span>
+                            {% elif r.row_type == 'credit_note' %}
+                                <span class="badge badge-pill badge-danger">N. CRÉDITO</span>
+                            {% else %}
+                                <span class="badge badge-pill badge-primary">VENTA</span>
+                            {% endif %}
+                        </td>
                         <td class="align-middle text-center text-nowrap">
                             {% if r.voucher_type == 'FACTURA' %}
                                 <span class="badge badge-pill badge-warning">{{ r.voucher_type }}</span>
@@ -216,10 +266,12 @@
                             {% else %}
                                 <span class="badge badge-pill badge-secondary">{{ r.voucher_type }}</span>
                             {% endif %}
-                            {% if r.status == 'A' %}
+                            {% if r.status_label == 'ANULADA' %}
                                 <div><span class="badge badge-danger mt-1">ANULADA</span></div>
                             {% elif r.row_type == 'credit_note' %}
                                 <div><span class="badge badge-warning mt-1">ANULACIÓN</span></div>
+                            {% elif r.row_type == 'purchase' and r.status == 'S' %}
+                                <div><span class="badge badge-secondary mt-1">SIN ALMACÉN</span></div>
                             {% endif %}
                         </td>
                         <td class="align-middle text-center font-weight-bold">{{ r.serial }}</td>
@@ -235,13 +287,39 @@
                                 {% endfor %}
                             {% elif r.missing_serials %}
                                 <span class="badge badge-danger">Sin series registradas</span>
-                            {% elif r.status == 'A' %}
+                            {% elif r.row_type == 'sale' and r.status == 'A' %}
                                 <span class="text-muted">Serie liberada por anulación</span>
                             {% else %}
                                 <span class="text-muted">No aplica</span>
                             {% endif %}
                         </td>
                         <td class="align-middle text-center ps-col-qty">{{ r.quantity|floatformat:2 }}{% if r.unit %} {{ r.unit }}{% endif %}</td>
+                        <td class="align-middle text-center ps-col-stock {% if r.stock_mismatch %}ps-stock-warn{% endif %}"
+                            {% if r.stock_mismatch_reason %}title="{{ r.stock_mismatch_reason }}"{% endif %}>
+                            {% if r.has_kardex %}
+                                {{ r.stock_prev|floatformat:2 }}
+                                {% if r.stock_return_prev is not None %}
+                                    <span class="ps-stock-sub">Dev. {{ r.stock_return_prev|floatformat:2 }}</span>
+                                {% endif %}
+                            {% elif r.stock_mismatch %}
+                                <span class="badge badge-danger">Sin kardex</span>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="align-middle text-center ps-col-stock {% if r.stock_mismatch %}ps-stock-warn{% endif %}"
+                            {% if r.stock_mismatch_reason %}title="{{ r.stock_mismatch_reason }}"{% endif %}>
+                            {% if r.has_kardex %}
+                                {{ r.stock_post|floatformat:2 }}
+                                {% if r.stock_return_post is not None %}
+                                    <span class="ps-stock-sub">Dev. {{ r.stock_return_post|floatformat:2 }}</span>
+                                {% endif %}
+                            {% elif r.stock_mismatch %}
+                                <span class="badge badge-danger">Sin kardex</span>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
                         <td class="align-middle text-right ps-col-price">S/ {{ r.price|floatformat:2 }}</td>
                         <td class="align-middle text-right ps-money text-primary">S/ {{ r.subtotal|floatformat:2 }}</td>
                     </tr>
@@ -249,9 +327,20 @@
                 </tbody>
                 <tfoot>
                 <tr>
-                    <td colspan="7" class="text-right">TOTALES (VENTAS VIGENTES)</td>
+                    <td colspan="8" class="text-right">TOTAL COMPRAS</td>
+                    <td></td>
+                    <td class="text-center ps-col-qty">{{ purchase_quantity|floatformat:2 }}</td>
+                    <td class="ps-col-stock"></td>
+                    <td class="ps-col-stock"></td>
+                    <td class="ps-col-price"></td>
+                    <td class="text-right">S/ {{ purchase_subtotal|floatformat:2 }}</td>
+                </tr>
+                <tr>
+                    <td colspan="8" class="text-right">TOTAL VENTAS VIGENTES</td>
                     <td class="text-center">{{ total_serials }} serie{{ total_serials|pluralize }}</td>
                     <td class="text-center ps-col-qty">{{ total_quantity|floatformat:2 }}</td>
+                    <td class="ps-col-stock"></td>
+                    <td class="ps-col-stock"></td>
                     <td class="ps-col-price"></td>
                     <td class="text-right">S/ {{ total_subtotal|floatformat:2 }}</td>
                 </tr>
@@ -261,7 +350,7 @@
     {% else %}
         <div class="text-center text-muted py-5">
             <i class="fas fa-inbox mb-2" style="font-size:2rem;opacity:.35;"></i>
-            <p class="mb-0">No hay ventas de este producto en el rango de fechas seleccionado.</p>
+            <p class="mb-0">No hay compras ni ventas de este producto en el rango de fechas seleccionado.</p>
         </div>
     {% endif %}
 </div>
@@ -277,8 +366,8 @@
     $("#btn_export_excel_product_sales").click(function () {
         $("#table-product-sales").table2excel({
             exclude: ".noExl",
-            name: "Ventas por producto",
-            filename: "Reporte_Ventas_Producto",
+            name: "Movimientos del producto",
+            filename: "Reporte_Movimientos_Producto",
             fileext: ".xls",
             preserveColors: true,
             exclude_img: true,

@@ -249,6 +249,7 @@
     <script type="text/javascript">
 
         let selectedSerials = [];
+        let isCancellingOrder = false;
 
         $('#search-form').submit(function (event) {
             event.preventDefault();
@@ -282,45 +283,64 @@
 
         });
 
-        $(document).on('click', '.btn-cancel', function () {
+        $(document).on('click', '.btn-cancel', function (e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
 
-            let $row = $(this).parent('td').parent('tr');
-            let $o_id = $row.attr('pk');
+            let $btn = $(this);
+            if (isCancellingOrder || $btn.data('cancelling') || $btn.prop('disabled')) {
+                return;
+            }
+
+            isCancellingOrder = true;
+            $btn.data('cancelling', true).prop('disabled', true).addClass('disabled');
+            $('.btn-cancel').css('pointer-events', 'none');
+
+            let pk = $btn.attr('pk');
+            let $row = $btn.closest('tr');
+            let $o_id = $row.attr('pk') || pk;
             $('#table-dictionary tr[pk="' + $o_id + '"]').addClass('bg-warning');
 
-            setTimeout(() => {
-                let r = confirm("¿ESTA SEGURO DE ANULAR LA ORDEN DE VENTA SELECCIONADO?");
-                if (r === true) {
-                    let pk = $(this).attr("pk")
-                    $.ajax({
-                        url: '/sales/cancel_order/',
-                        async: true,
-                        dataType: 'json', // for response
-                        type: 'GET',
-                        data: {
-                            'pk': pk,
-                            'start-date': $('#id-start-date').val(),
-                            'end-date': $('#id-end-date').val()
-                        },
-                        contentType: 'application/json;charset=UTF-8',
-                        headers: {"X-CSRFToken": '{{ csrf_token }}'},
-                        success: function (response, textStatus, xhr) {
-                            if (xhr.status === 200) {
-                                toastr.success(response.message, '¡ORDEN ACTUALIZADA CORRECTAMENTE!');
-                                $('#sales-grid-list').html(response.grid);
-                                // $('#table-dictionary tr[pk="' + $o_id + '"]').remove();
-                            }
-                        },
-                        fail: function (response) {
-                            console.log("error")
-                            toastr.error(jqXhr.responseJSON.error, '¡Inconcebible!');
-                        }
-                    });
-                } else {
-                    $('#table-comodity tr[pk="' + $o_id + '"]').removeClass('bg-warning');
+            let r = confirm("¿ESTA SEGURO DE ANULAR LA ORDEN DE VENTA SELECCIONADO?");
+            if (r !== true) {
+                isCancellingOrder = false;
+                $btn.data('cancelling', false).prop('disabled', false).removeClass('disabled');
+                $('.btn-cancel').css('pointer-events', 'auto');
+                $('#table-dictionary tr[pk="' + $o_id + '"]').removeClass('bg-warning');
+                return;
+            }
+            $('#loading-666').show();
 
+            $.ajax({
+                url: '/sales/cancel_order/',
+                dataType: 'json',
+                type: 'GET',
+                data: {
+                    'pk': pk,
+                    'start-date': $('#id-start-date').val(),
+                    'end-date': $('#id-end-date').val()
+                },
+                headers: {"X-CSRFToken": '{{ csrf_token }}'},
+                success: function (response, textStatus, xhr) {
+                    if (xhr.status === 200) {
+                        toastr.success(response.message || 'Orden anulada', '¡ORDEN ACTUALIZADA CORRECTAMENTE!');
+                        $('#sales-grid-list').html(response.grid);
+                    }
+                },
+                error: function (jqXhr) {
+                    let msg = (jqXhr.responseJSON && jqXhr.responseJSON.error)
+                        ? jqXhr.responseJSON.error
+                        : 'Error al anular la orden';
+                    toastr.error(msg, '¡No se pudo anular!');
+                    $('#table-dictionary tr[pk="' + $o_id + '"]').removeClass('bg-warning');
+                    $btn.data('cancelling', false).prop('disabled', false).removeClass('disabled');
+                },
+                complete: function () {
+                    isCancellingOrder = false;
+                    $('#loading-666').hide();
+                    $('.btn-cancel').css('pointer-events', 'auto');
                 }
-            }, 50);
+            });
         });
 
         $(document).on('click', '.btn-credit-note', function () {
