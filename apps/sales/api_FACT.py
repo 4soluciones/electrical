@@ -17,9 +17,9 @@ tokens = {
 }
 
 
-def send_bill_4_fact(order_id):  # FACTURA 4 FACT
+def send_bill_4_fact(order_id, serial_suffix=None):  # FACTURA 4 FACT
     order_obj = Order.objects.get(id=int(order_id))
-    serial = order_obj.subsidiary_store.subsidiary.serial
+    serial = serial_suffix or order_obj.subsidiary_store.subsidiary.serial
     correlative = get_new_correlative(serial, '1')
     details = OrderDetail.objects.filter(order=order_obj)
     client_obj = order_obj.client
@@ -30,6 +30,13 @@ def send_bill_4_fact(order_id):  # FACTURA 4 FACT
     register_date = order_obj.create_at
     formatdate = register_date.strftime("%Y-%m-%d")
     hour_date = register_date.strftime("%H:%M:%S")
+    if order_obj.issue_date and register_date:
+        try:
+            create_day = utc_to_local(register_date).date()
+        except Exception:
+            create_day = register_date.date()
+        if order_obj.issue_date < create_day:
+            formatdate = order_obj.issue_date.strftime("%Y-%m-%d")
 
     items = []
     items_credit_graphql = []
@@ -185,9 +192,9 @@ def send_bill_4_fact(order_id):  # FACTURA 4 FACT
         return {"error": "La respuesta no es un JSON válido"}
 
 
-def send_receipt_4_fact(order_id):  # BOLETA 4 FACT
+def send_receipt_4_fact(order_id, serial_suffix=None):  # BOLETA 4 FACT
     order_obj = Order.objects.get(id=int(order_id))
-    serial = order_obj.subsidiary_store.subsidiary.serial
+    serial = serial_suffix or order_obj.subsidiary_store.subsidiary.serial
     correlative = get_new_correlative(serial, '2')
     details = OrderDetail.objects.filter(order=order_obj)
     client_obj = order_obj.client
@@ -199,6 +206,8 @@ def send_receipt_4_fact(order_id):  # BOLETA 4 FACT
     register_date = utc_to_local(order_obj.create_at)
     formatdate = register_date.strftime("%Y-%m-%d")
     hour_date = register_date.strftime("%H:%M:%S")
+    if order_obj.issue_date and order_obj.issue_date < register_date.date():
+        formatdate = order_obj.issue_date.strftime("%Y-%m-%d")
 
     items = []
     index = 1

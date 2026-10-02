@@ -287,11 +287,12 @@
                             <option value="B">BOLETA</option>
                         </select>
                     </div>
-                    <div class="col-md-1 text-uppercase small pl-1 pr-0">
+                    <div class="col-md-2 text-uppercase small pl-1 pr-0">
                         <label for="id_serial" class="mb-0">Serie</label>
-                        <input type="text" class="form-control form-control-sm text-right"
-                               id="id_serial" readonly placeholder="-"
-                               name="serial">
+                        <select id="id_serial" name="serial"
+                                class="form-control form-control-sm">
+                            <option selected disabled value="">Seleccione</option>
+                        </select>
                     </div>
                     <div class="col-md-2 text-uppercase small pl-1 pr-1">
                         <label for="correlative" class="mb-0">Correlativo</label>
@@ -303,9 +304,12 @@
                     <div class="col-md-2 text-uppercase small pl-1 pr-1">
                         <label for="issue_date" class="mb-0">Fecha de emisión</label>
                         <input type="date" class="form-control form-control-sm" id="issue_date" name="issue_date" readonly
+                               data-today="{{ date }}"
+                               style="pointer-events: none;"
                                value="{{ date }}">
+                        <small id="issue_date_hint" class="form-text text-muted d-none" style="font-size: 10px; line-height: 1.2;"></small>
                     </div>
-                    <div class="col-md-3 text-uppercase small pl-1 pr-0">
+                    <div class="col-md-2 text-uppercase small pl-1 pr-0">
                         <label for="format_pdf" class="mb-0">Formato de PDF</label>
                         <select id="format_pdf" name="format-pdf"
                                 class="form-control form-control-sm">

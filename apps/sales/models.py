@@ -1,8 +1,10 @@
 import decimal
+from datetime import date, datetime, timedelta
 
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Min, Sum, Avg
+from django.utils import timezone
 
 from apps.comercial import apps
 from apps.hrm.models import Subsidiary, District, DocumentType
@@ -707,6 +709,181 @@ class OrderBill(models.Model):
     class Meta:
         verbose_name = 'Registro de Comprobante'
         verbose_name_plural = 'Registros de Comprobantes'
+
+
+class VoucherSerial(models.Model):
+    PURPOSE_NORMAL = 'N'
+    PURPOSE_PAST = 'P'
+    PURPOSE_CHOICES = (
+        (PURPOSE_NORMAL, 'Normal'),
+        (PURPOSE_PAST, 'Fecha pasada'),
+    )
+    DOCUMENT_CHOICES = (
+        ('F', 'Factura'),
+        ('B', 'Boleta'),
+    )
+
+    subsidiary = models.ForeignKey(
+        Subsidiary, on_delete=models.CASCADE, related_name='voucher_serials'
+    )
+    document_type = models.CharField('Tipo de comprobante', max_length=1, choices=DOCUMENT_CHOICES)
+    code = models.CharField('Código de serie', max_length=4)
+    purpose = models.CharField('Uso', max_length=1, choices=PURPOSE_CHOICES, default=PURPOSE_NORMAL)
+    max_past_days = models.PositiveSmallIntegerField(
+        'Días máximos hacia atrás', default=0,
+        help_text='Sin contar el día actual. Factura: 3, Boleta: 5. Cero en serie normal.'
+    )
+    is_active = models.BooleanField('Activo', default=True)
+    description = models.CharField('Descripción', max_length=100, null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Serie de comprobante'
+        verbose_name_plural = 'Series de comprobantes'
+        unique_together = ('subsidiary', 'document_type', 'code')
+        ordering = ['document_type', 'purpose', 'code']
+
+    def __str__(self):
+        return self.full_serial
+
+    @property
+    def full_serial(self):
+        return '{}{}'.format(self.document_type, self.code)
+
+    @property
+    def allows_past_date(self):
+        return self.purpose == self.PURPOSE_PAST
+
+    @property
+    def sunat_type(self):
+        return '1' if self.document_type == 'F' else '2'
+
+    def save(self, *args, **kwargs):
+        if self.purpose == self.PURPOSE_NORMAL:
+            self.max_past_days = 0
+        elif not self.max_past_days:
+            self.max_past_days = 3 if self.document_type == 'F' else 5
+        super().save(*args, **kwargs)
+
+
+def ensure_default_voucher_serials(subsidiary):
+    if subsidiary is None or not subsidiary.serial:
+        return
+    code = str(subsidiary.serial).strip()
+    for document_type in ('F', 'B'):
+        VoucherSerial.objects.get_or_create(
+            subsidiary=subsidiary,
+            document_type=document_type,
+            code=code,
+            defaults={
+                'purpose': VoucherSerial.PURPOSE_NORMAL,
+                'is_active': True,
+                'description': 'Serie principal',
+                'max_past_days': 0,
+            }
+        )
+
+
+def resolve_voucher_serial(subsidiary, document_type, posted_serial=''):
+    if document_type not in ('F', 'B') or subsidiary is None:
+        return None
+    ensure_default_voucher_serials(subsidiary)
+    qs = VoucherSerial.objects.filter(
+        subsidiary=subsidiary,
+        document_type=document_type,
+        is_active=True,
+    )
+    posted_serial = (posted_serial or '').strip().upper()
+    if posted_serial:
+        code = posted_serial[1:] if posted_serial.startswith(document_type) else posted_serial
+        match = qs.filter(code=code).first()
+        if match:
+            return match
+    default = qs.filter(purpose=VoucherSerial.PURPOSE_NORMAL).order_by('id').first()
+    if default:
+        return default
+    return qs.order_by('id').first()
+
+
+def get_last_issue_date_for_serial(full_serial, sunat_type):
+    last_bill = (
+        OrderBill.objects
+        .filter(serial=full_serial, type=sunat_type)
+        .select_related('order')
+        .order_by('n_receipt')
+        .last()
+    )
+    if last_bill and last_bill.order and last_bill.order.issue_date:
+        return last_bill.order.issue_date
+    return None
+
+
+def get_issue_date_limits(voucher_serial, today=None):
+    today = today or timezone.localdate()
+    if voucher_serial and voucher_serial.allows_past_date:
+        max_days = voucher_serial.max_past_days or (3 if voucher_serial.document_type == 'F' else 5)
+        min_date = today - timedelta(days=max_days)
+        max_date = today - timedelta(days=1)
+        last_issue = get_last_issue_date_for_serial(voucher_serial.full_serial, voucher_serial.sunat_type)
+        if last_issue and last_issue > min_date:
+            min_date = last_issue
+        return min_date, max_date, True
+    return today, today, False
+
+
+def validate_voucher_issue_date(document_type, voucher_serial, issue_date_value, today=None):
+    today = today or timezone.localdate()
+    if document_type not in ('F', 'B'):
+        return True, None
+    if isinstance(issue_date_value, str):
+        try:
+            issue_date_value = datetime.strptime(issue_date_value, '%Y-%m-%d').date()
+        except (TypeError, ValueError):
+            return False, 'La fecha de emisión no es válida.'
+    if issue_date_value is None:
+        return False, 'Debe indicar la fecha de emisión.'
+
+    min_date, max_date, allows_past = get_issue_date_limits(voucher_serial, today)
+    if min_date > max_date:
+        return False, (
+            'No se puede emitir en la serie {} porque el último comprobante ya tiene una fecha '
+            'fuera del rango permitido hacia atrás.'.format(
+                voucher_serial.full_serial if voucher_serial else ''
+            )
+        )
+    if issue_date_value < min_date or issue_date_value > max_date:
+        if allows_past and voucher_serial:
+            return False, (
+                'La serie {} solo permite fechas de emisión entre {} y {} '
+                '(hasta {} días atrás, sin contar el día actual).'.format(
+                    voucher_serial.full_serial,
+                    min_date.strftime('%d/%m/%Y'),
+                    max_date.strftime('%d/%m/%Y'),
+                    voucher_serial.max_past_days,
+                )
+            )
+        return False, 'La serie normal solo permite emitir con la fecha de hoy.'
+    return True, None
+
+
+def serialize_voucher_serials(subsidiary, document_type):
+    if document_type not in ('F', 'B') or subsidiary is None:
+        return []
+    ensure_default_voucher_serials(subsidiary)
+    series = []
+    for item in VoucherSerial.objects.filter(
+        subsidiary=subsidiary, document_type=document_type, is_active=True
+    ).order_by('purpose', 'code'):
+        series.append({
+            'id': item.id,
+            'serial': item.full_serial,
+            'code': item.code,
+            'purpose': item.purpose,
+            'label': item.full_serial,
+            'allows_past_date': item.allows_past_date,
+            'max_past_days': item.max_past_days,
+            'description': item.description or '',
+        })
+    return series
 
 
 class ProductRecipe(models.Model):

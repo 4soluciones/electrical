@@ -951,9 +951,21 @@
                 toastr.warning('SELECCIONE UN CLIENTE O BUSQUELO POR NUMERO DE DOCUMENTO', 'Error de Llenado');
                 return false;
             }
-            if ($('#type_bill_document').val() === null) {
+            if ($('#type_bill_document').val() === null || $('#type_bill_document').val() === '0') {
                 toastr.warning('Seleccionee el Tipo de Documento a Emitir', 'Error de Llenado');
                 return false;
+            }
+            if (!$('#id_serial').val()) {
+                toastr.warning('Seleccione la serie del comprobante', 'Error de Llenado');
+                return false;
+            }
+            let issueDateInput = $('#issue_date');
+            if (issueDateInput.attr('min') && issueDateInput.attr('max')) {
+                let selectedIssueDate = issueDateInput.val();
+                if (!selectedIssueDate || selectedIssueDate < issueDateInput.attr('min') || selectedIssueDate > issueDateInput.attr('max')) {
+                    toastr.warning('La fecha de emisión no es válida para la serie seleccionada', 'Error de Llenado');
+                    return false;
+                }
             }
             if (_transaction_payment_type.val() === '0') {
                 toastr.warning('SELECIONE EL TIPO DE PAGO', 'Mensaje');
@@ -2321,21 +2333,104 @@
         });
 
         $(document).on('change', '#type_bill_document', function (e) {
-            let type_bill_document = $(this).val();
+            fetchCorrelativeByType('');
+        });
+
+        let loadingVoucherSerial = false;
+        $(document).on('change', '#id_serial', function (e) {
+            if (loadingVoucherSerial) {
+                return;
+            }
+            let selectedSerial = $(this).val();
+            if (selectedSerial) {
+                fetchCorrelativeByType(selectedSerial);
+            }
+        });
+
+        function populateSerialOptions(series, selectedSerial) {
+            let $serial = $('#id_serial');
+            loadingVoucherSerial = true;
+            $serial.empty();
+            if (!series || series.length === 0) {
+                if (selectedSerial) {
+                    $serial.append($('<option>', {
+                        value: selectedSerial,
+                        text: selectedSerial,
+                        selected: true
+                    }));
+                } else {
+                    $serial.append($('<option>', {
+                        value: '',
+                        text: 'Seleccione',
+                        selected: true,
+                        disabled: true
+                    }));
+                }
+                loadingVoucherSerial = false;
+                return;
+            }
+            series.forEach(function (item) {
+                $serial.append($('<option>', {
+                    value: item.serial,
+                    text: item.label,
+                    selected: item.serial === selectedSerial
+                }));
+            });
+            loadingVoucherSerial = false;
+        }
+
+        function applyIssueDateConstraints(data) {
+            let $date = $('#issue_date');
+            let today = $date.data('today') || '{{ date }}';
+            if (data.allows_past_date) {
+                $date.prop('readonly', false);
+                $date.css('pointer-events', 'auto');
+                $date.attr('min', data.min_issue_date);
+                $date.attr('max', data.max_issue_date);
+                let current = $date.val();
+                if (!current || current < data.min_issue_date || current > data.max_issue_date) {
+                    $date.val(data.max_issue_date);
+                }
+                $('#issue_date_hint').removeClass('d-none').text(data.issue_date_hint || '');
+            } else {
+                $date.prop('readonly', true);
+                $date.css('pointer-events', 'none');
+                $date.removeAttr('min');
+                $date.removeAttr('max');
+                $date.val(today);
+                $('#issue_date_hint').addClass('d-none').text('');
+            }
+        }
+
+        function fetchCorrelativeByType(serial) {
+            let type_bill_document = $('#type_bill_document').val();
+            if (!type_bill_document || type_bill_document === '0') {
+                return;
+            }
             $.ajax({
                 url: '/sales/get_correlative_by_type/',
                 method: 'GET',
-                data: {'type_bill_document': type_bill_document},
+                data: {
+                    'type_bill_document': type_bill_document,
+                    'serial': serial || ''
+                },
                 success: function (data) {
-                    $('#correlative').val(data.correlative)
-                    $('#id_serial').val(data.serial)
+                    if (!data.status) {
+                        toastr.warning(data.message || 'No se pudo obtener el correlativo');
+                        return;
+                    }
+                    populateSerialOptions(data.series, data.serial);
+                    $('#correlative').val(data.correlative);
+                    if (data.serial) {
+                        $('#id_serial').val(data.serial);
+                    }
+                    applyIssueDateConstraints(data);
                 },
                 error: function (xhr, status, error) {
                     console.error("Error al obtener los datos: ", error);
                 }
             });
-
-        });
+        }
 
 
     </script>

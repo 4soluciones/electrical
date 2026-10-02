@@ -765,13 +765,15 @@ def get_new_correlative(serie, type):
     else:
         serie = 'B' + serie
 
-    order_bill_set = OrderBill.objects.filter(serial=serie, type=type)
-    if order_bill_set:
-        n_receipt = order_bill_set.last().n_receipt
-        new_n_receipt = n_receipt + 1
-        return new_n_receipt
-    else:
-        return 1
+    last_receipt = (
+        OrderBill.objects
+        .filter(serial=serie, type=type)
+        .order_by('n_receipt')
+        .last()
+    )
+    if last_receipt:
+        return last_receipt.n_receipt + 1
+    return 1
 
 
 def query_api_amigo(nro_doc, type_document):

@@ -6,6 +6,7 @@ from django.views.generic import TemplateView, View, CreateView, UpdateView
 from django.views.decorators.csrf import csrf_exempt
 from django.forms.models import model_to_dict
 from django.http import JsonResponse, HttpResponse
+from django.utils import timezone
 from http import HTTPStatus
 
 from .api_FACT import send_bill_4_fact, send_receipt_4_fact, send_credit_note_fact, annul_invoice, product_description_with_serials
@@ -25,7 +26,7 @@ import random
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models.fields.files import ImageFieldFile
 from django.template import loader
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from django.db import DatabaseError, IntegrityError, transaction
 from django.core import serializers
 from apps.sales.views_SUNAT import send_bill_nubefact, send_receipt_nubefact, query_dni, query_api_facturacioncloud, \
@@ -6981,17 +6982,24 @@ def get_correlative_by_type(request):
         return JsonResponse({'status': False, 'message': 'Método no permitido'}, status=405)
 
     type_bill_document = request.GET.get('type_bill_document')
-    subsidiary = Subsidiary.objects.get(id=1)
-    serial_suffix = subsidiary.serial
+    posted_serial = request.GET.get('serial', '')
+    try:
+        subsidiary = get_subsidiary_by_user(request.user)
+    except Exception:
+        subsidiary = None
+    if subsidiary is None:
+        subsidiary = Subsidiary.objects.filter(id=1).first()
+    if subsidiary is None:
+        return JsonResponse({'status': False, 'message': 'No se encontró la sede'}, status=400)
 
-    document_type_map = {
-        'F': ('F' + serial_suffix, '1'),
-        'B': ('B' + serial_suffix, '2'),
-    }
+    today = timezone.localdate()
+    series_payload = serialize_voucher_serials(subsidiary, type_bill_document)
+    voucher_serial = resolve_voucher_serial(subsidiary, type_bill_document, posted_serial)
 
-    new_serial, doc_type = document_type_map.get(type_bill_document, ('T001', 'T'))
-
-    if type_bill_document in document_type_map:
+    if type_bill_document in ('F', 'B'):
+        serial_suffix = voucher_serial.code if voucher_serial else subsidiary.serial
+        new_serial = '{}{}'.format(type_bill_document, serial_suffix)
+        doc_type = '1' if type_bill_document == 'F' else '2'
         last_receipt = (
             OrderBill.objects
             .filter(serial=new_serial, type=doc_type)
@@ -6999,7 +7007,27 @@ def get_correlative_by_type(request):
             .last()
         )
         new_n_receipt = (last_receipt.n_receipt + 1) if last_receipt else 1
+        min_date, max_date, allows_past = get_issue_date_limits(voucher_serial, today)
+        hint = ''
+        if allows_past and voucher_serial:
+            if min_date > max_date:
+                hint = (
+                    'No se puede emitir en la serie {} porque el último comprobante '
+                    'ya está fuera del rango de fechas pasadas permitido.'.format(
+                        voucher_serial.full_serial
+                    )
+                )
+            else:
+                hint = (
+                    'Serie para uso de fecha pasada: seleccione un día entre {} y {} '
+                    '(hasta {} días atrás).'.format(
+                        min_date.strftime('%d/%m/%Y'),
+                        max_date.strftime('%d/%m/%Y'),
+                        voucher_serial.max_past_days,
+                    )
+                )
     else:
+        new_serial = 'T001'
         max_correlative = Order.objects.filter(
             subsidiary=subsidiary,
             type='V',
@@ -7009,13 +7037,20 @@ def get_correlative_by_type(request):
         ).aggregate(
             r=Coalesce(Max('correlative_int'), 0)
         )['r']
-
         new_n_receipt = max_correlative + 1
+        min_date, max_date, allows_past = today, today, False
+        hint = ''
 
     return JsonResponse({
         'status': True,
         'correlative': str(new_n_receipt).zfill(6),
-        'serial': new_serial
+        'serial': new_serial,
+        'series': series_payload,
+        'allows_past_date': allows_past,
+        'min_issue_date': min_date.strftime('%Y-%m-%d'),
+        'max_issue_date': max_date.strftime('%Y-%m-%d'),
+        'issue_date_hint': hint,
+        'max_past_days': voucher_serial.max_past_days if voucher_serial else 0,
     })
 
 
@@ -7057,7 +7092,7 @@ def save_order(request):
 
         _sum_total = request.POST.get('sum-total', '')
 
-        serial = request.POST.get('serial', '')
+        voucher_serial_full = request.POST.get('serial', '')
         issue_date = request.POST.get('issue_date', '')
         format_pdf = request.POST.get('format-pdf', '')
 
@@ -7071,6 +7106,20 @@ def save_order(request):
         _correlative = request.POST.get('correlative', '')
         # _type_bill_document = request.POST.get('type_bill_document', '')
         voucher_type = request.POST.get('type_bill_document', '')
+
+        serial_suffix = subsidiary_obj.serial if subsidiary_obj else None
+        voucher_serial_obj = None
+        if voucher_type in ('F', 'B'):
+            voucher_serial_obj = resolve_voucher_serial(
+                subsidiary_obj, voucher_type, voucher_serial_full
+            )
+            if voucher_serial_obj:
+                serial_suffix = voucher_serial_obj.code
+            is_valid_date, date_error = validate_voucher_issue_date(
+                voucher_type, voucher_serial_obj, issue_date
+            )
+            if not is_valid_date:
+                return JsonResponse({'error': date_error}, status=HTTPStatus.BAD_REQUEST)
 
         detail = json.loads(request.POST.get('detail', ''))
         credit = json.loads(request.POST.get('credit', ''))
@@ -7217,7 +7266,7 @@ def save_order(request):
             #     response = JsonResponse(data)
             #     response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
             #     return response
-            r = send_bill_4_fact(order_obj.id)
+            r = send_bill_4_fact(order_obj.id, serial_suffix=serial_suffix)
             if r.get('success'):
                 order_bill_obj = OrderBill(order=order_obj,
                                            serial=r.get('serie'),
@@ -7238,6 +7287,8 @@ def save_order(request):
                     data = {'error': str(r.get('errors'))}
                 elif r.get('error'):
                     data = {'error': str(r.get('error'))}
+                else:
+                    data = {'error': str(r.get('message') or 'Error al emitir el comprobante')}
                 response = JsonResponse(data)
                 response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
                 return response
@@ -7275,7 +7326,7 @@ def save_order(request):
             #     response = JsonResponse(data)
             #     response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
             #     return response
-            r = send_receipt_4_fact(order_obj.id)
+            r = send_receipt_4_fact(order_obj.id, serial_suffix=serial_suffix)
             if r.get('success'):
                 order_bill_obj = OrderBill(order=order_obj,
                                            serial=r.get('serie'),
@@ -7296,6 +7347,8 @@ def save_order(request):
                     data = {'error': str(r.get('errors'))}
                 elif r.get('error'):
                     data = {'error': str(r.get('error'))}
+                else:
+                    data = {'error': str(r.get('message') or 'Error al emitir el comprobante')}
                 response = JsonResponse(data)
                 response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
                 return response

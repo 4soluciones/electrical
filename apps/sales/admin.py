@@ -48,6 +48,23 @@ class ProductStoreAdmin(admin.ModelAdmin):
 admin.site.register(models.Supplier)
 admin.site.register(models.ProductSupplier)
 admin.site.register(models.Client)
+
+
+class VoucherSerialAdmin(admin.ModelAdmin):
+    list_display = (
+        'full_serial_display', 'subsidiary', 'document_type', 'code',
+        'purpose', 'max_past_days', 'is_active', 'description',
+    )
+    list_filter = ('subsidiary', 'document_type', 'purpose', 'is_active')
+    list_editable = ('is_active',)
+    search_fields = ('code', 'description')
+
+    def full_serial_display(self, obj):
+        return obj.full_serial
+    full_serial_display.short_description = 'Serie'
+
+
+admin.site.register(models.VoucherSerial, VoucherSerialAdmin)
 # admin.site.register(models.LegalClient)
 # admin.site.register(models.NaturalClient)
 # admin.site.register(models.Kardex)
