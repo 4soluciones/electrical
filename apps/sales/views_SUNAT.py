@@ -891,7 +891,7 @@ def query_apis_net_dni_ruc(nro_doc, type_document):
         context = {
             'nombre': result.get("first_name"),
             'tipoDocumento': result.get("tipoDocumento"),
-            'numeroDocumento': result.get('numeroDocumento'),
+            'numeroDocumento': result.get('numero_documento'),
             'apellidoPaterno': result.get('first_last_name'),
             'apellidoMaterno': result.get('second_last_name'),
             'nombres': result.get('full_name'),
