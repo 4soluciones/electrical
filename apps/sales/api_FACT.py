@@ -17,6 +17,19 @@ tokens = {
 }
 
 
+def get_sale_emission_parts(order_obj):
+    register_date = order_obj.create_at
+    if register_date:
+        hour_date = register_date.strftime("%H:%M:%S")
+        formatdate = register_date.strftime("%Y-%m-%d")
+    else:
+        hour_date = "12:00:00"
+        formatdate = date.today().strftime("%Y-%m-%d")
+    if order_obj.issue_date:
+        formatdate = order_obj.issue_date.strftime("%Y-%m-%d")
+    return formatdate, hour_date
+
+
 def send_bill_4_fact(order_id, serial_suffix=None):  # FACTURA 4 FACT
     order_obj = Order.objects.get(id=int(order_id))
     serial = serial_suffix or order_obj.subsidiary_store.subsidiary.serial
@@ -27,16 +40,7 @@ def send_bill_4_fact(order_id, serial_suffix=None):  # FACTURA 4 FACT
     client_first_address = client_obj.clientaddress_set.first()
     client_address = str(client_first_address).replace('"', "'")
     client_document = client_obj.clienttype_set.filter(document_type_id='06').first()
-    register_date = order_obj.create_at
-    formatdate = register_date.strftime("%Y-%m-%d")
-    hour_date = register_date.strftime("%H:%M:%S")
-    if order_obj.issue_date and register_date:
-        try:
-            create_day = utc_to_local(register_date).date()
-        except Exception:
-            create_day = register_date.date()
-        if order_obj.issue_date < create_day:
-            formatdate = order_obj.issue_date.strftime("%Y-%m-%d")
+    formatdate, hour_date = get_sale_emission_parts(order_obj)
 
     items = []
     items_credit_graphql = []
@@ -130,7 +134,7 @@ def send_bill_4_fact(order_id, serial_suffix=None):  # FACTURA 4 FACT
                 numero: "{int(correlative)}",
                 fechaEmision: "{formatdate}",
                 horaEmision: "{hour_date}",
-                fechaVencimiento: "",
+                fechaVencimiento: "{formatdate}",
                 monedaId: 1,                
                 formaPagoId: {payment},
                 totalGravada: {float(sub_total)},
@@ -203,11 +207,7 @@ def send_receipt_4_fact(order_id, serial_suffix=None):  # BOLETA 4 FACT
     if client_obj.clientaddress_set.first():
         client_address = str(client_obj.clientaddress_set.first().address).replace('"', "'")
     client_document = client_obj.clienttype_set.filter(document_type_id='01').first()
-    register_date = utc_to_local(order_obj.create_at)
-    formatdate = register_date.strftime("%Y-%m-%d")
-    hour_date = register_date.strftime("%H:%M:%S")
-    if order_obj.issue_date and order_obj.issue_date < register_date.date():
-        formatdate = order_obj.issue_date.strftime("%Y-%m-%d")
+    formatdate, hour_date = get_sale_emission_parts(order_obj)
 
     items = []
     index = 1
@@ -271,7 +271,7 @@ def send_receipt_4_fact(order_id, serial_suffix=None):  # BOLETA 4 FACT
                     numero: "{int(correlative)}",
                     fechaEmision: "{formatdate}",
                     horaEmision: "{hour_date}",
-                    fechaVencimiento: "",
+                    fechaVencimiento: "{formatdate}",
                     monedaId: 1,                
                     formaPagoId: 1,
                     totalGravada: {float(sub_total)},

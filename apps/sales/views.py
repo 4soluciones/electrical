@@ -698,6 +698,7 @@ class SalesList(View):
         contexto['choices_payments'] = TransactionPayment._meta.get_field('type').choices
         contexto['electronic_invoice'] = letter
         contexto['series'] = series_set
+        contexto['can_use_past_serial'] = user_can_use_past_serial(user_obj)
         contexto['users'] = users_set
         contexto['current_user'] = user_obj
         contexto['user_in_list'] = users_set.filter(id=user_obj.id).exists()
@@ -6983,6 +6984,9 @@ def get_correlative_by_type(request):
 
     type_bill_document = request.GET.get('type_bill_document')
     posted_serial = request.GET.get('serial', '')
+    include_series = request.GET.get('include_series', '1') != '0'
+    can_use_past = user_can_use_past_serial(request.user)
+
     try:
         subsidiary = get_subsidiary_by_user(request.user)
     except Exception:
@@ -6993,21 +6997,33 @@ def get_correlative_by_type(request):
         return JsonResponse({'status': False, 'message': 'No se encontró la sede'}, status=400)
 
     today = timezone.localdate()
-    series_payload = serialize_voucher_serials(subsidiary, type_bill_document)
-    voucher_serial = resolve_voucher_serial(subsidiary, type_bill_document, posted_serial)
+    series_payload = []
+    voucher_serial = None
 
     if type_bill_document in ('F', 'B'):
+        serials = get_active_voucher_serials(
+            subsidiary, type_bill_document, include_past=can_use_past
+        )
+        voucher_serial = pick_voucher_serial(serials, type_bill_document, posted_serial)
+        if include_series:
+            series_payload = [serialize_voucher_serial(item) for item in serials]
+
         serial_suffix = voucher_serial.code if voucher_serial else subsidiary.serial
         new_serial = '{}{}'.format(type_bill_document, serial_suffix)
         doc_type = '1' if type_bill_document == 'F' else '2'
-        last_receipt = (
+
+        last_bill = (
             OrderBill.objects
             .filter(serial=new_serial, type=doc_type)
-            .order_by('n_receipt')
-            .last()
+            .select_related('order')
+            .order_by('-n_receipt')
+            .first()
         )
-        new_n_receipt = (last_receipt.n_receipt + 1) if last_receipt else 1
-        min_date, max_date, allows_past = get_issue_date_limits(voucher_serial, today)
+        new_n_receipt = (last_bill.n_receipt + 1) if last_bill else 1
+        last_issue = last_bill.order.issue_date if last_bill and last_bill.order else None
+        min_date, max_date, allows_past = get_issue_date_limits(
+            voucher_serial, today, last_issue_date=last_issue
+        )
         hint = ''
         if allows_past and voucher_serial:
             if min_date > max_date:
@@ -7051,6 +7067,7 @@ def get_correlative_by_type(request):
         'max_issue_date': max_date.strftime('%Y-%m-%d'),
         'issue_date_hint': hint,
         'max_past_days': voucher_serial.max_past_days if voucher_serial else 0,
+        'can_use_past_serial': can_use_past,
     })
 
 
@@ -7110,9 +7127,16 @@ def save_order(request):
         serial_suffix = subsidiary_obj.serial if subsidiary_obj else None
         voucher_serial_obj = None
         if voucher_type in ('F', 'B'):
-            voucher_serial_obj = resolve_voucher_serial(
-                subsidiary_obj, voucher_type, voucher_serial_full
+            can_use_past = user_can_use_past_serial(request.user)
+            serials = get_active_voucher_serials(
+                subsidiary_obj, voucher_type, include_past=can_use_past
             )
+            voucher_serial_obj = pick_voucher_serial(serials, voucher_type, voucher_serial_full)
+            if voucher_serial_obj and voucher_serial_obj.allows_past_date and not can_use_past:
+                return JsonResponse(
+                    {'error': 'No tiene permisos para usar la serie de fecha pasada'},
+                    status=HTTPStatus.FORBIDDEN
+                )
             if voucher_serial_obj:
                 serial_suffix = voucher_serial_obj.code
             is_valid_date, date_error = validate_voucher_issue_date(

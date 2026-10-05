@@ -416,6 +416,14 @@ def qr_code(table):
     return drawing
 
 
+def format_order_issue_date(order_obj, fmt="%d-%m-%Y"):
+    if order_obj.issue_date:
+        return order_obj.issue_date.strftime(fmt)
+    if order_obj.create_at:
+        return order_obj.create_at.strftime(fmt)
+    return '-'
+
+
 def print_ticket_order_sales(request, pk=None, t=None):  # Ticket
 
     _wt = 3.14 * inch - 4.5 * 0.05 * inch
@@ -433,9 +441,10 @@ def print_ticket_order_sales(request, pk=None, t=None):  # Ticket
     _title2 = Paragraph(tbh_business_address.replace("\n", "<br />"), styles["Center-text"])
     _title3 = Paragraph('RUC: ' + tbh_ruc.replace("\n", "<br />"), styles["Center-text"])
 
-    date = order_obj.update_at
     _format_time = datetime.now().strftime('%H:%M:%S')
-    _format_date = date.strftime("%d/%m/%Y")
+    if order_obj.create_at:
+        _format_time = order_obj.create_at.strftime('%H:%M:%S')
+    _format_date = format_order_issue_date(order_obj, "%d/%m/%Y")
 
     if t == 0:
         if order_obj.type == 'T':
@@ -1306,7 +1315,7 @@ def print_order_bill(request, pk=None, check=None):
             ]
             credit_list.setStyle(TableStyle(style_credit))
     tbl2_col2 = [
-        ['Fecha Emision: ', Paragraph(order_obj.create_at.strftime("%d-%m-%Y"), styles['Left_Square'])],
+        ['Fecha Emision: ', Paragraph(format_order_issue_date(order_obj), styles['Left_Square'])],
         ['Vendedor: ', Paragraph(order_obj.user.username.upper(), styles['Left_Square'])],
         # ['Moneda: ', 'coin'],
         ['Cond. Venta: ', Paragraph(str(payment.upper()), styles['Left_Square'])],

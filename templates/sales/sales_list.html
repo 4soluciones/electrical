@@ -2333,7 +2333,7 @@
         });
 
         $(document).on('change', '#type_bill_document', function (e) {
-            fetchCorrelativeByType('');
+            fetchCorrelativeByType('', true);
         });
 
         let loadingVoucherSerial = false;
@@ -2343,7 +2343,7 @@
             }
             let selectedSerial = $(this).val();
             if (selectedSerial) {
-                fetchCorrelativeByType(selectedSerial);
+                fetchCorrelativeByType(selectedSerial, false);
             }
         });
 
@@ -2402,7 +2402,7 @@
             }
         }
 
-        function fetchCorrelativeByType(serial) {
+        function fetchCorrelativeByType(serial, includeSeries) {
             let type_bill_document = $('#type_bill_document').val();
             if (!type_bill_document || type_bill_document === '0') {
                 return;
@@ -2412,16 +2412,19 @@
                 method: 'GET',
                 data: {
                     'type_bill_document': type_bill_document,
-                    'serial': serial || ''
+                    'serial': serial || '',
+                    'include_series': includeSeries === false ? '0' : '1'
                 },
                 success: function (data) {
                     if (!data.status) {
                         toastr.warning(data.message || 'No se pudo obtener el correlativo');
                         return;
                     }
-                    populateSerialOptions(data.series, data.serial);
+                    if (includeSeries !== false && data.series) {
+                        populateSerialOptions(data.series, data.serial);
+                    }
                     $('#correlative').val(data.correlative);
-                    if (data.serial) {
+                    if (data.serial && includeSeries !== false) {
                         $('#id_serial').val(data.serial);
                     }
                     applyIssueDateConstraints(data);

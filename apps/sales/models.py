@@ -817,13 +817,15 @@ def get_last_issue_date_for_serial(full_serial, sunat_type):
     return None
 
 
-def get_issue_date_limits(voucher_serial, today=None):
+def get_issue_date_limits(voucher_serial, today=None, last_issue_date=None):
     today = today or timezone.localdate()
     if voucher_serial and voucher_serial.allows_past_date:
         max_days = voucher_serial.max_past_days or (3 if voucher_serial.document_type == 'F' else 5)
         min_date = today - timedelta(days=max_days)
         max_date = today - timedelta(days=1)
-        last_issue = get_last_issue_date_for_serial(voucher_serial.full_serial, voucher_serial.sunat_type)
+        last_issue = last_issue_date
+        if last_issue is None:
+            last_issue = get_last_issue_date_for_serial(voucher_serial.full_serial, voucher_serial.sunat_type)
         if last_issue and last_issue > min_date:
             min_date = last_issue
         return min_date, max_date, True
@@ -865,25 +867,66 @@ def validate_voucher_issue_date(document_type, voucher_serial, issue_date_value,
     return True, None
 
 
-def serialize_voucher_serials(subsidiary, document_type):
+def user_can_use_past_serial(user):
+    if not user or not getattr(user, 'is_authenticated', False):
+        return False
+    if getattr(user, 'is_superuser', False):
+        return True
+    return user.groups.filter(name__iexact='admin').exists()
+
+
+def serialize_voucher_serial(item):
+    return {
+        'id': item.id,
+        'serial': item.full_serial,
+        'code': item.code,
+        'purpose': item.purpose,
+        'label': item.full_serial,
+        'allows_past_date': item.allows_past_date,
+        'max_past_days': item.max_past_days,
+        'description': item.description or '',
+    }
+
+
+def get_active_voucher_serials(subsidiary, document_type, include_past=True):
     if document_type not in ('F', 'B') or subsidiary is None:
         return []
-    ensure_default_voucher_serials(subsidiary)
-    series = []
-    for item in VoucherSerial.objects.filter(
-        subsidiary=subsidiary, document_type=document_type, is_active=True
-    ).order_by('purpose', 'code'):
-        series.append({
-            'id': item.id,
-            'serial': item.full_serial,
-            'code': item.code,
-            'purpose': item.purpose,
-            'label': item.full_serial,
-            'allows_past_date': item.allows_past_date,
-            'max_past_days': item.max_past_days,
-            'description': item.description or '',
-        })
-    return series
+
+    def _query():
+        qs = VoucherSerial.objects.filter(
+            subsidiary=subsidiary,
+            document_type=document_type,
+            is_active=True,
+        )
+        if not include_past:
+            qs = qs.filter(purpose=VoucherSerial.PURPOSE_NORMAL)
+        return list(qs.order_by('purpose', 'code'))
+
+    serials = _query()
+    if not serials:
+        ensure_default_voucher_serials(subsidiary)
+        serials = _query()
+    return serials
+
+
+def pick_voucher_serial(serials, document_type, posted_serial=''):
+    posted_serial = (posted_serial or '').strip().upper()
+    if posted_serial:
+        code = posted_serial[1:] if posted_serial.startswith(document_type) else posted_serial
+        for item in serials:
+            if item.code == code:
+                return item
+    for item in serials:
+        if item.purpose == VoucherSerial.PURPOSE_NORMAL:
+            return item
+    return serials[0] if serials else None
+
+
+def serialize_voucher_serials(subsidiary, document_type, include_past=True):
+    return [
+        serialize_voucher_serial(item)
+        for item in get_active_voucher_serials(subsidiary, document_type, include_past=include_past)
+    ]
 
 
 class ProductRecipe(models.Model):
