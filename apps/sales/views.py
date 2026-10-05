@@ -4025,83 +4025,38 @@ def get_name_business(request):
         else:
             if type_document == '01':
                 type_name = 'DNI'
-                r = query_api_facturacioncloud(nro_document, type_name)
-                name = r.get('Nombre')
-                paternal_name = r.get('Paterno')
-                maternal_name = r.get('Materno')
+                r = query_apis_net_dni_ruc(nro_document, type_name)
+                name = r.get('nombre')
+                paternal_name = r.get('apellidoPaterno')
+                maternal_name = r.get('apellidoMaterno')
 
-                if r.get('statusMessage') != 'SERVICIO SE VENCIO' and r.get('errors') is None:
+                if paternal_name is not None and len(paternal_name) > 0:
 
-                    if paternal_name is not None and len(paternal_name) > 0:
-                        result = name + ' ' + paternal_name + ' ' + maternal_name
+                    result = name + ' ' + paternal_name + ' ' + maternal_name
 
-                        if len(result.strip()) != 0:
-                            client_obj = Client(
-                                names=result,
-                            )
-                            client_obj.save()
+                    if len(result.strip()) != 0:
+                        client_obj = Client(
+                            names=result,
+                        )
+                        client_obj.save()
 
-                            client_type_obj = ClientType(
-                                document_number=nro_document,
-                                client=client_obj,
-                                document_type_id=type_document
-                            )
-                            client_type_obj.save()
-                            search_client_associate = ClientAssociate.objects.filter(subsidiary=subsidiary_obj,
-                                                                                     client=client_obj)
-                            if search_client_associate.count() == 0:
-                                client_associate = {
-                                    'client': client_obj,
-                                    'subsidiary': subsidiary_obj,
-                                }
-                                client_associate_obj = ClientAssociate.objects.create(**client_associate)
-                                client_associate_obj.save()
-                        else:
-                            data = {'error': 'NO EXISTE DNI. REGISTRE MANUALMENTE'}
-                            response = JsonResponse(data)
-                            response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
-                            return response
-
-                else:
-                    r = query_apis_net_dni_ruc(nro_document, type_name)
-                    name = r.get('nombres')
-                    paternal_name = r.get('apellidoPaterno')
-                    maternal_name = r.get('apellidoMaterno')
-
-                    if paternal_name is not None and len(paternal_name) > 0:
-
-                        result = name + ' ' + paternal_name + ' ' + maternal_name
-
-                        if len(result.strip()) != 0:
-                            client_obj = Client(
-                                names=result,
-                            )
-                            client_obj.save()
-
-                            client_type_obj = ClientType(
-                                document_number=nro_document,
-                                client=client_obj,
-                                document_type_id=type_document
-                            )
-                            client_type_obj.save()
-                            search_client_associate = ClientAssociate.objects.filter(subsidiary=subsidiary_obj,
-                                                                                     client=client_obj)
-                            if search_client_associate.count() == 0:
-                                client_associate = {
-                                    'client': client_obj,
-                                    'subsidiary': subsidiary_obj,
-                                }
-                                client_associate_obj = ClientAssociate.objects.create(**client_associate)
-                                client_associate_obj.save()
-                        else:
-                            data = {'error': 'NO EXISTE DNI. REGISTRE MANUALMENTE'}
-                            response = JsonResponse(data)
-                            response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
-                            return response
-
+                        client_type_obj = ClientType(
+                            document_number=nro_document,
+                            client=client_obj,
+                            document_type_id=type_document
+                        )
+                        client_type_obj.save()
+                        search_client_associate = ClientAssociate.objects.filter(subsidiary=subsidiary_obj,
+                                                                                 client=client_obj)
+                        if search_client_associate.count() == 0:
+                            client_associate = {
+                                'client': client_obj,
+                                'subsidiary': subsidiary_obj,
+                            }
+                            client_associate_obj = ClientAssociate.objects.create(**client_associate)
+                            client_associate_obj.save()
                     else:
-                        data = {
-                            'error': 'PROBLEMAS CON LA CONSULTA A LA RENIEC, FAVOR DE INTENTAR MAS TARDE O REGISTRE MANUALMENTE'}
+                        data = {'error': 'NO EXISTE DNI. REGISTRE MANUALMENTE'}
                         response = JsonResponse(data)
                         response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
                         return response
@@ -4113,7 +4068,7 @@ def get_name_business(request):
 
                 if r.get('numeroDocumento') == nro_document:
 
-                    business_name = r.get('nombre')
+                    business_name = r.get('razonSocial')
                     address_business = r.get('direccion')
                     result = business_name
                     address = address_business
@@ -4144,49 +4099,12 @@ def get_name_business(request):
                         }
                         client_associate_obj = ClientAssociate.objects.create(**client_associate)
                         client_associate_obj.save()
+
                 else:
-                    r = query_api_facturacioncloud(nro_document, type_name)
-
-                    if r.get('statusMessage') != 'SERVICIO SE VENCIO' and r.get('errors') is None:
-
-                        if r.get('ruc') == nro_document:
-
-                            business_name = r.get('razonSocial')
-                            address_business = r.get('direccion')
-                            result = business_name
-                            address = address_business
-
-                            client_obj = Client(
-                                names=result,
-                            )
-                            client_obj.save()
-
-                            client_type_obj = ClientType(
-                                document_number=nro_document,
-                                client=client_obj,
-                                document_type_id=type_document
-                            )
-                            client_type_obj.save()
-
-                            client_address_obj = ClientAddress(
-                                address=address,
-                                client=client_obj
-                            )
-                            client_address_obj.save()
-                            search_client_associate = ClientAssociate.objects.filter(subsidiary=subsidiary_obj,
-                                                                                     client=client_obj)
-                            if search_client_associate.count() == 0:
-                                client_associate = {
-                                    'client': client_obj,
-                                    'subsidiary': subsidiary_obj,
-                                }
-                                client_associate_obj = ClientAssociate.objects.create(**client_associate)
-                                client_associate_obj.save()
-                    else:
-                        data = {'error': 'NO EXISTE RUC. REGISTRE MANUAL O CORREGIRLO'}
-                        response = JsonResponse(data)
-                        response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
-                        return response
+                    data = {'error': 'NO EXISTE RUC. REGISTRE MANUAL O CORREGIRLO'}
+                    response = JsonResponse(data)
+                    response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+                    return response
 
         return JsonResponse({'pk': client_obj.id, 'result': result, 'address': address, 'age': age},
                             status=HTTPStatus.OK)

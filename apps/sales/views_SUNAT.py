@@ -873,14 +873,15 @@ def query_apis_net_dni_ruc(nro_doc, type_document):
     context = {}
     url = {}
     if type_document == 'DNI':
-        url = 'https://api.apis.net.pe/v1/dni?numero=' + nro_doc
+        # url = 'https://api.apis.net.pe/v1/dni?numero=' + nro_doc
+        url = 'https://api.decolecta.com/v1/reniec/dni?numero=' + nro_doc
 
     if type_document == 'RUC':
-        url = 'https://api.apis.net.pe/v1/ruc?numero=' + nro_doc
+        url = 'https://api.decolecta.com/v1/sunat/ruc?numero=' + nro_doc
 
     headers = {
         "Content-Type": 'application/json',
-        "Authorization": 'Bearer apis-token-1685.amWUXQRSlBEjqsVJYTy0zH-jDSGL5Mmy'
+        "Authorization": 'Bearer sk_9208.RYV679GaMxTuXFUiSElimKi0YSPYCgKD'
     }
     response = requests.get(url, headers=headers)
 
@@ -888,13 +889,21 @@ def query_apis_net_dni_ruc(nro_doc, type_document):
         result = response.json()
 
         context = {
-            'nombre': result.get("nombre"),
+            'nombre': result.get("first_name"),
             'tipoDocumento': result.get("tipoDocumento"),
             'numeroDocumento': result.get('numeroDocumento'),
-            'apellidoPaterno': result.get('apellidoPaterno'),
-            'apellidoMaterno': result.get('apellidoMaterno'),
-            'nombres': result.get('nombres'),
+            'apellidoPaterno': result.get('first_last_name'),
+            'apellidoMaterno': result.get('second_last_name'),
+            'nombres': result.get('full_name'),
             'direccion': result.get('direccion'),
+            'razonSocial': result.get('razon_social'),
+            # 'nombre': result.get("nombre"),
+            # 'tipoDocumento': result.get("tipoDocumento"),
+            # 'numeroDocumento': result.get('numeroDocumento'),
+            # 'apellidoPaterno': result.get('apellidoPaterno'),
+            # 'apellidoMaterno': result.get('apellidoMaterno'),
+            # 'nombres': result.get('nombres'),
+            # 'direccion': result.get('direccion'),
         }
     else:
         result = response.status_code
