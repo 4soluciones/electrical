@@ -233,7 +233,7 @@ class Guide(models.Model):
         ('O', 'Otro'))
     MOTIVE_CHOICES = (('01', 'VENTA'), ('14', 'VENTA SUJETA A CONFIRMACION DEL COMPRADOR'), ('02', 'COMPRA'),
                       ('04', 'TRASLADO ENTRE ESTABLECIMIENTOS DE LA MISMA EMPRESA'),
-                      ('18', 'TRASLADO EMISOR ITINERANTE CP'),
+                      ('18', 'TRASLADO EMISOR ITINERANTE CP'), ('06', 'DEVOLUCION'),
                       ('08', 'IMPORTACION'), ('09', 'EXPORTACION'), ('13', 'OTROS'),)
     MODALITY_TRANSPORT_CHOICES = (('1', 'PUBLICO'), ('2', 'PRIVADO'))
     id = models.AutoField(primary_key=True)
