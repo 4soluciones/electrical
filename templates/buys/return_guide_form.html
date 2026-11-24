@@ -1,0 +1,874 @@
+{% extends 'home.html' %}
+
+{% block title %}Nueva guía de remisión por devolución{% endblock title %}
+
+{% block body %}
+    {{ preset|json_script:"return-guide-preset" }}
+    <style>
+        .rg-shell {
+            width: min(100%, calc((300% + 1140px) / 4));
+            margin: 0.35rem auto 0;
+            padding: 0 0.35rem 3.4rem;
+            color: #1e2a36;
+        }
+        .rg-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            background: #024a82;
+            border-radius: 10px;
+            padding: 0.55rem 0.85rem;
+            margin-bottom: 0.55rem;
+        }
+        .rg-top h1 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin: 0;
+            color: #ffffff !important;
+        }
+        .rg-top p {
+            margin: 0;
+            font-size: 0.78rem;
+            color: #e8f4ff !important;
+        }
+        .rg-card {
+            background: #fff;
+            border: 1px solid #e4edf4;
+            border-radius: 10px;
+            margin-bottom: 0.55rem;
+        }
+        .rg-card-body { padding: 0.55rem 0.7rem 0.35rem; }
+        .rg-block { margin-bottom: 0.35rem; }
+        .rg-block-title {
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: #035ca0;
+            margin: 0 0 0.28rem;
+            padding-bottom: 0.12rem;
+            border-bottom: 1px solid #e8f0f6;
+        }
+        .rg-label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #5b7082;
+            margin-bottom: 0.12rem;
+        }
+        .rg-shell .form-group { margin-bottom: 0.35rem; }
+        .rg-shell .form-control,
+        .rg-shell .form-control-sm { font-size: 0.95rem; }
+        .rg-origin-line {
+            background: #f4f8fb;
+            border: 1px dashed #c5d7e6;
+            border-radius: 8px;
+            padding: 0.28rem 0.55rem;
+            font-size: 0.9rem;
+            color: #355066;
+            margin-bottom: 0.4rem;
+        }
+        .rg-origin-line strong { color: #16324a; }
+        .rg-table { margin-bottom: 0; font-size: 0.95rem; }
+        .rg-table thead th {
+            background: #f3f7fb;
+            color: #355066;
+            font-size: 0.8rem;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            border-top: 0;
+            padding: 0.35rem 0.4rem;
+            white-space: nowrap;
+        }
+        .rg-table td { padding: 0.28rem 0.35rem; vertical-align: middle; }
+        .rg-finder { display: flex; gap: 0.3rem; align-items: center; position: relative; }
+        .rg-finder .search-type-select {
+            width: 132px;
+            flex: 0 0 132px;
+            height: 31px;
+            padding: 0.15rem 0.35rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 6px;
+        }
+        .rg-finder .product-search-input { height: 31px; min-width: 0; }
+        .rg-drop {
+            display: none;
+            position: fixed;
+            z-index: 10050;
+            background: #fff;
+            border: 1px solid #d7e3ee;
+            border-radius: 8px;
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
+            max-height: 240px;
+            overflow: auto;
+        }
+        .rg-result {
+            display: block;
+            width: 100%;
+            text-align: left;
+            border: 0;
+            border-bottom: 1px solid #f0f4f8;
+            background: #fff;
+            padding: 0.4rem 0.6rem;
+        }
+        .rg-result:hover, .rg-result.active { background: #d9ecf8; }
+        .rg-result strong { display: block; color: #173246; font-size: 0.82rem; }
+        .rg-result span { color: #607284; font-size: 0.75rem; }
+        .rg-footer {
+            position: sticky;
+            bottom: 0;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.97);
+            border: 1px solid #e4edf4;
+            border-radius: 10px;
+            padding: 0.4rem 0.65rem;
+        }
+        .select2-container { width: 100% !important; }
+        .select2-container--default .select2-selection--single {
+            height: 31px;
+            border: 1px solid #ced4da;
+            border-radius: 0.2rem;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 29px;
+            font-size: 0.95rem;
+            padding-left: 0.45rem;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow { height: 29px; }
+        .rg-card.rg-detail { overflow: visible; }
+        @media (max-width: 767.98px) {
+            .rg-shell { padding: 0 0.7rem 3.6rem; }
+            .rg-top { align-items: flex-start; flex-direction: column; }
+            .rg-finder { flex-wrap: wrap; }
+            .rg-finder .search-type-select { width: 100%; flex-basis: 100%; }
+            .rg-drop { left: 8px; right: 8px; width: auto; }
+            .rg-footer { flex-direction: column; align-items: stretch; }
+            .rg-footer .btn { width: 100%; }
+        }
+    </style>
+
+    <div class="rg-shell roboto-condensed-regular">
+        <div class="rg-top">
+            <div>
+                <h1>Guía de remisión por devolución</h1>
+                <p>Motivo fijo: devolución. La partida es la dirección de la empresa.</p>
+            </div>
+            <a href="{% url 'buys:return_guide_list' %}" class="btn btn-sm btn-light">Ver emitidas</a>
+        </div>
+
+        {% if preset_error %}
+            <div class="alert alert-warning py-2 mb-2">{{ preset_error }}</div>
+        {% endif %}
+        {% if not origin_ubigeo or not origin_address %}
+            <div class="alert alert-danger py-2 mb-2">
+                La sede no tiene dirección o ubigeo de origen. Configúrelos antes de emitir.
+            </div>
+        {% endif %}
+
+        <section class="rg-card">
+            <div class="rg-card-body">
+                <div class="rg-origin-line">
+                    Partida: <strong>{{ company_name|default:"Empresa" }}</strong>
+                    · RUC {{ company_ruc|default:"-" }}
+                    · {{ origin_ubigeo|default:"Sin ubigeo" }}{% if origin_district %} {{ origin_district }}{% endif %}
+                    · {{ origin_address|default:"Sin dirección" }}
+                </div>
+
+                <div class="rg-block">
+                    <div class="rg-block-title">Destinatario</div>
+                    <div class="form-row">
+                        <div class="form-group col-lg-4 col-md-7">
+                            <label class="rg-label" for="supplier">Proveedor</label>
+                            <select id="supplier" class="form-control form-control-sm">
+                                <option value="">Buscar por nombre o RUC</option>
+                                {% for supplier in suppliers %}
+                                    <option value="{{ supplier.id }}"
+                                            data-ruc="{{ supplier.ruc|default:'' }}"
+                                            data-name="{{ supplier.business_name|default:supplier.name }}"
+                                            data-address="{{ supplier.address|default:'' }}">
+                                        {{ supplier.ruc|default:"SIN RUC" }} — {{ supplier.business_name|default:supplier.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group col-lg-2 col-md-5">
+                            <label class="rg-label" for="supplier-ruc">RUC</label>
+                            <input id="supplier-ruc" class="form-control form-control-sm" type="text" readonly>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-lg-4 col-md-5">
+                            <label class="rg-label" for="destiny">Ubigeo destino</label>
+                            <select id="destiny" class="form-control form-control-sm">
+                                <option value="">Seleccione distrito</option>
+                                {% for district in districts %}
+                                    <option value="{{ district.id }}">{{ district.id }} — {{ district.description }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group col-lg-8 col-md-7">
+                            <label class="rg-label" for="destiny-address">Dirección de destino</label>
+                            <input id="destiny-address" class="form-control form-control-sm" type="text" maxlength="200">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rg-block">
+                    <div class="rg-block-title">Traslado</div>
+                    <div class="form-row">
+                        <div class="form-group col-md-2 col-6">
+                            <label class="rg-label" for="issue">Emisión</label>
+                            <input id="issue" class="form-control form-control-sm" type="date" value="{{ date_now }}">
+                        </div>
+                        <div class="form-group col-md-2 col-6">
+                            <label class="rg-label" for="transfer">Traslado</label>
+                            <input id="transfer" class="form-control form-control-sm" type="date" value="{{ date_now }}">
+                        </div>
+                        <div class="form-group col-md-2 col-6">
+                            <label class="rg-label">Motivo</label>
+                            <input class="form-control form-control-sm" type="text" value="DEVOLUCIÓN" readonly>
+                        </div>
+                        <div class="form-group col-md-2 col-6">
+                            <label class="rg-label" for="modality">Modalidad</label>
+                            <select id="modality" class="form-control form-control-sm">
+                                <option value="">Seleccione</option>
+                                {% for code, label in modalities %}
+                                    <option value="{{ code }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group col-md-2 col-6">
+                            <label class="rg-label" for="weight">Peso (KGM)</label>
+                            <input id="weight" class="form-control form-control-sm" type="number" min="0.01" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="form-group col-md-2 col-6">
+                            <label class="rg-label" for="lumps">Bultos</label>
+                            <input id="lumps" class="form-control form-control-sm" type="number" min="1" step="1" placeholder="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rg-block">
+                    <div class="rg-block-title">Transporte <span class="text-muted font-weight-normal" id="transport-hint"></span></div>
+                    <div class="form-row">
+                        <div class="form-group col-md-2 col-6">
+                            <label class="rg-label" for="carrier-document">Doc. transportista</label>
+                            <input id="carrier-document" class="form-control form-control-sm" type="text" maxlength="11" placeholder="Ingrese el RUC y presione enter">
+                        </div>
+                        <div class="form-group col-md-4 col-6">
+                            <label class="rg-label" for="carrier-names">Razón social</label>
+                            <input id="carrier-names" class="form-control form-control-sm" type="text" maxlength="200" placeholder="Enter para consultar">
+                        </div>
+                        <div class="form-group col-md-3 col-6">
+                            <label class="rg-label" for="register-mtc">Registro MTC</label>
+                            <input id="register-mtc" class="form-control form-control-sm" type="text" maxlength="200">
+                        </div>
+                        <div class="form-group col-md-3 col-6">
+                            <label class="rg-label" for="truck">Placa</label>
+                            <input id="truck" class="form-control form-control-sm" type="text" maxlength="50" placeholder="ABC-123">
+                        </div>
+                        <div class="form-group col-md-3 col-6">
+                            <label class="rg-label" for="driver-names">Nombres</label>
+                            <input id="driver-names" class="form-control form-control-sm" type="text" maxlength="100">
+                        </div>
+                        <div class="form-group col-md-3 col-6">
+                            <label class="rg-label" for="driver-lastname">Apellidos</label>
+                            <input id="driver-lastname" class="form-control form-control-sm" type="text" maxlength="100">
+                        </div>
+                        <div class="form-group col-md-3 col-6">
+                            <label class="rg-label" for="driver-dni">DNI</label>
+                            <input id="driver-dni" class="form-control form-control-sm" type="text" maxlength="15">
+                        </div>
+                        <div class="form-group col-md-3 col-6">
+                            <label class="rg-label" for="driver-license">Licencia</label>
+                            <input id="driver-license" class="form-control form-control-sm" type="text" maxlength="15">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rg-block mb-1">
+                    <div class="rg-block-title">Documento y observación</div>
+                    <div class="form-row">
+                        <div class="form-group col-md-2 col-6">
+                            <label class="rg-label" for="related-type">Tipo</label>
+                            <select id="related-type" class="form-control form-control-sm">
+                                {% for code, label in document_types %}
+                                    <option value="{{ code }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group col-md-2 col-6">
+                            <label class="rg-label" for="related-serial">Serie</label>
+                            <input id="related-serial" class="form-control form-control-sm" type="text" maxlength="10" placeholder="F001">
+                        </div>
+                        <div class="form-group col-md-2 col-6">
+                            <label class="rg-label" for="related-number">Número</label>
+                            <input id="related-number" class="form-control form-control-sm" type="text" maxlength="20">
+                        </div>
+                        <div class="form-group col-md-6 col-12">
+                            <label class="rg-label" for="observation">Observación</label>
+                            <input id="observation" class="form-control form-control-sm" type="text" maxlength="500" placeholder="Detalle de la devolución">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="rg-card rg-detail">
+            <div class="rg-card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <div class="rg-block-title mb-0 border-0 pb-0">Detalle de productos</div>
+                    <button type="button" id="btn-add-product" class="btn btn-warning btn-sm">
+                        <i class="fas fa-plus"></i> Agregar
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered rg-table">
+                        <thead>
+                        <tr class="text-center">
+                            <th style="width: 36px">Nº</th>
+                            <th>Descripción del artículo</th>
+                            <th style="width: 180px">Serie</th>
+                            <th style="width: 90px">Cantidad</th>
+                            <th style="width: 70px">UM</th>
+                            <th style="width: 42px"></th>
+                        </tr>
+                        </thead>
+                        <tbody id="details-table"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <div class="rg-footer">
+            <div class="text-muted small" id="purchase-note"></div>
+            <div class="text-right">
+                <a href="{% url 'buys:return_guide_list' %}" class="btn btn-sm btn-outline-secondary mr-1">Cancelar</a>
+                <button type="button" id="btn-emit" class="btn btn-sm btn-success px-3"
+                        {% if not origin_ubigeo or not origin_address %}disabled{% endif %}>
+                    <i class="fas fa-paper-plane mr-1"></i> Emitir y enviar a SUNAT
+                </button>
+            </div>
+        </div>
+    </div>
+{% endblock body %}
+
+{% block extrajs %}
+    <script>
+        const preset = JSON.parse(document.getElementById('return-guide-preset').textContent || '{}');
+        const csrfToken = '{{ csrf_token }}';
+        const searchUrl = "{% url 'buys:search_products_return_guide' %}";
+        let rowSeq = 0;
+        let searchTimer = null;
+        let sending = false;
+
+        const placeholders = {
+            all: 'Buscar producto...',
+            barcode: 'Código o código de barras...',
+            description: 'Nombre del producto...',
+            serial: 'Número de serie...'
+        };
+
+        function statusLabel(code) {
+            const names = {C: 'Comprado', V: 'Vendido', D: 'Devuelta', A: 'Anulado', P: 'Pendiente'};
+            return names[code] || '';
+        }
+
+        function renumber() {
+            $('#details-table tr.item-row').each(function (index) {
+                $(this).find('.item-num').text(index + 1);
+            });
+        }
+
+        function hideDrops(except) {
+            $('.rg-drop').each(function () {
+                if (!except || this !== except) {
+                    $(this).hide().empty().removeData('results');
+                }
+            });
+        }
+
+        function placeDrop($input, $drop) {
+            if (!$input.length || !$drop.length) {
+                return;
+            }
+            const rect = $input[0].getBoundingClientRect();
+            const available = window.innerHeight - rect.bottom - 16;
+            $drop.css({
+                top: (rect.bottom + 3) + 'px',
+                left: rect.left + 'px',
+                width: Math.max(rect.width, 280) + 'px',
+                maxHeight: Math.max(140, Math.min(240, available)) + 'px'
+            });
+        }
+
+        function markActive($drop) {
+            const index = parseInt($drop.attr('data-active') || '0', 10);
+            const $items = $drop.find('.rg-result');
+            $items.removeClass('active');
+            const $current = $items.eq(index);
+            if (!$current.length) {
+                return;
+            }
+            $current.addClass('active');
+            const box = $drop[0];
+            const item = $current[0];
+            if (item.offsetTop < box.scrollTop) {
+                box.scrollTop = item.offsetTop;
+            } else if (item.offsetTop + item.offsetHeight > box.scrollTop + box.clientHeight) {
+                box.scrollTop = item.offsetTop + item.offsetHeight - box.clientHeight;
+            }
+        }
+
+        function addRow(raw) {
+            raw = raw || {};
+            const index = ++rowSeq;
+            const productId = raw.product_id || raw.id || '';
+            const serial = String(raw.serial || '').trim();
+            const $row = $('<tr class="item-row">');
+            $row.attr('data-product', productId);
+            $row.attr('data-unit', raw.unit_id || '');
+            $row.attr('data-serial-lock', serial ? '1' : '0');
+
+            const $finder = $('<div class="rg-finder">');
+            const $type = $('<select class="form-control search-type-select">');
+            $type.html(
+                '<option value="all">🔍 Todo</option>' +
+                '<option value="barcode">📊 Código</option>' +
+                '<option value="description">📝 Descripción</option>' +
+                '<option value="serial">🔢 Serie</option>'
+            );
+            const $input = $('<input type="text" class="form-control form-control-sm product-search-input" autocomplete="off">');
+            $input.attr('placeholder', placeholders.all);
+            if (productId) {
+                $input.val(raw.name || '');
+            }
+            const $drop = $('<div class="rg-drop">');
+            $finder.append($type, $input, $drop);
+
+            const $serialCell = $('<td class="item-serial-cell">');
+            $serialCell.append(buildSerialField(serial, raw.serials || (serial ? [serial] : [])));
+            const $qty = $('<input type="number" class="form-control form-control-sm text-center item-qty" min="0.01" step="0.01">');
+            $qty.val(serial ? 1 : (raw.quantity || ''));
+            if (serial) {
+                $qty.prop('readonly', true);
+            }
+            const $unit = $('<input type="text" class="form-control form-control-sm text-center item-unit" readonly>');
+            $unit.val(raw.unit_name || '');
+            const price = raw.price != null ? raw.price : raw.price_purchase;
+            if (price != null && price !== '') {
+                $row.attr('data-price', price);
+            }
+            const $remove = $('<button type="button" class="btn btn-danger btn-sm item-remove" title="Quitar"><i class="fas fa-trash"></i></button>');
+
+            $row.append(
+                $('<td class="text-center item-num">'),
+                $('<td>').append($finder),
+                $serialCell,
+                $('<td>').append($qty),
+                $('<td>').append($unit),
+                $('<td class="text-center">').append($remove)
+            );
+            $('#details-table').append($row);
+            renumber();
+            return $row;
+        }
+
+        function uniqueSerials(serial, serials) {
+            const values = [];
+            const seen = {};
+            if (serial) {
+                values.push(String(serial).trim());
+                seen[String(serial).trim().toUpperCase()] = true;
+            }
+            (serials || []).forEach(function (item) {
+                const value = String(item || '').trim();
+                const key = value.toUpperCase();
+                if (value && !seen[key]) {
+                    seen[key] = true;
+                    values.push(value);
+                }
+            });
+            return values;
+        }
+
+        function buildSerialField(serial, serials) {
+            const values = uniqueSerials(serial, serials);
+            const locked = !!String(serial || '').trim() || values.length === 1;
+            const chosen = String(serial || '').trim() || (values.length === 1 ? values[0] : '');
+            if (values.length > 1 && !String(serial || '').trim()) {
+                const $select = $('<select class="form-control form-control-sm text-uppercase item-serial">');
+                $select.append($('<option value="">').text('Seleccione serie'));
+                values.forEach(function (value) {
+                    $select.append($('<option>').val(value).text(value));
+                });
+                return $select;
+            }
+            const $input = $('<input type="text" class="form-control form-control-sm text-uppercase item-serial" maxlength="100" placeholder="Serie">');
+            $input.val(chosen);
+            if (locked && chosen) {
+                $input.prop('readonly', true);
+            }
+            return $input;
+        }
+
+        function applyProduct($row, product) {
+            const serial = String(product.serial || '').trim();
+            const serials = uniqueSerials(serial, product.serials);
+            const chosen = serial || (serials.length === 1 ? serials[0] : '');
+            if (chosen) {
+                let duplicated = false;
+                $('#details-table tr.item-row').each(function () {
+                    if (this !== $row[0] && String($(this).find('.item-serial').val() || '').trim().toUpperCase() === chosen.toUpperCase()) {
+                        duplicated = true;
+                    }
+                });
+                if (duplicated) {
+                    toastr.warning('La serie ' + chosen + ' ya está en el detalle.');
+                    return;
+                }
+            }
+            $row.attr('data-product', product.id || product.product_id);
+            $row.attr('data-unit', product.unit_id || '');
+            $row.attr('data-serial-lock', chosen ? '1' : '0');
+            const price = product.price != null ? product.price : product.price_purchase;
+            if (price != null && price !== '') {
+                $row.attr('data-price', price);
+            }
+            $row.find('.product-search-input').val(product.name || '');
+            $row.find('.item-unit').val(product.unit_name || '');
+            $row.find('.item-serial-cell').empty().append(buildSerialField(serial, product.serials));
+            const $qty = $row.find('.item-qty');
+            if (chosen) {
+                $qty.val(1).prop('readonly', true);
+            } else {
+                $qty.prop('readonly', false);
+                if (!$qty.val()) {
+                    $qty.val(1);
+                }
+            }
+            hideDrops();
+        }
+
+        function renderResults($input, $drop, products) {
+            $drop.empty().data('results', products || []);
+            if (!products.length) {
+                $drop.append($('<div class="p-2 text-muted small">').text('Sin resultados.'));
+                $drop.attr('data-active', '-1');
+            } else {
+                products.forEach(function (product, index) {
+                    const $btn = $('<button type="button" class="rg-result">');
+                    $btn.attr('data-index', index);
+                    $btn.append($('<strong>').text(product.name));
+                    const meta = [product.code, product.unit_name];
+                    if (product.serial) {
+                        meta.push('Serie ' + product.serial);
+                    }
+                    if (product.serial_status) {
+                        meta.push(statusLabel(product.serial_status));
+                    }
+                    $btn.append($('<span>').text(meta.filter(Boolean).join(' · ')));
+                    $drop.append($btn);
+                });
+                $drop.attr('data-active', '0');
+            }
+            placeDrop($input, $drop);
+            $drop.show();
+            markActive($drop);
+        }
+
+        function collectItems() {
+            const items = [];
+            let missing = false;
+            $('#details-table tr.item-row').each(function () {
+                const productId = $(this).attr('data-product');
+                const name = $(this).find('.product-search-input').val().trim();
+                if (!productId && !name) {
+                    return;
+                }
+                if (!productId) {
+                    missing = true;
+                    return;
+                }
+                items.push({
+                    product_id: productId,
+                    unit_id: $(this).attr('data-unit'),
+                    quantity: $(this).find('.item-qty').val(),
+                    price: $(this).attr('data-price') || 0,
+                    serial: $(this).find('.item-serial').val()
+                });
+            });
+            return {items: items, missing: missing};
+        }
+
+        $(function () {
+            $('#supplier').select2({
+                width: '100%',
+                placeholder: 'Buscar proveedor por nombre o RUC',
+                templateSelection: function (option) {
+                    if (!option.id) {
+                        return option.text;
+                    }
+                    return $(option.element).attr('data-name') || option.text;
+                }
+            });
+            $('#destiny').select2({width: '100%', placeholder: 'Buscar distrito'});
+
+            $('#supplier').on('change', function () {
+                const $option = $(this).find('option:selected');
+                $('#supplier-ruc').val($option.attr('data-ruc') || '');
+                $('#destiny-address').val($option.attr('data-address') || '');
+            });
+
+            $('#modality').on('change', function () {
+                const hint = $(this).val() === '2'
+                    ? '· Privado: placa, conductor, DNI y licencia'
+                    : ($(this).val() === '1' ? '· Público: documento y razón social del transportista' : '');
+                $('#transport-hint').text(hint);
+            });
+
+            $('#btn-add-product').on('click', function () {
+                addRow();
+                $('#details-table tr.item-row:last .product-search-input').focus();
+            });
+
+            $(document).on('change', '.search-type-select', function () {
+                const $row = $(this).closest('tr');
+                const type = $(this).val();
+                $row.attr('data-product', '').attr('data-unit', '').attr('data-serial-lock', '0').attr('data-price', '');
+                $row.find('.product-search-input').attr('placeholder', placeholders[type] || placeholders.all).val('');
+                $row.find('.item-serial-cell').empty().append(buildSerialField('', []));
+                $row.find('.item-qty, .item-unit').val('');
+                $row.find('.item-serial, .item-qty').prop('readonly', false);
+                $row.find('.rg-drop').hide().empty();
+            });
+
+            $(document).on('change', 'select.item-serial', function () {
+                const $row = $(this).closest('tr');
+                const value = String($(this).val() || '').trim();
+                if (!value) {
+                    $row.find('.item-qty').prop('readonly', false);
+                    return;
+                }
+                let duplicated = false;
+                $('#details-table tr.item-row').each(function () {
+                    if (this !== $row[0] && String($(this).find('.item-serial').val() || '').trim().toUpperCase() === value.toUpperCase()) {
+                        duplicated = true;
+                    }
+                });
+                if (duplicated) {
+                    toastr.warning('La serie ' + value + ' ya está en el detalle.');
+                    $(this).val('');
+                    return;
+                }
+                $row.find('.item-qty').val(1).prop('readonly', true);
+            });
+
+            $(document).on('input', '.product-search-input', function () {
+                const $input = $(this);
+                const $row = $input.closest('tr');
+                const $drop = $row.find('.rg-drop');
+                $row.attr('data-product', '').attr('data-unit', '');
+                const term = $input.val().trim();
+                const type = $row.find('.search-type-select').val();
+                clearTimeout(searchTimer);
+                if (term.length < 2) {
+                    $drop.hide().empty();
+                    return;
+                }
+                searchTimer = setTimeout(function () {
+                    $.getJSON(searchUrl, {term: term, type: type})
+                        .done(function (response) {
+                            hideDrops($drop[0]);
+                            renderResults($input, $drop, response.products || []);
+                        })
+                        .fail(function () { toastr.error('No se pudo buscar productos.'); });
+                }, 280);
+            });
+
+            $(document).on('keydown', '.product-search-input', function (event) {
+                const $input = $(this);
+                const $drop = $input.closest('.rg-finder').find('.rg-drop');
+                const results = $drop.data('results') || [];
+                if (!$drop.is(':visible') || !results.length) {
+                    return;
+                }
+                let index = parseInt($drop.attr('data-active') || '0', 10);
+                if (event.key === 'ArrowDown') {
+                    event.preventDefault();
+                    index = index >= results.length - 1 ? 0 : index + 1;
+                    $drop.attr('data-active', index);
+                    markActive($drop);
+                } else if (event.key === 'ArrowUp') {
+                    event.preventDefault();
+                    index = index <= 0 ? results.length - 1 : index - 1;
+                    $drop.attr('data-active', index);
+                    markActive($drop);
+                } else if (event.key === 'Enter') {
+                    event.preventDefault();
+                    if (index < 0) {
+                        index = 0;
+                    }
+                    if (results[index]) {
+                        applyProduct($input.closest('tr'), results[index]);
+                    }
+                } else if (event.key === 'Escape') {
+                    $drop.hide();
+                }
+            });
+
+            $(document).on('mousedown', '.rg-result', function (event) {
+                event.preventDefault();
+                const $drop = $(this).closest('.rg-drop');
+                const results = $drop.data('results') || [];
+                const product = results[parseInt($(this).attr('data-index'), 10)];
+                if (product) {
+                    applyProduct($drop.closest('tr'), product);
+                }
+            });
+
+            function repositionDrops() {
+                $('.rg-drop:visible').each(function () {
+                    placeDrop($(this).closest('.rg-finder').find('.product-search-input'), $(this));
+                });
+            }
+            $(window).on('resize', repositionDrops);
+            $('.page-content').on('scroll', repositionDrops);
+
+            $(document).on('click', '.item-remove', function () {
+                const $rows = $('#details-table tr.item-row');
+                if ($rows.length === 1) {
+                    const $row = $rows.first();
+                    $row.attr('data-product', '').attr('data-unit', '').attr('data-serial-lock', '0');
+                    $row.find('input').val('').prop('readonly', false);
+                    $row.find('.item-unit').prop('readonly', true);
+                    $row.find('.rg-drop').hide().empty();
+                    return;
+                }
+                $(this).closest('tr').remove();
+                renumber();
+            });
+
+            $(document).on('click', function (event) {
+                if (!$(event.target).closest('.rg-finder').length) {
+                    hideDrops();
+                }
+            });
+
+            $('#carrier-document').on('keypress', function (event) {
+                if (event.keyCode !== 13) {
+                    return;
+                }
+                event.preventDefault();
+                const number = $(this).val().trim();
+                if (!number) {
+                    return;
+                }
+                $.getJSON('/sales/get_name_business/', {
+                    nro_document: number,
+                    type: number.length === 11 ? '06' : '01'
+                }).done(function (response) {
+                    if (response.result) {
+                        $('#carrier-names').val(response.result).focus();
+                    } else {
+                        toastr.error(response.message || 'No se encontró el transportista.');
+                    }
+                }).fail(function () { toastr.error('No se pudo consultar el documento.'); });
+            });
+
+            if (preset.purchase_id) {
+                $('#purchase-note').text('Compra #' + preset.purchase_id + (preset.bill_number ? ' · ' + preset.bill_number : ''));
+            }
+            if (preset.supplier_id) {
+                $('#supplier').val(String(preset.supplier_id)).trigger('change');
+            }
+            if (preset.destiny_address) {
+                $('#destiny-address').val(preset.destiny_address);
+            }
+            if (preset.related_type) {
+                $('#related-type').val(preset.related_type);
+            }
+            if (preset.related_serial) {
+                $('#related-serial').val(preset.related_serial);
+            }
+            if (preset.related_number) {
+                $('#related-number').val(preset.related_number);
+            }
+            const presetItems = preset.items || [];
+            if (presetItems.length) {
+                presetItems.forEach(addRow);
+            } else {
+                addRow();
+            }
+
+            $('#btn-emit').on('click', function () {
+                if (sending) {
+                    return;
+                }
+                const collected = collectItems();
+                if (collected.missing) {
+                    toastr.warning('Seleccione el producto desde la lista de búsqueda.');
+                    return;
+                }
+                if (!collected.items.length) {
+                    toastr.warning('Agregue al menos un producto.');
+                    return;
+                }
+                const payload = {
+                    supplier_id: $('#supplier').val(),
+                    purchase_id: preset.purchase_id || null,
+                    issue: $('#issue').val(),
+                    transfer: $('#transfer').val(),
+                    destiny: $('#destiny').val(),
+                    destiny_address: $('#destiny-address').val(),
+                    modality: $('#modality').val(),
+                    weight: $('#weight').val(),
+                    lumps: $('#lumps').val(),
+                    observation: $('#observation').val(),
+                    carrier_document: $('#carrier-document').val(),
+                    carrier_names: $('#carrier-names').val(),
+                    register_mtc: $('#register-mtc').val(),
+                    truck: $('#truck').val(),
+                    driver_names: $('#driver-names').val(),
+                    driver_lastname: $('#driver-lastname').val(),
+                    driver_dni: $('#driver-dni').val(),
+                    driver_license: $('#driver-license').val(),
+                    related_type: $('#related-type').val(),
+                    related_serial: $('#related-serial').val(),
+                    related_number: $('#related-number').val(),
+                    items: collected.items
+                };
+                sending = true;
+                const $button = $(this).prop('disabled', true);
+                $button.html('<i class="fas fa-spinner fa-spin mr-1"></i> Enviando...');
+                $.ajax({
+                    url: "{% url 'buys:save_return_guide' %}",
+                    method: 'POST',
+                    data: JSON.stringify(payload),
+                    contentType: 'application/json; charset=UTF-8',
+                    headers: {'X-CSRFToken': csrfToken}
+                }).done(function (response) {
+                    if (response.success) {
+                        toastr.success((response.serie || '') + '-' + (response.numero || '') + ' ' + (response.message || 'Guía enviada.'));
+                        window.location.href = "{% url 'buys:return_guide_list' %}";
+                        return;
+                    }
+                    toastr.error(response.message || 'No se pudo emitir la guía.');
+                    sending = false;
+                    $button.prop('disabled', false).html('<i class="fas fa-paper-plane mr-1"></i> Emitir y enviar a SUNAT');
+                }).fail(function (xhr) {
+                    const message = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Ocurrió un problema al emitir la guía.';
+                    toastr.error(message);
+                    sending = false;
+                    $button.prop('disabled', false).html('<i class="fas fa-paper-plane mr-1"></i> Emitir y enviar a SUNAT');
+                });
+            });
+        });
+    </script>
+{% endblock extrajs %}

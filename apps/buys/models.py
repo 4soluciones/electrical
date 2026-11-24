@@ -312,3 +312,52 @@ class PurchaseReturnDetail(models.Model):
     class Meta:
         verbose_name = 'Detalle compra devolucion'
         verbose_name_plural = 'Detalles de compra devolucion'
+
+
+class ReturnGuide(models.Model):
+    STATUS_CHOICES = (('P', 'Pendiente'), ('E', 'Enviada'), ('R', 'Rechazada'))
+    DOCUMENT_TYPE_CHOICES = (
+        ('01', 'Factura'),
+        ('03', 'Boleta'),
+        ('09', 'Guía de remisión'),
+        ('00', 'Otro'),
+    )
+    id = models.AutoField(primary_key=True)
+    guide = models.OneToOneField(
+        'comercial.Guide', on_delete=models.CASCADE, related_name='return_guide')
+    supplier = models.ForeignKey(
+        Supplier, verbose_name='Proveedor', on_delete=models.PROTECT, related_name='return_guides')
+    purchase = models.ForeignKey(
+        Purchase, verbose_name='Compra origen', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='return_guides')
+    related_document_type = models.CharField(
+        'Tipo documento relacionado', max_length=2, choices=DOCUMENT_TYPE_CHOICES, default='01', blank=True)
+    related_document_serial = models.CharField('Serie documento relacionado', max_length=10, blank=True, default='')
+    related_document_number = models.CharField('Numero documento relacionado', max_length=20, blank=True, default='')
+    status = models.CharField('Estado SUNAT', max_length=1, choices=STATUS_CHOICES, default='P')
+    sunat_message = models.CharField('Respuesta SUNAT', max_length=500, blank=True, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return 'Devolucion {}'.format(self.id)
+
+    class Meta:
+        verbose_name = 'Guia de remision por devolucion'
+        verbose_name_plural = 'Guias de remision por devolucion'
+
+
+class ReturnGuideItem(models.Model):
+    id = models.AutoField(primary_key=True)
+    return_guide = models.ForeignKey(ReturnGuide, on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    unit = models.ForeignKey(Unit, on_delete=models.PROTECT)
+    quantity = models.DecimalField('Cantidad', max_digits=10, decimal_places=2, default=0)
+    price_unit = models.DecimalField('Precio unitario', max_digits=12, decimal_places=4, default=0)
+    serial_number = models.CharField('Serie', max_length=100, blank=True, default='')
+
+    def __str__(self):
+        return '{} x {}'.format(self.product, self.quantity)
+
+    class Meta:
+        verbose_name = 'Detalle de guia por devolucion'
+        verbose_name_plural = 'Detalles de guia por devolucion'

@@ -2,6 +2,12 @@ from django.urls import path
 from django.contrib.auth.decorators import login_required
 from apps.buys.views import *
 from apps.buys.views_PDF import print_requirement
+from apps.buys.views_return_guide import (
+    return_guide_list,
+    return_guide_form,
+    search_products_return_guide,
+    save_return_guide,
+)
 
 urlpatterns = [
     path('', login_required(Home.as_view()), name='home'),
@@ -54,6 +60,11 @@ urlpatterns = [
     # path('get_units_product/', get_units_product, name='get_units_product'),
     path('buy_list/', get_buy_list, name='buy_list'),
     path('buy_return/', get_buy_return, name='buy_return'),
+    path('return_guide/', login_required(return_guide_list), name='return_guide_list'),
+    path('return_guide/new/', login_required(return_guide_form), name='return_guide'),
+    path('return_guide/search_products/', login_required(search_products_return_guide),
+         name='search_products_return_guide'),
+    path('return_guide/save/', login_required(save_return_guide), name='save_return_guide'),
     path('report_buy_return/', get_report_buy_return, name='report_buy_return'),
     path('save_purchase_return/', save_purchase_return, name='save_purchase_return'),
     path('search_products_for_return/', search_products_for_return, name='search_products_for_return'),

@@ -607,9 +607,204 @@ def annul_invoice(order_id):
         return {"success": False, "message": "La respuesta no es un JSON válido"}
 
 
+def _guide_text(value):
+    text = '' if value is None else str(value)
+    return text.replace('\\', ' ').replace('"', "'").replace('\n', ' ').replace('\r', ' ').strip()
+
+
+DEVOLUCION_RUC_MESSAGE = (
+    'Para el motivo DEVOLUCIÓN el destinatario tiene que ser una empresa con RUC.'
+)
+
+
+def return_guide_recipient_error(document_number, document_type='6'):
+    """Motivo 06: SUNAT exige que el destinatario sea una empresa identificada con RUC."""
+    if str(document_type or '').zfill(2) != '06':
+        return DEVOLUCION_RUC_MESSAGE
+    ruc = ''.join(ch for ch in str(document_number or '') if ch.isdigit())
+    if len(ruc) != 11 or not ruc.startswith('20') or not _valid_company_ruc(ruc):
+        return DEVOLUCION_RUC_MESSAGE
+    return None
+
+
+def _valid_company_ruc(ruc):
+    factors = (5, 4, 3, 2, 7, 6, 5, 4, 3, 2)
+    total = sum(int(ruc[index]) * factors[index] for index in range(10))
+    check = 11 - (total % 11)
+    if check == 10:
+        check = 0
+    elif check == 11:
+        check = 1
+    return check == int(ruc[10])
+
+
+def _send_return_guide_fact(guide_obj, return_guide):
+    """Envia una guia de remision por devolucion con el mismo registro SUNAT de las guias de venta."""
+    supplier = return_guide.supplier
+    date = guide_obj.guide_date
+    date_transfer = guide_obj.guide_transfer
+    formatdate = date.strftime("%Y-%m-%d")
+    formatdate_hour = date.strftime("%H:%M")
+    formatdate_transfer = date_transfer.strftime("%Y-%m-%d")
+
+    client_names = _guide_text((supplier.business_name or supplier.name or '').upper())
+    client_document = _guide_text(supplier.ruc)
+    recipient_error = return_guide_recipient_error(client_document, '6')
+    if recipient_error:
+        return {"success": False, "message": recipient_error}
+    client_address = _guide_text(guide_obj.guide_destiny_address or supplier.address)
+    client_phone = _guide_text(supplier.phone)
+
+    items = []
+    for detail in return_guide.items.select_related('product', 'unit'):
+        quantity_sent = decimal.Decimal(detail.quantity or 0)
+        if quantity_sent <= 0:
+            continue
+        unit_price = decimal.Decimal(detail.price_unit or 0)
+        if unit_price <= 0:
+            product_detail = detail.product.productdetail_set.filter(is_enabled=True).first()
+            unit_price = decimal.Decimal(product_detail.price_purchase if product_detail else '0.01')
+        if unit_price <= 0:
+            unit_price = decimal.Decimal('0.01')
+        base_total = quantity_sent * unit_price
+        base_amount = base_total / decimal.Decimal('1.1800')
+        product_name = _guide_text(detail.product.name)
+        if detail.serial_number:
+            product_name = _guide_text('{} SERIE {}'.format(detail.product.name, detail.serial_number))
+        items.append({
+            "producto": product_name,
+            "cantidad": float(quantity_sent),
+            "precioBase": float(round(base_amount / quantity_sent, 6)),
+            "codigoSunat": "10000000",
+            "codigoProducto": _guide_text(detail.product.code or "0000"),
+            "codigoUnidad": "NIU",
+            "tipoIgvCodigo": "10",
+        })
+
+    if not items:
+        return {"success": False, "message": "La guia no tiene productos para enviar."}
+
+    items_graphql = ", ".join(
+        f"""{{
+               producto: "{item['producto']}",
+               cantidad: {item['cantidad']},
+               precioBase: {item['precioBase']},
+               codigoSunat: "{item['codigoSunat']}",
+               codigoProducto: "{item['codigoProducto']}",
+               codigoUnidad: "{item['codigoUnidad']}",
+               tipoIgvCodigo: "{item['tipoIgvCodigo']}"
+        }}"""
+        for item in items
+    )
+    items_graphql = f"[{items_graphql}]"
+
+    guide_mode = "01" if guide_obj.guide_modality_transport == "1" else "02"
+    related_date = formatdate
+    if return_guide.purchase_id and return_guide.purchase.purchase_date:
+        related_date = return_guide.purchase.purchase_date.strftime("%Y-%m-%d")
+
+    graphql_query = f"""
+    mutation RegisterGuide {{
+        registerGuide(
+            client: {{
+                razonSocialNombres: "{client_names}",
+                numeroDocumento: "{client_document}",
+                codigoTipoEntidad: 6,
+                clienteDireccion: "{client_address}",
+                clienteTelefono: "{client_phone}"
+            }},
+            guide: {{
+                serial: "{_guide_text(guide_obj.guide_serial)}",
+                number: "{guide_obj.guide_number}",
+                guideModeTransfer: "{guide_mode}",
+                guideReasonTransfer: "06",
+                note: "{_guide_text(guide_obj.observation)}",
+                emitDate: "{formatdate}",
+                emitHour: "{formatdate_hour}"
+            }},
+            transportation: {{
+                transferDate: "{formatdate_transfer}",
+                totalWeight: "{guide_obj.guide_weight}",
+                quantityPackages: "{guide_obj.guide_package}"
+            }},
+            points: {{
+                guideOriginSerial: "",
+                guideOriginAddress: "{_guide_text(guide_obj.guide_origin_address)}",
+                guideOriginDistrictId: "{_guide_text(guide_obj.guide_origin)}",
+                guideArrivalSerial: "",
+                guideArrivalAddress: "{_guide_text(guide_obj.guide_destiny_address)}",
+                guideArrivalDistrictId: "{_guide_text(guide_obj.guide_destiny)}"
+            }},
+            carrier: {{
+                transportationCompanyDocumentType: "6",
+                transportationCompanyDocumentNumber: "{_guide_text(guide_obj.guide_carrier_document)}",
+                transportationCompanyNames: "{_guide_text(guide_obj.guide_carrier_names)}",
+                transportationCompanyMtcRegistrationNumber: "{_guide_text(guide_obj.guide_register_mtc)}",
+                mainDriverDocumentNumber: "{_guide_text(guide_obj.guide_driver_dni)}",
+                mainDriverNames: "{_guide_text(guide_obj.guide_driver_full_name).upper()}",
+                mainDriverLicense: "{_guide_text(guide_obj.guide_driver_license).upper()}",
+                mainVehicleLicensePlate: "{_guide_text(guide_obj.guide_truck)}"
+            }},
+            items: {items_graphql},
+            relatedDocuments: {{
+                tipoDocumentoCodigo: "{_guide_text(return_guide.related_document_type or '01')}",
+                serie: "{_guide_text(return_guide.related_document_serial)}",
+                numero: "{_guide_text(return_guide.related_document_number)}",
+                fechaEmision: "{related_date}"
+            }}
+        ) {{
+            message
+            error
+            operationId
+        }}
+    }}
+    """
+
+    token = tokens.get("20603890214", "ID no encontrado")
+    headers = {
+        "Content-Type": "application/json",
+        "token": token
+    }
+
+    try:
+        response = requests.post(GRAPHQL_URL, json={"query": graphql_query}, headers=headers)
+        response.raise_for_status()
+        result = response.json()
+    except requests.exceptions.RequestException as exc:
+        return {"success": False, "message": "Error en la solicitud: {}".format(exc)}
+    except ValueError:
+        return {"success": False, "message": "La respuesta no es un JSON valido"}
+
+    if result.get("errors"):
+        first = result["errors"][0] if result["errors"] else {}
+        return {"success": False, "message": first.get("message") or "SUNAT rechazo el envio."}
+
+    data = result.get("data", {}).get("registerGuide") or {}
+    if data.get("error"):
+        return {
+            "success": False,
+            "message": data.get("message") or "SUNAT rechazo la guia.",
+            "error": data.get("error"),
+        }
+    return {
+        "success": True,
+        "message": data.get("message"),
+        "operationId": data.get("operationId"),
+        "serie": "G" + str(guide_obj.guide_serial or ""),
+        "numero": guide_obj.guide_number,
+    }
+
+
 def send_guide_fact(guide_id):
     guide_obj = Guide.objects.get(id=guide_id)
-    order_obj = Order.objects.get(guide=guide_obj)
+    order_obj = Order.objects.filter(guide=guide_obj).first()
+    if order_obj is None:
+        from apps.buys.models import ReturnGuide
+        return_guide = ReturnGuide.objects.filter(guide=guide_obj).select_related(
+            'supplier', 'purchase').prefetch_related('items__product', 'items__unit').first()
+        if return_guide is not None:
+            return _send_return_guide_fact(guide_obj, return_guide)
+        return {"success": False, "message": "La guia no tiene una orden asociada."}
     correlative = order_obj.orderbill.n_receipt
     date_transfer = guide_obj.guide_transfer
     date = guide_obj.guide_date
@@ -629,6 +824,11 @@ def send_guide_fact(guide_id):
         client_names = subsidiary_obj.business_name.upper()
         client_address = subsidiary_obj.address.upper()
         client_email = subsidiary_obj.email
+
+    if str(guide_obj.guide_motive) == '06':
+        recipient_error = return_guide_recipient_error(client_nro_document, client_type_document)
+        if recipient_error:
+            return {"success": False, "message": recipient_error}
 
     # Format dates
     formatdate = date.strftime("%Y-%m-%d")

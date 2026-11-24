@@ -71,7 +71,7 @@
                                 <span class="badge badge-pill badge-success px-3 py-1">{{ p.get_status_display }}</span>
                             </td>
                             <td class="p-1">
-                                <div class="d-flex justify-content-center align-items-center" style="gap: 0.35rem">
+                                <div class="d-flex flex-wrap justify-content-center align-items-center" style="gap: 0.35rem">
                                     <button type="button" class="btn btn-outline-info btn-sm btn-show-detail"
                                             pk="{{ p.id }}" title="Ver detalle de la compra">
                                         <i class="fas fa-sort-down fa-lg see-icon"></i> Detalle
@@ -80,6 +80,11 @@
                                             purchase="{{ p.id }}" title="Agregar series al producto">
                                         <i class="fas fa-qrcode"></i> Series
                                     </button>
+                                    <a class="btn btn-warning btn-sm"
+                                       href="{% url 'buys:return_guide' %}?purchase={{ p.id }}"
+                                       title="Emitir guía de remisión por devolución">
+                                        <i class="fas fa-file-export"></i> Devolución
+                                    </a>
                                 </div>
                             </td>
                         </tr>

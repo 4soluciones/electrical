@@ -1,0 +1,115 @@
+{% extends 'home.html' %}
+
+{% block title %}Guías de remisión por devolución{% endblock title %}
+
+{% block body %}
+    <style>
+        .rg-page { padding: 1.25rem 0 2rem; }
+        .rg-hero {
+            background: linear-gradient(135deg, #035ca0 0%, #0b7ec4 60%, #1493d8 100%);
+            border-radius: 16px;
+            color: #fff;
+            padding: 1.35rem 1.5rem;
+            box-shadow: 0 10px 28px rgba(3, 92, 160, 0.22);
+        }
+        .rg-hero h1 { font-size: 1.45rem; font-weight: 700; margin: 0; letter-spacing: 0.01em; }
+        .rg-hero p { margin: 0.35rem 0 0; opacity: 0.9; font-size: 0.92rem; }
+        .rg-card {
+            border: 0;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+            overflow: hidden;
+        }
+        .rg-table thead th {
+            background: #f4f8fb;
+            color: #355066;
+            font-size: 0.75rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            border-top: 0;
+            white-space: nowrap;
+        }
+        .rg-table td { vertical-align: middle; }
+        .rg-badge { border-radius: 999px; padding: 0.35rem 0.7rem; font-weight: 600; }
+        .rg-empty {
+            padding: 3rem 1rem;
+            text-align: center;
+            color: #6c7a89;
+        }
+        .rg-empty i { font-size: 2rem; color: #035ca0; display: block; margin-bottom: 0.6rem; }
+        @media (max-width: 767.98px) {
+            .rg-hero { padding: 1.1rem; }
+            .rg-hero .btn { width: 100%; margin-top: 0.8rem; }
+        }
+    </style>
+    <div class="container-fluid rg-page roboto-condensed-regular">
+        <div class="rg-hero d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3">
+            <div>
+                <h1><i class="fas fa-file-export mr-2"></i>Guías de remisión por devolución</h1>
+                <p>Documentos emitidos al proveedor con motivo de traslado devolución.</p>
+            </div>
+            <a href="{% url 'buys:return_guide' %}" class="btn btn-light font-weight-bold">
+                <i class="fas fa-plus mr-1"></i> Nueva guía
+            </a>
+        </div>
+
+        <div class="card rg-card">
+            {% if guides %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 rg-table">
+                        <thead>
+                        <tr>
+                            <th>Guía</th>
+                            <th>Emisión</th>
+                            <th>Proveedor</th>
+                            <th>Compra</th>
+                            <th>Destino</th>
+                            <th>Estado</th>
+                            <th>Respuesta</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for item in guides %}
+                            <tr>
+                                <td class="font-weight-bold text-nowrap">
+                                    {{ item.guide.guide_serial }}-{{ item.guide.guide_number }}
+                                </td>
+                                <td class="text-nowrap">{{ item.guide.guide_date|date:"d/m/Y" }}</td>
+                                <td>
+                                    <div class="font-weight-bold">{{ item.supplier.business_name|default:item.supplier.name }}</div>
+                                    <small class="text-muted">{{ item.supplier.ruc|default:"Sin RUC" }}</small>
+                                </td>
+                                <td>
+                                    {% if item.purchase %}
+                                        #{{ item.purchase.id }}
+                                        <div><small class="text-muted">{{ item.purchase.bill_number|default:"" }}</small></div>
+                                    {% else %}
+                                        <span class="text-muted">Manual</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ item.guide.guide_destiny_address|default:"-"|truncatechars:48 }}</td>
+                                <td>
+                                    {% if item.status == 'E' %}
+                                        <span class="badge badge-success rg-badge">Enviada</span>
+                                    {% elif item.status == 'R' %}
+                                        <span class="badge badge-danger rg-badge">Rechazada</span>
+                                    {% else %}
+                                        <span class="badge badge-secondary rg-badge">Pendiente</span>
+                                    {% endif %}
+                                </td>
+                                <td><small>{{ item.sunat_message|default:"-"|truncatechars:80 }}</small></td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="rg-empty">
+                    <i class="fas fa-file-invoice"></i>
+                    <div class="font-weight-bold mb-1">Aún no hay guías de devolución</div>
+                    <div>Cree una guía manual o ábrala desde una compra que ya está en almacén.</div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock body %}
